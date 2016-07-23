@@ -70,3 +70,7 @@ type Router struct {
 	inputPorts      map[Direction]*InputPort
 	outputPorts     map[Direction]*OutputPort
 }
+
+func (router *Router) InjectPacket(packet *Packet) bool {
+	return false //TODO
+}

@@ -1,19 +1,19 @@
 package acogo
 
-type SyntheticTrafficGenerator struct {
+type TransposeTrafficGenerator struct {
 	network             *Network
 	packetInjectionRate float32
-	packetSize          int
 	maxPackets          int
 	hotspots            []int
+	newPacket           func(src int, dest int) *Packet
 }
 
-func newSyntheticTrafficGenerator(network *Network, packetInjectionRate float32, packetSize int, maxPackets int) *SyntheticTrafficGenerator {
-	var gen = &SyntheticTrafficGenerator{
+func NewTransposeTrafficGenerator(network *Network, packetInjectionRate float32, maxPackets int, newPacket func(src int, dest int) *Packet) *TransposeTrafficGenerator {
+	var gen = &TransposeTrafficGenerator{
 		network:network,
 		packetInjectionRate:packetInjectionRate,
-		packetSize:packetSize,
 		maxPackets:maxPackets,
+		newPacket:newPacket,
 	}
 
 	network.cycleAccurateEventQueue.AddPerCycleEvent(gen.generateTraffic)
@@ -21,23 +21,30 @@ func newSyntheticTrafficGenerator(network *Network, packetInjectionRate float32,
 	return gen
 }
 
-func (gen *SyntheticTrafficGenerator) generateTraffic() {
-	for i:=0; i < len(gen.network.nodes); i++ {
+func (gen *TransposeTrafficGenerator) generateTraffic() {
+	for i := 0; i < len(gen.network.nodes); i++ {
 		if !gen.network.acceptPacket || gen.maxPackets != -1 && gen.network.numPacketsReceived > gen.maxPackets {
 			break
 		}
 
-		var valid = gen.network.random.nextDouble() <= gen.packetInjectionRate
+		var valid = gen.network.experiment.rand.Float32() <= gen.packetInjectionRate
 		if valid {
-			var node  = gen.network.nodes[i]
+			var node = gen.network.nodes[i]
 			var src = node.id
 			var dest = gen.dest(src)
 
 			if src != dest {
 				gen.network.cycleAccurateEventQueue.Schedule(func() {
-					gen.network.receive(gen.newPacket(src, dest, gen.packetSize))
+					gen.network.Receive(gen.newPacket(src, dest))
 				}, 1)
 			}
 		}
 	}
+}
+
+func (gen *TransposeTrafficGenerator) dest(src int) int {
+	var srcX, srcY = gen.network.GetX(src), gen.network.GetY(src)
+	var destX, destY = gen.network.width - 1 - srcY, gen.network.width - 1 - srcX
+
+	return destY * gen.network.width + destX
 }

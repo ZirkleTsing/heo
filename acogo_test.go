@@ -6,15 +6,31 @@ import (
 )
 
 func TestCycleAccurateEventQueue(t *testing.T) {
-	var cycleAccurateEventQueue = NewCycleAccurateEventQueue()
+	var numNodes = 64
+	var maxCycles = 20000
+	var maxPackets = -1
+	var noDrain = false
 
-	var _ = NewNetwork(16, cycleAccurateEventQueue)
+	var config = NewNoCConfig("test_results/synthetic/aco", numNodes, maxCycles, maxPackets, noDrain)
 
-	cycleAccurateEventQueue.Schedule(func() {
-		fmt.Printf("[%d] Welcome to ACOGo, haha!\n", cycleAccurateEventQueue.currentCycle)
-	}, 2)
+	config.routing = "oddEven"
+	config.selection = "aco"
 
-	for i := 0; i < 10; i++ {
-		cycleAccurateEventQueue.AdvanceOneCycle()
-	}
+	config.dataPacketTraffic = "transpose"
+	config.dataPacketInjectionRate = 0.06
+
+	config.antPacketTraffic = "uniform"
+	config.antPacketInjectionRate = 0.0002
+	config.acoSelectionAlpha = 0.45
+	config.reinforcementFactor = 0.001
+
+	var experiment = NewNoCExperiment(config)
+
+	experiment.cycleAccurateEventQueue.Schedule(func() {
+		fmt.Printf("[%d] Welcome to ACOGo!\n", experiment.cycleAccurateEventQueue.currentCycle)
+	}, 4)
+
+	experiment.run()
+
+	fmt.Printf("[%d] Simulation ended!\n", experiment.cycleAccurateEventQueue.currentCycle)
 }
