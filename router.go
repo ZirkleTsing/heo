@@ -1,19 +1,4 @@
-package main
-
-import (
-	"fmt"
-	"container/heap"
-)
-
-type Direction int
-
-const (
-	DirectionLocal = 0
-	DirectionNorth = 1
-	DirectionEast = 2
-	DirectionSouth = 3
-	DirectionWest = 4
-)
+package acogo
 
 type FlitState int
 
@@ -26,64 +11,6 @@ const (
 	FlitStateLinkTraversal = 5
 	FlitStateDestinationArrived = 6
 )
-
-type CycleAccurateEvent struct {
-	eventQueue *CycleAccurateEventQueue
-	when       int
-	action     func()
-	id         int
-}
-
-type CycleAccurateEventQueue struct {
-	events         []*CycleAccurateEvent
-	currentCycle   int
-	currentEventId int
-}
-
-func (eventQueue CycleAccurateEventQueue) AdvanceOneCycle() {
-	fmt.Println("Welcome to ACOGo, haha!")
-}
-
-func GetReflexDirection(direction Direction) int {
-	switch direction {
-	case DirectionLocal:
-		return DirectionLocal
-	case DirectionNorth:
-		return DirectionSouth
-	case DirectionEast:
-		return DirectionWest
-	default:
-		return -1
-	}
-}
-
-type PacketMemoryEntry struct {
-	nodeId    int
-	timestamp int
-}
-
-type Packet struct {
-	network              *Network
-	id                   int
-	beginCycle, endCycle int
-	src, dest            int
-	size                 int
-	onCompletedCallback  func()
-	memory               []*PacketMemoryEntry
-	flits                []*Flit
-}
-
-type Node struct {
-	network   *Network
-	id        int
-	x, y      int
-	neighbors map[Direction]int
-	router    *Router
-}
-
-type Network struct {
-
-}
 
 type Flit struct {
 	packet                        *Packet
@@ -142,9 +69,4 @@ type Router struct {
 	injectionBuffer []*Packet
 	inputPorts      map[Direction]*InputPort
 	outputPorts     map[Direction]*OutputPort
-}
-
-func main() {
-	var eventQueue CycleAccurateEventQueue
-	eventQueue.AdvanceOneCycle()
 }
