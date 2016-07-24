@@ -30,7 +30,7 @@ func NewNoCExperiment(config *NoCConfig) *NoCExperiment {
 	experiment.Network = network
 
 	var _ = NewTransposeTrafficGenerator(network, config.DataPacketInjectionRate, config.MaxPackets, func(src int, dest int) *Packet {
-		return NewPacket(network, src, dest, config.DataPacketSize, func() {})
+		return NewPacket(network, src, dest, config.DataPacketSize, true, func() {})
 	})
 
 	return experiment

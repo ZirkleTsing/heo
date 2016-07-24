@@ -14,7 +14,7 @@ const (
 	DirectionWest = 5
 )
 
-func (direction Direction) GetReflexDirection() int {
+func (direction Direction) GetReflexDirection() Direction {
 	switch direction {
 	case DirectionLocal:
 		return DirectionLocal
@@ -44,31 +44,54 @@ type Packet struct {
 	HasPayload           bool
 }
 
-func NewPacket(network *Network, src int, dest int, size int, onCompletedCallback func()) *Packet {
+type PacketHandler interface {
+	HandleDestArrived(packet *Packet, inputVirtualChannel *InputVirtualChannel)
+
+	DoRouteComputation(packet *Packet, inputVirtualChannel *InputVirtualChannel) Direction
+}
+
+func NewPacket(network *Network, src int, dest int, size int, hasPayload bool, onCompletedCallback func()) *Packet {
 	var packet = &Packet{
 		Network:network,
 		Src:src,
 		Dest:dest,
 		Size:size,
 		OnCompletedCallback:onCompletedCallback,
-		HasPayload:true,
+		HasPayload:hasPayload,
 	}
 
 	return packet
 }
 
-type AntPacket struct {
-	Forward bool
-	*Packet
+func (packet *Packet) HandleDestArrived(inputVirtualChannel *InputVirtualChannel) {
+	packet.Memorize(inputVirtualChannel.InputPort.Router.Node.Id)
+
+	packet.EndCycle = inputVirtualChannel.InputPort.Router.Node.Network.Experiment.CycleAccurateEventQueue.CurrentCycle
+
+	if packet.OnCompletedCallback != nil {
+		packet.OnCompletedCallback()
+	}
 }
 
-func NewAntPacket(network *Network, src int, dest int, size int, onCompletedCallback func(), forward bool) *AntPacket {
-	var packet = &AntPacket{
-		forward,
-		NewPacket(network, src, dest, size, onCompletedCallback),
+func (packet *Packet) DoRouteComputation(inputVirtualChannel *InputVirtualChannel) Direction {
+	var parent = -1
+
+	if len(packet.Memory) > 0 {
+		parent = packet.Memory[len(packet.Memory) - 1].NodeId
 	}
 
-	return packet
+	packet.Memorize(inputVirtualChannel.InputPort.Router.Node.Id)
+
+	var directions = inputVirtualChannel.InputPort.Router.Node.RoutingAlgorithm.NextHop(packet.Src, packet.Dest, parent)
+
+	return inputVirtualChannel.InputPort.Router.Node.SelectionAlgorithm.Select(packet.Src, packet.Dest, inputVirtualChannel.Num, directions)
+}
+
+func (packet *Packet) Memorize(currentNodeId int) {
+	packet.Memory = append(packet.Memory, &PacketMemoryEntry{
+		NodeId:currentNodeId,
+		Timestamp:packet.Network.Experiment.CycleAccurateEventQueue.CurrentCycle,
+	})
 }
 
 type Node struct {
@@ -77,6 +100,8 @@ type Node struct {
 	X, Y      int
 	Neighbors map[Direction]int
 	Router    *Router
+	RoutingAlgorithm RoutingAlgorithm //TODO
+	SelectionAlgorithm SelectionAlgorithm //TODO
 }
 
 func NewNode(network *Network, id int) *Node {
@@ -133,6 +158,12 @@ func NewNetwork(experiment *NoCExperiment, numNodes int) *Network {
 		var node = NewNode(network, i)
 		network.Nodes = append(network.Nodes, node)
 	}
+
+	network.Experiment.CycleAccurateEventQueue.AddPerCycleEvent(func() {
+		for i := 0; i < numNodes; i++ {
+			network.Nodes[i].Router.AdvanceOneCycle()
+		}
+	})
 
 	return network
 }

@@ -60,6 +60,10 @@ func (inputBuffer *InputBuffer) Count() int {
 	return inputBuffer.Flits.Count
 }
 
+func (inputBuffer *InputBuffer) FreeSlots() int  {
+	return inputBuffer.Flits.Size - inputBuffer.Flits.Count
+}
+
 type InputVirtualChannel struct {
 	InputPort            *InputPort
 	Num                  int
@@ -188,12 +192,10 @@ func NewRouter(node *Node) *Router {
 		router.OutputPorts[Direction(i)] = NewOutputPort(router, Direction(i))
 	}
 
-	router.Node.Network.Experiment.CycleAccurateEventQueue.AddPerCycleEvent(router.advanceOneCycle)
-
 	return router
 }
 
-func (router *Router) advanceOneCycle() {
+func (router *Router) AdvanceOneCycle() {
 	router.stageLinkTraversal()
 	router.stageSwitchTraversal()
 	router.stageSwitchAllocation()
@@ -240,4 +242,8 @@ func (router *Router) GetInputVirtualChannels() []*InputVirtualChannel {
 	}
 
 	return inputVirtualChannels
+}
+
+func (router *Router) FreeSlots(ip Direction, ivc int) int {
+	return router.InputPorts[ip].VirtualChannels[ivc].InputBuffer.FreeSlots()
 }
