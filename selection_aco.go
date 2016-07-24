@@ -1,50 +1,5 @@
 package acogo
 
-type AntPacket struct {
-	Forward bool
-	*Packet
-}
-
-func NewAntPacket(network *Network, src int, dest int, size int, onCompletedCallback func(), forward bool) *AntPacket {
-	var packet = &AntPacket{
-		Forward:forward,
-		Packet:NewPacket(network, src, dest, size, forward, onCompletedCallback),
-	}
-
-	return packet
-}
-
-func (packet *AntPacket) HandleDestArrived(inputVirtualChannel *InputVirtualChannel) {
-	var selectionAlgorithm = inputVirtualChannel.InputPort.Router.Node.SelectionAlgorithm.(*ACOSelectionAlgorithm)
-
-	if packet.Forward {
-		packet.Memorize(inputVirtualChannel.InputPort.Router.Node.Id)
-		selectionAlgorithm.CreateAndSendBackwardAntPacket(packet)
-	} else {
-		selectionAlgorithm.UpdatePheromoneTable(packet, inputVirtualChannel)
-	}
-
-	packet.EndCycle = inputVirtualChannel.InputPort.Router.Node.Network.Experiment.CycleAccurateEventQueue.CurrentCycle
-
-	if packet.OnCompletedCallback != nil {
-		packet.OnCompletedCallback()
-	}
-}
-
-func (packet *AntPacket) DoRouteComputation(inputVirtualChannel *InputVirtualChannel) Direction {
-	var selectionAlgorithm = inputVirtualChannel.InputPort.Router.Node.SelectionAlgorithm.(*ACOSelectionAlgorithm)
-
-	if packet.Forward {
-		return packet.Packet.DoRouteComputation(inputVirtualChannel)
-	} else {
-		if inputVirtualChannel.InputPort.Router.Node.Id != packet.Src {
-			selectionAlgorithm.UpdatePheromoneTable(packet, inputVirtualChannel)
-		}
-
-		return selectionAlgorithm.BackwardAntPacket(packet)
-	}
-}
-
 type Pheromone struct {
 	PheromoneTable *PheromoneTable
 	Dest           int
@@ -93,14 +48,14 @@ func (pheromoneTable *PheromoneTable) Update(dest int, direction Direction) {
 }
 
 type ACOSelectionAlgorithm struct {
+	Node *Node
 	PheromoneTable *PheromoneTable
-	*GeneralSelectionAlgorithm
 }
 
 func NewACOSelectionAlgorithm(node *Node) *ACOSelectionAlgorithm {
 	var acoSelectionAlgorithm = &ACOSelectionAlgorithm{
+		Node:node,
 		PheromoneTable:NewPheromoneTable(node),
-		GeneralSelectionAlgorithm:NewGeneralSelectionAlgorithm(node),
 	}
 
 	var pheromoneValue = 1.0 / float32(len(node.Neighbors))

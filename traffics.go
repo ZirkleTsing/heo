@@ -5,10 +5,10 @@ type TransposeTrafficGenerator struct {
 	PacketInjectionRate float32
 	MaxPackets          int
 	Hotspots            []int //TODO
-	NewPacket           func(src int, dest int) *Packet
+	NewPacket           func(src int, dest int) Packet
 }
 
-func NewTransposeTrafficGenerator(network *Network, packetInjectionRate float32, maxPackets int, newPacket func(src int, dest int) *Packet) *TransposeTrafficGenerator {
+func NewTransposeTrafficGenerator(network *Network, packetInjectionRate float32, maxPackets int, newPacket func(src int, dest int) Packet) *TransposeTrafficGenerator {
 	var gen = &TransposeTrafficGenerator{
 		Network:network,
 		PacketInjectionRate:packetInjectionRate,

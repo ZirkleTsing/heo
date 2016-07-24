@@ -27,73 +27,6 @@ func (direction Direction) GetReflexDirection() Direction {
 	}
 }
 
-type PacketMemoryEntry struct {
-	NodeId    int
-	Timestamp int
-}
-
-type Packet struct {
-	Network              *Network
-	Id                   int
-	BeginCycle, EndCycle int
-	Src, Dest            int
-	Size                 int
-	OnCompletedCallback  func()
-	Memory               []*PacketMemoryEntry
-	Flits                []*Flit
-	HasPayload           bool
-}
-
-type PacketHandler interface {
-	HandleDestArrived(packet *Packet, inputVirtualChannel *InputVirtualChannel)
-
-	DoRouteComputation(packet *Packet, inputVirtualChannel *InputVirtualChannel) Direction
-}
-
-func NewPacket(network *Network, src int, dest int, size int, hasPayload bool, onCompletedCallback func()) *Packet {
-	var packet = &Packet{
-		Network:network,
-		Src:src,
-		Dest:dest,
-		Size:size,
-		OnCompletedCallback:onCompletedCallback,
-		HasPayload:hasPayload,
-	}
-
-	return packet
-}
-
-func (packet *Packet) HandleDestArrived(inputVirtualChannel *InputVirtualChannel) {
-	packet.Memorize(inputVirtualChannel.InputPort.Router.Node.Id)
-
-	packet.EndCycle = inputVirtualChannel.InputPort.Router.Node.Network.Experiment.CycleAccurateEventQueue.CurrentCycle
-
-	if packet.OnCompletedCallback != nil {
-		packet.OnCompletedCallback()
-	}
-}
-
-func (packet *Packet) DoRouteComputation(inputVirtualChannel *InputVirtualChannel) Direction {
-	var parent = -1
-
-	if len(packet.Memory) > 0 {
-		parent = packet.Memory[len(packet.Memory) - 1].NodeId
-	}
-
-	packet.Memorize(inputVirtualChannel.InputPort.Router.Node.Id)
-
-	var directions = inputVirtualChannel.InputPort.Router.Node.RoutingAlgorithm.NextHop(packet.Src, packet.Dest, parent)
-
-	return inputVirtualChannel.InputPort.Router.Node.SelectionAlgorithm.Select(packet.Src, packet.Dest, inputVirtualChannel.Num, directions)
-}
-
-func (packet *Packet) Memorize(currentNodeId int) {
-	packet.Memory = append(packet.Memory, &PacketMemoryEntry{
-		NodeId:currentNodeId,
-		Timestamp:packet.Network.Experiment.CycleAccurateEventQueue.CurrentCycle,
-	})
-}
-
 type Node struct {
 	Network   *Network
 	Id        int
@@ -176,8 +109,8 @@ func (network *Network) GetY(id int) int {
 	return (id - id % network.Width) / network.Width
 }
 
-func (network *Network) Receive(packet *Packet) bool {
-	if !network.Nodes[packet.Src].Router.InjectPacket(packet) {
+func (network *Network) Receive(packet Packet) bool {
+	if !network.Nodes[packet.GetSrc()].Router.InjectPacket(packet) {
 		network.Experiment.CycleAccurateEventQueue.Schedule(func() {
 			network.Receive(packet)
 		}, 1)

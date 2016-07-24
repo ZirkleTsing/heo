@@ -13,7 +13,7 @@ const (
 )
 
 type Flit struct {
-	Packet                        *Packet
+	Packet                        Packet
 	Num                           int
 	Head                          bool
 	Tail                          bool
@@ -175,7 +175,7 @@ func NewSwitchArbiter(outputPort *OutputPort) *SwitchArbiter {
 
 type Router struct {
 	Node            *Node
-	InjectionBuffer []*Packet
+	InjectionBuffer []Packet
 	InputPorts      map[Direction]*InputPort
 	OutputPorts     map[Direction]*OutputPort
 }
@@ -228,7 +228,7 @@ func (router *Router) localPacketInjection() {
 	//TODO
 }
 
-func (router *Router) InjectPacket(packet *Packet) bool {
+func (router *Router) InjectPacket(packet Packet) bool {
 	return true //TODO
 }
 

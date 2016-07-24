@@ -4,53 +4,13 @@ type SelectionAlgorithm interface {
 	Select(src int, dest int, ivc int, directions []Direction) Direction
 }
 
-type GeneralSelectionAlgorithm struct {
-	Node *Node
-}
-
-func NewGeneralSelectionAlgorithm(node *Node) *GeneralSelectionAlgorithm {
-	var generalSelectionAlgorithm = &GeneralSelectionAlgorithm{
-		Node:node,
-	}
-
-	return generalSelectionAlgorithm
-}
-
-func (selectionAlgorithm *GeneralSelectionAlgorithm) HandleDestArrived(packet *Packet, inputVirtualChannel *InputVirtualChannel) {
-	packet.Memorize(selectionAlgorithm.Node.Id)
-
-	packet.EndCycle = selectionAlgorithm.Node.Network.Experiment.CycleAccurateEventQueue.CurrentCycle
-
-	if packet.OnCompletedCallback != nil {
-		packet.OnCompletedCallback()
-	}
-}
-
-func (selectionAlgorithm *GeneralSelectionAlgorithm) DoRouteComputation(packet *Packet, inputVirtualChannel *InputVirtualChannel) Direction {
-	var parent = -1
-
-	if len(packet.Memory) > 0 {
-		parent = packet.Memory[len(packet.Memory) - 1].NodeId
-	}
-
-	packet.Memorize(selectionAlgorithm.Node.Id)
-
-	var directions = selectionAlgorithm.Node.RoutingAlgorithm.NextHop(packet.Src, packet.Dest, parent)
-
-	return selectionAlgorithm.Select(packet.Src, packet.Dest, inputVirtualChannel.Num, directions)
-}
-
-func (selectionAlgorithm *GeneralSelectionAlgorithm) Select(src int, dest int, ivc int, directions []Direction) Direction {
-	return Direction(-1)
-}
-
 type BufferLevelSelectionAlgorithm struct {
-	*GeneralSelectionAlgorithm
+	Node *Node
 }
 
 func NewBufferLevelSelectionAlgorithm(node *Node) *BufferLevelSelectionAlgorithm {
 	var bufferLevelSelectionAlgorithm = &BufferLevelSelectionAlgorithm{
-		GeneralSelectionAlgorithm:NewGeneralSelectionAlgorithm(node),
+		Node:node,
 	}
 
 	return bufferLevelSelectionAlgorithm
@@ -78,5 +38,5 @@ func (selectionAlgorithm *BufferLevelSelectionAlgorithm) Select(src int, dest in
 		return bestDirections[selectionAlgorithm.Node.Network.Experiment.rand.Intn(len(bestDirections))]
 	}
 
-	return selectionAlgorithm.GeneralSelectionAlgorithm.Select(src, dest, ivc, directions)
+	return directions[0]
 }
