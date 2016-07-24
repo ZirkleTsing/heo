@@ -121,5 +121,17 @@ func (network *Network) Receive(packet Packet) bool {
 		return false
 	}
 
+	network.LogPacketReceived(packet)
+
 	return true
+}
+
+func (network *Network) LogPacketReceived(packet Packet) {
+	network.NumPacketsReceived++
+	//TODO
+}
+
+func (network *Network) LogPacketTransmitted(packet Packet) {
+	network.NumPacketsTransmitted++
+	//TODO
 }

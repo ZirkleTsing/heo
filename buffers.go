@@ -6,11 +6,11 @@ type InjectionBuffer struct {
 }
 
 func NewInjectionBuffer(router *Router) *InjectionBuffer {
-	var inputBuffer = &InjectionBuffer{
-		packets:NewQueue(router.Node.Network.Experiment.Config.MaxInputBufferSize),
+	var injectionBuffer = &InjectionBuffer{
+		packets:NewQueue(router.Node.Network.Experiment.Config.MaxInjectionBufferSize),
 	}
 
-	return inputBuffer
+	return injectionBuffer
 }
 
 func (injectionBuffer *InjectionBuffer) Push(packet Packet) {
@@ -30,7 +30,7 @@ func (injectionBuffer *InjectionBuffer) Pop() {
 }
 
 func (injectionBuffer *InjectionBuffer) Full() bool {
-	return injectionBuffer.packets.Size >= injectionBuffer.packets.Count
+	return injectionBuffer.packets.Size <= injectionBuffer.packets.Count
 }
 
 func (injectionBuffer *InjectionBuffer) Size() int {
@@ -76,7 +76,7 @@ func (inputBuffer *InputBuffer) Pop() {
 }
 
 func (inputBuffer *InputBuffer) Full() bool {
-	return inputBuffer.flits.Size >= inputBuffer.flits.Count
+	return inputBuffer.flits.Size <= inputBuffer.flits.Count
 }
 
 func (inputBuffer *InputBuffer) Size() int {

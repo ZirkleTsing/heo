@@ -105,6 +105,8 @@ func (packet *DataPacket) HandleDestArrived(inputVirtualChannel *InputVirtualCha
 
 	packet.EndCycle = inputVirtualChannel.InputPort.Router.Node.Network.Experiment.CycleAccurateEventQueue.CurrentCycle
 
+	inputVirtualChannel.InputPort.Router.Node.Network.LogPacketTransmitted(packet)
+
 	if packet.OnCompletedCallback != nil {
 		packet.OnCompletedCallback()
 	}

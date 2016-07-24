@@ -52,5 +52,18 @@ func (experiment *NoCExperiment) Run() {
 		}
 	}
 
+	experiment.CollectStats()
+
 	fmt.Printf("[%d] Simulation ended!\n", experiment.CycleAccurateEventQueue.CurrentCycle)
+
+	for key, value := range experiment.Stats {
+		fmt.Printf("%s: %s\n", key, value)
+	}
+}
+
+func (experiment *NoCExperiment) CollectStats() {
+	experiment.Stats["TotalCycles"] = fmt.Sprintf("%d", experiment.CycleAccurateEventQueue.CurrentCycle)
+	experiment.Stats["NumPacketsReceived"] = fmt.Sprintf("%d", experiment.Network.NumPacketsReceived)
+	experiment.Stats["NumPacketsTransmitted"] = fmt.Sprintf("%d", experiment.Network.NumPacketsTransmitted)
+	//TODO
 }
