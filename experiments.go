@@ -25,7 +25,7 @@ func NewNoCExperiment(config *NoCConfig) *NoCExperiment {
 
 	experiment.stats = make(map[string]string)
 
-	var network = NewNetwork(experiment, config.numNodes, cycleAccurateEventQueue)
+	var network = NewNetwork(experiment, config.numNodes)
 
 	experiment.network = network
 

@@ -16,7 +16,7 @@ func NewTransposeTrafficGenerator(network *Network, packetInjectionRate float32,
 		newPacket:newPacket,
 	}
 
-	network.cycleAccurateEventQueue.AddPerCycleEvent(gen.generateTraffic)
+	network.experiment.cycleAccurateEventQueue.AddPerCycleEvent(gen.generateTraffic)
 
 	return gen
 }
@@ -34,7 +34,7 @@ func (gen *TransposeTrafficGenerator) generateTraffic() {
 			var dest = gen.dest(src)
 
 			if src != dest {
-				gen.network.cycleAccurateEventQueue.Schedule(func() {
+				gen.network.experiment.cycleAccurateEventQueue.Schedule(func() {
 					gen.network.Receive(gen.newPacket(src, dest))
 				}, 1)
 			}

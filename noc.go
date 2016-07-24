@@ -7,11 +7,11 @@ import (
 type Direction int
 
 const (
-	DirectionLocal = 0
-	DirectionNorth = 1
-	DirectionEast = 2
-	DirectionSouth = 3
-	DirectionWest = 4
+	DirectionLocal = 1
+	DirectionNorth = 2
+	DirectionEast = 3
+	DirectionSouth = 4
+	DirectionWest = 5
 )
 
 func (direction Direction) GetReflexDirection() int {
@@ -105,9 +105,7 @@ func NewNode(network *Network, id int) *Node {
 		node.neighbors[DirectionWest] = id - 1
 	}
 
-	node.router = &Router{
-		node:node,
-	}
+	node.router = NewRouter(node)
 
 	return node
 }
@@ -115,7 +113,6 @@ func NewNode(network *Network, id int) *Node {
 type Network struct {
 	experiment              *NoCExperiment
 	currentPacketId         int
-	cycleAccurateEventQueue *CycleAccurateEventQueue
 	numNodes                int
 	nodes                   []*Node
 	width                   int
@@ -124,11 +121,10 @@ type Network struct {
 	numPacketsTransmitted   int
 }
 
-func NewNetwork(experiment *NoCExperiment, numNodes int, cycleAccurateEventQueue *CycleAccurateEventQueue) *Network {
+func NewNetwork(experiment *NoCExperiment, numNodes int) *Network {
 	var network = &Network{
 		experiment:experiment,
 		numNodes:numNodes,
-		cycleAccurateEventQueue: cycleAccurateEventQueue,
 		width:int(math.Sqrt(float64(numNodes))),
 	}
 
@@ -150,7 +146,7 @@ func (network *Network) GetY(id int) int {
 
 func (network *Network) Receive(packet *Packet) bool {
 	if !network.nodes[packet.src].router.InjectPacket(packet) {
-		network.cycleAccurateEventQueue.Schedule(func() {
+		network.experiment.cycleAccurateEventQueue.Schedule(func() {
 			network.Receive(packet)
 		}, 1)
 		return false
