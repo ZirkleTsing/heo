@@ -85,8 +85,8 @@ func (q *CycleAccurateEventQueue) AdvanceOneCycle() {
 		event.Action()
 	}
 
-	for i := 0; i < len(q.PerCycleEvents); i++ {
-		q.PerCycleEvents[i]()
+	for _, e := range q.PerCycleEvents {
+		e()
 	}
 
 	q.CurrentCycle++

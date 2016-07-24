@@ -1,5 +1,6 @@
 package acogo
 
+import "fmt"
 import "math/rand"
 
 type NoCExperiment struct {
@@ -37,6 +38,8 @@ func NewNoCExperiment(config *NoCConfig) *NoCExperiment {
 }
 
 func (experiment *NoCExperiment) Run() {
+	fmt.Printf("[%d] Welcome to ACOGo simulator!\n", experiment.CycleAccurateEventQueue.CurrentCycle)
+
 	for (experiment.Config.MaxCycles == -1 || experiment.CycleAccurateEventQueue.CurrentCycle < experiment.Config.MaxCycles) && (experiment.Config.MaxPackets == -1 || experiment.Network.NumPacketsReceived < experiment.Config.MaxPackets) {
 		experiment.CycleAccurateEventQueue.AdvanceOneCycle()
 	}
@@ -48,4 +51,6 @@ func (experiment *NoCExperiment) Run() {
 			experiment.CycleAccurateEventQueue.AdvanceOneCycle()
 		}
 	}
+
+	fmt.Printf("[%d] Simulation ended!\n", experiment.CycleAccurateEventQueue.CurrentCycle)
 }

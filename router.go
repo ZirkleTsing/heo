@@ -133,27 +133,21 @@ func NewVirtualChannelArbiter(outputVirtualChannel *OutputVirtualChannel) *Virtu
 	return virtualChannelArbiter
 }
 
-func (arbiter *VirtualChannelArbiter) GetResource() interface{} {
-	return arbiter.OutputVirtualChannel
-}
-
-func (arbiter *VirtualChannelArbiter) GetRequesters() interface{} {
-	return arbiter.InputVirtualChannels
-}
-
-func (arbiter *VirtualChannelArbiter) ResourceAvailable(resource interface{}) bool {
-	return arbiter.OutputVirtualChannel.InputVirtualChannel == nil
-}
-
-func (arbiter *VirtualChannelArbiter) RequesterHasRequests(requester interface{}) bool {
-	var inputVirtualChannel = requester.(*InputVirtualChannel)
-
-	if inputVirtualChannel.Route == arbiter.OutputVirtualChannel.OutputPort.Direction {
-		var flit = inputVirtualChannel.InputBuffer.Peek()
-		return flit != nil && flit.Head && flit.State == FlitStateRouteComputation
+func (arbiter *VirtualChannelArbiter) Next() *InputVirtualChannel  {
+	if arbiter.OutputVirtualChannel.InputVirtualChannel != nil {
+		return nil
 	}
 
-	return false;
+	for _, inputVirtualChannel := range arbiter.InputVirtualChannels {
+		if inputVirtualChannel.Route == arbiter.OutputVirtualChannel.OutputPort.Direction {
+			var flit = inputVirtualChannel.InputBuffer.Peek()
+			if flit != nil && flit.Head && flit.State == FlitStateRouteComputation {
+				return inputVirtualChannel
+			}
+		}
+	}
+
+	return nil
 }
 
 type SwitchArbiter struct {
@@ -170,27 +164,17 @@ func NewSwitchArbiter(outputPort *OutputPort) *SwitchArbiter {
 	return switchArbiter
 }
 
-func (arbiter *SwitchArbiter) GetResource() interface{} {
-	return arbiter.OutputPort
-}
-
-func (arbiter *SwitchArbiter) GetRequesters() interface{} {
-	return arbiter.InputVirtualChannels
-}
-
-func (arbiter *SwitchArbiter) ResourceAvailable(resource interface{}) bool {
-	return true
-}
-
-func (arbiter *SwitchArbiter) RequesterHasRequests(requester interface{}) bool {
-	var inputVirtualChannel = requester.(*InputVirtualChannel)
-
-	if inputVirtualChannel.OutputVirtualChannel != nil && inputVirtualChannel.OutputVirtualChannel.OutputPort == arbiter.OutputPort {
-		var flit = inputVirtualChannel.InputBuffer.Peek()
-		return flit != nil && (flit.Head && flit.State == FlitStateVirtualChannelAllocation || !flit.Head && flit.State == FlitStateInputBuffer)
+func (arbiter *SwitchArbiter) Next() *InputVirtualChannel  {
+	for _, inputVirtualChannel := range arbiter.InputVirtualChannels {
+		if inputVirtualChannel.OutputVirtualChannel != nil && inputVirtualChannel.OutputVirtualChannel.OutputPort == arbiter.OutputPort {
+			var flit = inputVirtualChannel.InputBuffer.Peek()
+			if flit != nil && (flit.Head && flit.State == FlitStateVirtualChannelAllocation || !flit.Head && flit.State == FlitStateInputBuffer) {
+				return inputVirtualChannel
+			}
+		}
 	}
 
-	return false
+	return nil
 }
 
 type Router struct {
@@ -312,9 +296,9 @@ func (router *Router) stageSwitchTraversal() {
 
 func (router *Router) stageSwitchAllocation() {
 	for _, outputPort := range router.OutputPorts {
-		var winnerInputVirtualChannel, ok = Next(outputPort.Arbiter).(InputVirtualChannel)
+		var winnerInputVirtualChannel = outputPort.Arbiter.Next()
 
-		if ok {
+		if winnerInputVirtualChannel != nil {
 			var flit = winnerInputVirtualChannel.InputBuffer.Peek()
 			flit.Node = router.Node
 			flit.State = FlitStateSwitchAllocation
@@ -326,9 +310,9 @@ func (router *Router) stageVirtualChannelAllocation() {
 	for _, outputPort := range router.OutputPorts {
 		for _, outputVirtualChannel := range outputPort.VirtualChannels {
 			if outputVirtualChannel.InputVirtualChannel == nil {
-				var winnerInputVirtualChannel, ok = Next(outputVirtualChannel.Arbiter).(*InputVirtualChannel)
+				var winnerInputVirtualChannel = outputVirtualChannel.Arbiter.Next()
 
-				if ok {
+				if winnerInputVirtualChannel != nil {
 					var flit = winnerInputVirtualChannel.InputBuffer.Peek()
 					flit.Node = router.Node
 					flit.State = FlitStateVirtualChannelAllocation
