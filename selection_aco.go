@@ -128,10 +128,9 @@ func (selectionAlgorithm *ACOSelectionAlgorithm) Select(src int, dest int, ivc i
 	var maxProbability = -1.0
 	var bestDirection = Direction(-1)
 
-	for i := 0; i < NumDirections; i++ {
-		var direction = Direction(i)
+	for direction, neighbor := range selectionAlgorithm.Node.Neighbors {
+		var neighborRouter = selectionAlgorithm.Node.Network.Nodes[neighbor].Router
 		var pheromone = selectionAlgorithm.PheromoneTable.Pheromones[dest][direction]
-		var neighborRouter = selectionAlgorithm.Node.Network.Nodes[selectionAlgorithm.Node.Neighbors[direction]].Router
 		var freeSlots = neighborRouter.FreeSlots(direction, ivc)
 
 		var alpha = selectionAlgorithm.Node.Network.Experiment.Config.AcoSelectionAlpha

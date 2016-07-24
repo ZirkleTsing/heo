@@ -1,6 +1,8 @@
 package acogo
 
-import "math"
+import (
+	"math"
+)
 
 type FlitState int
 
@@ -194,9 +196,12 @@ func NewRouter(node *Node) *Router {
 
 	router.InjectionBuffer = NewInjectionBuffer(router)
 
-	for i := 0; i < NumDirections; i++ {
-		router.InputPorts[Direction(i)] = NewInputPort(router, Direction(i))
-		router.OutputPorts[Direction(i)] = NewOutputPort(router, Direction(i))
+	router.InputPorts[DirectionLocal] = NewInputPort(router, DirectionLocal)
+	router.OutputPorts[DirectionLocal] = NewOutputPort(router, DirectionLocal)
+
+	for direction:= range node.Neighbors {
+		router.InputPorts[direction] = NewInputPort(router, direction)
+		router.OutputPorts[direction] = NewOutputPort(router, direction)
 	}
 
 	return router
@@ -224,6 +229,8 @@ func (router *Router) stageLinkTraversal() {
 						var nextHop = router.Node.Neighbors[outputPort.Direction]
 						var ip = outputPort.Direction.GetReflexDirection()
 						var ivc = outputVirtualChannel.Num
+
+						//fmt.Printf("Pre::nextHopArrived: src=%d, dest=%d, current=%d, nextHop=%d, outputPort.direction=%d\n", flit.Packet.GetSrc(), flit.Packet.GetDest(), router.Node.Id, nextHop, outputPort.Direction)
 
 						router.Node.Network.Experiment.CycleAccurateEventQueue.Schedule(func() {
 							router.nextHopArrived(flit, nextHop, ip, ivc)
@@ -253,6 +260,10 @@ func (router *Router) stageLinkTraversal() {
 }
 
 func (router *Router) nextHopArrived(flit *Flit, nextHop int, ip Direction, ivc int) {
+	//fmt.Printf("nextHopArrived: src=%d, dest=%d, current=%d, nextHop=%d\n", flit.Packet.GetSrc(), flit.Packet.GetDest(), router.Node.Id, nextHop)
+
+	//router.Node.DumpNeighbors()
+
 	var inputBuffer = router.Node.Network.Nodes[nextHop].Router.InputPorts[ip].VirtualChannels[ivc].InputBuffer
 
 	if !inputBuffer.Full() {

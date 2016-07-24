@@ -13,7 +13,6 @@ const (
 	DirectionEast = 2
 	DirectionSouth = 3
 	DirectionWest = 4
-	NumDirections = 5
 )
 
 func (direction Direction) GetReflexDirection() Direction {
@@ -70,8 +69,8 @@ func NewNode(network *Network, id int) *Node {
 
 	node.Router = NewRouter(node)
 
-	//node.RoutingAlgorithm = NewOddEvenRoutingAlgorithm(node)
-	node.RoutingAlgorithm = NewXYRoutingAlgorithm(node)
+	node.RoutingAlgorithm = NewOddEvenRoutingAlgorithm(node)
+	//node.RoutingAlgorithm = NewXYRoutingAlgorithm(node)
 
 	//node.SelectionAlgorithm = NewACOSelectionAlgorithm(node)
 	node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)

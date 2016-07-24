@@ -18,7 +18,7 @@ func (packet *AntPacket) HandleDestArrived(inputVirtualChannel *InputVirtualChan
 	var selectionAlgorithm = inputVirtualChannel.InputPort.Router.Node.SelectionAlgorithm.(*ACOSelectionAlgorithm)
 
 	if packet.Forward {
-		packet.Memorize(inputVirtualChannel.InputPort.Router.Node.Id)
+		packet.Memorize(inputVirtualChannel.InputPort.Router.Node)
 		selectionAlgorithm.CreateAndSendBackwardAntPacket(packet)
 	} else {
 		selectionAlgorithm.UpdatePheromoneTable(packet, inputVirtualChannel)

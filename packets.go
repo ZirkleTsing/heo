@@ -116,7 +116,7 @@ func (packet *DataPacket) GetHasPayload() bool {
 }
 
 func (packet *DataPacket) HandleDestArrived(inputVirtualChannel *InputVirtualChannel) {
-	packet.Memorize(inputVirtualChannel.InputPort.Router.Node.Id)
+	packet.Memorize(inputVirtualChannel.InputPort.Router.Node)
 
 	packet.EndCycle = inputVirtualChannel.InputPort.Router.Node.Network.Experiment.CycleAccurateEventQueue.CurrentCycle
 
@@ -134,22 +134,33 @@ func (packet *DataPacket) DoRouteComputation(inputVirtualChannel *InputVirtualCh
 		parent = packet.Memory[len(packet.Memory) - 1].NodeId
 	}
 
-	packet.Memorize(inputVirtualChannel.InputPort.Router.Node.Id)
+	packet.Memorize(inputVirtualChannel.InputPort.Router.Node)
 
 	var directions = inputVirtualChannel.InputPort.Router.Node.RoutingAlgorithm.NextHop(packet.Src, packet.Dest, parent)
 
 	return inputVirtualChannel.InputPort.Router.Node.SelectionAlgorithm.Select(packet.Src, packet.Dest, inputVirtualChannel.Num, directions)
 }
 
-func (packet *DataPacket) Memorize(currentNodeId int) {
+func (packet *DataPacket) Memorize(node *Node) {
 	for _, entry := range packet.Memory {
-		if entry.NodeId == currentNodeId {
-			panic(fmt.Sprintf("%d", currentNodeId))
+		if entry.NodeId == node.Id {
+			packet.DumpMemory()
+			node.DumpNeighbors()
+			fmt.Printf("packet#%d(src=%d, dest=%d): %d", packet.Id, packet.Src, packet.Dest, node.Id)
+			panic(fmt.Sprintf("packet#%d(src=%d, dest=%d): %d", packet.Id, packet.Src, packet.Dest, node.Id))
 		}
 	}
 
 	packet.Memory = append(packet.Memory, &PacketMemoryEntry{
-		NodeId:currentNodeId,
+		NodeId:node.Id,
 		Timestamp:packet.Network.Experiment.CycleAccurateEventQueue.CurrentCycle,
 	})
+}
+
+func (packet *DataPacket) DumpMemory() {
+	for i, entry := range packet.Memory {
+		fmt.Printf("packet#%d.memory[%d]=%d\n", packet.Id, i, entry.NodeId)
+	}
+
+	fmt.Println()
 }
