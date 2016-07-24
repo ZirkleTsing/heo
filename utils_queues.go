@@ -46,5 +46,5 @@ func (q *Queue) Pop() interface{} {
 }
 
 func (q *Queue) Peek() interface{} {
-	return q.Nodes[0]
+	return q.Nodes[q.Head]
 }
