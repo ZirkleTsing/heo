@@ -28,13 +28,13 @@ type NoCConfig struct {
 
 	AntPacketTraffic        string
 	AntPacketSize           int
-	AntPacketInjectionRate  float32
+	AntPacketInjectionRate  float64
 
-	AcoSelectionAlpha       float32
-	ReinforcementFactor     float32
+	AcoSelectionAlpha       float64
+	ReinforcementFactor     float64
 
 	DataPacketTraffic       string
-	DataPacketInjectionRate float32
+	DataPacketInjectionRate float64
 	DataPacketSize          int
 }
 

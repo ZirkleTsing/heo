@@ -4,10 +4,10 @@ type Pheromone struct {
 	PheromoneTable *PheromoneTable
 	Dest           int
 	Direction      Direction
-	Value          float32
+	Value          float64
 }
 
-func NewPheromone(pheromoneTable *PheromoneTable, dest int, direction Direction, value float32) *Pheromone {
+func NewPheromone(pheromoneTable *PheromoneTable, dest int, direction Direction, value float64) *Pheromone {
 	var pheromone = &Pheromone{
 		PheromoneTable:pheromoneTable,
 		Dest:dest,
@@ -32,7 +32,7 @@ func NewPheromoneTable(node *Node) *PheromoneTable {
 	return pheromoneTable
 }
 
-func (pheromoneTable *PheromoneTable) Append(dest int, direction Direction, pheromoneValue float32) {
+func (pheromoneTable *PheromoneTable) Append(dest int, direction Direction, pheromoneValue float64) {
 	var pheromone = NewPheromone(pheromoneTable, dest, direction, pheromoneValue)
 	pheromoneTable.Pheromones[dest][direction] = pheromone
 }
@@ -58,7 +58,7 @@ func NewACOSelectionAlgorithm(node *Node) *ACOSelectionAlgorithm {
 		PheromoneTable:NewPheromoneTable(node),
 	}
 
-	var pheromoneValue = 1.0 / float32(len(node.Neighbors))
+	var pheromoneValue = 1.0 / float64(len(node.Neighbors))
 
 	for dest := 0; dest < node.Network.NumNodes; dest++ {
 		if (node.Id != dest) {
@@ -120,7 +120,7 @@ func (selectionAlgorithm *ACOSelectionAlgorithm) UpdatePheromoneTable(packet *An
 }
 
 func (selectionAlgorithm *ACOSelectionAlgorithm) Select(src int, dest int, ivc int, directions []Direction) Direction {
-	var maxProbability = float32(-1.0)
+	var maxProbability = -1.0
 	var bestDirection = Direction(-1)
 
 	for i := 0; i < DirectionWest; i++ {
@@ -133,7 +133,7 @@ func (selectionAlgorithm *ACOSelectionAlgorithm) Select(src int, dest int, ivc i
 		var qTotal = selectionAlgorithm.Node.Network.Experiment.Config.MaxInputBufferSize
 		var n = len(selectionAlgorithm.Node.Neighbors)
 
-		var probability = (pheromone.Value + alpha * (float32(freeSlots) / float32(qTotal))) / (1 + alpha * float32(n - 1));
+		var probability = (pheromone.Value + alpha * (float64(freeSlots) / float64(qTotal))) / (1 + alpha * float64(n - 1));
 		if probability > maxProbability {
 			maxProbability = probability
 			bestDirection = direction

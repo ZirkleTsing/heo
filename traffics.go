@@ -2,13 +2,13 @@ package acogo
 
 type TransposeTrafficGenerator struct {
 	Network             *Network
-	PacketInjectionRate float32
+	PacketInjectionRate float64
 	MaxPackets          int
 	Hotspots            []int //TODO
 	NewPacket           func(src int, dest int) Packet
 }
 
-func NewTransposeTrafficGenerator(network *Network, packetInjectionRate float32, maxPackets int, newPacket func(src int, dest int) Packet) *TransposeTrafficGenerator {
+func NewTransposeTrafficGenerator(network *Network, packetInjectionRate float64, maxPackets int, newPacket func(src int, dest int) Packet) *TransposeTrafficGenerator {
 	var gen = &TransposeTrafficGenerator{
 		Network:network,
 		PacketInjectionRate:packetInjectionRate,
@@ -27,7 +27,7 @@ func (gen *TransposeTrafficGenerator) generateTraffic() {
 			break
 		}
 
-		var valid = gen.Network.Experiment.rand.Float32() <= gen.PacketInjectionRate
+		var valid = gen.Network.Experiment.rand.Float64() <= gen.PacketInjectionRate
 		if valid {
 			var node = gen.Network.Nodes[i]
 			var src = node.Id

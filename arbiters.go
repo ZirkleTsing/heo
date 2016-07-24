@@ -2,7 +2,7 @@ package acogo
 
 type RoundRobinArbiter interface {
 	GetResource() interface{}
-	GetRequesters() []interface{}
+	GetRequesters() interface{}
 	ResourceAvailable(resource interface{}) bool
 	RequesterHasRequests(requester interface{}) bool
 }
@@ -12,8 +12,8 @@ func Next(arbiter RoundRobinArbiter) interface{}  {
 		return nil
 	}
 
-	for i:=0; i < len(arbiter.GetRequesters()); i++ {
-		var requester = arbiter.GetRequesters()[i] //TODO
+	for i:=0; i < len(arbiter.GetRequesters().([]interface{})); i++ {
+		var requester = arbiter.GetRequesters().([]interface{})[i] //TODO
 		if arbiter.RequesterHasRequests(requester) {
 			return requester
 		}

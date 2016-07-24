@@ -12,6 +12,7 @@ type Packet interface {
 	GetOnCompletedCallback() func()
 	GetMemory() []*PacketMemoryEntry
 	GetFlits() []*Flit
+	SetFlits(flits []*Flit)
 	GetHasPayload() bool
 	HandleDestArrived(inputVirtualChannel *InputVirtualChannel)
 	DoRouteComputation(inputVirtualChannel *InputVirtualChannel) Direction
@@ -76,6 +77,10 @@ func (packet *DataPacket) GetMemory() []*PacketMemoryEntry {
 
 func (packet *DataPacket) GetFlits() []*Flit {
 	return packet.Flits
+}
+
+func (packet *DataPacket) SetFlits(flits []*Flit) {
+	packet.Flits = flits
 }
 
 func (packet *DataPacket) GetHasPayload() bool {
