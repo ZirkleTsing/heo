@@ -34,6 +34,11 @@ func NewPheromoneTable(node *Node) *PheromoneTable {
 
 func (pheromoneTable *PheromoneTable) Append(dest int, direction Direction, pheromoneValue float64) {
 	var pheromone = NewPheromone(pheromoneTable, dest, direction, pheromoneValue)
+
+	if _, exists := pheromoneTable.Pheromones[dest]; !exists {
+		pheromoneTable.Pheromones[dest] = make(map[Direction]*Pheromone)
+	}
+
 	pheromoneTable.Pheromones[dest][direction] = pheromone
 }
 

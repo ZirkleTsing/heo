@@ -65,6 +65,10 @@ func NewNode(network *Network, id int) *Node {
 
 	node.Router = NewRouter(node)
 
+	node.RoutingAlgorithm = NewOddEvenRoutingAlgorithm(node)
+
+	node.SelectionAlgorithm = NewACOSelectionAlgorithm(node)
+
 	return node
 }
 

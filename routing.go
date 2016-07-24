@@ -8,6 +8,14 @@ type XYRoutingAlgorithm struct {
 	Node *Node
 }
 
+func NewXYRoutingAlgorithm(node *Node) *XYRoutingAlgorithm {
+	var xyRoutingAlgorithm = &XYRoutingAlgorithm{
+		Node:node,
+	}
+
+	return xyRoutingAlgorithm
+}
+
 func (routingAlgorithm *XYRoutingAlgorithm) NextHop(src int, dest int, parent int) []Direction {
 	var directions []Direction
 
@@ -33,6 +41,14 @@ func (routingAlgorithm *XYRoutingAlgorithm) NextHop(src int, dest int, parent in
 
 type OddEvenRoutingAlgorithm struct {
 	Node *Node
+}
+
+func NewOddEvenRoutingAlgorithm(node *Node) *OddEvenRoutingAlgorithm {
+	var xyRoutingAlgorithm = &OddEvenRoutingAlgorithm{
+		Node:node,
+	}
+
+	return xyRoutingAlgorithm
 }
 
 func (routingAlgorithm *OddEvenRoutingAlgorithm) NextHop(src int, dest int, parent int) []Direction {
