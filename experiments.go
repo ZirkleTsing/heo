@@ -10,7 +10,7 @@ type NoCExperiment struct {
 	Config                  *NoCConfig
 	Stats                   map[string]string
 
-	BeginTime, EndTime      int
+	BeginTime, EndTime      int //TODO
 	CycleAccurateEventQueue *CycleAccurateEventQueue
 	Network                 *Network
 	rand                    *rand.Rand
@@ -19,15 +19,14 @@ type NoCExperiment struct {
 func NewNoCExperiment(config *NoCConfig) *NoCExperiment {
 	var cycleAccurateEventQueue = NewCycleAccurateEventQueue()
 
-	var rand = rand.New(rand.NewSource(int64(config.RandSeed)))
+	var rand = rand.New(rand.NewSource(config.RandSeed))
 
 	var experiment = &NoCExperiment{
 		Config:config,
+		Stats: make(map[string]string),
 		CycleAccurateEventQueue:cycleAccurateEventQueue,
 		rand: rand,
 	}
-
-	experiment.Stats = make(map[string]string)
 
 	var network = NewNetwork(experiment, config.NumNodes)
 
@@ -43,11 +42,15 @@ func NewNoCExperiment(config *NoCConfig) *NoCExperiment {
 func (experiment *NoCExperiment) Run() {
 	fmt.Printf("[%d] Welcome to ACOGo simulator!\n", experiment.CycleAccurateEventQueue.CurrentCycle)
 
+	//for _, node := range experiment.Network.Nodes {
+	//	node.DumpNeighbors()
+	//}
+
 	for (experiment.Config.MaxCycles == -1 || experiment.CycleAccurateEventQueue.CurrentCycle < experiment.Config.MaxCycles) && (experiment.Config.MaxPackets == -1 || experiment.Network.NumPacketsReceived < experiment.Config.MaxPackets) {
 		experiment.CycleAccurateEventQueue.AdvanceOneCycle()
 	}
 
-	if !experiment.Config.NoDrain {
+	if experiment.Config.DrainPackets {
 		experiment.Network.AcceptPacket = false
 
 		for experiment.Network.NumPacketsReceived != experiment.Network.NumPacketsTransmitted {
@@ -60,9 +63,11 @@ func (experiment *NoCExperiment) Run() {
 	fmt.Printf("[%d] Simulation ended!\n", experiment.CycleAccurateEventQueue.CurrentCycle)
 
 	var keys []string
+
 	for k, _ := range experiment.Stats {
 		keys = append(keys, k)
 	}
+
 	sort.Strings(keys)
 
 	for _, k := range keys {

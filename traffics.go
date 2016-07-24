@@ -4,38 +4,36 @@ type TransposeTrafficGenerator struct {
 	Network             *Network
 	PacketInjectionRate float64
 	MaxPackets          int
-	Hotspots            []int //TODO
 	NewPacket           func(src int, dest int) Packet
 }
 
 func NewTransposeTrafficGenerator(network *Network, packetInjectionRate float64, maxPackets int, newPacket func(src int, dest int) Packet) *TransposeTrafficGenerator {
-	var gen = &TransposeTrafficGenerator{
+	var generator = &TransposeTrafficGenerator{
 		Network:network,
 		PacketInjectionRate:packetInjectionRate,
 		MaxPackets:maxPackets,
 		NewPacket:newPacket,
 	}
 
-	network.Experiment.CycleAccurateEventQueue.AddPerCycleEvent(gen.generateTraffic)
+	network.Experiment.CycleAccurateEventQueue.AddPerCycleEvent(generator.GenerateTraffic)
 
-	return gen
+	return generator
 }
 
-func (gen *TransposeTrafficGenerator) generateTraffic() {
-	for i := 0; i < len(gen.Network.Nodes); i++ {
-		if !gen.Network.AcceptPacket || gen.MaxPackets != -1 && gen.Network.NumPacketsReceived > gen.MaxPackets {
+func (generator *TransposeTrafficGenerator) GenerateTraffic() {
+	for _, node := range generator.Network.Nodes {
+		if !generator.Network.AcceptPacket || generator.MaxPackets != -1 && generator.Network.NumPacketsReceived > generator.MaxPackets {
 			break
 		}
 
-		var valid = gen.Network.Experiment.rand.Float64() <= gen.PacketInjectionRate
+		var valid = generator.Network.Experiment.rand.Float64() <= generator.PacketInjectionRate
 		if valid {
-			var node = gen.Network.Nodes[i]
 			var src = node.Id
-			var dest = gen.dest(src)
+			var dest = generator.dest(src)
 
 			if src != dest {
-				gen.Network.Experiment.CycleAccurateEventQueue.Schedule(func() {
-					gen.Network.Receive(gen.NewPacket(src, dest))
+				generator.Network.Experiment.CycleAccurateEventQueue.Schedule(func() {
+					generator.Network.Receive(generator.NewPacket(src, dest))
 				}, 1)
 			}
 		}

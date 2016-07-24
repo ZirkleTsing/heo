@@ -5,22 +5,22 @@ import "math"
 type FlitState int
 
 const (
-	FlitStateInputBuffer = 1
-	FlitStateRouteComputation = 2
-	FlitStateVirtualChannelAllocation = 3
-	FlitStateSwitchAllocation = 4
-	FlitStateSwitchTraversal = 5
-	FlitStateLinkTraversal = 6
-	FlitStateDestinationArrived = 7
+	FlitStateInputBuffer = 0
+	FlitStateRouteComputation = 1
+	FlitStateVirtualChannelAllocation = 2
+	FlitStateSwitchAllocation = 3
+	FlitStateSwitchTraversal = 4
+	FlitStateLinkTraversal = 5
+	FlitStateDestinationArrived = 6
 )
 
 type Flit struct {
-	Packet                        Packet
-	Num                           int
-	Head                          bool
-	Tail                          bool
-	Node                          *Node
-	State                         FlitState
+	Packet    Packet
+	Num       int
+	Head      bool
+	Tail      bool
+	Node      *Node
+	State     FlitState
 	Timestamp int
 }
 
@@ -50,6 +50,7 @@ func NewInputVirtualChannel(inputPort *InputPort, num int) *InputVirtualChannel 
 	var inputVirtualChannel = &InputVirtualChannel{
 		InputPort:inputPort,
 		Num:num,
+		Route:Direction(-1),
 	}
 
 	inputVirtualChannel.InputBuffer = NewInputBuffer(inputVirtualChannel)
@@ -125,15 +126,15 @@ type VirtualChannelArbiter struct {
 }
 
 func NewVirtualChannelArbiter(outputVirtualChannel *OutputVirtualChannel) *VirtualChannelArbiter {
-	var virtualChannelArbiter = &VirtualChannelArbiter{
+	var arbiter = &VirtualChannelArbiter{
 		OutputVirtualChannel:outputVirtualChannel,
 		InputVirtualChannels:outputVirtualChannel.OutputPort.Router.GetInputVirtualChannels(),
 	}
 
-	return virtualChannelArbiter
+	return arbiter
 }
 
-func (arbiter *VirtualChannelArbiter) Next() *InputVirtualChannel  {
+func (arbiter *VirtualChannelArbiter) Next() *InputVirtualChannel {
 	if arbiter.OutputVirtualChannel.InputVirtualChannel != nil {
 		return nil
 	}
@@ -156,15 +157,15 @@ type SwitchArbiter struct {
 }
 
 func NewSwitchArbiter(outputPort *OutputPort) *SwitchArbiter {
-	var switchArbiter = &SwitchArbiter{
+	var arbiter = &SwitchArbiter{
 		OutputPort:outputPort,
 		InputVirtualChannels:outputPort.Router.GetInputVirtualChannels(),
 	}
 
-	return switchArbiter
+	return arbiter
 }
 
-func (arbiter *SwitchArbiter) Next() *InputVirtualChannel  {
+func (arbiter *SwitchArbiter) Next() *InputVirtualChannel {
 	for _, inputVirtualChannel := range arbiter.InputVirtualChannels {
 		if inputVirtualChannel.OutputVirtualChannel != nil && inputVirtualChannel.OutputVirtualChannel.OutputPort == arbiter.OutputPort {
 			var flit = inputVirtualChannel.InputBuffer.Peek()
@@ -216,9 +217,8 @@ func (router *Router) stageLinkTraversal() {
 			var inputVirtualChannel = outputVirtualChannel.InputVirtualChannel
 			if inputVirtualChannel != nil && outputVirtualChannel.Credits > 0 {
 				var flit = inputVirtualChannel.InputBuffer.Peek()
-				if (flit != nil && flit.State == FlitStateSwitchTraversal) {
-					if (outputPort.Direction != DirectionLocal) {
-						flit.Node = router.Node
+				if flit != nil && flit.State == FlitStateSwitchTraversal {
+					if outputPort.Direction != DirectionLocal {
 						flit.State = FlitStateLinkTraversal
 
 						var nextHop = router.Node.Neighbors[outputPort.Direction]
@@ -235,7 +235,6 @@ func (router *Router) stageLinkTraversal() {
 					if outputPort.Direction != DirectionLocal {
 						outputVirtualChannel.Credits--
 					} else {
-						flit.Node = router.Node
 						flit.State = FlitStateDestinationArrived
 					}
 
@@ -243,7 +242,7 @@ func (router *Router) stageLinkTraversal() {
 						inputVirtualChannel.OutputVirtualChannel = nil
 						outputVirtualChannel.InputVirtualChannel = nil
 
-						if (outputPort.Direction == DirectionLocal) {
+						if outputPort.Direction == DirectionLocal {
 							flit.Packet.HandleDestArrived(inputVirtualChannel)
 						}
 					}
@@ -254,8 +253,7 @@ func (router *Router) stageLinkTraversal() {
 }
 
 func (router *Router) nextHopArrived(flit *Flit, nextHop int, ip Direction, ivc int) {
-	var inputBuffer =
-		router.Node.Network.Nodes[nextHop].Router.InputPorts[ip].VirtualChannels[ivc].InputBuffer
+	var inputBuffer = router.Node.Network.Nodes[nextHop].Router.InputPorts[ip].VirtualChannels[ivc].InputBuffer
 
 	if !inputBuffer.Full() {
 		router.Node.Network.Nodes[nextHop].Router.InsertFlit(flit, ip, ivc)
@@ -277,7 +275,6 @@ func (router *Router) stageSwitchTraversal() {
 				if inputVirtualChannel.OutputVirtualChannel != nil && inputVirtualChannel.OutputVirtualChannel.OutputPort == outputPort {
 					var flit = inputVirtualChannel.InputBuffer.Peek()
 					if flit != nil && flit.State == FlitStateSwitchAllocation {
-						flit.Node = router.Node
 						flit.State = FlitStateSwitchTraversal
 
 						if inputPort.Direction != DirectionLocal {
@@ -300,7 +297,6 @@ func (router *Router) stageSwitchAllocation() {
 
 		if winnerInputVirtualChannel != nil {
 			var flit = winnerInputVirtualChannel.InputBuffer.Peek()
-			flit.Node = router.Node
 			flit.State = FlitStateSwitchAllocation
 		}
 	}
@@ -314,7 +310,6 @@ func (router *Router) stageVirtualChannelAllocation() {
 
 				if winnerInputVirtualChannel != nil {
 					var flit = winnerInputVirtualChannel.InputBuffer.Peek()
-					flit.Node = router.Node
 					flit.State = FlitStateVirtualChannelAllocation
 
 					winnerInputVirtualChannel.OutputVirtualChannel = outputVirtualChannel
@@ -337,7 +332,6 @@ func (router *Router) stageRouteComputation() {
 					inputVirtualChannel.Route = flit.Packet.DoRouteComputation(inputVirtualChannel)
 				}
 
-				flit.Node = router.Node
 				flit.State = FlitStateRouteComputation
 			}
 		}
@@ -350,29 +344,29 @@ func (router *Router) localPacketInjection() {
 
 		for ivc := 0; ivc < router.Node.Network.Experiment.Config.NumVirtualChannels; ivc++ {
 			if router.InjectionBuffer.Count() == 0 {
-				return;
+				return
 			}
 
-			var packet = router.InjectionBuffer.Peek().(Packet)
+			var packet = router.InjectionBuffer.Peek()
 
 			var numFlits = int(math.Ceil(float64(packet.GetSize()) / float64(router.Node.Network.Experiment.Config.LinkWidth)))
 
 			var inputBuffer = router.InputPorts[DirectionLocal].VirtualChannels[ivc].InputBuffer
 
 			if inputBuffer.Count() + numFlits <= inputBuffer.Size() {
-				for i:= 0; i < numFlits; i++ {
+				for i := 0; i < numFlits; i++ {
 					var flit = NewFlit(packet, i, i == 0, i == numFlits - 1)
 					router.InsertFlit(flit, DirectionLocal, ivc)
 				}
 
 				router.InjectionBuffer.Pop()
 				requestInserted = true;
-				break;
+				break
 			}
 		}
 
-		if(!requestInserted) {
-			break;
+		if !requestInserted {
+			break
 		}
 	}
 }
@@ -396,8 +390,8 @@ func (router *Router) GetInputVirtualChannels() []*InputVirtualChannel {
 	var inputVirtualChannels []*InputVirtualChannel
 
 	for _, inputPort := range router.InputPorts {
-		for i := range inputPort.VirtualChannels {
-			inputVirtualChannels = append(inputVirtualChannels, inputPort.VirtualChannels[i])
+		for _, inputVirtualChannel := range inputPort.VirtualChannels {
+			inputVirtualChannels = append(inputVirtualChannels, inputVirtualChannel)
 		}
 	}
 

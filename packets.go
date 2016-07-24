@@ -1,5 +1,10 @@
 package acogo
 
+import (
+	"fmt"
+	"math"
+)
+
 type Packet interface {
 	GetNetwork() *Network
 	GetId() int
@@ -33,6 +38,29 @@ type DataPacket struct {
 	Memory               []*PacketMemoryEntry
 	Flits                []*Flit
 	HasPayload           bool
+}
+
+func NewDataPacket(network *Network, src int, dest int, size int, hasPayload bool, onCompletedCallback func()) *DataPacket {
+	var packet = &DataPacket{
+		Network:network,
+		Id:network.currentPacketId,
+		BeginCycle:network.Experiment.CycleAccurateEventQueue.CurrentCycle,
+		EndCycle:-1,
+		Src:src,
+		Dest:dest,
+		Size:size,
+		OnCompletedCallback:onCompletedCallback,
+		HasPayload:hasPayload,
+	}
+
+	network.currentPacketId++
+
+	var numFlits = int(math.Ceil(float64(packet.Size) / float64(network.Experiment.Config.LinkWidth)))
+	if numFlits > network.Experiment.Config.MaxInputBufferSize {
+		panic(fmt.Sprintf("Number of flits (%d) in a packet cannot be greater than max input buffer size (%d)", numFlits, network.Experiment.Config.MaxInputBufferSize))
+	}
+
+	return packet
 }
 
 func (packet *DataPacket) GetNetwork() *Network {
@@ -87,19 +115,6 @@ func (packet *DataPacket) GetHasPayload() bool {
 	return packet.HasPayload
 }
 
-func NewDataPacket(network *Network, src int, dest int, size int, hasPayload bool, onCompletedCallback func()) *DataPacket {
-	var packet = &DataPacket{
-		Network:network,
-		Src:src,
-		Dest:dest,
-		Size:size,
-		OnCompletedCallback:onCompletedCallback,
-		HasPayload:hasPayload,
-	}
-
-	return packet
-}
-
 func (packet *DataPacket) HandleDestArrived(inputVirtualChannel *InputVirtualChannel) {
 	packet.Memorize(inputVirtualChannel.InputPort.Router.Node.Id)
 
@@ -127,6 +142,12 @@ func (packet *DataPacket) DoRouteComputation(inputVirtualChannel *InputVirtualCh
 }
 
 func (packet *DataPacket) Memorize(currentNodeId int) {
+	for _, entry := range packet.Memory {
+		if entry.NodeId == currentNodeId {
+			panic(fmt.Sprintf("%d", currentNodeId))
+		}
+	}
+
 	packet.Memory = append(packet.Memory, &PacketMemoryEntry{
 		NodeId:currentNodeId,
 		Timestamp:packet.Network.Experiment.CycleAccurateEventQueue.CurrentCycle,

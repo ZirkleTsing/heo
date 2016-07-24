@@ -34,13 +34,13 @@ func (direction Direction) GetReflexDirection() Direction {
 }
 
 type Node struct {
-	Network   *Network
-	Id        int
-	X, Y      int
-	Neighbors map[Direction]int
-	Router    *Router
-	RoutingAlgorithm RoutingAlgorithm //TODO
-	SelectionAlgorithm SelectionAlgorithm //TODO
+	Network            *Network
+	Id                 int
+	X, Y               int
+	Neighbors          map[Direction]int
+	Router             *Router
+	RoutingAlgorithm   RoutingAlgorithm
+	SelectionAlgorithm SelectionAlgorithm
 }
 
 func NewNode(network *Network, id int) *Node {
@@ -49,9 +49,8 @@ func NewNode(network *Network, id int) *Node {
 		Id:id,
 		X:network.GetX(id),
 		Y:network.GetY(id),
+		Neighbors:make(map[Direction]int),
 	}
-
-	node.Neighbors = make(map[Direction]int)
 
 	if (id / network.Width > 0) {
 		node.Neighbors[DirectionNorth] = id - network.Width
@@ -71,12 +70,21 @@ func NewNode(network *Network, id int) *Node {
 
 	node.Router = NewRouter(node)
 
-	node.RoutingAlgorithm = NewOddEvenRoutingAlgorithm(node)
+	//node.RoutingAlgorithm = NewOddEvenRoutingAlgorithm(node)
+	node.RoutingAlgorithm = NewXYRoutingAlgorithm(node)
 
 	//node.SelectionAlgorithm = NewACOSelectionAlgorithm(node)
 	node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
 
 	return node
+}
+
+func (node *Node) DumpNeighbors() {
+	for direction, neighbor := range node.Neighbors {
+		fmt.Printf("node#%d.neighbors[%d]=%d\n", node.Id, direction, neighbor)
+	}
+
+	fmt.Println()
 }
 
 type Network struct {
@@ -104,8 +112,8 @@ func NewNetwork(experiment *NoCExperiment, numNodes int) *Network {
 	}
 
 	network.Experiment.CycleAccurateEventQueue.AddPerCycleEvent(func() {
-		for i := 0; i < numNodes; i++ {
-			network.Nodes[i].Router.AdvanceOneCycle()
+		for _, node := range network.Nodes {
+			node.Router.AdvanceOneCycle()
 		}
 	})
 

@@ -2,10 +2,12 @@ package acogo
 
 // NewQueue returns a new queue with the given initial size.
 func NewQueue(size int) *Queue {
-	return &Queue{
+	var queue = &Queue{
 		Nodes: make([]interface{}, size),
 		Size:  size,
 	}
+
+	return queue
 }
 
 // Queue is a basic FIFO queue based on a circular list that resizes as needed.

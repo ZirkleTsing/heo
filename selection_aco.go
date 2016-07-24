@@ -58,7 +58,7 @@ type ACOSelectionAlgorithm struct {
 }
 
 func NewACOSelectionAlgorithm(node *Node) *ACOSelectionAlgorithm {
-	var acoSelectionAlgorithm = &ACOSelectionAlgorithm{
+	var selectionAlgorithm = &ACOSelectionAlgorithm{
 		Node:node,
 		PheromoneTable:NewPheromoneTable(node),
 	}
@@ -66,15 +66,15 @@ func NewACOSelectionAlgorithm(node *Node) *ACOSelectionAlgorithm {
 	var pheromoneValue = 1.0 / float64(len(node.Neighbors))
 
 	for dest := 0; dest < node.Network.NumNodes; dest++ {
-		if (node.Id != dest) {
+		if node.Id != dest {
 			for i := range node.Neighbors {
 				var direction = Direction(i)
-				acoSelectionAlgorithm.PheromoneTable.Append(dest, direction, pheromoneValue)
+				selectionAlgorithm.PheromoneTable.Append(dest, direction, pheromoneValue)
 			}
 		}
 	}
 
-	return acoSelectionAlgorithm
+	return selectionAlgorithm
 }
 
 func (selectionAlgorithm *ACOSelectionAlgorithm) CreateAndSendBackwardAntPacket(packet *AntPacket) {
@@ -105,7 +105,7 @@ func (selectionAlgorithm *ACOSelectionAlgorithm) BackwardAntPacket(packet *AntPa
 		}
 	}
 
-	return Direction(-1)
+	panic("Impossible")
 }
 
 func (selectionAlgorithm *ACOSelectionAlgorithm) UpdatePheromoneTable(packet *AntPacket, inputVirtualChannel *InputVirtualChannel) {
@@ -117,7 +117,7 @@ func (selectionAlgorithm *ACOSelectionAlgorithm) UpdatePheromoneTable(packet *An
 		}
 	}
 
-	for j := i + 1; j < len(packet.Memory); i++ {
+	for j := i + 1; j < len(packet.Memory); j++ {
 		var entry = packet.Memory[j]
 		var dest = entry.NodeId
 		selectionAlgorithm.PheromoneTable.Update(dest, inputVirtualChannel.InputPort.Direction)
@@ -138,7 +138,7 @@ func (selectionAlgorithm *ACOSelectionAlgorithm) Select(src int, dest int, ivc i
 		var qTotal = selectionAlgorithm.Node.Network.Experiment.Config.MaxInputBufferSize
 		var n = len(selectionAlgorithm.Node.Neighbors)
 
-		var probability = (pheromone.Value + alpha * (float64(freeSlots) / float64(qTotal))) / (1 + alpha * float64(n - 1));
+		var probability = (pheromone.Value + alpha * (float64(freeSlots) / float64(qTotal))) / (1 + alpha * float64(n - 1))
 		if probability > maxProbability {
 			maxProbability = probability
 			bestDirection = direction

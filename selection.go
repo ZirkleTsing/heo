@@ -9,11 +9,11 @@ type BufferLevelSelectionAlgorithm struct {
 }
 
 func NewBufferLevelSelectionAlgorithm(node *Node) *BufferLevelSelectionAlgorithm {
-	var bufferLevelSelectionAlgorithm = &BufferLevelSelectionAlgorithm{
+	var selectionAlgorithm = &BufferLevelSelectionAlgorithm{
 		Node:node,
 	}
 
-	return bufferLevelSelectionAlgorithm
+	return selectionAlgorithm
 }
 
 func (selectionAlgorithm *BufferLevelSelectionAlgorithm) Select(src int, dest int, ivc int, directions []Direction) Direction {
@@ -26,10 +26,10 @@ func (selectionAlgorithm *BufferLevelSelectionAlgorithm) Select(src int, dest in
 		var neighborRouter = selectionAlgorithm.Node.Network.Nodes[selectionAlgorithm.Node.Neighbors[direction]].Router
 		var freeSlots = neighborRouter.FreeSlots(direction.GetReflexDirection(), ivc)
 
-		if (freeSlots > maxFreeSlots) {
-			maxFreeSlots = freeSlots;
+		if freeSlots > maxFreeSlots {
+			maxFreeSlots = freeSlots
 			bestDirections = []Direction{direction}
-		} else if (freeSlots == maxFreeSlots) {
+		} else if freeSlots == maxFreeSlots {
 			bestDirections = append(bestDirections, direction)
 		}
 	}

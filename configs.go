@@ -9,9 +9,9 @@ type NoCConfig struct {
 
 	MaxPackets              int
 
-	NoDrain                 bool
+	DrainPackets            bool
 
-	RandSeed                int
+	RandSeed                int64
 
 	Routing                 string
 
@@ -38,7 +38,7 @@ type NoCConfig struct {
 	DataPacketSize          int
 }
 
-func NewNoCConfig(outputDirectory string, numNodes int, maxCycles int, maxPackets int, noDrain bool) *NoCConfig {
+func NewNoCConfig(outputDirectory string, numNodes int, maxCycles int, maxPackets int, drainPackets bool) *NoCConfig {
 	var config = &NoCConfig{
 		OutputDirectory:outputDirectory,
 
@@ -48,7 +48,7 @@ func NewNoCConfig(outputDirectory string, numNodes int, maxCycles int, maxPacket
 
 		MaxPackets:maxPackets,
 
-		NoDrain:noDrain,
+		DrainPackets:drainPackets,
 
 		RandSeed:13,
 

@@ -9,11 +9,11 @@ type XYRoutingAlgorithm struct {
 }
 
 func NewXYRoutingAlgorithm(node *Node) *XYRoutingAlgorithm {
-	var xyRoutingAlgorithm = &XYRoutingAlgorithm{
+	var routingAlgorithm = &XYRoutingAlgorithm{
 		Node:node,
 	}
 
-	return xyRoutingAlgorithm
+	return routingAlgorithm
 }
 
 func (routingAlgorithm *XYRoutingAlgorithm) NextHop(src int, dest int, parent int) []Direction {
@@ -44,11 +44,11 @@ type OddEvenRoutingAlgorithm struct {
 }
 
 func NewOddEvenRoutingAlgorithm(node *Node) *OddEvenRoutingAlgorithm {
-	var xyRoutingAlgorithm = &OddEvenRoutingAlgorithm{
+	var routingAlgorithm = &OddEvenRoutingAlgorithm{
 		Node:node,
 	}
 
-	return xyRoutingAlgorithm
+	return routingAlgorithm
 }
 
 func (routingAlgorithm *OddEvenRoutingAlgorithm) NextHop(src int, dest int, parent int) []Direction {
@@ -63,8 +63,8 @@ func (routingAlgorithm *OddEvenRoutingAlgorithm) NextHop(src int, dest int, pare
 	var d0 = routingAlgorithm.Node.Network.GetX(dest)
 	var d1 = routingAlgorithm.Node.Network.GetY(dest)
 
-	var e0 = d0 - c0;
-	var e1 = -(d1 - c1);
+	var e0 = d0 - c0
+	var e1 = -(d1 - c1)
 
 	if e0 == 0 {
 		if e1 > 0 {

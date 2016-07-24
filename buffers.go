@@ -14,6 +14,10 @@ func NewInjectionBuffer(router *Router) *InjectionBuffer {
 }
 
 func (injectionBuffer *InjectionBuffer) Push(packet Packet) {
+	if injectionBuffer.Full() {
+		panic("Injection buffer is full")
+	}
+
 	injectionBuffer.packets.Push(packet)
 }
 
@@ -60,6 +64,10 @@ func NewInputBuffer(inputVirtualChannel *InputVirtualChannel) *InputBuffer {
 }
 
 func (inputBuffer *InputBuffer) Push(flit *Flit) {
+	if inputBuffer.Full() {
+		panic("Input buffer is full")
+	}
+
 	inputBuffer.flits.Push(flit)
 }
 

@@ -1,14 +1,14 @@
 package acogo
 
 type AntPacket struct {
-	Forward bool
 	*DataPacket
+	Forward bool
 }
 
 func NewAntPacket(network *Network, src int, dest int, size int, onCompletedCallback func(), forward bool) *AntPacket {
 	var packet = &AntPacket{
-		Forward:forward,
 		DataPacket:NewDataPacket(network, src, dest, size, forward, onCompletedCallback),
+		Forward:forward,
 	}
 
 	return packet
