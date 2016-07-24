@@ -128,7 +128,7 @@ func (selectionAlgorithm *ACOSelectionAlgorithm) Select(src int, dest int, ivc i
 	var maxProbability = -1.0
 	var bestDirection = Direction(-1)
 
-	for i := 0; i < DirectionWest; i++ {
+	for i := 0; i < NumDirections; i++ {
 		var direction = Direction(i)
 		var pheromone = selectionAlgorithm.PheromoneTable.Pheromones[dest][direction]
 		var neighborRouter = selectionAlgorithm.Node.Network.Nodes[selectionAlgorithm.Node.Neighbors[direction]].Router

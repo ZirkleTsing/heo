@@ -193,7 +193,7 @@ func NewRouter(node *Node) *Router {
 
 	router.InjectionBuffer = NewInjectionBuffer(router)
 
-	for i := 0; i < DirectionWest; i++ {
+	for i := 0; i < NumDirections; i++ {
 		router.InputPorts[Direction(i)] = NewInputPort(router, Direction(i))
 		router.OutputPorts[Direction(i)] = NewOutputPort(router, Direction(i))
 	}

@@ -1,7 +1,10 @@
 package acogo
 
-import "fmt"
-import "math/rand"
+import (
+	"math/rand"
+	"fmt"
+	"sort"
+)
 
 type NoCExperiment struct {
 	Config                  *NoCConfig
@@ -56,8 +59,14 @@ func (experiment *NoCExperiment) Run() {
 
 	fmt.Printf("[%d] Simulation ended!\n", experiment.CycleAccurateEventQueue.CurrentCycle)
 
-	for key, value := range experiment.Stats {
-		fmt.Printf("%s: %s\n", key, value)
+	var keys []string
+	for k, _ := range experiment.Stats {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		fmt.Printf("%s: %s\n", k, experiment.Stats[k])
 	}
 }
 

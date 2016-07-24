@@ -1,17 +1,19 @@
 package acogo
 
 import (
+	"fmt"
 	"math"
 )
 
 type Direction int
 
 const (
-	DirectionLocal = 1
-	DirectionNorth = 2
-	DirectionEast = 3
-	DirectionSouth = 4
-	DirectionWest = 5
+	DirectionLocal = 0
+	DirectionNorth = 1
+	DirectionEast = 2
+	DirectionSouth = 3
+	DirectionWest = 4
+	NumDirections = 5
 )
 
 func (direction Direction) GetReflexDirection() Direction {
@@ -22,8 +24,12 @@ func (direction Direction) GetReflexDirection() Direction {
 		return DirectionSouth
 	case DirectionEast:
 		return DirectionWest
+	case DirectionSouth:
+		return DirectionNorth
+	case DirectionWest:
+		return DirectionEast
 	default:
-		return -1
+		panic(fmt.Sprintf("%d", direction))
 	}
 }
 
@@ -67,7 +73,8 @@ func NewNode(network *Network, id int) *Node {
 
 	node.RoutingAlgorithm = NewOddEvenRoutingAlgorithm(node)
 
-	node.SelectionAlgorithm = NewACOSelectionAlgorithm(node)
+	//node.SelectionAlgorithm = NewACOSelectionAlgorithm(node)
+	node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
 
 	return node
 }
