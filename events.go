@@ -6,48 +6,48 @@ import (
 
 type CycleAccurateEvent struct {
 	eventQueue *CycleAccurateEventQueue
-	when       int
-	action     func()
-	id         int
+	When       int
+	Action     func()
+	Id         int
 	index      int
 }
 
 type CycleAccurateEventQueue struct {
-	events         []*CycleAccurateEvent
-	perCycleEvents []func()
-	currentCycle   int
+	Events         []*CycleAccurateEvent
+	PerCycleEvents []func()
+	CurrentCycle   int
 	currentEventId int
 }
 
 func (q CycleAccurateEventQueue) Len() int {
-	return len(q.events)
+	return len(q.Events)
 }
 
 func (q CycleAccurateEventQueue) Less(i, j int) bool {
-	var x = q.events[i]
-	var y = q.events[j]
-	return x.when < y.when || (x.when == y.when && x.id < y.id)
+	var x = q.Events[i]
+	var y = q.Events[j]
+	return x.When < y.When || (x.When == y.When && x.Id < y.Id)
 }
 
 func (q CycleAccurateEventQueue) Swap(i, j int) {
-	q.events[i], q.events[j] = q.events[j], q.events[i]
-	q.events[i].index = i
-	q.events[j].index = j
+	q.Events[i], q.Events[j] = q.Events[j], q.Events[i]
+	q.Events[i].index = i
+	q.Events[j].index = j
 }
 
 func (q *CycleAccurateEventQueue) Push(x interface{}) {
-	n := len((*q).events)
+	n := len((*q).Events)
 	item := x.(*CycleAccurateEvent)
 	item.index = n
-	(*q).events = append((*q).events, item)
+	(*q).Events = append((*q).Events, item)
 }
 
 func (q *CycleAccurateEventQueue) Pop() interface{} {
-	old := (*q).events
+	old := (*q).Events
 	n := len(old)
 	item := old[n - 1]
 	item.index = -1
-	(*q).events = old[0 : n - 1]
+	(*q).Events = old[0 : n - 1]
 	return item
 }
 
@@ -60,16 +60,16 @@ func (q *CycleAccurateEventQueue) Schedule(action func(), delay int) {
 
 	var event = &CycleAccurateEvent{
 		eventQueue:q,
-		when:q.currentCycle + delay,
-		action:action,
-		id:q.currentEventId,
+		When:q.CurrentCycle + delay,
+		Action:action,
+		Id:q.currentEventId,
 	}
 
 	heap.Push(q, event)
 }
 
 func (q *CycleAccurateEventQueue) AddPerCycleEvent(action func()) {
-	q.perCycleEvents = append(q.perCycleEvents, action)
+	q.PerCycleEvents = append(q.PerCycleEvents, action)
 }
 
 func (q *CycleAccurateEventQueue) AdvanceOneCycle() {
@@ -77,17 +77,17 @@ func (q *CycleAccurateEventQueue) AdvanceOneCycle() {
 		var value = q.Pop()
 		var event *CycleAccurateEvent = value.(*CycleAccurateEvent)
 
-		if event.when > q.currentCycle {
+		if event.When > q.CurrentCycle {
 			q.Push(value)
 			break
 		}
 
-		event.action()
+		event.Action()
 	}
 
-	for i := 0; i < len(q.perCycleEvents); i++ {
-		q.perCycleEvents[i]()
+	for i := 0; i < len(q.PerCycleEvents); i++ {
+		q.PerCycleEvents[i]()
 	}
 
-	q.currentCycle++
+	q.CurrentCycle++
 }

@@ -13,182 +13,182 @@ const (
 )
 
 type Flit struct {
-	packet                        *Packet
-	num                           int
-	head                          bool
-	tail                          bool
-	node                          *Node
-	state                         FlitState
-	prevStateTimestamp, timestamp int
+	Packet                        *Packet
+	Num                           int
+	Head                          bool
+	Tail                          bool
+	Node                          *Node
+	State                         FlitState
+	prevStateTimestamp, Timestamp int
 }
 
 type InputBuffer struct {
-	inputVirtualChannel *InputVirtualChannel
-	flits               *Queue
+	InputVirtualChannel *InputVirtualChannel
+	Flits               *Queue
 }
 
 func NewInputBuffer(inputVirtualChannel *InputVirtualChannel) *InputBuffer {
 	var inputBuffer = &InputBuffer{
-		inputVirtualChannel:inputVirtualChannel,
-		flits:NewQueue(inputVirtualChannel.inputPort.router.node.network.experiment.config.maxInputBufferSize),
+		InputVirtualChannel:inputVirtualChannel,
+		Flits:NewQueue(inputVirtualChannel.InputPort.Router.Node.Network.Experiment.Config.MaxInputBufferSize),
 	}
 
 	return inputBuffer
 }
 
 func (inputBuffer *InputBuffer) Push(flit *Flit) {
-	inputBuffer.flits.Push(flit)
+	inputBuffer.Flits.Push(flit)
 }
 
 func (inputBuffer *InputBuffer) Peek() *Flit {
-	if inputBuffer.flits.count > 0 {
-		return inputBuffer.flits.Peek().(*Flit)
+	if inputBuffer.Flits.Count > 0 {
+		return inputBuffer.Flits.Peek().(*Flit)
 	} else {
 		return nil
 	}
 }
 
 func (inputBuffer *InputBuffer) Pop() {
-	inputBuffer.flits.Pop()
+	inputBuffer.Flits.Pop()
 }
 
 func (inputBuffer *InputBuffer) Full() bool {
-	return inputBuffer.flits.size == inputBuffer.flits.count
+	return inputBuffer.Flits.Size == inputBuffer.Flits.Count
 }
 
 func (inputBuffer *InputBuffer) Count() int {
-	return inputBuffer.flits.count
+	return inputBuffer.Flits.Count
 }
 
 type InputVirtualChannel struct {
-	inputPort            *InputPort
-	id                   int
-	inputBuffer          *InputBuffer
-	route                Direction
-	outputVirtualChannel *OutputVirtualChannel
+	InputPort            *InputPort
+	Num                  int
+	InputBuffer          *InputBuffer
+	Route                Direction
+	OutputVirtualChannel *OutputVirtualChannel
 }
 
-func NewInputVirtualChannel(inputPort *InputPort, id int) *InputVirtualChannel {
+func NewInputVirtualChannel(inputPort *InputPort, num int) *InputVirtualChannel {
 	var inputVirtualChannel = &InputVirtualChannel{
-		inputPort:inputPort,
-		id:id,
+		InputPort:inputPort,
+		Num:num,
 	}
 
-	inputVirtualChannel.inputBuffer = NewInputBuffer(inputVirtualChannel)
+	inputVirtualChannel.InputBuffer = NewInputBuffer(inputVirtualChannel)
 
 	return inputVirtualChannel
 }
 
 type InputPort struct {
-	router          *Router
-	direction       Direction
-	virtualChannels []*InputVirtualChannel
+	Router          *Router
+	Direction       Direction
+	VirtualChannels []*InputVirtualChannel
 }
 
 func NewInputPort(router *Router, direction Direction) *InputPort {
 	var inputPort = &InputPort{
-		router:router,
-		direction:direction,
+		Router:router,
+		Direction:direction,
 	}
 
-	for i := 0; i < router.node.network.experiment.config.numVirtualChannels; i++ {
-		inputPort.virtualChannels = append(inputPort.virtualChannels, NewInputVirtualChannel(inputPort, i))
+	for i := 0; i < router.Node.Network.Experiment.Config.NumVirtualChannels; i++ {
+		inputPort.VirtualChannels = append(inputPort.VirtualChannels, NewInputVirtualChannel(inputPort, i))
 	}
 
 	return inputPort
 }
 
 type OutputVirtualChannel struct {
-	outputPort          *OutputPort
-	id                  int
-	inputVirtualChannel *InputVirtualChannel
-	credits             int
-	arbiter             *VirtualChannelArbiter
+	OutputPort          *OutputPort
+	Num                 int
+	InputVirtualChannel *InputVirtualChannel
+	Credits             int
+	Arbiter             *VirtualChannelArbiter
 }
 
-func NewOutputVirtualChannel(outputPort *OutputPort, id int) *OutputVirtualChannel {
+func NewOutputVirtualChannel(outputPort *OutputPort, num int) *OutputVirtualChannel {
 	var outputVirtualChannel = &OutputVirtualChannel{
-		outputPort:outputPort,
-		id: id,
-		credits:10,
+		OutputPort:outputPort,
+		Num: num,
+		Credits:10,
 	}
 
-	outputVirtualChannel.arbiter = NewVirtualChannelArbiter(outputVirtualChannel)
+	outputVirtualChannel.Arbiter = NewVirtualChannelArbiter(outputVirtualChannel)
 
 	return outputVirtualChannel
 }
 
 type OutputPort struct {
-	router          *Router
-	direction       Direction
-	virtualChannels []*OutputVirtualChannel
-	arbiter         *SwitchArbiter
+	Router          *Router
+	Direction       Direction
+	VirtualChannels []*OutputVirtualChannel
+	Arbiter         *SwitchArbiter
 }
 
 func NewOutputPort(router *Router, direction Direction) *OutputPort {
 	var outputPort = &OutputPort{
-		router:router,
-		direction:direction,
+		Router:router,
+		Direction:direction,
 	}
 
-	for i := 0; i < router.node.network.experiment.config.numVirtualChannels; i++ {
+	for i := 0; i < router.Node.Network.Experiment.Config.NumVirtualChannels; i++ {
 		var outputVirtualChannel = NewOutputVirtualChannel(outputPort, i)
-		outputPort.virtualChannels = append(outputPort.virtualChannels, outputVirtualChannel)
+		outputPort.VirtualChannels = append(outputPort.VirtualChannels, outputVirtualChannel)
 	}
 
-	outputPort.arbiter = NewSwitchArbiter(outputPort)
+	outputPort.Arbiter = NewSwitchArbiter(outputPort)
 
 	return outputPort
 }
 
 type VirtualChannelArbiter struct {
-	outputVirtualChannel *OutputVirtualChannel
-	inputVirtualChannels []*InputVirtualChannel
+	OutputVirtualChannel *OutputVirtualChannel
+	InputVirtualChannels []*InputVirtualChannel
 }
 
 func NewVirtualChannelArbiter(outputVirtualChannel *OutputVirtualChannel) *VirtualChannelArbiter {
 	var virtualChannelArbiter = &VirtualChannelArbiter{
-		outputVirtualChannel:outputVirtualChannel,
-		inputVirtualChannels:outputVirtualChannel.outputPort.router.GetInputVirtualChannels(),
+		OutputVirtualChannel:outputVirtualChannel,
+		InputVirtualChannels:outputVirtualChannel.OutputPort.Router.GetInputVirtualChannels(),
 	}
 
 	return virtualChannelArbiter
 }
 
 type SwitchArbiter struct {
-	outputPort           *OutputPort
-	inputVirtualChannels []*InputVirtualChannel
+	OutputPort           *OutputPort
+	InputVirtualChannels []*InputVirtualChannel
 }
 
 func NewSwitchArbiter(outputPort *OutputPort) *SwitchArbiter {
 	var switchArbiter = &SwitchArbiter{
-		outputPort:outputPort,
-		inputVirtualChannels:outputPort.router.GetInputVirtualChannels(),
+		OutputPort:outputPort,
+		InputVirtualChannels:outputPort.Router.GetInputVirtualChannels(),
 	}
 
 	return switchArbiter
 }
 
 type Router struct {
-	node            *Node
-	injectionBuffer []*Packet
-	inputPorts      map[Direction]*InputPort
-	outputPorts     map[Direction]*OutputPort
+	Node            *Node
+	InjectionBuffer []*Packet
+	InputPorts      map[Direction]*InputPort
+	OutputPorts     map[Direction]*OutputPort
 }
 
 func NewRouter(node *Node) *Router {
 	var router = &Router{
-		node:node,
-		inputPorts:make(map[Direction]*InputPort),
-		outputPorts:make(map[Direction]*OutputPort),
+		Node:node,
+		InputPorts:make(map[Direction]*InputPort),
+		OutputPorts:make(map[Direction]*OutputPort),
 	}
 
 	for i := 0; i < DirectionWest; i++ {
-		router.inputPorts[Direction(i)] = NewInputPort(router, Direction(i))
-		router.outputPorts[Direction(i)] = NewOutputPort(router, Direction(i))
+		router.InputPorts[Direction(i)] = NewInputPort(router, Direction(i))
+		router.OutputPorts[Direction(i)] = NewOutputPort(router, Direction(i))
 	}
 
-	router.node.network.experiment.cycleAccurateEventQueue.AddPerCycleEvent(router.advanceOneCycle)
+	router.Node.Network.Experiment.CycleAccurateEventQueue.AddPerCycleEvent(router.advanceOneCycle)
 
 	return router
 }
@@ -203,33 +203,39 @@ func (router *Router) advanceOneCycle() {
 }
 
 func (router *Router) stageLinkTraversal() {
+	//TODO
 }
 
 func (router *Router) stageSwitchTraversal() {
+	//TODO
 }
 
 func (router *Router) stageSwitchAllocation() {
+	//TODO
 }
 
 func (router *Router) stageVirtualChannelAllocation() {
+	//TODO
 }
 
 func (router *Router) stageRouteComputation() {
+	//TODO
 }
 
 func (router *Router) localPacketInjection() {
+	//TODO
 }
 
 func (router *Router) InjectPacket(packet *Packet) bool {
-	return false //TODO
+	return true //TODO
 }
 
 func (router *Router) GetInputVirtualChannels() []*InputVirtualChannel {
 	var inputVirtualChannels []*InputVirtualChannel
 
-	for _, inputPort := range router.inputPorts {
-		for i := range inputPort.virtualChannels {
-			inputVirtualChannels = append(inputVirtualChannels, inputPort.virtualChannels[i])
+	for _, inputPort := range router.InputPorts {
+		for i := range inputPort.VirtualChannels {
+			inputVirtualChannels = append(inputVirtualChannels, inputPort.VirtualChannels[i])
 		}
 	}
 

@@ -1,41 +1,41 @@
 package acogo
 
 type TransposeTrafficGenerator struct {
-	network             *Network
-	packetInjectionRate float32
-	maxPackets          int
-	hotspots            []int
-	newPacket           func(src int, dest int) *Packet
+	Network             *Network
+	PacketInjectionRate float32
+	MaxPackets          int
+	Hotspots            []int //TODO
+	NewPacket           func(src int, dest int) *Packet
 }
 
 func NewTransposeTrafficGenerator(network *Network, packetInjectionRate float32, maxPackets int, newPacket func(src int, dest int) *Packet) *TransposeTrafficGenerator {
 	var gen = &TransposeTrafficGenerator{
-		network:network,
-		packetInjectionRate:packetInjectionRate,
-		maxPackets:maxPackets,
-		newPacket:newPacket,
+		Network:network,
+		PacketInjectionRate:packetInjectionRate,
+		MaxPackets:maxPackets,
+		NewPacket:newPacket,
 	}
 
-	network.experiment.cycleAccurateEventQueue.AddPerCycleEvent(gen.generateTraffic)
+	network.Experiment.CycleAccurateEventQueue.AddPerCycleEvent(gen.generateTraffic)
 
 	return gen
 }
 
 func (gen *TransposeTrafficGenerator) generateTraffic() {
-	for i := 0; i < len(gen.network.nodes); i++ {
-		if !gen.network.acceptPacket || gen.maxPackets != -1 && gen.network.numPacketsReceived > gen.maxPackets {
+	for i := 0; i < len(gen.Network.Nodes); i++ {
+		if !gen.Network.AcceptPacket || gen.MaxPackets != -1 && gen.Network.NumPacketsReceived > gen.MaxPackets {
 			break
 		}
 
-		var valid = gen.network.experiment.rand.Float32() <= gen.packetInjectionRate
+		var valid = gen.Network.Experiment.rand.Float32() <= gen.PacketInjectionRate
 		if valid {
-			var node = gen.network.nodes[i]
-			var src = node.id
+			var node = gen.Network.Nodes[i]
+			var src = node.Id
 			var dest = gen.dest(src)
 
 			if src != dest {
-				gen.network.experiment.cycleAccurateEventQueue.Schedule(func() {
-					gen.network.Receive(gen.newPacket(src, dest))
+				gen.Network.Experiment.CycleAccurateEventQueue.Schedule(func() {
+					gen.Network.Receive(gen.NewPacket(src, dest))
 				}, 1)
 			}
 		}
@@ -43,8 +43,8 @@ func (gen *TransposeTrafficGenerator) generateTraffic() {
 }
 
 func (gen *TransposeTrafficGenerator) dest(src int) int {
-	var srcX, srcY = gen.network.GetX(src), gen.network.GetY(src)
-	var destX, destY = gen.network.width - 1 - srcY, gen.network.width - 1 - srcX
+	var srcX, srcY = gen.Network.GetX(src), gen.Network.GetY(src)
+	var destX, destY = gen.Network.Width - 1 - srcY, gen.Network.Width - 1 - srcX
 
-	return destY * gen.network.width + destX
+	return destY * gen.Network.Width + destX
 }

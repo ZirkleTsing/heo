@@ -3,46 +3,46 @@ package acogo
 // NewQueue returns a new queue with the given initial size.
 func NewQueue(size int) *Queue {
 	return &Queue{
-		nodes: make([]interface{}, size),
-		size:  size,
+		Nodes: make([]interface{}, size),
+		Size:  size,
 	}
 }
 
 // Queue is a basic FIFO queue based on a circular list that resizes as needed.
 type Queue struct {
-	nodes []interface{}
-	size  int
-	head  int
-	tail  int
-	count int
+	Nodes []interface{}
+	Size  int
+	Head  int
+	Tail  int
+	Count int
 }
 
 // Push adds a node to the queue.
 func (q *Queue) Push(n interface{}) {
-	if q.head == q.tail && q.count > 0 {
-		nodes := make([]interface{}, len(q.nodes) + q.size)
-		copy(nodes, q.nodes[q.head:])
-		copy(nodes[len(q.nodes) - q.head:], q.nodes[:q.head])
-		q.head = 0
-		q.tail = len(q.nodes)
-		q.nodes = nodes
+	if q.Head == q.Tail && q.Count > 0 {
+		nodes := make([]interface{}, len(q.Nodes) + q.Size)
+		copy(nodes, q.Nodes[q.Head:])
+		copy(nodes[len(q.Nodes) - q.Head:], q.Nodes[:q.Head])
+		q.Head = 0
+		q.Tail = len(q.Nodes)
+		q.Nodes = nodes
 	}
-	q.nodes[q.tail] = n
-	q.tail = (q.tail + 1) % len(q.nodes)
-	q.count++
+	q.Nodes[q.Tail] = n
+	q.Tail = (q.Tail + 1) % len(q.Nodes)
+	q.Count++
 }
 
 // Pop removes and returns a node from the queue in first to last order.
 func (q *Queue) Pop() interface{} {
-	if q.count == 0 {
+	if q.Count == 0 {
 		return nil
 	}
-	node := q.nodes[q.head]
-	q.head = (q.head + 1) % len(q.nodes)
-	q.count--
+	node := q.Nodes[q.Head]
+	q.Head = (q.Head + 1) % len(q.Nodes)
+	q.Count--
 	return node
 }
 
 func (q *Queue) Peek() interface{} {
-	return q.nodes[0]
+	return q.Nodes[0]
 }

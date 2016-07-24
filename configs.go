@@ -1,80 +1,80 @@
 package acogo
 
 type NoCConfig struct {
-	outputDirectory string
+	OutputDirectory         string
 
-	numNodes int
+	NumNodes                int
 
-	maxCycles int
+	MaxCycles               int
 
-	maxPackets int
+	MaxPackets              int
 
-	noDrain bool
+	NoDrain                 bool
 
-	randSeed int
+	RandSeed                int
 
-	routing string
+	Routing                 string
 
-	selection string
+	Selection               string
 
-	maxInjectionBufferSize int
+	MaxInjectionBufferSize  int
 
-	maxInputBufferSize int
+	MaxInputBufferSize      int
 
-	numVirtualChannels int
+	NumVirtualChannels      int
 
-	linkWidth int
-	linkDelay int
+	LinkWidth               int
+	LinkDelay               int
 
-	antPacketTraffic string
-	antPacketSize int
-	antPacketInjectionRate float32
+	AntPacketTraffic        string
+	AntPacketSize           int
+	AntPacketInjectionRate  float32
 
-	acoSelectionAlpha float32
-	reinforcementFactor float32
+	AcoSelectionAlpha       float32
+	ReinforcementFactor     float32
 
-	dataPacketTraffic string
-	dataPacketInjectionRate float32
-	dataPacketSize int
+	DataPacketTraffic       string
+	DataPacketInjectionRate float32
+	DataPacketSize          int
 }
 
 func NewNoCConfig(outputDirectory string, numNodes int, maxCycles int, maxPackets int, noDrain bool) *NoCConfig {
 	var config = &NoCConfig{
-		outputDirectory:outputDirectory,
+		OutputDirectory:outputDirectory,
 
-		numNodes:numNodes,
+		NumNodes:numNodes,
 
-		maxCycles:maxCycles,
+		MaxCycles:maxCycles,
 
-		maxPackets:maxPackets,
+		MaxPackets:maxPackets,
 
-		noDrain:noDrain,
+		NoDrain:noDrain,
 
-		randSeed:13,
+		RandSeed:13,
 
-		routing:"oddEven",
+		Routing:"oddEven",
 
-		selection:"aco",
+		Selection:"aco",
 
-		maxInjectionBufferSize:32,
+		MaxInjectionBufferSize:32,
 
-		maxInputBufferSize:4,
+		MaxInputBufferSize:4,
 
-		numVirtualChannels:4,
+		NumVirtualChannels:4,
 
-		linkWidth:4,
-		linkDelay:1,
+		LinkWidth:4,
+		LinkDelay:1,
 
-		antPacketTraffic:"uniform",
-		antPacketSize:4,
-		antPacketInjectionRate:0.01,
+		AntPacketTraffic:"uniform",
+		AntPacketSize:4,
+		AntPacketInjectionRate:0.01,
 
-		acoSelectionAlpha:0.5,
-		reinforcementFactor:0.05,
+		AcoSelectionAlpha:0.5,
+		ReinforcementFactor:0.05,
 
-		dataPacketTraffic:"uniform",
-		dataPacketInjectionRate:0.01,
-		dataPacketSize:16,
+		DataPacketTraffic:"uniform",
+		DataPacketInjectionRate:0.01,
+		DataPacketSize:16,
 	}
 
 	return config
