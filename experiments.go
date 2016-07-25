@@ -24,13 +24,9 @@ func NewNoCExperiment(config *NoCConfig) *NoCExperiment {
 		Rand: rand.New(rand.NewSource(config.RandSeed)),
 	}
 
-	var network = NewNetwork(experiment, config.NumNodes)
+	var network = NewNetwork(experiment)
 
 	experiment.Network = network
-
-	var _ = NewTransposeTrafficGenerator(network, config.DataPacketInjectionRate, config.MaxPackets, func(src int, dest int) Packet {
-		return NewDataPacket(network, src, dest, config.DataPacketSize, true, func() {})
-	})
 
 	return experiment
 }

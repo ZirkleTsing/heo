@@ -23,30 +23,41 @@ func NewNode(network *Network, id int) *Node {
 		Neighbors:make(map[Direction]int),
 	}
 
-	if (id / network.Width > 0) {
+	if id / network.Width > 0 {
 		node.Neighbors[DIRECTION_NORTH] = id - network.Width
 	}
 
-	if ( (id % network.Width) != network.Width - 1) {
+	if (id % network.Width) != network.Width - 1 {
 		node.Neighbors[DIRECTION_EAST] = id + 1
 	}
 
-	if (id / network.Width < network.Width - 1) {
+	if id / network.Width < network.Width - 1 {
 		node.Neighbors[DIRECTION_SOUTH] = id + network.Width
 	}
 
-	if (id % network.Width != 0) {
+	if id % network.Width != 0 {
 		node.Neighbors[DIRECTION_WEST] = id - 1
 	}
 
 	node.Router = NewRouter(node)
 
-	//TODO
-	node.RoutingAlgorithm = NewOddEvenRoutingAlgorithm(node)
-	//node.RoutingAlgorithm = NewXYRoutingAlgorithm(node)
+	switch routing := network.Experiment.Config.Routing; routing {
+	case "xy":
+		node.RoutingAlgorithm = NewXYRoutingAlgorithm(node)
+	case "oddEven":
+		node.RoutingAlgorithm = NewOddEvenRoutingAlgorithm(node)
 
-	//node.SelectionAlgorithm = NewACOSelectionAlgorithm(node)
-	node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
+		switch selection := network.Experiment.Config.Selection; selection {
+		case "bufferLevel":
+			node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
+		case "aco":
+			node.SelectionAlgorithm = NewACOSelectionAlgorithm(node)
+		default:
+			panic(fmt.Sprintf("Not supported: %s", selection))
+		}
+	default:
+		panic(fmt.Sprintf("Not supported: %s", routing))
+	}
 
 	return node
 }

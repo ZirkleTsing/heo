@@ -13,24 +13,54 @@ type Network struct {
 	AcceptPacket          bool
 	NumPacketsReceived    int64
 	NumPacketsTransmitted int64
+	TrafficGenerators     []TrafficGenerator
 }
 
-func NewNetwork(experiment *NoCExperiment, numNodes int) *Network {
+func NewNetwork(experiment *NoCExperiment) *Network {
 	var network = &Network{
 		Experiment:experiment,
-		NumNodes:numNodes,
-		Width:int(math.Sqrt(float64(numNodes))),
+		NumNodes:experiment.Config.NumNodes,
+		Width:int(math.Sqrt(float64(experiment.Config.NumNodes))),
 		AcceptPacket:true,
 	}
 
-	for i := 0; i < numNodes; i++ {
+	for i := 0; i < network.NumNodes; i++ {
 		var node = NewNode(network, i)
 		network.Nodes = append(network.Nodes, node)
 	}
 
-	network.Experiment.CycleAccurateEventQueue.AddPerCycleEvent(func() {
+	switch dataPacketTraffic := experiment.Config.DataPacketTraffic; dataPacketTraffic {
+	case "uniform":
+		network.TrafficGenerators = append(network.TrafficGenerators, NewUniformTrafficGenerator(network, experiment.Config.DataPacketInjectionRate, experiment.Config.MaxPackets, func(src int, dest int) Packet {
+			return NewDataPacket(network, src, dest, experiment.Config.DataPacketSize, true, func() {})
+		}))
+	case "transpose":
+		network.TrafficGenerators = append(network.TrafficGenerators, NewTransposeTrafficGenerator(network, experiment.Config.DataPacketInjectionRate, experiment.Config.MaxPackets, func(src int, dest int) Packet {
+			return NewDataPacket(network, src, dest, experiment.Config.DataPacketSize, true, func() {})
+		}))
+	}
+
+	switch selection := experiment.Config.Selection; selection {
+	case "aco":
+		switch antPacketTraffic := experiment.Config.AntPacketTraffic; antPacketTraffic {
+		case "uniform":
+			network.TrafficGenerators = append(network.TrafficGenerators, NewUniformTrafficGenerator(network, experiment.Config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
+				return NewAntPacket(network, src, dest, experiment.Config.AntPacketSize, func() {}, true)
+			}))
+		case "transpose":
+			network.TrafficGenerators = append(network.TrafficGenerators, NewTransposeTrafficGenerator(network, experiment.Config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
+				return NewAntPacket(network, src, dest, experiment.Config.AntPacketSize, func() {}, true)
+			}))
+		}
+	}
+
+	experiment.CycleAccurateEventQueue.AddPerCycleEvent(func() {
 		for _, node := range network.Nodes {
 			node.Router.AdvanceOneCycle()
+		}
+
+		for _, trafficGenerator := range network.TrafficGenerators {
+			trafficGenerator.AdvanceOneCycle()
 		}
 	})
 
