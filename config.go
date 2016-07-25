@@ -13,9 +13,9 @@ type NoCConfig struct {
 
 	RandSeed                int64
 
-	Routing                 string
+	Routing                 string //TODO
 
-	Selection               string
+	Selection               string //TODO
 
 	MaxInjectionBufferSize  int
 
@@ -26,16 +26,16 @@ type NoCConfig struct {
 	LinkWidth               int
 	LinkDelay               int
 
-	AntPacketTraffic        string
+	DataPacketTraffic       string //TODO
+	DataPacketInjectionRate float64
+	DataPacketSize          int
+
+	AntPacketTraffic        string //TODO
+	AntPacketInjectionRate  float64 //TODO
 	AntPacketSize           int
-	AntPacketInjectionRate  float64
 
 	AcoSelectionAlpha       float64
 	ReinforcementFactor     float64
-
-	DataPacketTraffic       string
-	DataPacketInjectionRate float64
-	DataPacketSize          int
 }
 
 func NewNoCConfig(outputDirectory string, numNodes int, maxCycles int64, maxPackets int64, drainPackets bool) *NoCConfig {
@@ -65,16 +65,16 @@ func NewNoCConfig(outputDirectory string, numNodes int, maxCycles int64, maxPack
 		LinkWidth:4,
 		LinkDelay:1,
 
+		DataPacketTraffic:"transpose",
+		DataPacketInjectionRate:0.01,
+		DataPacketSize:16,
+
 		AntPacketTraffic:"uniform",
-		AntPacketSize:4,
 		AntPacketInjectionRate:0.01,
+		AntPacketSize:4,
 
 		AcoSelectionAlpha:0.5,
 		ReinforcementFactor:0.05,
-
-		DataPacketTraffic:"uniform",
-		DataPacketInjectionRate:0.01,
-		DataPacketSize:16,
 	}
 
 	return config
