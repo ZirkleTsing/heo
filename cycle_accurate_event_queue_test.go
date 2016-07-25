@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func TestEvents(t *testing.T) {
+func TestCycleAccurateEventQueue(t *testing.T) {
 	var cycleAccurateEventQueue = NewCycleAccurateEventQueue()
 
 	for i := 99; i >= 0; i-- {

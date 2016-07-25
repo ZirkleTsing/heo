@@ -18,6 +18,18 @@ type Packet interface {
 	DoRouteComputation(inputVirtualChannel *InputVirtualChannel) Direction
 }
 
+func Delay(packet Packet) int {
+	if packet.GetEndCycle() == -1 {
+		return -1
+	} else {
+		return int(packet.GetEndCycle() - packet.GetBeginCycle())
+	}
+}
+
+func Hops(packet Packet) int {
+	return len(packet.GetMemory())
+}
+
 type PacketMemoryEntry struct {
 	NodeId    int
 	Timestamp int64

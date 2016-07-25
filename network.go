@@ -11,9 +11,29 @@ type Network struct {
 	Nodes                 []*Node
 	Width                 int
 	AcceptPacket          bool
+	TrafficGenerators     []TrafficGenerator
+
 	NumPacketsReceived    int64
 	NumPacketsTransmitted int64
-	TrafficGenerators     []TrafficGenerator
+
+	totalPacketDelays int64
+	MaxPacketDelay int
+
+	totalPacketHops int64
+	MaxPacketHops int
+
+	NumPayloadPacketsReceived int64
+	NumPayloadPacketsTransmitted int64
+
+	totalPayloadPacketDelays int64
+	MaxPayloadPacketDelay int
+
+	totalPayloadPacketHops int64
+	MaxPayloadPacketHops int
+
+	numFlitPerStateDelaySamples map[FlitState]int64
+	totalFlitPerStateDelays map[FlitState]int64
+	MaxFlitPerStateDelay map[FlitState]int
 }
 
 func NewNetwork(experiment *NoCExperiment) *Network {
@@ -22,6 +42,10 @@ func NewNetwork(experiment *NoCExperiment) *Network {
 		NumNodes:experiment.Config.NumNodes,
 		Width:int(math.Sqrt(float64(experiment.Config.NumNodes))),
 		AcceptPacket:true,
+
+		numFlitPerStateDelaySamples:make(map[FlitState]int64),
+		totalFlitPerStateDelays:make(map[FlitState]int64),
+		MaxFlitPerStateDelay:make(map[FlitState]int),
 	}
 
 	for i := 0; i < network.NumNodes; i++ {
@@ -90,10 +114,72 @@ func (network *Network) Receive(packet Packet) bool {
 
 func (network *Network) LogPacketReceived(packet Packet) {
 	network.NumPacketsReceived++
-	//TODO
+
+	if packet.GetHasPayload() {
+		network.NumPayloadPacketsReceived++
+	}
 }
 
 func (network *Network) LogPacketTransmitted(packet Packet) {
 	network.NumPacketsTransmitted++
-	//TODO
+
+	if packet.GetHasPayload() {
+		network.NumPayloadPacketsTransmitted++
+	}
+
+	network.totalPacketDelays += int64(Delay(packet))
+	network.totalPacketHops += int64(Hops(packet))
+
+	if packet.GetHasPayload() {
+		network.totalPayloadPacketDelays += int64(Delay(packet))
+		network.totalPayloadPacketHops += int64(Hops(packet))
+	}
+
+	network.MaxPacketDelay = int(math.Max(float64(network.MaxPacketDelay), float64(Delay(packet))))
+	network.MaxPacketHops = int(math.Max(float64(network.MaxPacketHops), float64(Hops(packet))))
+
+	if packet.GetHasPayload() {
+		network.MaxPayloadPacketDelay = int(math.Max(float64(network.MaxPayloadPacketDelay), float64(Delay(packet))))
+		network.MaxPayloadPacketHops = int(math.Max(float64(network.MaxPayloadPacketHops), float64(Hops(packet))))
+	}
+}
+
+func (network *Network) Throughput() float64 {
+	return float64(network.NumPacketsTransmitted) / float64(network.Experiment.CycleAccurateEventQueue.CurrentCycle) / float64(network.NumNodes)
+}
+
+func (network *Network) AveragePacketDelay() float64 {
+	if network.NumPacketsTransmitted > 0 {
+		return float64(network.totalPacketDelays) / float64(network.NumPacketsTransmitted)
+	} else {
+		return 0.0
+	}
+}
+
+func (network *Network) AveragePacketHops() float64 {
+	if network.NumPacketsTransmitted > 0 {
+		return float64(network.totalPacketHops) / float64(network.NumPacketsTransmitted)
+	} else {
+		return 0.0
+	}
+}
+
+func (network *Network) PayloadThroughput() float64 {
+	return float64(network.NumPayloadPacketsTransmitted) / float64(network.Experiment.CycleAccurateEventQueue.CurrentCycle) / float64(network.NumNodes)
+}
+
+func (network *Network) AveragePayloadPacketDelay() float64 {
+	if network.NumPayloadPacketsTransmitted > 0 {
+		return float64(network.totalPayloadPacketDelays) / float64(network.NumPayloadPacketsTransmitted)
+	} else {
+		return 0.0
+	}
+}
+
+func (network *Network) AveragePayloadPacketHops() float64 {
+	if network.NumPayloadPacketsTransmitted > 0 {
+		return float64(network.totalPayloadPacketHops) / float64(network.NumPayloadPacketsTransmitted)
+	} else {
+		return 0.0
+	}
 }

@@ -4,13 +4,14 @@ import (
 	"math/rand"
 	"fmt"
 	"sort"
+	"time"
 )
 
 type NoCExperiment struct {
 	Config                  *NoCConfig
 	Stats                   map[string]string
 
-	BeginTime, EndTime      int64 //TODO
+	BeginTime, EndTime      time.Time
 	CycleAccurateEventQueue *CycleAccurateEventQueue
 	Network                 *Network
 	Rand                    *rand.Rand
@@ -36,6 +37,8 @@ func (experiment *NoCExperiment) Run() {
 
 	// TODO: dump config
 
+	experiment.BeginTime = time.Now()
+
 	for (experiment.Config.MaxCycles == -1 || experiment.CycleAccurateEventQueue.CurrentCycle < experiment.Config.MaxCycles) && (experiment.Config.MaxPackets == -1 || experiment.Network.NumPacketsReceived < experiment.Config.MaxPackets) {
 		experiment.CycleAccurateEventQueue.AdvanceOneCycle()
 	}
@@ -47,6 +50,8 @@ func (experiment *NoCExperiment) Run() {
 			experiment.CycleAccurateEventQueue.AdvanceOneCycle()
 		}
 	}
+
+	experiment.EndTime = time.Now()
 
 	experiment.CollectStats()
 
@@ -67,7 +72,24 @@ func (experiment *NoCExperiment) Run() {
 
 func (experiment *NoCExperiment) CollectStats() {
 	experiment.Stats["TotalCycles"] = fmt.Sprintf("%d", experiment.CycleAccurateEventQueue.CurrentCycle)
+
+	experiment.Stats["SimulationTime"] = fmt.Sprintf("%v", experiment.EndTime.Sub(experiment.BeginTime))
+	experiment.Stats["CyclesPerSecond"] = fmt.Sprintf("%f", float64(experiment.CycleAccurateEventQueue.CurrentCycle) / experiment.EndTime.Sub(experiment.BeginTime).Seconds())
+	experiment.Stats["PacketsPerSecond"] = fmt.Sprintf("%f", float64(experiment.Network.NumPacketsTransmitted) / experiment.EndTime.Sub(experiment.BeginTime).Seconds())
+
 	experiment.Stats["NumPacketsReceived"] = fmt.Sprintf("%d", experiment.Network.NumPacketsReceived)
 	experiment.Stats["NumPacketsTransmitted"] = fmt.Sprintf("%d", experiment.Network.NumPacketsTransmitted)
-	//TODO
+	experiment.Stats["Throughput"] = fmt.Sprintf("%f", experiment.Network.Throughput())
+	experiment.Stats["AveragePacketDelay"] = fmt.Sprintf("%f", experiment.Network.AveragePacketDelay())
+	experiment.Stats["AveragePacketHops"] = fmt.Sprintf("%f", experiment.Network.AveragePacketHops())
+	experiment.Stats["MaxPacketDelay"] = fmt.Sprintf("%d", experiment.Network.MaxPacketDelay)
+	experiment.Stats["MaxPacketHops"] = fmt.Sprintf("%d", experiment.Network.MaxPacketHops)
+
+	experiment.Stats["NumPayloadPacketsReceived"] = fmt.Sprintf("%d", experiment.Network.NumPayloadPacketsReceived)
+	experiment.Stats["NumPayloadPacketsTransmitted"] = fmt.Sprintf("%d", experiment.Network.NumPayloadPacketsTransmitted)
+	experiment.Stats["PayloadThroughput"] = fmt.Sprintf("%f", experiment.Network.PayloadThroughput())
+	experiment.Stats["AveragePayloadPacketDelay"] = fmt.Sprintf("%f", experiment.Network.AveragePayloadPacketDelay())
+	experiment.Stats["AveragePayloadPacketHops"] = fmt.Sprintf("%f", experiment.Network.AveragePayloadPacketHops())
+	experiment.Stats["MaxPayloadPacketDelay"] = fmt.Sprintf("%d", experiment.Network.MaxPayloadPacketDelay)
+	experiment.Stats["MaxPayloadPacketHops"] = fmt.Sprintf("%d", experiment.Network.MaxPayloadPacketHops)
 }
