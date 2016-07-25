@@ -2,29 +2,35 @@ package acogo
 
 import "fmt"
 
-type Direction int
+type Direction string
 
 const (
-	DirectionLocal = 0
-	DirectionNorth = 1
-	DirectionEast = 2
-	DirectionSouth = 3
-	DirectionWest = 4
+	DIRECTION_UNKNOWN = Direction("UNKNOWN")
+
+	DIRECTION_LOCAL = Direction("LOCAL")
+
+	DIRECTION_NORTH = Direction("NORTH")
+
+	DIRECTION_EAST = Direction("EAST")
+
+	DIRECTION_SOUTH = Direction("SOUTH")
+
+	DIRECTION_WEST = Direction("WEST")
 )
 
 func (direction Direction) GetReflexDirection() Direction {
 	switch direction {
-	case DirectionLocal:
-		return DirectionLocal
-	case DirectionNorth:
-		return DirectionSouth
-	case DirectionEast:
-		return DirectionWest
-	case DirectionSouth:
-		return DirectionNorth
-	case DirectionWest:
-		return DirectionEast
+	case DIRECTION_LOCAL:
+		return DIRECTION_LOCAL
+	case DIRECTION_NORTH:
+		return DIRECTION_SOUTH
+	case DIRECTION_EAST:
+		return DIRECTION_WEST
+	case DIRECTION_SOUTH:
+		return DIRECTION_NORTH
+	case DIRECTION_WEST:
+		return DIRECTION_EAST
 	default:
-		panic(fmt.Sprintf("%d", direction))
+		panic(fmt.Sprintf("Cannot get the reflex direction of %d", direction))
 	}
 }

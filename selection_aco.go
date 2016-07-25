@@ -74,7 +74,7 @@ func (selectionAlgorithm *ACOSelectionAlgorithm) UpdatePheromoneTable(packet *An
 
 func (selectionAlgorithm *ACOSelectionAlgorithm) Select(packet Packet, ivc int, directions []Direction) Direction {
 	var maxProbability = -1.0
-	var bestDirection = Direction(-1)
+	var bestDirection = DIRECTION_UNKNOWN
 
 	for direction, neighbor := range selectionAlgorithm.Node.Neighbors {
 		var neighborRouter = selectionAlgorithm.Node.Network.Nodes[neighbor].Router

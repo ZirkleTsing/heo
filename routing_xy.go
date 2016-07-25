@@ -27,19 +27,19 @@ func (routingAlgorithm *XYRoutingAlgorithm) NextHop(packet Packet, parent int) [
 
 	if destX != x {
 		if destX > x {
-			directions = append(directions, DirectionEast)
+			directions = append(directions, DIRECTION_EAST)
 		} else {
-			directions = append(directions, DirectionWest)
+			directions = append(directions, DIRECTION_WEST)
 		}
 	} else {
 		if destY > y {
-			directions = append(directions, DirectionSouth)
+			directions = append(directions, DIRECTION_SOUTH)
 		} else {
-			directions = append(directions, DirectionNorth)
+			directions = append(directions, DIRECTION_NORTH)
 		}
 	}
 
-	fmt.Printf("NextHop(packet#%d(src=%d, dest=%d), current=%d): %d\n", packet.GetId(), packet.GetSrc(), packet.GetDest(), routingAlgorithm.Node.Id, directions[0])
+	fmt.Printf("NextHop(packet#%d(src=%d, dest=%d), current=%d) = %s\n", packet.GetId(), packet.GetSrc(), packet.GetDest(), routingAlgorithm.Node.Id, directions[0])
 
 	return directions
 }

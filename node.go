@@ -24,19 +24,19 @@ func NewNode(network *Network, id int) *Node {
 	}
 
 	if (id / network.Width > 0) {
-		node.Neighbors[DirectionNorth] = id - network.Width
+		node.Neighbors[DIRECTION_NORTH] = id - network.Width
 	}
 
 	if ( (id % network.Width) != network.Width - 1) {
-		node.Neighbors[DirectionEast] = id + 1
+		node.Neighbors[DIRECTION_EAST] = id + 1
 	}
 
 	if (id / network.Width < network.Width - 1) {
-		node.Neighbors[DirectionSouth] = id + network.Width
+		node.Neighbors[DIRECTION_SOUTH] = id + network.Width
 	}
 
 	if (id % network.Width != 0) {
-		node.Neighbors[DirectionWest] = id - 1
+		node.Neighbors[DIRECTION_WEST] = id - 1
 	}
 
 	node.Router = NewRouter(node)
@@ -52,7 +52,7 @@ func NewNode(network *Network, id int) *Node {
 
 func (node *Node) DumpNeighbors() {
 	for direction, neighbor := range node.Neighbors {
-		fmt.Printf("node#%d.neighbors[%d]=%d\n", node.Id, direction, neighbor)
+		fmt.Printf("node#%d.neighbors[%s]=%d\n", node.Id, direction, neighbor)
 	}
 
 	fmt.Println()

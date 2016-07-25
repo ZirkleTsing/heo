@@ -29,35 +29,35 @@ func (routingAlgorithm *OddEvenRoutingAlgorithm) NextHop(packet Packet, parent i
 
 	if e0 == 0 {
 		if e1 > 0 {
-			directions = append(directions, DirectionNorth)
+			directions = append(directions, DIRECTION_NORTH)
 		} else {
-			directions = append(directions, DirectionSouth)
+			directions = append(directions, DIRECTION_SOUTH)
 		}
 	} else {
 		if e0 > 0 {
 			if e1 == 0 {
-				directions = append(directions, DirectionEast)
+				directions = append(directions, DIRECTION_EAST)
 			} else {
 				if c0 % 2 == 1 || c0 == s0 {
 					if e1 > 0 {
-						directions = append(directions, DirectionNorth)
+						directions = append(directions, DIRECTION_NORTH)
 					} else {
-						directions = append(directions, DirectionSouth)
+						directions = append(directions, DIRECTION_SOUTH)
 					}
 				}
 
 				if d0 % 2 == 1 || e0 != 1 {
-					directions = append(directions, DirectionEast)
+					directions = append(directions, DIRECTION_EAST)
 				}
 			}
 		} else {
-			directions = append(directions, DirectionWest)
+			directions = append(directions, DIRECTION_WEST)
 			if c0 % 2 == 0 {
 				if e1 > 0 {
-					directions = append(directions, DirectionNorth)
+					directions = append(directions, DIRECTION_NORTH)
 				}
 				if e1 < 0 {
-					directions = append(directions, DirectionSouth)
+					directions = append(directions, DIRECTION_SOUTH)
 				}
 			}
 		}
