@@ -2,6 +2,7 @@ package acogo
 
 import (
 	"math"
+	"fmt"
 )
 
 type FlitState int
@@ -230,7 +231,10 @@ func (router *Router) stageLinkTraversal() {
 						var ip = outputPort.Direction.GetReflexDirection()
 						var ivc = outputVirtualChannel.Num
 
-						//fmt.Printf("Pre::nextHopArrived: src=%d, dest=%d, current=%d, nextHop=%d, outputPort.direction=%d\n", flit.Packet.GetSrc(), flit.Packet.GetDest(), router.Node.Id, nextHop, outputPort.Direction)
+						if flit.Head {
+							fmt.Printf("Pre::nextHopArrived: packet#%d, src=%d, dest=%d, current=%d, nextHop=%d, outputPort.direction=%d\n", flit.Packet.GetId(), flit.Packet.GetSrc(), flit.Packet.GetDest(), router.Node.Id, nextHop, outputPort.Direction)
+							router.Node.DumpNeighbors()
+						}
 
 						router.Node.Network.Experiment.CycleAccurateEventQueue.Schedule(func() {
 							router.nextHopArrived(flit, nextHop, ip, ivc)
@@ -260,10 +264,6 @@ func (router *Router) stageLinkTraversal() {
 }
 
 func (router *Router) nextHopArrived(flit *Flit, nextHop int, ip Direction, ivc int) {
-	//fmt.Printf("nextHopArrived: src=%d, dest=%d, current=%d, nextHop=%d\n", flit.Packet.GetSrc(), flit.Packet.GetDest(), router.Node.Id, nextHop)
-
-	//router.Node.DumpNeighbors()
-
 	var inputBuffer = router.Node.Network.Nodes[nextHop].Router.InputPorts[ip].VirtualChannels[ivc].InputBuffer
 
 	if !inputBuffer.Full() {

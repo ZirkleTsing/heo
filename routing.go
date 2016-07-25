@@ -1,7 +1,11 @@
 package acogo
 
+import (
+	"fmt"
+)
+
 type RoutingAlgorithm interface {
-	NextHop(src int, dest int, parent int) []Direction
+	NextHop(packet Packet, parent int) []Direction
 }
 
 type XYRoutingAlgorithm struct {
@@ -16,25 +20,30 @@ func NewXYRoutingAlgorithm(node *Node) *XYRoutingAlgorithm {
 	return routingAlgorithm
 }
 
-func (routingAlgorithm *XYRoutingAlgorithm) NextHop(src int, dest int, parent int) []Direction {
+func (routingAlgorithm *XYRoutingAlgorithm) NextHop(packet Packet, parent int) []Direction {
 	var directions []Direction
 
-	var destX = routingAlgorithm.Node.Network.GetX(dest)
-	var destY = routingAlgorithm.Node.Network.GetY(dest)
+	var destX = routingAlgorithm.Node.Network.GetX(packet.GetDest())
+	var destY = routingAlgorithm.Node.Network.GetY(packet.GetDest())
 
-	if destX != routingAlgorithm.Node.X {
-		if destX > routingAlgorithm.Node.X {
+	var x = routingAlgorithm.Node.X
+	var y = routingAlgorithm.Node.Y
+
+	if destX != x {
+		if destX > x {
 			directions = append(directions, DirectionEast)
 		} else {
 			directions = append(directions, DirectionWest)
 		}
 	} else {
-		if destY > routingAlgorithm.Node.Y {
+		if destY > y {
 			directions = append(directions, DirectionSouth)
 		} else {
 			directions = append(directions, DirectionNorth)
 		}
 	}
+
+	fmt.Printf("NextHop(packet#%d(src=%d, dest=%d), current=%d): %d\n", packet.GetId(), packet.GetSrc(), packet.GetDest(), routingAlgorithm.Node.Id, directions[0])
 
 	return directions
 }
@@ -51,17 +60,17 @@ func NewOddEvenRoutingAlgorithm(node *Node) *OddEvenRoutingAlgorithm {
 	return routingAlgorithm
 }
 
-func (routingAlgorithm *OddEvenRoutingAlgorithm) NextHop(src int, dest int, parent int) []Direction {
+func (routingAlgorithm *OddEvenRoutingAlgorithm) NextHop(packet Packet, parent int) []Direction {
 	var directions []Direction
 
 	var c0 = routingAlgorithm.Node.X
 	var c1 = routingAlgorithm.Node.Y
 
-	var s0 = routingAlgorithm.Node.Network.GetX(src)
-	//var s1 = routingAlgorithm.Node.Network.GetY(src)
+	var s0 = routingAlgorithm.Node.Network.GetX(packet.GetSrc())
+	//var s1 = routingAlgorithm.Node.Network.GetY(packet.GetSrc())
 
-	var d0 = routingAlgorithm.Node.Network.GetX(dest)
-	var d1 = routingAlgorithm.Node.Network.GetY(dest)
+	var d0 = routingAlgorithm.Node.Network.GetX(packet.GetDest())
+	var d1 = routingAlgorithm.Node.Network.GetY(packet.GetDest())
 
 	var e0 = d0 - c0
 	var e1 = -(d1 - c1)

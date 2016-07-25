@@ -136,9 +136,9 @@ func (packet *DataPacket) DoRouteComputation(inputVirtualChannel *InputVirtualCh
 
 	packet.Memorize(inputVirtualChannel.InputPort.Router.Node)
 
-	var directions = inputVirtualChannel.InputPort.Router.Node.RoutingAlgorithm.NextHop(packet.Src, packet.Dest, parent)
+	var directions = inputVirtualChannel.InputPort.Router.Node.RoutingAlgorithm.NextHop(packet, parent)
 
-	return inputVirtualChannel.InputPort.Router.Node.SelectionAlgorithm.Select(packet.Src, packet.Dest, inputVirtualChannel.Num, directions)
+	return inputVirtualChannel.InputPort.Router.Node.SelectionAlgorithm.Select(packet, inputVirtualChannel.Num, directions)
 }
 
 func (packet *DataPacket) Memorize(node *Node) {

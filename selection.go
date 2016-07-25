@@ -1,7 +1,7 @@
 package acogo
 
 type SelectionAlgorithm interface {
-	Select(src int, dest int, ivc int, directions []Direction) Direction
+	Select(packet Packet, ivc int, directions []Direction) Direction
 }
 
 type BufferLevelSelectionAlgorithm struct {
@@ -16,7 +16,7 @@ func NewBufferLevelSelectionAlgorithm(node *Node) *BufferLevelSelectionAlgorithm
 	return selectionAlgorithm
 }
 
-func (selectionAlgorithm *BufferLevelSelectionAlgorithm) Select(src int, dest int, ivc int, directions []Direction) Direction {
+func (selectionAlgorithm *BufferLevelSelectionAlgorithm) Select(packet Packet, ivc int, directions []Direction) Direction {
 	var bestDirections []Direction
 
 	var maxFreeSlots = -1

@@ -124,13 +124,13 @@ func (selectionAlgorithm *ACOSelectionAlgorithm) UpdatePheromoneTable(packet *An
 	}
 }
 
-func (selectionAlgorithm *ACOSelectionAlgorithm) Select(src int, dest int, ivc int, directions []Direction) Direction {
+func (selectionAlgorithm *ACOSelectionAlgorithm) Select(packet Packet, ivc int, directions []Direction) Direction {
 	var maxProbability = -1.0
 	var bestDirection = Direction(-1)
 
 	for direction, neighbor := range selectionAlgorithm.Node.Neighbors {
 		var neighborRouter = selectionAlgorithm.Node.Network.Nodes[neighbor].Router
-		var pheromone = selectionAlgorithm.PheromoneTable.Pheromones[dest][direction]
+		var pheromone = selectionAlgorithm.PheromoneTable.Pheromones[packet.GetDest()][direction]
 		var freeSlots = neighborRouter.FreeSlots(direction, ivc)
 
 		var alpha = selectionAlgorithm.Node.Network.Experiment.Config.AcoSelectionAlpha
