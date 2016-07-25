@@ -13,9 +13,9 @@ type NoCConfig struct {
 
 	RandSeed                int64
 
-	Routing                 string //TODO
+	Routing                 string
 
-	Selection               string //TODO
+	Selection               string
 
 	MaxInjectionBufferSize  int
 
@@ -26,12 +26,12 @@ type NoCConfig struct {
 	LinkWidth               int
 	LinkDelay               int
 
-	DataPacketTraffic       string //TODO
+	DataPacketTraffic       string
 	DataPacketInjectionRate float64
 	DataPacketSize          int
 
-	AntPacketTraffic        string //TODO
-	AntPacketInjectionRate  float64 //TODO
+	AntPacketTraffic        string
+	AntPacketInjectionRate  float64
 	AntPacketSize           int
 
 	AcoSelectionAlpha       float64
