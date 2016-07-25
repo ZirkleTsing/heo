@@ -26,6 +26,7 @@ func (generator *TransposeTrafficGenerator) GenerateTraffic() {
 			break
 		}
 
+		//TODO: eliminate non-deterministic randomness
 		var valid = generator.Network.Experiment.Rand.Float64() <= generator.PacketInjectionRate
 		if valid {
 			var src = node.Id
