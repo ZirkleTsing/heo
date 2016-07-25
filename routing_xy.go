@@ -1,9 +1,5 @@
 package acogo
 
-import (
-	"fmt"
-)
-
 type XYRoutingAlgorithm struct {
 	Node *Node
 }
