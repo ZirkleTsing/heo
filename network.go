@@ -5,7 +5,7 @@ import (
 )
 
 type Network struct {
-	Experiment            *NoCExperiment
+	Experiment            *Experiment
 	CurrentPacketId       int64
 	NumNodes              int
 	Nodes                 []*Node
@@ -36,7 +36,7 @@ type Network struct {
 	MaxFlitPerStateDelay map[FlitState]int
 }
 
-func NewNetwork(experiment *NoCExperiment) *Network {
+func NewNetwork(experiment *Experiment) *Network {
 	var network = &Network{
 		Experiment:experiment,
 		NumNodes:experiment.Config.NumNodes,
@@ -144,6 +144,26 @@ func (network *Network) LogPacketTransmitted(packet Packet) {
 	}
 }
 
+func (network *Network) LogFlitPerStateDelay(state FlitState, delay int) {
+	if _, exists := network.numFlitPerStateDelaySamples[state]; !exists {
+		network.numFlitPerStateDelaySamples[state] = int64(0)
+	}
+
+	network.numFlitPerStateDelaySamples[state]++
+
+	if _, exists := network.totalFlitPerStateDelays[state]; !exists {
+		network.totalFlitPerStateDelays[state] = int64(0)
+	}
+
+	network.totalFlitPerStateDelays[state] += int64(delay)
+
+	if _, exists := network.MaxFlitPerStateDelay[state]; !exists {
+		network.MaxFlitPerStateDelay[state] = 0
+	}
+
+	network.MaxFlitPerStateDelay[state] = int(math.Max(float64(network.MaxFlitPerStateDelay[state]), float64(delay)))
+}
+
 func (network *Network) Throughput() float64 {
 	return float64(network.NumPacketsTransmitted) / float64(network.Experiment.CycleAccurateEventQueue.CurrentCycle) / float64(network.NumNodes)
 }
@@ -182,4 +202,14 @@ func (network *Network) AveragePayloadPacketHops() float64 {
 	} else {
 		return 0.0
 	}
+}
+
+func (network *Network) AverageFlitPerStateDelay(state FlitState) float64 {
+	if _, exists := network.numFlitPerStateDelaySamples[state]; exists {
+		if network.numFlitPerStateDelaySamples[state] > 0 {
+			return float64(network.totalFlitPerStateDelays[state]) / float64(network.numFlitPerStateDelaySamples[state])
+		}
+	}
+
+	return 0.0
 }

@@ -50,9 +50,9 @@ func (router *Router) stageLinkTraversal() {
 			var inputVirtualChannel = outputVirtualChannel.InputVirtualChannel
 			if inputVirtualChannel != nil && outputVirtualChannel.Credits > 0 {
 				var flit = inputVirtualChannel.InputBuffer.Peek()
-				if flit != nil && flit.State == FLIT_STATE_SWITCH_TRAVERSAL {
+				if flit != nil && flit.GetState() == FLIT_STATE_SWITCH_TRAVERSAL {
 					if outputPort.Direction != DIRECTION_LOCAL {
-						flit.State = FLIT_STATE_LINK_TRAVERSAL
+						flit.SetNodeAndState(router.Node, FLIT_STATE_LINK_TRAVERSAL)
 
 						var nextHop = router.Node.Neighbors[outputPort.Direction]
 						var ip = outputPort.Direction.GetReflexDirection()
@@ -68,7 +68,7 @@ func (router *Router) stageLinkTraversal() {
 					if outputPort.Direction != DIRECTION_LOCAL {
 						outputVirtualChannel.Credits--
 					} else {
-						flit.State = FLIT_STATE_DESTINATION_ARRIVED
+						flit.SetNodeAndState(router.Node, FLIT_STATE_DESTINATION_ARRIVED)
 					}
 
 					if flit.Tail {
@@ -107,8 +107,8 @@ func (router *Router) stageSwitchTraversal() {
 			for _, inputVirtualChannel := range inputPort.VirtualChannels {
 				if inputVirtualChannel.OutputVirtualChannel != nil && inputVirtualChannel.OutputVirtualChannel.OutputPort == outputPort {
 					var flit = inputVirtualChannel.InputBuffer.Peek()
-					if flit != nil && flit.State == FLIT_STATE_SWITCH_ALLOCATION {
-						flit.State = FLIT_STATE_SWITCH_TRAVERSAL
+					if flit != nil && flit.GetState() == FLIT_STATE_SWITCH_ALLOCATION {
+						flit.SetNodeAndState(router.Node, FLIT_STATE_SWITCH_TRAVERSAL)
 
 						if inputPort.Direction != DIRECTION_LOCAL {
 							var parent = router.Node.Network.Nodes[router.Node.Neighbors[inputPort.Direction]]
@@ -130,7 +130,7 @@ func (router *Router) stageSwitchAllocation() {
 
 		if winnerInputVirtualChannel != nil {
 			var flit = winnerInputVirtualChannel.InputBuffer.Peek()
-			flit.State = FLIT_STATE_SWITCH_ALLOCATION
+			flit.SetNodeAndState(router.Node, FLIT_STATE_SWITCH_ALLOCATION)
 		}
 	}
 }
@@ -140,7 +140,7 @@ func (router *Router) findWinnerForSwitchAllocation(outputPort *OutputPort) *Inp
 		for _, inputVirtualChannel := range inputPort.VirtualChannels {
 			if inputVirtualChannel.OutputVirtualChannel != nil && inputVirtualChannel.OutputVirtualChannel.OutputPort == outputPort {
 				var flit = inputVirtualChannel.InputBuffer.Peek()
-				if flit != nil && (flit.Head && flit.State == FLIT_STATE_VIRTUAL_CHANNEL_ALLOCATION || !flit.Head && flit.State == FLIT_STATE_INPUT_BUFFER) {
+				if flit != nil && (flit.Head && flit.GetState() == FLIT_STATE_VIRTUAL_CHANNEL_ALLOCATION || !flit.Head && flit.GetState() == FLIT_STATE_INPUT_BUFFER) {
 					return inputVirtualChannel
 				}
 			}
@@ -158,7 +158,7 @@ func (router *Router) stageVirtualChannelAllocation() {
 
 				if winnerInputVirtualChannel != nil {
 					var flit = winnerInputVirtualChannel.InputBuffer.Peek()
-					flit.State = FLIT_STATE_VIRTUAL_CHANNEL_ALLOCATION
+					flit.SetNodeAndState(router.Node, FLIT_STATE_VIRTUAL_CHANNEL_ALLOCATION)
 
 					winnerInputVirtualChannel.OutputVirtualChannel = outputVirtualChannel
 					outputVirtualChannel.InputVirtualChannel = winnerInputVirtualChannel
@@ -173,7 +173,7 @@ func (router *Router) findWinnerForVirtualChannelAllocation(outputVirtualChannel
 		for _, inputVirtualChannel := range inputPort.VirtualChannels {
 			if inputVirtualChannel.Route == outputVirtualChannel.OutputPort.Direction {
 				var flit = inputVirtualChannel.InputBuffer.Peek()
-				if flit != nil && flit.Head && flit.State == FLIT_STATE_ROUTE_COMPUTATION {
+				if flit != nil && flit.Head && flit.GetState() == FLIT_STATE_ROUTE_COMPUTATION {
 					return inputVirtualChannel
 				}
 			}
@@ -188,14 +188,14 @@ func (router *Router) stageRouteComputation() {
 		for _, inputVirtualChannel := range inputPort.VirtualChannels {
 			var flit = inputVirtualChannel.InputBuffer.Peek()
 
-			if flit != nil && flit.Head && flit.State == FLIT_STATE_INPUT_BUFFER {
+			if flit != nil && flit.Head && flit.GetState() == FLIT_STATE_INPUT_BUFFER {
 				if flit.Packet.GetDest() == router.Node.Id {
 					inputVirtualChannel.Route = DIRECTION_LOCAL
 				} else {
 					inputVirtualChannel.Route = flit.Packet.DoRouteComputation(inputVirtualChannel)
 				}
 
-				flit.State = FLIT_STATE_ROUTE_COMPUTATION
+				flit.SetNodeAndState(router.Node, FLIT_STATE_ROUTE_COMPUTATION)
 			}
 		}
 	}
@@ -245,8 +245,7 @@ func (router *Router) InjectPacket(packet Packet) bool {
 
 func (router *Router) InsertFlit(flit *Flit, ip Direction, ivc int) {
 	router.InputPorts[ip].VirtualChannels[ivc].InputBuffer.Push(flit)
-	flit.Node = router.Node
-	flit.State = FLIT_STATE_INPUT_BUFFER
+	flit.SetNodeAndState(router.Node, FLIT_STATE_INPUT_BUFFER)
 }
 
 func (router *Router) GetInputVirtualChannels() []*InputVirtualChannel {

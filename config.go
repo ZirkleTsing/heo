@@ -1,6 +1,6 @@
 package acogo
 
-type NoCConfig struct {
+type Config struct {
 	OutputDirectory         string
 
 	NumNodes                int
@@ -38,8 +38,8 @@ type NoCConfig struct {
 	ReinforcementFactor     float64
 }
 
-func NewNoCConfig(outputDirectory string, numNodes int, maxCycles int64, maxPackets int64, drainPackets bool) *NoCConfig {
-	var config = &NoCConfig{
+func NewConfig(outputDirectory string, numNodes int, maxCycles int64, maxPackets int64, drainPackets bool) *Config {
+	var config = &Config{
 		OutputDirectory:outputDirectory,
 
 		NumNodes:numNodes,
