@@ -1,5 +1,9 @@
 package acogo
 
+import (
+	"container/heap"
+)
+
 type CycleAccurateEvent struct {
 	eventQueue *CycleAccurateEventQueue
 	When       int64
@@ -8,18 +12,44 @@ type CycleAccurateEvent struct {
 }
 
 type CycleAccurateEventQueue struct {
-	Events         map[int64]([]*CycleAccurateEvent)
+	Events         []*CycleAccurateEvent
 	PerCycleEvents []func()
 	CurrentCycle   int64
 	currentEventId int64
 }
 
+func (q CycleAccurateEventQueue) Len() int {
+	return len(q.Events)
+}
+
+func (q CycleAccurateEventQueue) Less(i, j int) bool {
+	var x = q.Events[i]
+	var y = q.Events[j]
+	return x.When < y.When || (x.When == y.When && x.Id < y.Id)
+}
+
+func (q CycleAccurateEventQueue) Swap(i, j int) {
+	q.Events[i], q.Events[j] = q.Events[j], q.Events[i]
+}
+
+func (q *CycleAccurateEventQueue) Push(x interface{}) {
+	item := x.(*CycleAccurateEvent)
+	q.Events = append(q.Events, item)
+}
+
+func (q *CycleAccurateEventQueue) Pop() interface{} {
+	old := q.Events
+	n := len(old)
+	item := old[n - 1]
+	q.Events = old[0 : n - 1]
+	return item
+}
+
 func NewCycleAccurateEventQueue() *CycleAccurateEventQueue {
-	var q = CycleAccurateEventQueue{
-		Events:make(map[int64]([]*CycleAccurateEvent)),
+	var q = &CycleAccurateEventQueue{
 	}
 
-	return &q
+	return q
 }
 
 func (q *CycleAccurateEventQueue) Schedule(action func(), delay int) {
@@ -32,7 +62,7 @@ func (q *CycleAccurateEventQueue) Schedule(action func(), delay int) {
 		Id:q.currentEventId,
 	}
 
-	q.Events[event.When] = append(q.Events[event.When], event)
+	heap.Push(q, event)
 }
 
 func (q *CycleAccurateEventQueue) AddPerCycleEvent(action func()) {
@@ -40,12 +70,15 @@ func (q *CycleAccurateEventQueue) AddPerCycleEvent(action func()) {
 }
 
 func (q *CycleAccurateEventQueue) AdvanceOneCycle() {
-	if events, exists := q.Events[q.CurrentCycle]; exists {
-		for _, event := range events {
-			event.Action()
+	for q.Len() > 0 {
+		var event = heap.Pop(q).(*CycleAccurateEvent)
+
+		if event.When > q.CurrentCycle {
+			heap.Push(q, event)
+			break
 		}
 
-		delete(q.Events, q.CurrentCycle)
+		event.Action()
 	}
 
 	for _, e := range q.PerCycleEvents {
