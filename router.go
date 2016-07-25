@@ -2,7 +2,6 @@ package acogo
 
 import (
 	"math"
-	"fmt"
 )
 
 type Router struct {
@@ -58,11 +57,6 @@ func (router *Router) stageLinkTraversal() {
 						var nextHop = router.Node.Neighbors[outputPort.Direction]
 						var ip = outputPort.Direction.GetReflexDirection()
 						var ivc = outputVirtualChannel.Num
-
-						if flit.Head {
-							fmt.Printf("NextHopArrived(packet#%d, src=%d, dest=%d, current=%d, nextHop=%d, op=%s)\n", flit.Packet.GetId(), flit.Packet.GetSrc(), flit.Packet.GetDest(), router.Node.Id, nextHop, outputPort.Direction)
-							router.Node.DumpNeighbors()
-						}
 
 						router.Node.Network.Experiment.CycleAccurateEventQueue.Schedule(func() {
 							router.NextHopArrived(flit, nextHop, ip, ivc)

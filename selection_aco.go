@@ -76,10 +76,11 @@ func (selectionAlgorithm *ACOSelectionAlgorithm) Select(packet Packet, ivc int, 
 	var maxProbability = -1.0
 	var bestDirection = DIRECTION_UNKNOWN
 
-	for direction, neighbor := range selectionAlgorithm.Node.Neighbors {
+	for _, direction := range directions {
+		var neighbor = selectionAlgorithm.Node.Neighbors[direction]
 		var neighborRouter = selectionAlgorithm.Node.Network.Nodes[neighbor].Router
 		var pheromone = selectionAlgorithm.PheromoneTable.Pheromones[packet.GetDest()][direction]
-		var freeSlots = neighborRouter.FreeSlots(direction, ivc)
+		var freeSlots = neighborRouter.FreeSlots(direction.GetReflexDirection(), ivc)
 
 		var alpha = selectionAlgorithm.Node.Network.Experiment.Config.AcoSelectionAlpha
 		var qTotal = selectionAlgorithm.Node.Network.Experiment.Config.MaxInputBufferSize

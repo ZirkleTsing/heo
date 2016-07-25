@@ -121,9 +121,6 @@ func (packet *DataPacket) DoRouteComputation(inputVirtualChannel *InputVirtualCh
 func (packet *DataPacket) Memorize(node *Node) {
 	for _, entry := range packet.Memory {
 		if entry.NodeId == node.Id {
-			packet.DumpMemory()
-			node.DumpNeighbors()
-			fmt.Printf("packet#%d(src=%d, dest=%d): %d", packet.Id, packet.Src, packet.Dest, node.Id)
 			panic(fmt.Sprintf("packet#%d(src=%d, dest=%d): %d", packet.Id, packet.Src, packet.Dest, node.Id))
 		}
 	}

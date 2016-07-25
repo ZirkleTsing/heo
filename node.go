@@ -41,11 +41,12 @@ func NewNode(network *Network, id int) *Node {
 
 	node.Router = NewRouter(node)
 
-	//node.RoutingAlgorithm = routing.NewOddEvenRoutingAlgorithm(node)
-	node.RoutingAlgorithm = NewXYRoutingAlgorithm(node)
+	//TODO
+	node.RoutingAlgorithm = NewOddEvenRoutingAlgorithm(node)
+	//node.RoutingAlgorithm = NewXYRoutingAlgorithm(node)
 
-	//node.SelectionAlgorithm = NewACOSelectionAlgorithm(node)
-	node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
+	node.SelectionAlgorithm = NewACOSelectionAlgorithm(node)
+	//node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
 
 	return node
 }

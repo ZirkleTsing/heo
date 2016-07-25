@@ -17,7 +17,8 @@ func (selectionAlgorithm *BufferLevelSelectionAlgorithm) Select(packet Packet, i
 
 	var maxFreeSlots = -1
 
-	for direction, neighbor := range selectionAlgorithm.Node.Neighbors {
+	for _, direction := range directions {
+		var neighbor = selectionAlgorithm.Node.Neighbors[direction]
 		var neighborRouter = selectionAlgorithm.Node.Network.Nodes[neighbor].Router
 		var freeSlots = neighborRouter.FreeSlots(direction.GetReflexDirection(), ivc)
 

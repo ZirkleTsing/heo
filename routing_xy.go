@@ -39,7 +39,5 @@ func (routingAlgorithm *XYRoutingAlgorithm) NextHop(packet Packet, parent int) [
 		}
 	}
 
-	fmt.Printf("NextHop(packet#%d(src=%d, dest=%d), current=%d) = %s\n", packet.GetId(), packet.GetSrc(), packet.GetDest(), routingAlgorithm.Node.Id, directions[0])
-
 	return directions
 }

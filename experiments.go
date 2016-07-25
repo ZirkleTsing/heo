@@ -17,15 +17,11 @@ type NoCExperiment struct {
 }
 
 func NewNoCExperiment(config *NoCConfig) *NoCExperiment {
-	var cycleAccurateEventQueue = NewCycleAccurateEventQueue()
-
-	var rand = rand.New(rand.NewSource(config.RandSeed))
-
 	var experiment = &NoCExperiment{
 		Config:config,
 		Stats: make(map[string]string),
-		CycleAccurateEventQueue:cycleAccurateEventQueue,
-		Rand: rand,
+		CycleAccurateEventQueue:NewCycleAccurateEventQueue(),
+		Rand: rand.New(rand.NewSource(config.RandSeed)),
 	}
 
 	var network = NewNetwork(experiment, config.NumNodes)
@@ -42,9 +38,7 @@ func NewNoCExperiment(config *NoCConfig) *NoCExperiment {
 func (experiment *NoCExperiment) Run() {
 	fmt.Printf("[%d] Welcome to ACOGo simulator!\n", experiment.CycleAccurateEventQueue.CurrentCycle)
 
-	//for _, node := range experiment.Network.Nodes {
-	//	node.DumpNeighbors()
-	//}
+	// TODO: dump config
 
 	for (experiment.Config.MaxCycles == -1 || experiment.CycleAccurateEventQueue.CurrentCycle < experiment.Config.MaxCycles) && (experiment.Config.MaxPackets == -1 || experiment.Network.NumPacketsReceived < experiment.Config.MaxPackets) {
 		experiment.CycleAccurateEventQueue.AdvanceOneCycle()
