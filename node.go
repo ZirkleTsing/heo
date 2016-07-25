@@ -45,8 +45,8 @@ func NewNode(network *Network, id int) *Node {
 	node.RoutingAlgorithm = NewOddEvenRoutingAlgorithm(node)
 	//node.RoutingAlgorithm = NewXYRoutingAlgorithm(node)
 
-	node.SelectionAlgorithm = NewACOSelectionAlgorithm(node)
-	//node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
+	//node.SelectionAlgorithm = NewACOSelectionAlgorithm(node)
+	node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
 
 	return node
 }
