@@ -19,7 +19,7 @@ type Flit struct {
 	Tail      bool
 	Node      *Node
 	State     FlitState
-	Timestamp int
+	Timestamp int64
 }
 
 func NewFlit(packet Packet, num int, head bool, tail bool) *Flit {

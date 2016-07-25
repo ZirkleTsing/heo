@@ -5,9 +5,9 @@ type NoCConfig struct {
 
 	NumNodes                int
 
-	MaxCycles               int
+	MaxCycles               int64
 
-	MaxPackets              int
+	MaxPackets              int64
 
 	DrainPackets            bool
 
@@ -38,7 +38,7 @@ type NoCConfig struct {
 	DataPacketSize          int
 }
 
-func NewNoCConfig(outputDirectory string, numNodes int, maxCycles int, maxPackets int, drainPackets bool) *NoCConfig {
+func NewNoCConfig(outputDirectory string, numNodes int, maxCycles int64, maxPackets int64, drainPackets bool) *NoCConfig {
 	var config = &NoCConfig{
 		OutputDirectory:outputDirectory,
 

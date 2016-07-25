@@ -3,11 +3,11 @@ package acogo
 type TransposeTrafficGenerator struct {
 	Network             *Network
 	PacketInjectionRate float64
-	MaxPackets          int
+	MaxPackets          int64
 	NewPacket           func(src int, dest int) Packet
 }
 
-func NewTransposeTrafficGenerator(network *Network, packetInjectionRate float64, maxPackets int, newPacket func(src int, dest int) Packet) *TransposeTrafficGenerator {
+func NewTransposeTrafficGenerator(network *Network, packetInjectionRate float64, maxPackets int64, newPacket func(src int, dest int) Packet) *TransposeTrafficGenerator {
 	var generator = &TransposeTrafficGenerator{
 		Network:network,
 		PacketInjectionRate:packetInjectionRate,

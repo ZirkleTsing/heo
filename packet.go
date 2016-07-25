@@ -2,10 +2,10 @@ package acogo
 
 type Packet interface {
 	GetNetwork() *Network
-	GetId() int
-	GetBeginCycle() int
-	GetEndCycle() int
-	SetEndCycle(endCycle int)
+	GetId() int64
+	GetBeginCycle() int64
+	GetEndCycle() int64
+	SetEndCycle(endCycle int64)
 	GetSrc() int
 	GetDest() int
 	GetSize() int
@@ -20,5 +20,5 @@ type Packet interface {
 
 type PacketMemoryEntry struct {
 	NodeId    int
-	Timestamp int
+	Timestamp int64
 }

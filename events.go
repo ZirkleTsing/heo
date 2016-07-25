@@ -2,21 +2,21 @@ package acogo
 
 type CycleAccurateEvent struct {
 	eventQueue *CycleAccurateEventQueue
-	When       int
+	When       int64
 	Action     func()
-	Id         int
+	Id         int64
 }
 
 type CycleAccurateEventQueue struct {
-	Events         map[int]([]*CycleAccurateEvent)
+	Events         map[int64]([]*CycleAccurateEvent)
 	PerCycleEvents []func()
-	CurrentCycle   int
-	currentEventId int
+	CurrentCycle   int64
+	currentEventId int64
 }
 
 func NewCycleAccurateEventQueue() *CycleAccurateEventQueue {
 	var q = CycleAccurateEventQueue{
-		Events:make(map[int]([]*CycleAccurateEvent)),
+		Events:make(map[int64]([]*CycleAccurateEvent)),
 	}
 
 	return &q
@@ -27,7 +27,7 @@ func (q *CycleAccurateEventQueue) Schedule(action func(), delay int) {
 
 	var event = &CycleAccurateEvent{
 		eventQueue:q,
-		When:q.CurrentCycle + delay,
+		When:q.CurrentCycle + int64(delay),
 		Action:action,
 		Id:q.currentEventId,
 	}

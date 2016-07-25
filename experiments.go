@@ -10,7 +10,7 @@ type NoCExperiment struct {
 	Config                  *NoCConfig
 	Stats                   map[string]string
 
-	BeginTime, EndTime      int //TODO
+	BeginTime, EndTime      int64 //TODO
 	CycleAccurateEventQueue *CycleAccurateEventQueue
 	Network                 *Network
 	Rand                    *rand.Rand

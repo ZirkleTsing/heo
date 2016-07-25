@@ -7,8 +7,8 @@ import (
 
 type DataPacket struct {
 	Network              *Network
-	Id                   int
-	BeginCycle, EndCycle int
+	Id                   int64
+	BeginCycle, EndCycle int64
 	Src, Dest            int
 	Size                 int
 	OnCompletedCallback  func()
@@ -44,19 +44,19 @@ func (packet *DataPacket) GetNetwork() *Network {
 	return packet.Network
 }
 
-func (packet *DataPacket) GetId() int {
+func (packet *DataPacket) GetId() int64 {
 	return packet.Id
 }
 
-func (packet *DataPacket) GetBeginCycle() int {
+func (packet *DataPacket) GetBeginCycle() int64 {
 	return packet.BeginCycle
 }
 
-func (packet *DataPacket) GetEndCycle() int {
+func (packet *DataPacket) GetEndCycle() int64 {
 	return packet.EndCycle
 }
 
-func (packet *DataPacket) SetEndCycle(endCycle int) {
+func (packet *DataPacket) SetEndCycle(endCycle int64) {
 	packet.EndCycle = endCycle
 }
 

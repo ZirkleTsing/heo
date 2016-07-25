@@ -6,13 +6,13 @@ import (
 
 type Network struct {
 	Experiment            *NoCExperiment
-	CurrentPacketId       int
+	CurrentPacketId       int64
 	NumNodes              int
 	Nodes                 []*Node
 	Width                 int
 	AcceptPacket          bool
-	NumPacketsReceived    int
-	NumPacketsTransmitted int
+	NumPacketsReceived    int64
+	NumPacketsTransmitted int64
 }
 
 func NewNetwork(experiment *NoCExperiment, numNodes int) *Network {
