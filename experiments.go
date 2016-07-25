@@ -13,7 +13,7 @@ type NoCExperiment struct {
 	BeginTime, EndTime      int //TODO
 	CycleAccurateEventQueue *CycleAccurateEventQueue
 	Network                 *Network
-	rand                    *rand.Rand
+	Rand                    *rand.Rand
 }
 
 func NewNoCExperiment(config *NoCConfig) *NoCExperiment {
@@ -25,7 +25,7 @@ func NewNoCExperiment(config *NoCConfig) *NoCExperiment {
 		Config:config,
 		Stats: make(map[string]string),
 		CycleAccurateEventQueue:cycleAccurateEventQueue,
-		rand: rand,
+		Rand: rand,
 	}
 
 	var network = NewNetwork(experiment, config.NumNodes)

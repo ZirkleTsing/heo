@@ -5,29 +5,6 @@ import (
 	"math"
 )
 
-type Packet interface {
-	GetNetwork() *Network
-	GetId() int
-	GetBeginCycle() int
-	GetEndCycle() int
-	SetEndCycle(endCycle int)
-	GetSrc() int
-	GetDest() int
-	GetSize() int
-	GetOnCompletedCallback() func()
-	GetMemory() []*PacketMemoryEntry
-	GetFlits() []*Flit
-	SetFlits(flits []*Flit)
-	GetHasPayload() bool
-	HandleDestArrived(inputVirtualChannel *InputVirtualChannel)
-	DoRouteComputation(inputVirtualChannel *InputVirtualChannel) Direction
-}
-
-type PacketMemoryEntry struct {
-	NodeId    int
-	Timestamp int
-}
-
 type DataPacket struct {
 	Network              *Network
 	Id                   int
@@ -43,7 +20,7 @@ type DataPacket struct {
 func NewDataPacket(network *Network, src int, dest int, size int, hasPayload bool, onCompletedCallback func()) *DataPacket {
 	var packet = &DataPacket{
 		Network:network,
-		Id:network.currentPacketId,
+		Id:network.CurrentPacketId,
 		BeginCycle:network.Experiment.CycleAccurateEventQueue.CurrentCycle,
 		EndCycle:-1,
 		Src:src,
@@ -53,7 +30,7 @@ func NewDataPacket(network *Network, src int, dest int, size int, hasPayload boo
 		HasPayload:hasPayload,
 	}
 
-	network.currentPacketId++
+	network.CurrentPacketId++
 
 	var numFlits = int(math.Ceil(float64(packet.Size) / float64(network.Experiment.Config.LinkWidth)))
 	if numFlits > network.Experiment.Config.MaxInputBufferSize {
