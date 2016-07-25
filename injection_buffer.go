@@ -1,13 +1,18 @@
 package acogo
 
+import "container/list"
+
 type InjectionBuffer struct {
 	Router  *Router
-	packets *Queue
+	Packets *list.List
+	Size    int
 }
 
 func NewInjectionBuffer(router *Router) *InjectionBuffer {
 	var injectionBuffer = &InjectionBuffer{
-		packets:NewQueue(router.Node.Network.Experiment.Config.MaxInjectionBufferSize),
+		Router:router,
+		Packets:list.New(),
+		Size: router.Node.Network.Experiment.Config.MaxInjectionBufferSize,
 	}
 
 	return injectionBuffer
@@ -18,33 +23,30 @@ func (injectionBuffer *InjectionBuffer) Push(packet Packet) {
 		panic("Injection buffer is full")
 	}
 
-	injectionBuffer.packets.Push(packet)
+	injectionBuffer.Packets.PushBack(packet)
 }
 
 func (injectionBuffer *InjectionBuffer) Peek() Packet {
-	if injectionBuffer.packets.Count > 0 {
-		return injectionBuffer.packets.Peek().(Packet)
+	if injectionBuffer.Packets.Len() > 0 {
+		return injectionBuffer.Packets.Front().Value.(Packet)
 	} else {
 		return nil
 	}
 }
 
 func (injectionBuffer *InjectionBuffer) Pop() {
-	injectionBuffer.packets.Pop()
+	var e = injectionBuffer.Packets.Front()
+	injectionBuffer.Packets.Remove(e)
 }
 
 func (injectionBuffer *InjectionBuffer) Full() bool {
-	return injectionBuffer.packets.Size <= injectionBuffer.packets.Count
-}
-
-func (injectionBuffer *InjectionBuffer) Size() int {
-	return injectionBuffer.packets.Size
+	return injectionBuffer.Size <= injectionBuffer.Packets.Len()
 }
 
 func (injectionBuffer *InjectionBuffer) Count() int {
-	return injectionBuffer.packets.Count
+	return injectionBuffer.Packets.Len()
 }
 
 func (injectionBuffer *InjectionBuffer) FreeSlots() int {
-	return injectionBuffer.packets.Size - injectionBuffer.packets.Count
+	return injectionBuffer.Size - injectionBuffer.Packets.Len()
 }

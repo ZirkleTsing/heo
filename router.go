@@ -216,7 +216,7 @@ func (router *Router) localPacketInjection() {
 
 			var inputBuffer = router.InputPorts[DIRECTION_LOCAL].VirtualChannels[ivc].InputBuffer
 
-			if inputBuffer.Count() + numFlits <= inputBuffer.Size() {
+			if numFlits <= inputBuffer.FreeSlots() {
 				for i := 0; i < numFlits; i++ {
 					var flit = NewFlit(packet, i, i == 0, i == numFlits - 1)
 					router.InsertFlit(flit, DIRECTION_LOCAL, ivc)

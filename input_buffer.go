@@ -1,14 +1,18 @@
 package acogo
 
+import "container/list"
+
 type InputBuffer struct {
 	InputVirtualChannel *InputVirtualChannel
-	flits               *Queue
+	Flits               *list.List
+	Size                int
 }
 
 func NewInputBuffer(inputVirtualChannel *InputVirtualChannel) *InputBuffer {
 	var inputBuffer = &InputBuffer{
 		InputVirtualChannel:inputVirtualChannel,
-		flits:NewQueue(inputVirtualChannel.InputPort.Router.Node.Network.Experiment.Config.MaxInputBufferSize),
+		Flits:list.New(),
+		Size: inputVirtualChannel.InputPort.Router.Node.Network.Experiment.Config.MaxInputBufferSize,
 	}
 
 	return inputBuffer
@@ -19,33 +23,30 @@ func (inputBuffer *InputBuffer) Push(flit *Flit) {
 		panic("Input buffer is full")
 	}
 
-	inputBuffer.flits.Push(flit)
+	inputBuffer.Flits.PushBack(flit)
 }
 
 func (inputBuffer *InputBuffer) Peek() *Flit {
-	if inputBuffer.flits.Count > 0 {
-		return inputBuffer.flits.Peek().(*Flit)
+	if inputBuffer.Flits.Len() > 0 {
+		return inputBuffer.Flits.Front().Value.(*Flit)
 	} else {
 		return nil
 	}
 }
 
 func (inputBuffer *InputBuffer) Pop() {
-	inputBuffer.flits.Pop()
+	var e = inputBuffer.Flits.Front()
+	inputBuffer.Flits.Remove(e)
 }
 
 func (inputBuffer *InputBuffer) Full() bool {
-	return inputBuffer.flits.Size <= inputBuffer.flits.Count
-}
-
-func (inputBuffer *InputBuffer) Size() int {
-	return inputBuffer.flits.Size
+	return inputBuffer.Size <= inputBuffer.Flits.Len()
 }
 
 func (inputBuffer *InputBuffer) Count() int {
-	return inputBuffer.flits.Count
+	return inputBuffer.Flits.Len()
 }
 
 func (inputBuffer *InputBuffer) FreeSlots() int {
-	return inputBuffer.flits.Size - inputBuffer.flits.Count
+	return inputBuffer.Size - inputBuffer.Flits.Len()
 }
