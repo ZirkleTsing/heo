@@ -42,15 +42,15 @@ func NewNode(network *Network, id int) *Node {
 	node.Router = NewRouter(node)
 
 	switch routing := network.Experiment.Config.Routing; routing {
-	case "xy":
+	case ROUTING_XY:
 		node.RoutingAlgorithm = NewXYRoutingAlgorithm(node)
-	case "oddEven":
+	case ROUTING_ODD_EVEN:
 		node.RoutingAlgorithm = NewOddEvenRoutingAlgorithm(node)
 
 		switch selection := network.Experiment.Config.Selection; selection {
-		case "bufferLevel":
+		case SELECTION_BUFFER_LEVEL:
 			node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
-		case "aco":
+		case SELECTION_ACO:
 			node.SelectionAlgorithm = NewACOSelectionAlgorithm(node)
 		default:
 			panic(fmt.Sprintf("Not supported: %s", selection))

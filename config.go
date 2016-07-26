@@ -1,5 +1,26 @@
 package acogo
 
+type TrafficType string
+
+const (
+	TRAFFIC_TRANSPOSE = TrafficType("Transpose")
+	TRAFFIC_UNIFORM = TrafficType("Uniform")
+)
+
+type RoutingType string
+
+const (
+	ROUTING_XY = RoutingType("XY")
+	ROUTING_ODD_EVEN = RoutingType("Odd Even")
+)
+
+type SelectionType string
+
+const (
+	SELECTION_BUFFER_LEVEL = SelectionType("Buffer Level")
+	SELECTION_ACO = SelectionType("ACO")
+)
+
 type Config struct {
 	OutputDirectory         string
 
@@ -11,9 +32,9 @@ type Config struct {
 
 	DrainPackets            bool
 
-	Routing                 string
+	Routing                 RoutingType
 
-	Selection               string
+	Selection               SelectionType
 
 	MaxInjectionBufferSize  int
 
@@ -24,11 +45,11 @@ type Config struct {
 	LinkWidth               int
 	LinkDelay               int
 
-	DataPacketTraffic       string
+	DataPacketTraffic       TrafficType
 	DataPacketInjectionRate float64
 	DataPacketSize          int
 
-	AntPacketTraffic        string
+	AntPacketTraffic        TrafficType
 	AntPacketInjectionRate  float64
 	AntPacketSize           int
 
@@ -48,9 +69,9 @@ func NewConfig(outputDirectory string, numNodes int, maxCycles int64, maxPackets
 
 		DrainPackets:drainPackets,
 
-		Routing:"oddEven",
+		Routing:ROUTING_ODD_EVEN,
 
-		Selection:"aco",
+		Selection:SELECTION_ACO,
 
 		MaxInjectionBufferSize:32,
 
@@ -61,11 +82,11 @@ func NewConfig(outputDirectory string, numNodes int, maxCycles int64, maxPackets
 		LinkWidth:4,
 		LinkDelay:1,
 
-		DataPacketTraffic:"transpose",
+		DataPacketTraffic:TRAFFIC_TRANSPOSE,
 		DataPacketInjectionRate:0.01,
 		DataPacketSize:16,
 
-		AntPacketTraffic:"uniform",
+		AntPacketTraffic:TRAFFIC_UNIFORM,
 		AntPacketInjectionRate:0.01,
 		AntPacketSize:4,
 

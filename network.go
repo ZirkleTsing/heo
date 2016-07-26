@@ -54,24 +54,24 @@ func NewNetwork(experiment *Experiment) *Network {
 	}
 
 	switch dataPacketTraffic := experiment.Config.DataPacketTraffic; dataPacketTraffic {
-	case "uniform":
+	case TRAFFIC_UNIFORM:
 		network.TrafficGenerators = append(network.TrafficGenerators, NewUniformTrafficGenerator(network, experiment.Config.DataPacketInjectionRate, experiment.Config.MaxPackets, func(src int, dest int) Packet {
 			return NewDataPacket(network, src, dest, experiment.Config.DataPacketSize, true, func() {})
 		}))
-	case "transpose":
+	case TRAFFIC_TRANSPOSE:
 		network.TrafficGenerators = append(network.TrafficGenerators, NewTransposeTrafficGenerator(network, experiment.Config.DataPacketInjectionRate, experiment.Config.MaxPackets, func(src int, dest int) Packet {
 			return NewDataPacket(network, src, dest, experiment.Config.DataPacketSize, true, func() {})
 		}))
 	}
 
 	switch selection := experiment.Config.Selection; selection {
-	case "aco":
+	case SELECTION_ACO:
 		switch antPacketTraffic := experiment.Config.AntPacketTraffic; antPacketTraffic {
-		case "uniform":
+		case TRAFFIC_UNIFORM:
 			network.TrafficGenerators = append(network.TrafficGenerators, NewUniformTrafficGenerator(network, experiment.Config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
 				return NewAntPacket(network, src, dest, experiment.Config.AntPacketSize, func() {}, true)
 			}))
-		case "transpose":
+		case TRAFFIC_TRANSPOSE:
 			network.TrafficGenerators = append(network.TrafficGenerators, NewTransposeTrafficGenerator(network, experiment.Config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
 				return NewAntPacket(network, src, dest, experiment.Config.AntPacketSize, func() {}, true)
 			}))
