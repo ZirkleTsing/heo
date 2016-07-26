@@ -7,7 +7,7 @@ import (
 )
 
 func WriteJsonFile(obj interface{}, outputDirectory string, outputJsonFileName string) {
-	if err:= os.MkdirAll(outputDirectory, os.ModePerm); err != nil {
+	if err := os.MkdirAll(outputDirectory, os.ModePerm); err != nil {
 		panic(fmt.Sprintf("Cannot create output directory (%s)", err))
 	}
 
@@ -19,7 +19,7 @@ func WriteJsonFile(obj interface{}, outputDirectory string, outputJsonFileName s
 
 	defer fp.Close()
 
-	j, err:=json.MarshalIndent(obj, "", "  ")
+	j, err := json.MarshalIndent(obj, "", "  ")
 
 	if err != nil {
 		panic(fmt.Sprintf("Cannot encode object as JSON (%s)", err))
