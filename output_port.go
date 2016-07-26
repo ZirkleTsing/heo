@@ -4,6 +4,7 @@ type OutputPort struct {
 	Router          *Router
 	Direction       Direction
 	VirtualChannels []*OutputVirtualChannel
+	Arbiter         *SwitchArbiter
 }
 
 func NewOutputPort(router *Router, direction Direction) *OutputPort {
@@ -16,6 +17,8 @@ func NewOutputPort(router *Router, direction Direction) *OutputPort {
 		var outputVirtualChannel = NewOutputVirtualChannel(outputPort, i)
 		outputPort.VirtualChannels = append(outputPort.VirtualChannels, outputVirtualChannel)
 	}
+
+	outputPort.Arbiter = NewSwitchArbiter(outputPort)
 
 	return outputPort
 }

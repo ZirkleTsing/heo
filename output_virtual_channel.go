@@ -5,6 +5,7 @@ type OutputVirtualChannel struct {
 	Num                 int
 	InputVirtualChannel *InputVirtualChannel
 	Credits             int
+	Arbiter             *VirtualChannelArbiter
 }
 
 func NewOutputVirtualChannel(outputPort *OutputPort, num int) *OutputVirtualChannel {
@@ -13,6 +14,8 @@ func NewOutputVirtualChannel(outputPort *OutputPort, num int) *OutputVirtualChan
 		Num: num,
 		Credits:10,
 	}
+
+	outputVirtualChannel.Arbiter = NewVirtualChannelArbiter(outputVirtualChannel)
 
 	return outputVirtualChannel
 }
