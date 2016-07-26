@@ -111,4 +111,6 @@ func (experiment *Experiment) DumpConfig() {
 		f := s.Field(i)
 		fmt.Printf("  %s: %v\n", typeOfT.Field(i).Name, f.Interface())
 	}
+
+	WriteJsonFile(experiment.Config, experiment.Config.OutputDirectory, "config.json")
 }

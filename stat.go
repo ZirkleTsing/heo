@@ -1,10 +1,46 @@
 package acogo
 
-import "fmt"
+import (
+	"fmt"
+	"bytes"
+	"encoding/json"
+)
 
 type Stat struct {
 	Key   string
 	Value string
+}
+
+type Stats []Stat
+
+func (stats Stats) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+
+	buf.WriteString("{")
+
+	for i, stat := range stats {
+		if i != 0 {
+			buf.WriteString(",")
+		}
+
+		key, err := json.Marshal(stat.Key)
+		if err != nil {
+			return nil, err
+		}
+		buf.Write(key)
+
+		buf.WriteString(":")
+
+		val, err := json.Marshal(stat.Value)
+		if err != nil {
+			return nil, err
+		}
+		buf.Write(val)
+	}
+
+	buf.WriteString("}")
+
+	return buf.Bytes(), nil
 }
 
 func (experiment *Experiment) DumpStats() {
@@ -116,4 +152,6 @@ func (experiment *Experiment) DumpStats() {
 	for _, stat := range experiment.Stats {
 		fmt.Printf("  %s: %s\n", stat.Key, stat.Value)
 	}
+
+	WriteJsonFile(experiment.Stats, experiment.Config.OutputDirectory, "stats.json")
 }

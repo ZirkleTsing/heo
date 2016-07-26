@@ -7,7 +7,7 @@ import (
 
 type Experiment struct {
 	Config                  *Config
-	Stats                   []Stat
+	Stats                   Stats
 
 	BeginTime, EndTime      time.Time
 	CycleAccurateEventQueue *CycleAccurateEventQueue
