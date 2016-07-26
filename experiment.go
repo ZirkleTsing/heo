@@ -30,7 +30,7 @@ func NewExperiment(config *Config) *Experiment {
 func (experiment *Experiment) Run() {
 	fmt.Printf("[%d] Welcome to ACOGo simulator!\n", experiment.CycleAccurateEventQueue.CurrentCycle)
 
-	// TODO: dump config
+	experiment.DumpConfig()
 
 	experiment.BeginTime = time.Now()
 
@@ -50,5 +50,5 @@ func (experiment *Experiment) Run() {
 
 	fmt.Printf("[%d] Simulation ended!\n", experiment.CycleAccurateEventQueue.CurrentCycle)
 
-	experiment.CollectStats()
+	experiment.DumpStats()
 }

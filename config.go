@@ -1,5 +1,10 @@
 package acogo
 
+import (
+	"reflect"
+	"fmt"
+)
+
 type TrafficType string
 
 const (
@@ -95,4 +100,15 @@ func NewConfig(outputDirectory string, numNodes int, maxCycles int64, maxPackets
 	}
 
 	return config
+}
+
+func (experiment *Experiment) DumpConfig() {
+	s := reflect.ValueOf(experiment.Config).Elem()
+	typeOfT := s.Type()
+
+	fmt.Println("Config:")
+	for i := 0; i < s.NumField(); i++ {
+		f := s.Field(i)
+		fmt.Printf("  %s: %v\n", typeOfT.Field(i).Name, f.Interface())
+	}
 }

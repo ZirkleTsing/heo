@@ -7,7 +7,7 @@ type Stat struct {
 	Value string
 }
 
-func (experiment *Experiment) CollectStats() {
+func (experiment *Experiment) DumpStats() {
 	experiment.Stats = append(experiment.Stats, Stat{
 		Key: "TotalCycles",
 		Value: fmt.Sprintf("%d", experiment.CycleAccurateEventQueue.CurrentCycle),
@@ -112,7 +112,8 @@ func (experiment *Experiment) CollectStats() {
 		})
 	}
 
+	fmt.Println("Stats:")
 	for _, stat := range experiment.Stats {
-		fmt.Printf("%s: %s\n", stat.Key, stat.Value)
+		fmt.Printf("  %s: %s\n", stat.Key, stat.Value)
 	}
 }
