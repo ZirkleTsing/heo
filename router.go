@@ -32,6 +32,11 @@ func NewRouter(node *Node) *Router {
 		router.OutputPorts[direction] = NewOutputPort(router, direction)
 	}
 
+	for _, state := range VALID_FLIT_STATES {
+		router.NumInflightHeadFlits[state] = 0
+		router.NumInflightNonHeadFlits[state] = 0
+	}
+
 	return router
 }
 
@@ -45,6 +50,10 @@ func (router *Router) AdvanceOneCycle() {
 }
 
 func (router *Router) stageLinkTraversal() {
+	if router.NumInflightHeadFlits[FLIT_STATE_SWITCH_TRAVERSAL] == 0 && router.NumInflightNonHeadFlits[FLIT_STATE_SWITCH_TRAVERSAL] == 0 {
+		return
+	}
+
 	for _, outputPort := range router.OutputPorts {
 		for _, outputVirtualChannel := range outputPort.VirtualChannels {
 			var inputVirtualChannel = outputVirtualChannel.InputVirtualChannel
@@ -98,6 +107,10 @@ func (router *Router) NextHopArrived(flit *Flit, nextHop int, ip Direction, ivc 
 }
 
 func (router *Router) stageSwitchTraversal() {
+	if router.NumInflightHeadFlits[FLIT_STATE_SWITCH_ALLOCATION] == 0 && router.NumInflightNonHeadFlits[FLIT_STATE_SWITCH_ALLOCATION] == 0 {
+		return
+	}
+
 	for _, outputPort := range router.OutputPorts {
 		for _, inputPort := range router.InputPorts {
 			if outputPort.Direction == inputPort.Direction {
@@ -125,6 +138,10 @@ func (router *Router) stageSwitchTraversal() {
 }
 
 func (router *Router) stageSwitchAllocation() {
+	if router.NumInflightHeadFlits[FLIT_STATE_VIRTUAL_CHANNEL_ALLOCATION] == 0 && router.NumInflightNonHeadFlits[FLIT_STATE_INPUT_BUFFER] == 0 {
+		return
+	}
+
 	for _, outputPort := range router.OutputPorts {
 		var winnerInputVirtualChannel = router.findWinnerForSwitchAllocation(outputPort)
 
@@ -151,6 +168,10 @@ func (router *Router) findWinnerForSwitchAllocation(outputPort *OutputPort) *Inp
 }
 
 func (router *Router) stageVirtualChannelAllocation() {
+	if router.NumInflightHeadFlits[FLIT_STATE_ROUTE_COMPUTATION] == 0 {
+		return
+	}
+
 	for _, outputPort := range router.OutputPorts {
 		for _, outputVirtualChannel := range outputPort.VirtualChannels {
 			if outputVirtualChannel.InputVirtualChannel == nil {
@@ -184,6 +205,10 @@ func (router *Router) findWinnerForVirtualChannelAllocation(outputVirtualChannel
 }
 
 func (router *Router) stageRouteComputation() {
+	if router.NumInflightHeadFlits[FLIT_STATE_INPUT_BUFFER] == 0 {
+		return
+	}
+
 	for _, inputPort := range router.InputPorts {
 		for _, inputVirtualChannel := range inputPort.VirtualChannels {
 			var flit = inputVirtualChannel.InputBuffer.Peek()
