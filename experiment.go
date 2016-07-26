@@ -58,3 +58,7 @@ func RunExperiments(experiments []*Experiment) {
 
 	RunInParallel(tasks)
 }
+
+func AnalyzeExperiments(outputDirectory string, outputCSVFileName string, experiments []*Experiment) {
+	WriteCSVFile(outputDirectory, outputCSVFileName, experiments, GetCSVFields())
+}

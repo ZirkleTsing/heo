@@ -1,6 +1,10 @@
 package acogo
 
-import "fmt"
+import (
+	"fmt"
+	"encoding/csv"
+	"os"
+)
 
 type CSVField struct {
 	Name     string
@@ -156,4 +160,48 @@ func GetCSVFields() []CSVField {
 	}
 
 	return csvFields
+}
+
+func WriteCSVFile(outputDirectory string, outputCSVFileName string, experiments []*Experiment, fields []CSVField) {
+	if err := os.MkdirAll(outputDirectory, os.ModePerm); err != nil {
+		panic(fmt.Sprintf("Cannot create output directory (%s)", err))
+	}
+
+	fp, err := os.Create(outputDirectory + "/" + outputCSVFileName)
+
+	if err != nil {
+		panic(fmt.Sprintf("Cannot create CSV file (%s)", err))
+	}
+
+	defer fp.Close()
+
+	var w = csv.NewWriter(fp)
+
+	var head []string
+
+	for _, field := range fields {
+		head = append(head, field.Name)
+	}
+
+	if err := w.Write(head); err != nil {
+		panic(fmt.Sprintf("Error writing record to CSV file (%s)", err))
+	}
+
+	for _, experiment := range experiments {
+		var record []string
+
+		for _, field := range fields {
+			record = append(record, fmt.Sprintf("%+v", field.Callback(experiment)))
+		}
+
+		if err := w.Write(record); err != nil {
+			panic(fmt.Sprintf("Error writing record to CSV file (%s)", err))
+		}
+	}
+
+	w.Flush()
+
+	if err := w.Error(); err != nil {
+		panic(err)
+	}
 }
