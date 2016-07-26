@@ -148,11 +148,6 @@ func (experiment *Experiment) DumpStats() {
 		})
 	}
 
-	fmt.Println("Stats:")
-	for _, stat := range experiment.Stats {
-		fmt.Printf("  %s: %+v\n", stat.Key, stat.Value)
-	}
-
 	WriteJsonFile(experiment.Stats, experiment.Config.OutputDirectory, "stats.json")
 }
 

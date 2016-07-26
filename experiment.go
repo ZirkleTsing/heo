@@ -1,7 +1,6 @@
 package acogo
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -29,8 +28,6 @@ func NewExperiment(config *Config) *Experiment {
 }
 
 func (experiment *Experiment) Run() {
-	fmt.Printf("[%d] Welcome to ACOGo simulator!\n", experiment.CycleAccurateEventQueue.CurrentCycle)
-
 	experiment.BeginTime = time.Now()
 
 	for (experiment.Config.MaxCycles == -1 || experiment.CycleAccurateEventQueue.CurrentCycle < experiment.Config.MaxCycles) && (experiment.Config.MaxPackets == -1 || experiment.Network.NumPacketsReceived < experiment.Config.MaxPackets) {
@@ -47,9 +44,17 @@ func (experiment *Experiment) Run() {
 
 	experiment.EndTime = time.Now()
 
-	fmt.Printf("[%d] Simulation ended!\n", experiment.CycleAccurateEventQueue.CurrentCycle)
-
 	experiment.DumpConfig()
 
 	experiment.DumpStats()
+}
+
+func RunExperiments(experiments []*Experiment) {
+	var tasks []func()
+
+	for _, experiment := range experiments {
+		tasks = append(tasks, experiment.Run)
+	}
+
+	RunInParallel(tasks)
 }
