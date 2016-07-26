@@ -8,23 +8,38 @@ import (
 type TrafficType string
 
 const (
-	TRAFFIC_TRANSPOSE = TrafficType("Transpose")
 	TRAFFIC_UNIFORM = TrafficType("Uniform")
+	TRAFFIC_TRANSPOSE = TrafficType("Transpose")
 )
+
+var TRAFFICS = []TrafficType{
+	TRAFFIC_UNIFORM,
+	TRAFFIC_TRANSPOSE,
+}
 
 type RoutingType string
 
 const (
 	ROUTING_XY = RoutingType("XY")
-	ROUTING_ODD_EVEN = RoutingType("Odd Even")
+	ROUTING_ODD_EVEN = RoutingType("OddEven")
 )
+
+var ROUTINGS = []RoutingType{
+	ROUTING_XY,
+	ROUTING_ODD_EVEN,
+}
 
 type SelectionType string
 
 const (
-	SELECTION_BUFFER_LEVEL = SelectionType("Buffer Level")
+	SELECTION_BUFFER_LEVEL = SelectionType("BufferLevel")
 	SELECTION_ACO = SelectionType("ACO")
 )
+
+var SELECTIONS = []SelectionType{
+	SELECTION_BUFFER_LEVEL,
+	SELECTION_ACO,
+}
 
 type Config struct {
 	OutputDirectory         string

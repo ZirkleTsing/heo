@@ -44,6 +44,7 @@ func NewNode(network *Network, id int) *Node {
 	switch routing := network.Experiment.Config.Routing; routing {
 	case ROUTING_XY:
 		node.RoutingAlgorithm = NewXYRoutingAlgorithm(node)
+		node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
 	case ROUTING_ODD_EVEN:
 		node.RoutingAlgorithm = NewOddEvenRoutingAlgorithm(node)
 

@@ -8,6 +8,7 @@ import (
 type Experiment struct {
 	Config                  *Config
 	Stats                   Stats
+	statMap                 map[string]interface{}
 
 	BeginTime, EndTime      time.Time
 	CycleAccurateEventQueue *CycleAccurateEventQueue

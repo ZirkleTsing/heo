@@ -136,14 +136,14 @@ func (experiment *Experiment) DumpStats() {
 
 	for _, state := range VALID_FLIT_STATES {
 		experiment.Stats = append(experiment.Stats, Stat{
-			Key: fmt.Sprintf("AverageFlitPerStateDelay::%s", state),
+			Key: fmt.Sprintf("AverageFlitPerStateDelay[%s]", state),
 			Value: experiment.Network.AverageFlitPerStateDelay(state),
 		})
 	}
 
 	for _, state := range VALID_FLIT_STATES {
 		experiment.Stats = append(experiment.Stats, Stat{
-			Key: fmt.Sprintf("MaxFlitPerStateDelay::%s", state),
+			Key: fmt.Sprintf("MaxFlitPerStateDelay[%s]", state),
 			Value: experiment.Network.MaxFlitPerStateDelay[state],
 		})
 	}
@@ -154,4 +154,16 @@ func (experiment *Experiment) DumpStats() {
 	}
 
 	WriteJsonFile(experiment.Stats, experiment.Config.OutputDirectory, "stats.json")
+}
+
+func (experiment *Experiment) GetStatMap() map[string]interface{} {
+	if experiment.statMap == nil {
+		experiment.statMap = make(map[string]interface{})
+
+		for _, stat := range experiment.Stats {
+			experiment.statMap[stat.Key] = stat.Value
+		}
+	}
+
+	return experiment.statMap
 }
