@@ -11,8 +11,6 @@ type Config struct {
 
 	DrainPackets            bool
 
-	RandSeed                int64
-
 	Routing                 string
 
 	Selection               string
@@ -49,8 +47,6 @@ func NewConfig(outputDirectory string, numNodes int, maxCycles int64, maxPackets
 		MaxPackets:maxPackets,
 
 		DrainPackets:drainPackets,
-
-		RandSeed:13,
 
 		Routing:"oddEven",
 

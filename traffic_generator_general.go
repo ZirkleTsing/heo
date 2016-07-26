@@ -1,5 +1,7 @@
 package acogo
 
+import "math/rand"
+
 type GeneralTrafficGenerator struct {
 	Network             *Network
 	PacketInjectionRate float64
@@ -24,8 +26,7 @@ func (generator *GeneralTrafficGenerator) AdvanceOneCycle(dest func(src int) int
 			break
 		}
 
-		//TODO: eliminate non-deterministic randomness
-		var valid = generator.Network.Experiment.Rand.Float64() <= generator.PacketInjectionRate
+		var valid = rand.Float64() <= generator.PacketInjectionRate
 		if valid {
 			var src = node.Id
 			var dest = dest(src)

@@ -1,5 +1,7 @@
 package acogo
 
+import "math/rand"
+
 type BufferLevelSelectionAlgorithm struct {
 	Node *Node
 }
@@ -31,7 +33,7 @@ func (selectionAlgorithm *BufferLevelSelectionAlgorithm) Select(packet Packet, i
 	}
 
 	if len(bestDirections) > 0 {
-		return bestDirections[selectionAlgorithm.Node.Network.Experiment.Rand.Intn(len(bestDirections))]
+		return bestDirections[rand.Intn(len(bestDirections))]
 	}
 
 	return directions[0]

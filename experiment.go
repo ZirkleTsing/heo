@@ -1,7 +1,6 @@
 package acogo
 
 import (
-	"math/rand"
 	"fmt"
 	"time"
 )
@@ -13,14 +12,12 @@ type Experiment struct {
 	BeginTime, EndTime      time.Time
 	CycleAccurateEventQueue *CycleAccurateEventQueue
 	Network                 *Network
-	Rand                    *rand.Rand
 }
 
 func NewExperiment(config *Config) *Experiment {
 	var experiment = &Experiment{
 		Config:config,
 		CycleAccurateEventQueue:NewCycleAccurateEventQueue(),
-		Rand: rand.New(rand.NewSource(config.RandSeed)),
 	}
 
 	var network = NewNetwork(experiment)

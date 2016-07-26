@@ -1,5 +1,7 @@
 package acogo
 
+import "math/rand"
+
 type UniformTrafficGenerator struct {
 	*GeneralTrafficGenerator
 }
@@ -15,7 +17,7 @@ func NewUniformTrafficGenerator(network *Network, packetInjectionRate float64, m
 func (generator *UniformTrafficGenerator) AdvanceOneCycle() {
 	generator.GeneralTrafficGenerator.AdvanceOneCycle(func(src int) int {
 		for {
-			var i = generator.Network.Experiment.Rand.Intn(generator.Network.NumNodes)
+			var i = rand.Intn(generator.Network.NumNodes)
 			if i != src {
 				return i;
 			}
