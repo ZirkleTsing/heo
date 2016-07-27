@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 )
 
+const STATS_JSON_FILE_NAME = "stats.json"
+
 type Stat struct {
 	Key   string
 	Value interface{}
@@ -148,7 +150,7 @@ func (experiment *Experiment) DumpStats() {
 		})
 	}
 
-	WriteJsonFile(experiment.Stats, experiment.Config.OutputDirectory, "stats.json")
+	WriteJsonFile(experiment.Stats, experiment.Config.OutputDirectory, STATS_JSON_FILE_NAME)
 }
 
 func (experiment *Experiment) GetStatMap() map[string]interface{} {

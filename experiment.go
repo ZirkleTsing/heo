@@ -2,6 +2,7 @@ package acogo
 
 import (
 	"time"
+	"os"
 )
 
 type Experiment struct {
@@ -28,6 +29,10 @@ func NewExperiment(config *Config) *Experiment {
 }
 
 func (experiment *Experiment) Run() {
+	if _, err := os.Stat(experiment.Config.OutputDirectory + "/" + STATS_JSON_FILE_NAME); err == nil {
+		return
+	}
+
 	experiment.BeginTime = time.Now()
 
 	for (experiment.Config.MaxCycles == -1 || experiment.CycleAccurateEventQueue.CurrentCycle < experiment.Config.MaxCycles) && (experiment.Config.MaxPackets == -1 || experiment.Network.NumPacketsReceived < experiment.Config.MaxPackets) {

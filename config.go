@@ -1,5 +1,7 @@
 package acogo
 
+const CONFIG_JSON_FILE_NAME = "config.json"
+
 type TrafficType string
 
 const (
@@ -113,5 +115,5 @@ func NewConfig(outputDirectory string, numNodes int, maxCycles int64, maxPackets
 }
 
 func (experiment *Experiment) DumpConfig() {
-	WriteJsonFile(experiment.Config, experiment.Config.OutputDirectory, "config.json")
+	WriteJsonFile(experiment.Config, experiment.Config.OutputDirectory, CONFIG_JSON_FILE_NAME)
 }
