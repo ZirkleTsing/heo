@@ -28,9 +28,11 @@ func NewExperiment(config *Config) *Experiment {
 	return experiment
 }
 
-func (experiment *Experiment) Run() {
-	if _, err := os.Stat(experiment.Config.OutputDirectory + "/" + STATS_JSON_FILE_NAME); err == nil {
-		return
+func (experiment *Experiment) Run(skipIfStatsFileExists bool) {
+	if skipIfStatsFileExists {
+		if _, err := os.Stat(experiment.Config.OutputDirectory + "/" + STATS_JSON_FILE_NAME); err == nil {
+			return
+		}
 	}
 
 	experiment.BeginTime = time.Now()
@@ -54,11 +56,15 @@ func (experiment *Experiment) Run() {
 	experiment.DumpStats()
 }
 
-func RunExperiments(experiments []*Experiment) {
+func RunExperiments(experiments []*Experiment, skipIfStatsFileExists bool) {
 	var tasks []func()
 
 	for _, experiment := range experiments {
-		tasks = append(tasks, experiment.Run)
+		var e = experiment
+
+		tasks = append(tasks, func() {
+			e.Run(skipIfStatsFileExists)
+		})
 	}
 
 	RunInParallel(tasks)
