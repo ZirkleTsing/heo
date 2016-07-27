@@ -4,7 +4,7 @@ import "testing"
 
 func TestExperiment(t *testing.T) {
 	var numNodes = 64
-	var maxCycles = int64(100000)
+	var maxCycles = int64(1000000)
 	var maxPackets = int64(-1)
 	var drainPackets = true
 

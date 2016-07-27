@@ -1,7 +1,7 @@
 {
   "OutputDirectory": "test_results/synthetic/aco",
   "NumNodes": 64,
-  "MaxCycles": 100000,
+  "MaxCycles": 1000000,
   "MaxPackets": -1,
   "DrainPackets": true,
   "Routing": "OddEven",
