@@ -153,6 +153,10 @@ func (experiment *Experiment) DumpStats() {
 	WriteJsonFile(experiment.Stats, experiment.Config.OutputDirectory, STATS_JSON_FILE_NAME)
 }
 
+func (experiment *Experiment) LoadStats() {
+	LoadJsonFile(experiment.Config.OutputDirectory, STATS_JSON_FILE_NAME, &experiment.statMap)
+}
+
 func (experiment *Experiment) GetStatMap() map[string]interface{} {
 	if experiment.statMap == nil {
 		experiment.statMap = make(map[string]interface{})

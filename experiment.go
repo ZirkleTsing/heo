@@ -71,5 +71,9 @@ func RunExperiments(experiments []*Experiment, skipIfStatsFileExists bool) {
 }
 
 func AnalyzeExperiments(outputDirectory string, outputCSVFileName string, experiments []*Experiment) {
+	for _, experiment := range experiments {
+		experiment.LoadStats()
+	}
+
 	WriteCSVFile(outputDirectory, outputCSVFileName, experiments, GetCSVFields())
 }
