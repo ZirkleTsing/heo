@@ -72,7 +72,7 @@ func GetCSVFields() []CSVField {
 					case SELECTION_BUFFER_LEVEL:
 						return "BufferLevel"
 					case SELECTION_ACO:
-						return fmt.Sprintf("ACO/aj=%s/a=%s/rf=%s", experiment.Config.AntPacketInjectionRate, experiment.Config.AcoSelectionAlpha, experiment.Config.ReinforcementFactor)
+						return fmt.Sprintf("ACO/aj=%f/a=%f/rf=%f", experiment.Config.AntPacketInjectionRate, experiment.Config.AcoSelectionAlpha, experiment.Config.ReinforcementFactor)
 					default:
 						panic("Impossible")
 					}
@@ -96,7 +96,7 @@ func GetCSVFields() []CSVField {
 		{
 			Name: "Num_Packets_Transmitted",
 			Callback: func(experiment *Experiment) interface{} {
-				return experiment.GetStatMap()["NumPacketTransmitted"]
+				return experiment.GetStatMap()["NumPacketsTransmitted"]
 			},
 		},
 		{
@@ -143,16 +143,18 @@ func GetCSVFields() []CSVField {
 		},
 	}
 
-	for _, state := range VALID_FLIT_STATES {
+	for _, s := range VALID_FLIT_STATES {
+		var state = s
+
 		csvFields = append(csvFields, CSVField{
-			Name: fmt.Sprintf("Average_Flit_per_State_Delay::%s", state),
+			Name: fmt.Sprintf("Average_Flit_per_State_Delay[%s]", state),
 			Callback: func(experiment *Experiment) interface{} {
 				return experiment.GetStatMap()[fmt.Sprintf("AverageFlitPerStateDelay[%s]", state)]
 			},
 		})
 
 		csvFields = append(csvFields, CSVField{
-			Name: fmt.Sprintf("Max_Flit_per_State_Delay::%s", state),
+			Name: fmt.Sprintf("Max_Flit_per_State_Delay[%s]", state),
 			Callback: func(experiment *Experiment) interface{} {
 				return experiment.GetStatMap()[fmt.Sprintf("MaxFlitPerStateDelay[%s]", state)]
 			},
