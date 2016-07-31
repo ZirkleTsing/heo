@@ -86,7 +86,9 @@ func (selectionAlgorithm *ACOSelectionAlgorithm) Select(packet Packet, ivc int, 
 		var qTotal = selectionAlgorithm.Node.Network.Experiment.Config.MaxInputBufferSize
 		var n = len(selectionAlgorithm.Node.Neighbors)
 
-		var probability = (pheromone.Value + alpha * (float64(freeSlots) / float64(qTotal))) / (1 + alpha * float64(n - 1))
+		var probability = (pheromone.Value + alpha * (float64(freeSlots) / float64(qTotal))) /
+			(1 + alpha * float64(n - 1))
+
 		if probability > maxProbability {
 			maxProbability = probability
 			bestDirection = direction
