@@ -6,12 +6,14 @@ type TrafficType string
 
 const (
 	TRAFFIC_UNIFORM = TrafficType("Uniform")
-	TRAFFIC_TRANSPOSE = TrafficType("Transpose")
+	TRAFFIC_TRANSPOSE1 = TrafficType("Transpose1")
+	TRAFFIC_TRANSPOSE2 = TrafficType("Transpose2")
 )
 
 var TRAFFICS = []TrafficType{
 	TRAFFIC_UNIFORM,
-	TRAFFIC_TRANSPOSE,
+	TRAFFIC_TRANSPOSE1,
+	TRAFFIC_TRANSPOSE2,
 }
 
 type RoutingType string
@@ -99,7 +101,7 @@ func NewConfig(outputDirectory string, numNodes int, maxCycles int64, maxPackets
 		LinkWidth:4,
 		LinkDelay:1,
 
-		DataPacketTraffic:TRAFFIC_TRANSPOSE,
+		DataPacketTraffic:TRAFFIC_TRANSPOSE1,
 		DataPacketInjectionRate:0.01,
 		DataPacketSize:16,
 

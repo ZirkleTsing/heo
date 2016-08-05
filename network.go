@@ -58,8 +58,12 @@ func NewNetwork(experiment *Experiment) *Network {
 		network.TrafficGenerators = append(network.TrafficGenerators, NewUniformTrafficGenerator(network, experiment.Config.DataPacketInjectionRate, experiment.Config.MaxPackets, func(src int, dest int) Packet {
 			return NewDataPacket(network, src, dest, experiment.Config.DataPacketSize, true, func() {})
 		}))
-	case TRAFFIC_TRANSPOSE:
-		network.TrafficGenerators = append(network.TrafficGenerators, NewTransposeTrafficGenerator(network, experiment.Config.DataPacketInjectionRate, experiment.Config.MaxPackets, func(src int, dest int) Packet {
+	case TRAFFIC_TRANSPOSE1:
+		network.TrafficGenerators = append(network.TrafficGenerators, NewTranspose1TrafficGenerator(network, experiment.Config.DataPacketInjectionRate, experiment.Config.MaxPackets, func(src int, dest int) Packet {
+			return NewDataPacket(network, src, dest, experiment.Config.DataPacketSize, true, func() {})
+		}))
+	case TRAFFIC_TRANSPOSE2:
+		network.TrafficGenerators = append(network.TrafficGenerators, NewTranspose2TrafficGenerator(network, experiment.Config.DataPacketInjectionRate, experiment.Config.MaxPackets, func(src int, dest int) Packet {
 			return NewDataPacket(network, src, dest, experiment.Config.DataPacketSize, true, func() {})
 		}))
 	}
@@ -71,8 +75,12 @@ func NewNetwork(experiment *Experiment) *Network {
 			network.TrafficGenerators = append(network.TrafficGenerators, NewUniformTrafficGenerator(network, experiment.Config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
 				return NewAntPacket(network, src, dest, experiment.Config.AntPacketSize, func() {}, true)
 			}))
-		case TRAFFIC_TRANSPOSE:
-			network.TrafficGenerators = append(network.TrafficGenerators, NewTransposeTrafficGenerator(network, experiment.Config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
+		case TRAFFIC_TRANSPOSE1:
+			network.TrafficGenerators = append(network.TrafficGenerators, NewTranspose1TrafficGenerator(network, experiment.Config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
+				return NewAntPacket(network, src, dest, experiment.Config.AntPacketSize, func() {}, true)
+			}))
+		case TRAFFIC_TRANSPOSE2:
+			network.TrafficGenerators = append(network.TrafficGenerators, NewTranspose2TrafficGenerator(network, experiment.Config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
 				return NewAntPacket(network, src, dest, experiment.Config.AntPacketSize, func() {}, true)
 			}))
 		}
