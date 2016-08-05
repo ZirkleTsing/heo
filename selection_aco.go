@@ -82,12 +82,12 @@ func (selectionAlgorithm *ACOSelectionAlgorithm) Select(packet Packet, ivc int, 
 		var pheromone = selectionAlgorithm.PheromoneTable.Pheromones[packet.GetDest()][direction]
 		var freeSlots = neighborRouter.FreeSlots(direction.GetReflexDirection(), ivc)
 
-		var alpha = selectionAlgorithm.Node.Network.Experiment.Config.AcoSelectionAlpha
-		var qTotal = selectionAlgorithm.Node.Network.Experiment.Config.MaxInputBufferSize
-		var n = len(selectionAlgorithm.Node.Neighbors)
+		var acoSelectionAlpha = selectionAlgorithm.Node.Network.Experiment.Config.AcoSelectionAlpha
+		var maxInputBufferSize = selectionAlgorithm.Node.Network.Experiment.Config.MaxInputBufferSize
+		var numNeighbors = len(selectionAlgorithm.Node.Neighbors)
 
-		var probability = (pheromone.Value + alpha * (float64(freeSlots) / float64(qTotal))) /
-			(1 + alpha * float64(n - 1))
+		var probability = (pheromone.Value + acoSelectionAlpha * (float64(freeSlots) / float64(maxInputBufferSize))) /
+			(1 + acoSelectionAlpha * float64(numNeighbors - 1))
 
 		if probability > maxProbability {
 			maxProbability = probability
