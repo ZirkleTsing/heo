@@ -66,13 +66,19 @@ func GetCSVFields() []CSVField {
 			Callback: func(experiment *Experiment) interface{} {
 				switch experiment.Config.Routing {
 				case ROUTING_XY:
-					return "XY"
+					return string(ROUTING_XY)
+				case ROUTING_NEGATIVE_FIRST:
+					return string(ROUTING_NEGATIVE_FIRST)
+				case ROUTING_WEST_FIRST:
+					return string(ROUTING_WEST_FIRST)
+				case ROUTING_NORTH_LAST:
+					return string(ROUTING_NORTH_LAST)
 				case ROUTING_ODD_EVEN:
 					switch experiment.Config.Selection {
 					case SELECTION_BUFFER_LEVEL:
-						return "BufferLevel"
+						return string(SELECTION_BUFFER_LEVEL)
 					case SELECTION_ACO:
-						return fmt.Sprintf("ACO/aj=%f/a=%f/rf=%f", experiment.Config.AntPacketInjectionRate, experiment.Config.AcoSelectionAlpha, experiment.Config.ReinforcementFactor)
+						return fmt.Sprintf("%s/aj=%f/a=%f/rf=%f", string(SELECTION_ACO), experiment.Config.AntPacketInjectionRate, experiment.Config.AcoSelectionAlpha, experiment.Config.ReinforcementFactor)
 					default:
 						panic("Impossible")
 					}

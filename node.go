@@ -45,6 +45,15 @@ func NewNode(network *Network, id int) *Node {
 	case ROUTING_XY:
 		node.RoutingAlgorithm = NewXYRoutingAlgorithm(node)
 		node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
+	case ROUTING_NEGATIVE_FIRST:
+		node.RoutingAlgorithm = NewNegativeFirstRoutingAlgorithm(node)
+		node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
+	case ROUTING_WEST_FIRST:
+		node.RoutingAlgorithm = NewWestFirstRoutingAlgorithm(node)
+		node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
+	case ROUTING_NORTH_LAST:
+		node.RoutingAlgorithm = NewNorthLastRoutingAlgorithm(node)
+		node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
 	case ROUTING_ODD_EVEN:
 		node.RoutingAlgorithm = NewOddEvenRoutingAlgorithm(node)
 

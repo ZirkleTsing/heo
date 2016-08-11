@@ -20,11 +20,17 @@ type RoutingType string
 
 const (
 	ROUTING_XY = RoutingType("XY")
+	ROUTING_NEGATIVE_FIRST = RoutingType("NegativeFirst")
+	ROUTING_WEST_FIRST = RoutingType("WestFirst")
+	ROUTING_NORTH_LAST = RoutingType("NorthLast")
 	ROUTING_ODD_EVEN = RoutingType("OddEven")
 )
 
 var ROUTINGS = []RoutingType{
 	ROUTING_XY,
+	ROUTING_NEGATIVE_FIRST,
+	ROUTING_WEST_FIRST,
+	ROUTING_NORTH_LAST,
 	ROUTING_ODD_EVEN,
 }
 
