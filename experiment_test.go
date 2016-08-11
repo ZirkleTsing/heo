@@ -13,7 +13,7 @@ func TestExperiment(t *testing.T) {
 	config.Routing = ROUTING_ODD_EVEN
 	config.Selection = SELECTION_ACO
 
-	config.DataPacketTraffic = TRAFFIC_TRANSPOSE
+	config.DataPacketTraffic = TRAFFIC_TRANSPOSE1
 	config.DataPacketInjectionRate = 0.06
 
 	config.AntPacketTraffic = TRAFFIC_UNIFORM
