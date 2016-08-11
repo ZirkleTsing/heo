@@ -19,7 +19,6 @@ func (routingAlgorithm *OddEvenRoutingAlgorithm) NextHop(packet Packet, parent i
 	var c1 = routingAlgorithm.Node.Y
 
 	var s0 = routingAlgorithm.Node.Network.GetX(packet.GetSrc())
-	//var s1 = routingAlgorithm.Node.Network.GetY(packet.GetSrc())
 
 	var d0 = routingAlgorithm.Node.Network.GetX(packet.GetDest())
 	var d1 = routingAlgorithm.Node.Network.GetY(packet.GetDest())
