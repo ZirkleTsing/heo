@@ -21,18 +21,15 @@ func (routingAlgorithm *XYRoutingAlgorithm) NextHop(packet Packet, parent int) [
 	var x = routingAlgorithm.Node.X
 	var y = routingAlgorithm.Node.Y
 
-	if destX != x {
-		if destX > x {
-			directions = append(directions, DIRECTION_EAST)
-		} else {
-			directions = append(directions, DIRECTION_WEST)
-		}
-	} else {
-		if destY > y {
-			directions = append(directions, DIRECTION_SOUTH)
-		} else {
-			directions = append(directions, DIRECTION_NORTH)
-		}
+	switch {
+	case destX > x:
+		directions = append(directions, DIRECTION_EAST)
+	case destX < x:
+		directions = append(directions, DIRECTION_WEST)
+	case destY > y:
+		directions = append(directions, DIRECTION_SOUTH)
+	default:
+		directions = append(directions, DIRECTION_NORTH)
 	}
 
 	return directions
