@@ -3,6 +3,7 @@ package acogo
 import (
 	"time"
 	"os"
+	"fmt"
 )
 
 type Experiment struct {
@@ -57,17 +58,30 @@ func (experiment *Experiment) Run(skipIfStatsFileExists bool) {
 }
 
 func RunExperiments(experiments []*Experiment, skipIfStatsFileExists bool) {
-	var tasks []func()
+	var done = make(chan bool)
 
-	for _, experiment := range experiments {
-		var e = experiment
+	for i, e := range experiments {
+		go func(i int, experiment *Experiment, c chan bool) {
+			var len = len(experiments)
 
-		tasks = append(tasks, func() {
-			e.Run(skipIfStatsFileExists)
-		})
+			fmt.Printf("[%s] Experiment %d/%d started.\n",
+				time.Now().Format("2006-01-02 15:04:05"), i + 1, len)
+
+			experiment.Run(skipIfStatsFileExists)
+
+			done <- true
+
+			fmt.Printf("[%s] Experiment %d/%d ended.\n",
+				time.Now().Format("2006-01-02 15:04:05"), i + 1, len)
+		}(i, e, done)
 	}
 
-	RunInParallel(tasks)
+	for i := 0; i < len(experiments); i++ {
+		<-done
+
+		fmt.Printf("[%s] There are %d experiments to be run.\n",
+			time.Now().Format("2006-01-02 15:04:05"), len(experiments) - i - 1)
+	}
 }
 
 func AnalyzeExperiments(outputDirectory string, outputCSVFileName string, experiments []*Experiment) {
