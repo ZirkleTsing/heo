@@ -15,5 +15,4 @@ func TestMemory(t *testing.T) {
 	memory.WriteWord(0, 12)
 
 	fmt.Println(memory.ReadWord(0))
-
 }
