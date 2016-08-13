@@ -12,12 +12,6 @@ func TestMemory(t *testing.T) {
 
 	fmt.Printf("%s\n", memory.ReadString(0, len([]byte("Hello world."))))
 
-	var str = "Hello world."
-
-	var str1 = string([]byte(str))
-
-	fmt.Printf("%s, %s\n", str, str1)
-
 	memory.WriteWord(0, 12)
 
 	fmt.Println(memory.ReadWord(0))

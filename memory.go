@@ -2,9 +2,7 @@ package acogo
 
 import (
 	"math"
-	"bytes"
 	"encoding/binary"
-	"fmt"
 )
 
 type MemoryPage struct {
@@ -28,18 +26,10 @@ func NewMemoryPage(memory *Memory, id int) *MemoryPage {
 func (page *MemoryPage) Access(virtualAddress int, buffer *[]byte, offset int, size int, write bool) {
 	var displacement = page.Memory.GetDisplacement(virtualAddress)
 
-	var p = bytes.NewBuffer(page.Buffer[displacement:])
-
 	if write {
-		binary.Write(p, page.Memory.ByteOrder, (*buffer)[offset:size])
-
-		fmt.Printf("Write buffer[%d:%d](%v) to page#%d.Buffer[%d:%d](%v)\n",
-			offset, size, (*buffer)[offset:size], page.Id, displacement, size, page.Buffer[displacement:size])
+		copy(page.Buffer[displacement:size], (*buffer)[offset:size])
 	} else {
-		binary.Read(p, page.Memory.ByteOrder, (*buffer)[offset:size])
-
-		fmt.Printf("Read page#%d.Buffer[%d:%d](%v) to buffer[%d:%d](%v)\n",
-			page.Id, displacement, size, page.Buffer[displacement:size], offset, size, (*buffer)[offset:size])
+		copy((*buffer)[offset:size], page.Buffer[displacement:size])
 	}
 }
 
