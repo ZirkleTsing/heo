@@ -83,11 +83,3 @@ func RunExperiments(experiments []*Experiment, skipIfStatsFileExists bool) {
 			time.Now().Format("2006-01-02 15:04:05"), len(experiments) - i - 1)
 	}
 }
-
-func AnalyzeExperiments(outputDirectory string, outputCSVFileName string, experiments []*Experiment) {
-	for _, experiment := range experiments {
-		experiment.LoadStats()
-	}
-
-	WriteCSVFile(outputDirectory, outputCSVFileName, experiments, GetCSVFields())
-}

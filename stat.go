@@ -161,6 +161,10 @@ func (experiment *Experiment) GetStatMap() map[string]interface{} {
 	if experiment.statMap == nil {
 		experiment.statMap = make(map[string]interface{})
 
+		if experiment.Stats == nil {
+			experiment.LoadStats()
+		}
+
 		for _, stat := range experiment.Stats {
 			experiment.statMap[stat.Key] = stat.Value
 		}
