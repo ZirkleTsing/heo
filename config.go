@@ -37,11 +37,13 @@ var ROUTINGS = []RoutingType{
 type SelectionType string
 
 const (
+	SELECTION_RANDOM = SelectionType("Random")
 	SELECTION_BUFFER_LEVEL = SelectionType("BufferLevel")
 	SELECTION_ACO = SelectionType("ACO")
 )
 
 var SELECTIONS = []SelectionType{
+	SELECTION_RANDOM,
 	SELECTION_BUFFER_LEVEL,
 	SELECTION_ACO,
 }

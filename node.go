@@ -44,29 +44,27 @@ func NewNode(network *Network, id int) *Node {
 	switch routing := network.Experiment.Config.Routing; routing {
 	case ROUTING_XY:
 		node.RoutingAlgorithm = NewXYRoutingAlgorithm(node)
-		node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
 	case ROUTING_NEGATIVE_FIRST:
 		node.RoutingAlgorithm = NewNegativeFirstRoutingAlgorithm(node)
-		node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
 	case ROUTING_WEST_FIRST:
 		node.RoutingAlgorithm = NewWestFirstRoutingAlgorithm(node)
-		node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
 	case ROUTING_NORTH_LAST:
 		node.RoutingAlgorithm = NewNorthLastRoutingAlgorithm(node)
-		node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
 	case ROUTING_ODD_EVEN:
 		node.RoutingAlgorithm = NewOddEvenRoutingAlgorithm(node)
-
-		switch selection := network.Experiment.Config.Selection; selection {
-		case SELECTION_BUFFER_LEVEL:
-			node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
-		case SELECTION_ACO:
-			node.SelectionAlgorithm = NewACOSelectionAlgorithm(node)
-		default:
-			panic(fmt.Sprintf("Not supported: %s", selection))
-		}
 	default:
 		panic(fmt.Sprintf("Not supported: %s", routing))
+	}
+
+	switch selection := network.Experiment.Config.Selection; selection {
+	case SELECTION_RANDOM:
+		node.SelectionAlgorithm = NewRandomSelectionAlgorithm(node)
+	case SELECTION_BUFFER_LEVEL:
+		node.SelectionAlgorithm = NewBufferLevelSelectionAlgorithm(node)
+	case SELECTION_ACO:
+		node.SelectionAlgorithm = NewACOSelectionAlgorithm(node)
+	default:
+		panic(fmt.Sprintf("Not supported: %s", selection))
 	}
 
 	return node
