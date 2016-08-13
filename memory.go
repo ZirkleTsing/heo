@@ -33,13 +33,13 @@ func (page *MemoryPage) Access(virtualAddress int, buffer *[]byte, offset int, s
 	if write {
 		binary.Write(p, page.Memory.ByteOrder, (*buffer)[offset:size])
 
-		fmt.Printf("Write buffer[%d:%d](%v) to page#%d.Buffer[%d:%d]\n",
-			offset, size, (*buffer)[offset:size], page.Id, displacement, size)
+		fmt.Printf("Write buffer[%d:%d](%v) to page#%d.Buffer[%d:%d](%v)\n",
+			offset, size, (*buffer)[offset:size], page.Id, displacement, size, page.Buffer[displacement:size])
 	} else {
 		binary.Read(p, page.Memory.ByteOrder, (*buffer)[offset:size])
 
-		fmt.Printf("Read page#%d.Buffer[%d:%d] to buffer[%d:%d](%v)\n",
-			page.Id, displacement, size, offset, size, (*buffer)[offset:size])
+		fmt.Printf("Read page#%d.Buffer[%d:%d](%v) to buffer[%d:%d](%v)\n",
+			page.Id, displacement, size, page.Buffer[displacement:size], offset, size, (*buffer)[offset:size])
 	}
 }
 
