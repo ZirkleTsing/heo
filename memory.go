@@ -27,15 +27,14 @@ func (page *MemoryPage) Access(virtualAddress int, buffer *[]byte, offset int, s
 	var displacement = page.Memory.GetDisplacement(virtualAddress)
 
 	if write {
-		copy(page.Buffer[displacement:size], (*buffer)[offset:size])
+		copy(page.Buffer[displacement:displacement + size], (*buffer)[offset:offset + size])
 	} else {
-		copy((*buffer)[offset:size], page.Buffer[displacement:size])
+		copy((*buffer)[offset:offset + size], page.Buffer[displacement:displacement + size])
 	}
 }
 
 type Memory struct {
 	Id           int
-	ProcessId    int
 	LittleEndian bool
 	ByteOrder    binary.ByteOrder
 	Pages        map[int]*MemoryPage
@@ -43,10 +42,9 @@ type Memory struct {
 	NumPages     int
 }
 
-func NewMemory(id int, processId int, littleEndian bool) *Memory {
+func NewMemory(id int, littleEndian bool) *Memory {
 	var memory = &Memory{
 		Id:id,
-		ProcessId:processId,
 		LittleEndian:littleEndian,
 		Pages:make(map[int]*MemoryPage),
 		Geometry:NewCacheGeometry(-1, 1, 1 << 12),

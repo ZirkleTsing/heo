@@ -6,13 +6,13 @@ import (
 )
 
 func TestMemory(t *testing.T) {
-	var memory = NewMemory(0, 0, true)
+	var memory = NewMemory(0, true)
 
-	memory.WriteString(0, "Hello world.")
+	memory.WriteString(12, "你好 world.")
 
-	fmt.Printf("%s\n", memory.ReadString(0, len([]byte("Hello world."))))
+	fmt.Printf("%s\n", memory.ReadString(12, len([]byte("Hello world."))))
 
-	memory.WriteWord(0, 12)
+	memory.WriteWord(1, 12)
 
-	fmt.Println(memory.ReadWord(0))
+	fmt.Println(memory.ReadWord(1))
 }
