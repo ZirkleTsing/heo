@@ -127,29 +127,15 @@ const (
 
 type MnemonicName string
 
-type StaticInstIntrinsic struct {
-	MnemonicName    MnemonicName
-	FuOperationType string
-}
-
-func NewStaticInstIntrinsic(mnemonicName MnemonicName, fuOperationType string) StaticInstIntrinsic {
-	var staticInstIntrinsic = StaticInstIntrinsic{
-		MnemonicName:mnemonicName,
-		FuOperationType:fuOperationType,
-	}
-
-	return staticInstIntrinsic
-}
-
 type DecodeMethod struct {
-	Bits uint32
 	Mask uint32
+	Bits uint32
 }
 
-func NewDecodeMethod(bits uint32, mask uint32) DecodeMethod {
+func NewDecodeMethod(mask uint32, bits uint32) DecodeMethod {
 	var decodeMethod = DecodeMethod{
-		Bits:bits,
 		Mask:mask,
+		Bits:bits,
 	}
 
 	return decodeMethod
@@ -170,33 +156,28 @@ func NewDecodeCondition(bitField *BitField, value uint32) DecodeCondition {
 }
 
 type Mnemonic struct {
-	Intrinsic                         *StaticInstIntrinsic
-	StaticInstType                    StaticInstType
-	StaticInstFlags                   []StaticInstFlag
-	DecodeMethod                      *DecodeMethod
-	DecodeCondition                   *DecodeCondition
-	InputDependencies                 []Dependency
-	OutputDependencies                []Dependency
-	NonEffectiveAddressBaseDependency Dependency
-	Bits                              uint32
-	Mask                              uint32
-	ExtraBitField                     *BitField
-	ExtraBitFieldValue                uint32
-	FuOperationType                   string
+	Name               MnemonicName
+	StaticInstType     StaticInstType
+	StaticInstFlags    []StaticInstFlag
+	DecodeMethod       *DecodeMethod
+	DecodeCondition    *DecodeCondition
+	Mask               uint32
+	Bits               uint32
+	ExtraBitField      *BitField
+	ExtraBitFieldValue uint32
+	Execute            func(context *Context, machInst MachInst)
 }
 
-func NewMnemonic(intrinsic *StaticInstIntrinsic, staticInstType StaticInstType, staticInstFlags []StaticInstFlag, decodeMethod *DecodeMethod, decodeCondition *DecodeCondition, inputDependencies []Dependency, outputDependencies []Dependency, nonEffectiveAddressBaseDependency Dependency) *Mnemonic {
+func NewMnemonic(name MnemonicName, staticInstType StaticInstType, staticInstFlags []StaticInstFlag, decodeMethod *DecodeMethod, decodeCondition *DecodeCondition, execute func(context *Context, machInst MachInst)) *Mnemonic {
 	var mnemonic = &Mnemonic{
-		Intrinsic:intrinsic,
+		Name:name,
 		StaticInstType:staticInstType,
 		StaticInstFlags:staticInstFlags,
 		DecodeMethod:decodeMethod,
 		DecodeCondition:decodeCondition,
-		InputDependencies:inputDependencies,
-		OutputDependencies:outputDependencies,
-		NonEffectiveAddressBaseDependency:nonEffectiveAddressBaseDependency,
-		Bits:decodeMethod.Bits,
 		Mask:decodeMethod.Mask,
+		Bits:decodeMethod.Bits,
+		Execute:execute,
 	}
 
 	if decodeCondition != nil {
@@ -204,7 +185,28 @@ func NewMnemonic(intrinsic *StaticInstIntrinsic, staticInstType StaticInstType, 
 		mnemonic.ExtraBitFieldValue = decodeCondition.Value
 	}
 
-	mnemonic.FuOperationType = intrinsic.FuOperationType
-
 	return mnemonic
 }
+
+const (
+	FMT_SINGLE = 16
+	FMT_DOUBLE = 17
+	FMT_WORD = 20
+	FMT_LONG = 21
+	FMT_PS = 22
+)
+
+const (
+	FMT3_SINGLE = 0
+	FMT3_DOUBLE = 1
+	FMT3_WORD = 4
+	FMT3_LONG = 5
+	FMT3_PS = 6
+)
+
+var (
+	//TODO...
+	Add = NewMnemonic(ADD, StaticInstType_INTEGER_COMPUTATION, nil, nil, nil, func(context *Context, machInst MachInst) {
+
+	})
+)

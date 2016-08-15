@@ -6,7 +6,7 @@ import (
 )
 
 func TestMemory(t *testing.T) {
-	var memory = NewMemory(0, true)
+	var memory = NewMemory(true)
 
 	memory.WriteString(12, "你好 world.")
 

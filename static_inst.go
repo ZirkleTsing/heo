@@ -43,7 +43,15 @@ const (
 type StaticInstFlag uint
 
 type StaticInst struct {
-	MachInst uint32
-	Mnemonic string
-	Flags    []StaticInstFlag
+	MachInst MachInst
+	Mnemonic *Mnemonic
+}
+
+func NewStaticInst(machInst MachInst, mnemonic *Mnemonic) *StaticInst {
+	var staticInst = &StaticInst{
+		MachInst:machInst,
+		Mnemonic:mnemonic,
+	}
+
+	return staticInst
 }

@@ -14,10 +14,6 @@ func NewBitField(hi uint, lo uint) *BitField {
 	return bitField
 }
 
-func (bitField *BitField) ValueOf(machInst uint32) uint32 {
-	return Bits(machInst, bitField.Hi, bitField.Lo)
-}
-
 var (
 	OPCODE = NewBitField(31, 26)
 	OPCODE_HI = NewBitField(31, 29)

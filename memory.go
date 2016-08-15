@@ -34,7 +34,6 @@ func (page *MemoryPage) Access(virtualAddress int, buffer *[]byte, offset int, s
 }
 
 type Memory struct {
-	Id           int
 	LittleEndian bool
 	ByteOrder    binary.ByteOrder
 	Pages        map[int]*MemoryPage
@@ -42,9 +41,8 @@ type Memory struct {
 	NumPages     int
 }
 
-func NewMemory(id int, littleEndian bool) *Memory {
+func NewMemory(littleEndian bool) *Memory {
 	var memory = &Memory{
-		Id:id,
 		LittleEndian:littleEndian,
 		Pages:make(map[int]*MemoryPage),
 		Geometry:NewCacheGeometry(-1, 1, 1 << 12),
