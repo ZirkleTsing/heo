@@ -695,4 +695,95 @@ var (
 		NewDecodeMethod(0x44000001, 0xfc00003f),
 		NewDecodeCondition(FMT, FMT_SINGLE),
 		nil)
+
+	J = NewMnemonic(
+		Mnemonic_J,
+		[]StaticInstFlag{StaticInstFlag_UNCONDITIONAL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x08000000, 0xfc000000),
+		nil,
+		nil)
+
+	Jal = NewMnemonic(
+		Mnemonic_JAL,
+		[]StaticInstFlag{StaticInstFlag_UNCONDITIONAL, StaticInstFlag_FUNCTION_CALL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x0c000000, 0xfc000000),
+		nil,
+		nil)
+
+	Jalr = NewMnemonic(
+		Mnemonic_JALR,
+		[]StaticInstFlag{StaticInstFlag_UNCONDITIONAL, StaticInstFlag_FUNCTION_CALL, StaticInstFlag_INDIRECT_JUMP},
+		NewDecodeMethod(0x00000009, 0xfc00003f),
+		nil,
+		nil)
+
+	Jr = NewMnemonic(
+		Mnemonic_JR,
+		[]StaticInstFlag{StaticInstFlag_UNCONDITIONAL, StaticInstFlag_FUNCTION_RETURN, StaticInstFlag_INDIRECT_JUMP},
+		NewDecodeMethod(0x00000008, 0xfc00003f),
+		nil,
+		nil)
+
+	B = NewMnemonic(
+		Mnemonic_B,
+		[]StaticInstFlag{StaticInstFlag_UNCONDITIONAL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x10000000, 0xffff0000),
+		nil,
+		nil)
+
+	Bal = NewMnemonic(
+		Mnemonic_BAL,
+		[]StaticInstFlag{StaticInstFlag_UNCONDITIONAL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x04110000, 0xffff0000),
+		nil,
+		nil)
+
+	Bc1f = NewMnemonic(
+		Mnemonic_BC1F,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL},
+		NewDecodeMethod(0x45000000, 0xffe30000),
+		nil,
+		nil)
+
+	Bc1fl = NewMnemonic(
+		Mnemonic_BC1FL,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL},
+		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+		nil,
+		nil)
+
+	Bc1t = NewMnemonic(
+		Mnemonic_BC1T,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL},
+		NewDecodeMethod(0x45010000, 0xffe30000),
+		nil,
+		nil)
+
+	Bc1tl = NewMnemonic(
+		Mnemonic_BC1TL,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL},
+		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+		nil,
+		nil)
+
+	Beq = NewMnemonic(
+		Mnemonic_BEQ,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x10000000, 0xfc000000),
+		nil,
+		nil)
+
+	Beql = NewMnemonic(
+		Mnemonic_BEQL,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+		nil,
+		nil)
+
+	Bgez = NewMnemonic(
+		Mnemonic_BGEZ,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x04010000, 0xfc1f0000),
+		nil,
+		nil)
 )

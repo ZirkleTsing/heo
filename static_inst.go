@@ -26,13 +26,14 @@ const (
 	StaticInstFlag_STORE = 5
 	StaticInstFlag_DIRECT_JUMP = 6
 	StaticInstFlag_INDIRECT_JUMP = 7
-	StaticInstFlag_FUNCTIONAL_CALL = 8
-	StaticInstFlag_IMMEDIATE = 9
-	StaticInstFlag_DISPLACED_ADDRESSING = 10
-	StaticInstFlag_TRAP = 11
-	StaticInstFlag_NOP = 12
-	StaticInstFlag_UNIMPLEMENTED = 13
-	StaticInstFlag_UNKNOWN = 14
+	StaticInstFlag_FUNCTION_CALL = 8
+	StaticInstFlag_FUNCTION_RETURN = 9
+	StaticInstFlag_IMMEDIATE = 10
+	StaticInstFlag_DISPLACED_ADDRESSING = 11
+	StaticInstFlag_TRAP = 12
+	StaticInstFlag_NOP = 13
+	StaticInstFlag_UNIMPLEMENTED = 14
+	StaticInstFlag_UNKNOWN = 15
 )
 
 type StaticInstFlag uint
