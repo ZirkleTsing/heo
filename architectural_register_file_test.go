@@ -8,15 +8,15 @@ import (
 func TestFloatingPointRegisters(t *testing.T) {
 	var regs = NewArchitecturalRegisterFile(true)
 
-	regs.Fprs.PutUint32(0, 100)
-	regs.Fprs.PutUint64(1, 20000043)
+	regs.Fpr.SetUint32(0, 100)
+	regs.Fpr.SetUint64(1, 20000043)
 
-	fmt.Printf("%d\n", regs.Fprs.GetUint32(0))
-	fmt.Printf("%d\n", regs.Fprs.GetUint64(1))
+	fmt.Printf("%d\n", regs.Fpr.Uint32(0))
+	fmt.Printf("%d\n", regs.Fpr.Uint64(1))
 
-	regs.Fprs.PutFloat32(4, 100.1)
-	regs.Fprs.PutFloat64(5, 20000.043)
+	regs.Fpr.SetFloat32(4, 100.1)
+	regs.Fpr.SetFloat64(5, 20000.043)
 
-	fmt.Printf("%f\n", regs.Fprs.GetFloat32(4))
-	fmt.Printf("%f\n", regs.Fprs.GetFloat64(5))
+	fmt.Printf("%f\n", regs.Fpr.Float32(4))
+	fmt.Printf("%f\n", regs.Fpr.Float64(5))
 }

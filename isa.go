@@ -1,65 +1,57 @@
 package acogo
 
 func add(context *Context, machInst MachInst) {
-	context.Regs.Gprs[machInst.ValueOf(RD)] =
-		context.Regs.Gprs[machInst.ValueOf(RS)] + context.Regs.Gprs[machInst.ValueOf(RT)]
+	var temp int32 = context.Regs.Sgpr(machInst.Rs()) + context.Regs.Sgpr(machInst.Rt())
+	context.Regs.Gpr[machInst.Rd()] = uint32(temp)
 }
 
 func addi(context *Context, machInst MachInst) {
-	context.Regs.Gprs[machInst.ValueOf(RT)] =
-		context.Regs.Gprs[machInst.ValueOf(RS)] + SignExtend(machInst.ValueOf(INTIMM))
+	var temp int32 = context.Regs.Sgpr(machInst.Rs()) + machInst.Imm()
+	context.Regs.Gpr[machInst.Rt()] = uint32(temp)
 }
 
 func addiu(context *Context, machInst MachInst) {
-	context.Regs.Gprs[machInst.ValueOf(RT)] =
-		context.Regs.Gprs[machInst.ValueOf(RS)] + SignExtend(machInst.ValueOf(INTIMM))
+	context.Regs.Gpr[machInst.Rt()] = uint32(context.Regs.Sgpr(machInst.Rs()) + machInst.Imm())
 }
 
 func addu(context *Context, machInst MachInst) {
-	context.Regs.Gprs[machInst.ValueOf(RD)] =
-		context.Regs.Gprs[machInst.ValueOf(RS)] + context.Regs.Gprs[machInst.ValueOf(RT)]
+	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] + context.Regs.Gpr[machInst.Rt()]
 }
 
 func and(context *Context, machInst MachInst) {
-	context.Regs.Gprs[machInst.ValueOf(RD)] =
-		context.Regs.Gprs[machInst.ValueOf(RS)] & context.Regs.Gprs[machInst.ValueOf(RT)]
+	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] & context.Regs.Gpr[machInst.Rt()]
 }
 
 func andi(context *Context, machInst MachInst) {
-	context.Regs.Gprs[machInst.ValueOf(RT)] =
-		context.Regs.Gprs[machInst.ValueOf(RS)] & ZeroExtend(machInst.ValueOf(INTIMM))
+	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] & machInst.Uimm()
 }
 
 func div(context *Context, machInst MachInst) {
-	var rs = context.Regs.Gprs[machInst.ValueOf(RS)]
-	var rt = context.Regs.Gprs[machInst.ValueOf(RT)]
-
-	if rt == 0 {
-		context.Regs.Hi = 0
-		context.Regs.Lo = 0
-	} else {
-		context.Regs.Hi = rs % rt
-		context.Regs.Lo = rs / rt
+	if machInst.Rt() == 0 {
+		context.Regs.Lo = uint32(context.Regs.Sgpr(machInst.Rs()) / context.Regs.Sgpr(machInst.Rt()))
+		context.Regs.Hi = uint32(context.Regs.Sgpr(machInst.Rs()) % context.Regs.Sgpr(machInst.Rt()))
 	}
 }
 
 func divu(context *Context, machInst MachInst) {
-	var rs = context.Regs.Gprs[machInst.ValueOf(RS)]
-	var rt = context.Regs.Gprs[machInst.ValueOf(RT)]
-
-	if rt == 0 {
-		context.Regs.Hi = 0
-		context.Regs.Lo = 0
-	} else {
-		context.Regs.Hi = rs % rt
-		context.Regs.Lo = rs / rt
+	if machInst.Rt() == 0 {
+		context.Regs.Lo = uint32(context.Regs.Gpr[machInst.Rs()] / context.Regs.Gpr[machInst.Rt()])
+		context.Regs.Hi = uint32(context.Regs.Gpr[machInst.Rs()] % context.Regs.Gpr[machInst.Rt()])
 	}
 }
 
 func lui(context *Context, machInst MachInst) {
+	context.Regs.Gpr[machInst.Rt()] = machInst.Uimm() << 16
 }
 
 func madd(context *Context, machInst MachInst) {
+	var temp, temp1, temp2, temp3 int64
+	temp1 = int64(context.Regs.Sgpr(machInst.Rs()))
+	temp2 = int64(context.Regs.Sgpr(machInst.Rt()))
+	temp3 = (int64(context.Regs.Hi << 32) | int64(context.Regs.Lo))
+	temp = temp1 * temp2 + temp3
+	context.Regs.Hi = uint32(Bits64(uint64(temp), 63, 32))
+	context.Regs.Lo = uint32(Bits64(uint64(temp), 31, 0))
 }
 
 func mfhi(context *Context, machInst MachInst) {
@@ -93,6 +85,8 @@ func ori(context *Context, machInst MachInst) {
 }
 
 func sll(context *Context, machInst MachInst) {
+	context.Regs.Gpr[machInst.ValueOf(RD)] =
+		context.Regs.Gpr[machInst.ValueOf(RT)] << machInst.ValueOf(SHIFT)
 }
 
 func sllv(context *Context, machInst MachInst) {

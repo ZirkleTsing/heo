@@ -1,33 +1,26 @@
 package acogo
 
-func ContainsBit(value uint, i uint) bool {
-	return (value & (1 << i)) != 0
+type half uint16
+type word uint32
+type dword uint64
+
+type sbyte int8
+type shalf int16
+type sword int32
+type sdword int64
+
+func Sext32(x uint32, b uint32) int32 {
+	if uint32(x) & (uint32(1) << (b - 1)) != 0 {
+		return int32(uint32(x) | ^((uint32(1) << b) - 1))
+	} else {
+		return int32(x)
+	}
 }
 
-func SetBit(value uint, i uint) uint {
-	return value | (1 << i)
+func Bits32(x uint32, hi uint32, lo uint32) uint32 {
+	return (x >> lo) & ((uint32(1) << (hi - lo + 1)) - 1)
 }
 
-func ClearBit(value uint, i uint) uint {
-	return value & ^(1 << i)
-}
-
-func Mask(numBits uint) uint32 {
-	return (1 << numBits) - 1
-}
-
-func Bits(value uint32, first uint, last uint) uint32 {
-	return (value >> last) & Mask(first - last + 1)
-}
-
-func MaskBits(value uint32, first uint, last uint) uint32 {
-	return value & (Mask(first + 1) & ^Mask(last))
-}
-
-func SignExtend(value uint32) uint32 {
-	return (value << 16) >> 16
-}
-
-func ZeroExtend(value uint32) uint32 {
-	return value & 0xffff
+func Bits64(x uint64, hi uint64, lo uint64) uint64 {
+	return (x >> lo) & ((uint64(1) << (hi - lo + 1)) - 1)
 }

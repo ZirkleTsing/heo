@@ -95,8 +95,8 @@ type ArchitecturalRegisterFile struct {
 	Pc           uint32
 	Npc          uint32
 	Nnpc         uint32
-	Gprs         [32]uint32
-	Fprs         *FloatingPointRegisters
+	Gpr          []uint32
+	Fpr          *FloatingPointRegisters
 	Hi           uint32
 	Lo           uint32
 	Fcsr         uint32
@@ -105,10 +105,15 @@ type ArchitecturalRegisterFile struct {
 func NewArchitecturalRegisterFile(littleEndian bool) *ArchitecturalRegisterFile {
 	var architecturalRegisterFile = &ArchitecturalRegisterFile{
 		LittleEndian:littleEndian,
-		Fprs:NewFloatingPointRegisters(littleEndian),
+		Gpr:make([]uint32, 32),
+		Fpr:NewFloatingPointRegisters(littleEndian),
 	}
 
 	return architecturalRegisterFile
+}
+
+func (architecturalRegisterFile *ArchitecturalRegisterFile) Sgpr(i uint32) int32 {
+	return int32(architecturalRegisterFile.Gpr[i])
 }
 
 type FloatingPointRegisters struct {
@@ -132,7 +137,7 @@ func NewFloatingPointRegisters(littleEndian bool) *FloatingPointRegisters {
 	return floatingPointRegisters
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) GetUint32(index int) uint32 {
+func (floatingPointRegisters *FloatingPointRegisters) Uint32(index int) uint32 {
 	var size = 4
 
 	var buffer = make([]byte, size)
@@ -142,7 +147,7 @@ func (floatingPointRegisters *FloatingPointRegisters) GetUint32(index int) uint3
 	return floatingPointRegisters.ByteOrder.Uint32(buffer)
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) PutUint32(index int, value uint32) {
+func (floatingPointRegisters *FloatingPointRegisters) SetUint32(index int, value uint32) {
 	var size = 4
 
 	var buffer = make([]byte, size)
@@ -152,7 +157,7 @@ func (floatingPointRegisters *FloatingPointRegisters) PutUint32(index int, value
 	copy(floatingPointRegisters.data[index * size:index * size + size], buffer)
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) GetFloat32(index int) float32 {
+func (floatingPointRegisters *FloatingPointRegisters) Float32(index int) float32 {
 	var size = 4
 
 	var buffer = make([]byte, size)
@@ -162,7 +167,7 @@ func (floatingPointRegisters *FloatingPointRegisters) GetFloat32(index int) floa
 	return math.Float32frombits(floatingPointRegisters.ByteOrder.Uint32(buffer))
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) PutFloat32(index int, value float32) {
+func (floatingPointRegisters *FloatingPointRegisters) SetFloat32(index int, value float32) {
 	var size = 4
 
 	var buffer = make([]byte, size)
@@ -172,7 +177,7 @@ func (floatingPointRegisters *FloatingPointRegisters) PutFloat32(index int, valu
 	copy(floatingPointRegisters.data[index * size:index * size + size], buffer)
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) GetUint64(index int) uint64 {
+func (floatingPointRegisters *FloatingPointRegisters) Uint64(index int) uint64 {
 	var size = 8
 
 	var buffer = make([]byte, size)
@@ -182,7 +187,7 @@ func (floatingPointRegisters *FloatingPointRegisters) GetUint64(index int) uint6
 	return floatingPointRegisters.ByteOrder.Uint64(buffer)
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) PutUint64(index int, value uint64) {
+func (floatingPointRegisters *FloatingPointRegisters) SetUint64(index int, value uint64) {
 	var size = 8
 
 	var buffer = make([]byte, size)
@@ -192,7 +197,7 @@ func (floatingPointRegisters *FloatingPointRegisters) PutUint64(index int, value
 	copy(floatingPointRegisters.data[index * size:index * size + size], buffer)
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) GetFloat64(index int) float64 {
+func (floatingPointRegisters *FloatingPointRegisters) Float64(index int) float64 {
 	var size = 8
 
 	var buffer = make([]byte, size)
@@ -202,7 +207,7 @@ func (floatingPointRegisters *FloatingPointRegisters) GetFloat64(index int) floa
 	return math.Float64frombits(floatingPointRegisters.ByteOrder.Uint64(buffer))
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) PutFloat64(index int, value float64) {
+func (floatingPointRegisters *FloatingPointRegisters) SetFloat64(index int, value float64) {
 	var size = 8
 
 	var buffer = make([]byte, size)

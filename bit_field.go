@@ -1,11 +1,11 @@
 package acogo
 
 type BitField struct {
-	Hi uint
-	Lo uint
+	Hi uint32
+	Lo uint32
 }
 
-func NewBitField(hi uint, lo uint) *BitField {
+func NewBitField(hi uint32, lo uint32) *BitField {
 	var bitField = &BitField{
 		Hi:hi,
 		Lo:lo,
@@ -26,13 +26,13 @@ var (
 	FUNC_HI = NewBitField(5, 3)
 	FUNC_LO = NewBitField(2, 0)
 	COND = NewBitField(3, 0)
-	INTIMM = NewBitField(15, 0)
+	UIMM = NewBitField(15, 0)
 	TARGET = NewBitField(25, 0)
 	FMT = NewBitField(25, 21)
 	FMT3 = NewBitField(2, 0)
-	FT = NewBitField(20, 16)
 	FR = NewBitField(25, 21)
 	FS = NewBitField(15, 11)
+	FT = NewBitField(20, 16)
 	FD = NewBitField(10, 6)
 	BRANCH_CC = NewBitField(20, 18)
 	CC = NewBitField(10, 8)
