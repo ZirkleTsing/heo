@@ -128,14 +128,14 @@ const (
 type MnemonicName string
 
 type DecodeMethod struct {
-	Mask uint32
 	Bits uint32
+	Mask uint32
 }
 
-func NewDecodeMethod(mask uint32, bits uint32) DecodeMethod {
-	var decodeMethod = DecodeMethod{
-		Mask:mask,
+func NewDecodeMethod(bits uint32, mask uint32) *DecodeMethod {
+	var decodeMethod = &DecodeMethod{
 		Bits:bits,
+		Mask:mask,
 	}
 
 	return decodeMethod
@@ -146,8 +146,8 @@ type DecodeCondition struct {
 	Value    uint32
 }
 
-func NewDecodeCondition(bitField *BitField, value uint32) DecodeCondition {
-	var decodeCondition = DecodeCondition{
+func NewDecodeCondition(bitField *BitField, value uint32) *DecodeCondition {
+	var decodeCondition = &DecodeCondition{
 		BitField:bitField,
 		Value:value,
 	}
@@ -161,24 +161,25 @@ type Mnemonic struct {
 	StaticInstFlags    []StaticInstFlag
 	DecodeMethod       *DecodeMethod
 	DecodeCondition    *DecodeCondition
-	Mask               uint32
 	Bits               uint32
+	Mask               uint32
 	ExtraBitField      *BitField
 	ExtraBitFieldValue uint32
 	Execute            func(context *Context, machInst MachInst)
 }
 
-func NewMnemonic(name MnemonicName, staticInstType StaticInstType, staticInstFlags []StaticInstFlag, decodeMethod *DecodeMethod, decodeCondition *DecodeCondition, execute func(context *Context, machInst MachInst)) *Mnemonic {
+func NewMnemonic(name MnemonicName, staticInstFlags []StaticInstFlag, decodeMethod *DecodeMethod, decodeCondition *DecodeCondition, execute func(context *Context, machInst MachInst)) *Mnemonic {
 	var mnemonic = &Mnemonic{
 		Name:name,
-		StaticInstType:staticInstType,
 		StaticInstFlags:staticInstFlags,
 		DecodeMethod:decodeMethod,
 		DecodeCondition:decodeCondition,
-		Mask:decodeMethod.Mask,
 		Bits:decodeMethod.Bits,
+		Mask:decodeMethod.Mask,
 		Execute:execute,
 	}
+
+	mnemonic.StaticInstType = StaticInstType_UNKNOWN // TODO
 
 	if decodeCondition != nil {
 		mnemonic.ExtraBitField = decodeCondition.BitField
@@ -205,8 +206,248 @@ const (
 )
 
 var (
-	//TODO...
-	Add = NewMnemonic(ADD, StaticInstType_INTEGER_COMPUTATION, nil, nil, nil, func(context *Context, machInst MachInst) {
+	Add = NewMnemonic(
+		ADD,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x00000020, 0xfc0007ff),
+		nil,
+		add)
 
-	})
+	Addi = NewMnemonic(
+		ADDI,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION, StaticInstFlag_IMMEDIATE},
+		NewDecodeMethod(0x20000000, 0xfc000000),
+		nil,
+		addi)
+
+	Addiu = NewMnemonic(
+		ADDIU,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION, StaticInstFlag_IMMEDIATE},
+		NewDecodeMethod(0x24000000, 0xfc000000),
+		nil,
+		addiu)
+
+	Addu = NewMnemonic(
+		ADDU,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x00000021, 0xfc0007ff),
+		nil,
+		addu)
+
+	And = NewMnemonic(
+		AND,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x00000024, 0xfc0007ff),
+		nil,
+		and)
+
+	Andi = NewMnemonic(
+		ANDI,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION, StaticInstFlag_IMMEDIATE},
+		NewDecodeMethod(0x30000000, 0xfc000000),
+		nil,
+		andi)
+
+	Div = NewMnemonic(
+		DIV,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x0000001a, 0xfc00ffff),
+		nil,
+		div)
+
+	Divu = NewMnemonic(
+		DIVU,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x0000001a, 0xfc00ffff),
+		nil,
+		divu)
+
+	Lui = NewMnemonic(
+		LUI,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x3c000000, 0xffe00000),
+		nil,
+		nil)
+
+	Madd = NewMnemonic(
+		MADD,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x70000000, 0xfc00ffff),
+		nil,
+		nil)
+
+	Mfhi = NewMnemonic(
+		MFHI,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x00000010, 0xffff07ff),
+		nil,
+		nil)
+
+	Mflo = NewMnemonic(
+		MFLO,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x00000012, 0xffff07ff),
+		nil,
+		nil)
+
+	Msub = NewMnemonic(
+		MSUB,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x70000004, 0xfc00ffff),
+		nil,
+		nil)
+
+	Mthi = NewMnemonic(
+		MTHI,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+		nil,
+		nil)
+
+	Mtlo = NewMnemonic(
+		MTLO,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x00000013, 0xfc1fffff),
+		nil,
+		nil)
+
+	Mult = NewMnemonic(
+		MULT,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x00000018, 0xfc00003f),
+		nil,
+		nil)
+
+	Multu = NewMnemonic(
+		MULTU,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x00000019, 0xfc00003f),
+		nil,
+		nil)
+
+	Nor = NewMnemonic(
+		NOR,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x00000027, 0xfc00003f),
+		nil,
+		nil)
+
+	Or = NewMnemonic(
+		OR,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x00000025, 0xfc0007ff),
+		nil,
+		nil)
+
+	Ori = NewMnemonic(
+		ORI,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x34000000, 0xfc000000),
+		nil,
+		nil)
+
+	Sll = NewMnemonic(
+		SLL,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x00000000, 0xffe0003f),
+		nil,
+		nil)
+
+	Sllv = NewMnemonic(
+		SLLV,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x00000004, 0xfc0007ff),
+		nil,
+		nil)
+
+	Slt = NewMnemonic(
+		SLT,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x0000002a, 0xfc00003f),
+		nil,
+		nil)
+
+	Slti = NewMnemonic(
+		SLTI,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION, StaticInstFlag_IMMEDIATE},
+		NewDecodeMethod(0x28000000, 0xfc000000),
+		nil,
+		nil)
+
+	Sltiu = NewMnemonic(
+		SLTIU,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION, StaticInstFlag_IMMEDIATE},
+		NewDecodeMethod(0x2c000000, 0xfc000000),
+		nil,
+		nil)
+
+	Sltu = NewMnemonic(
+		SLTU,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION, StaticInstFlag_IMMEDIATE},
+		NewDecodeMethod(0x0000002b, 0xfc0007ff),
+		nil,
+		nil)
+
+	Sra = NewMnemonic(
+		SRA,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x00000003, 0xffe0003f),
+		nil,
+		nil)
+
+	Srav = NewMnemonic(
+		SRAV,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x00000007, 0xfc0007ff),
+		nil,
+		nil)
+
+	Srl = NewMnemonic(
+		SRL,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x00000002, 0xffe0003f),
+		nil,
+		nil)
+
+	Srlv = NewMnemonic(
+		SRLV,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x00000006, 0xfc0007ff),
+		nil,
+		nil)
+
+	Sub = NewMnemonic(
+		SUB,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x0, 0x0), // TODO: missing decoding information
+		nil,
+		nil)
+
+	Subu = NewMnemonic(
+		SUBU,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x00000023, 0xfc0007ff),
+		nil,
+		nil)
+
+	Xor = NewMnemonic(
+		XOR,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x00000026, 0xfc0007ff),
+		nil,
+		nil)
+
+	Xori = NewMnemonic(
+		XORI,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION, StaticInstFlag_IMMEDIATE},
+		NewDecodeMethod(0x38000000, 0xfc000000),
+		nil,
+		nil)
+
+	AbsD = NewMnemonic(
+		ABS_D,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000005, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		nil)
 )

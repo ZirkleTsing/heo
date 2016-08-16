@@ -92,14 +92,14 @@ const (
 
 type ArchitecturalRegisterFile struct {
 	LittleEndian bool
-	Pc           int
-	Npc          int
-	Nnpc         int
-	Gprs         [32]int
+	Pc           uint32
+	Npc          uint32
+	Nnpc         uint32
+	Gprs         [32]uint32
 	Fprs         *FloatingPointRegisters
-	Hi           int
-	Lo           int
-	Fcsr         int
+	Hi           uint32
+	Lo           uint32
+	Fcsr         uint32
 }
 
 func NewArchitecturalRegisterFile(littleEndian bool) *ArchitecturalRegisterFile {

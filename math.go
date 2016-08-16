@@ -20,14 +20,14 @@ func Bits(value uint32, first uint, last uint) uint32 {
 	return (value >> last) & Mask(first - last + 1)
 }
 
-func Mbits(value uint32, first uint, last uint) uint32 {
+func MaskBits(value uint32, first uint, last uint) uint32 {
 	return value & (Mask(first + 1) & ^Mask(last))
 }
 
-func SignExtend(value uint32) int32 {
-	return int32((value << 16) >> 16)
+func SignExtend(value uint32) uint32 {
+	return (value << 16) >> 16
 }
 
-func ZeroExtend(value int32) uint32 {
-	return uint32(value) & 0xffff
+func ZeroExtend(value uint32) uint32 {
+	return value & 0xffff
 }
