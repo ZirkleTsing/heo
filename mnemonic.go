@@ -450,4 +450,137 @@ var (
 		NewDecodeMethod(0x44000005, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
 		nil)
+
+	AbsS = NewMnemonic(
+		ABS_S,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000005, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		nil)
+
+	AddD = NewMnemonic(
+		ADD_D,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000000, 0xfc00003f),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		nil)
+
+	AddS = NewMnemonic(
+		ADD_S,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000000, 0xfc00003f),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		nil)
+
+	CCondD = NewMnemonic(
+		C_COND_D,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000030, 0xfc0000f0),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		nil)
+
+	CCondS = NewMnemonic(
+		C_COND_S,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000030, 0xfc0000f0),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		nil)
+
+	CvtDL = NewMnemonic(
+		CVT_D_L,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000021, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_LONG),
+		nil)
+
+	CvtDS = NewMnemonic(
+		CVT_D_S,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000021, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		nil)
+
+	CvtDW = NewMnemonic(
+		CVT_D_W,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000021, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_WORD),
+		nil)
+
+	CvtLD = NewMnemonic(
+		CVT_L_D,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+		nil,
+		nil)
+
+	CvtLS = NewMnemonic(
+		CVT_L_S,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+		nil,
+		nil)
+
+	CvtSD = NewMnemonic(
+		CVT_S_D,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000020, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		nil)
+
+	CvtSL = NewMnemonic(
+		CVT_S_L,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000020, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_LONG),
+		nil)
+
+	CvtSW = NewMnemonic(
+		CVT_S_W,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000020, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_WORD),
+		nil)
+
+	CvtWD = NewMnemonic(
+		CVT_W_D,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000024, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		nil)
+
+	CvtWD = NewMnemonic(
+		CVT_W_D,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000024, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		nil)
+
+	DivD = NewMnemonic(
+		DIV_D,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000003, 0xfc00003f),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		nil)
+
+	DivS = NewMnemonic(
+		DIV_S,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000003, 0xfc00003f),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		nil)
+
+	MovD = NewMnemonic(
+		MOV_D,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000006, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		nil)
+
+	MovS = NewMnemonic(
+		MOV_S,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000006, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		nil)
 )
