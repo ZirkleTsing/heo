@@ -79,6 +79,7 @@ const (
 	Mnemonic_CFC1 = "cfc1"
 	Mnemonic_CTC1 = "ctc1"
 	Mnemonic_MFC1 = "mfc1"
+	Mnemonic_MTC1 = "mtc1"
 	Mnemonic_LL = "ll"
 	Mnemonic_SC = "sc"
 	Mnemonic_NEG_D = "neg_d"
@@ -116,8 +117,8 @@ const (
 	Mnemonic_MOVF = "movf"
 	Mnemonic__MOVF = "_movf"
 	Mnemonic_MOVN = "movn"
-	Mnemonic__MOVN = "movn"
-	Mnemonic_MOVT = "movt"
+	Mnemonic__MOVN = "_movn"
+	Mnemonic__MOVT = "_movt"
 	Mnemonic_MOVZ = "movz"
 	Mnemonic__MOVZ = "_movz"
 	Mnemonic_MUL = "mul"
@@ -612,6 +613,13 @@ var (
 		nil,
 		nil)
 
+	_Movt = NewMnemonic(
+		Mnemonic__MOVT,
+		[]StaticInstFlag{StaticInstFlag_UNIMPLEMENTED},
+		NewDecodeMethod(0x44010011, 0xfc03003f),
+		nil,
+		nil)
+
 	Movz = NewMnemonic(
 		Mnemonic_MOVZ,
 		[]StaticInstFlag{StaticInstFlag_UNIMPLEMENTED},
@@ -784,6 +792,279 @@ var (
 		Mnemonic_BGEZ,
 		[]StaticInstFlag{StaticInstFlag_CONDITIONAL, StaticInstFlag_DIRECT_JUMP},
 		NewDecodeMethod(0x04010000, 0xfc1f0000),
+		nil,
+		nil)
+
+	Bgezal = NewMnemonic(
+		Mnemonic_BGEZAL,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL, StaticInstFlag_FUNCTION_CALL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x04110000, 0xfc1f0000),
+		nil,
+		nil)
+
+	Bgezall = NewMnemonic(
+		Mnemonic_BGEZALL,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL, StaticInstFlag_FUNCTION_CALL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+		nil,
+		nil)
+
+	Bgezl = NewMnemonic(
+		Mnemonic_BGEZL,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+		nil,
+		nil)
+
+	Bgtz = NewMnemonic(
+		Mnemonic_BGTZ,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x1c000000, 0xfc1f0000),
+		nil,
+		nil)
+
+	Bgtzl = NewMnemonic(
+		Mnemonic_BGTZL,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+		nil,
+		nil)
+
+	Blez = NewMnemonic(
+		Mnemonic_BLEZ,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x18000000, 0xfc1f0000),
+		nil,
+		nil)
+
+	Blezl = NewMnemonic(
+		Mnemonic_BLEZL,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+		nil,
+		nil)
+
+	Bltz = NewMnemonic(
+		Mnemonic_BLTZ,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x04000000, 0xfc1f0000),
+		nil,
+		nil)
+
+	Bltzal = NewMnemonic(
+		Mnemonic_BLTZAL,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL, StaticInstFlag_FUNCTION_CALL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+		nil,
+		nil)
+
+	Bltzall = NewMnemonic(
+		Mnemonic_BLTZALL,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL, StaticInstFlag_FUNCTION_CALL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+		nil,
+		nil)
+
+	Bltzl = NewMnemonic(
+		Mnemonic_BLTZL,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+		nil,
+		nil)
+
+	Bne = NewMnemonic(
+		Mnemonic_BNE,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x14000000, 0xfc000000),
+		nil,
+		nil)
+
+	Bnel = NewMnemonic(
+		Mnemonic_BNEL,
+		[]StaticInstFlag{StaticInstFlag_CONDITIONAL, StaticInstFlag_DIRECT_JUMP},
+		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+		nil,
+		nil)
+
+	Lb = NewMnemonic(
+		Mnemonic_LB,
+		[]StaticInstFlag{StaticInstFlag_LOAD, StaticInstFlag_DISPLACED_ADDRESSING},
+		NewDecodeMethod(0x80000000, 0xfc000000),
+		nil,
+		nil)
+
+	Lbu = NewMnemonic(
+		Mnemonic_LBU,
+		[]StaticInstFlag{StaticInstFlag_LOAD, StaticInstFlag_DISPLACED_ADDRESSING},
+		NewDecodeMethod(0x90000000, 0xfc000000),
+		nil,
+		nil)
+
+	Ldc1 = NewMnemonic(
+		Mnemonic_LDC1,
+		[]StaticInstFlag{StaticInstFlag_LOAD, StaticInstFlag_DISPLACED_ADDRESSING},
+		NewDecodeMethod(0xd4000000, 0xfc000000),
+		nil,
+		nil)
+
+	Lh = NewMnemonic(
+		Mnemonic_LH,
+		[]StaticInstFlag{StaticInstFlag_LOAD, StaticInstFlag_DISPLACED_ADDRESSING},
+		NewDecodeMethod(0x84000000, 0xfc000000),
+		nil,
+		nil)
+
+	Lhu = NewMnemonic(
+		Mnemonic_LHU,
+		[]StaticInstFlag{StaticInstFlag_LOAD, StaticInstFlag_DISPLACED_ADDRESSING},
+		NewDecodeMethod(0x94000000, 0xfc000000),
+		nil,
+		nil)
+
+	Ll = NewMnemonic(
+		Mnemonic_LL,
+		[]StaticInstFlag{StaticInstFlag_LOAD, StaticInstFlag_DISPLACED_ADDRESSING},
+		NewDecodeMethod(0xc0000000, 0xfc000000),
+		nil,
+		nil)
+
+	Lw = NewMnemonic(
+		Mnemonic_LW,
+		[]StaticInstFlag{StaticInstFlag_LOAD, StaticInstFlag_DISPLACED_ADDRESSING},
+		NewDecodeMethod(0x8c000000, 0xfc000000),
+		nil,
+		nil)
+
+	Lwc1 = NewMnemonic(
+		Mnemonic_LWC1,
+		[]StaticInstFlag{StaticInstFlag_LOAD, StaticInstFlag_DISPLACED_ADDRESSING},
+		NewDecodeMethod(0xc4000000, 0xfc000000),
+		nil,
+		nil)
+
+	Lwl = NewMnemonic(
+		Mnemonic_LWL,
+		[]StaticInstFlag{StaticInstFlag_LOAD, StaticInstFlag_DISPLACED_ADDRESSING},
+		NewDecodeMethod(0x88000000, 0xfc000000),
+		nil,
+		nil)
+
+	Lwr = NewMnemonic(
+		Mnemonic_LWR,
+		[]StaticInstFlag{StaticInstFlag_LOAD, StaticInstFlag_DISPLACED_ADDRESSING},
+		NewDecodeMethod(0x98000000, 0xfc000000),
+		nil,
+		nil)
+
+	Sb = NewMnemonic(
+		Mnemonic_SB,
+		[]StaticInstFlag{StaticInstFlag_STORE, StaticInstFlag_DISPLACED_ADDRESSING},
+		NewDecodeMethod(0xa0000000, 0xfc000000),
+		nil,
+		nil)
+
+	Sc = NewMnemonic(
+		Mnemonic_SC,
+		[]StaticInstFlag{StaticInstFlag_STORE, StaticInstFlag_DISPLACED_ADDRESSING},
+		NewDecodeMethod(0xe0000000, 0xfc000000),
+		nil,
+		nil)
+
+	Sdc1 = NewMnemonic(
+		Mnemonic_SDC1,
+		[]StaticInstFlag{StaticInstFlag_STORE, StaticInstFlag_DISPLACED_ADDRESSING},
+		NewDecodeMethod(0xf4000000, 0xfc000000),
+		nil,
+		nil)
+
+	Sh = NewMnemonic(
+		Mnemonic_SH,
+		[]StaticInstFlag{StaticInstFlag_STORE, StaticInstFlag_DISPLACED_ADDRESSING},
+		NewDecodeMethod(0xa4000000, 0xfc000000),
+		nil,
+		nil)
+
+	Sw = NewMnemonic(
+		Mnemonic_SW,
+		[]StaticInstFlag{StaticInstFlag_STORE, StaticInstFlag_DISPLACED_ADDRESSING},
+		NewDecodeMethod(0xac000000, 0xfc000000),
+		nil,
+		nil)
+
+	Swc1 = NewMnemonic(
+		Mnemonic_SWC1,
+		[]StaticInstFlag{StaticInstFlag_STORE, StaticInstFlag_DISPLACED_ADDRESSING},
+		NewDecodeMethod(0xe4000000, 0xfc000000),
+		nil,
+		nil)
+
+	Swl = NewMnemonic(
+		Mnemonic_SWL,
+		[]StaticInstFlag{StaticInstFlag_STORE, StaticInstFlag_DISPLACED_ADDRESSING},
+		NewDecodeMethod(0xa8000000, 0xfc000000),
+		nil,
+		nil)
+
+	Swr = NewMnemonic(
+		Mnemonic_SWR,
+		[]StaticInstFlag{StaticInstFlag_STORE, StaticInstFlag_DISPLACED_ADDRESSING},
+		NewDecodeMethod(0xb8000000, 0xfc000000),
+		nil,
+		nil)
+
+	Cfc1 = NewMnemonic(
+		Mnemonic_CFC1,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x44400000, 0xffe007ff),
+		nil,
+		nil)
+
+	Ctc1 = NewMnemonic(
+		Mnemonic_CTC1,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x44c00000, 0xffe007ff),
+		nil,
+		nil)
+
+	Mfc1 = NewMnemonic(
+		Mnemonic_MFC1,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x44000000, 0xffe007ff),
+		nil,
+		nil)
+
+	Mtc1 = NewMnemonic(
+		Mnemonic_MTC1,
+		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
+		NewDecodeMethod(0x44800000, 0xffe007ff),
+		nil,
+		nil)
+
+	Break = NewMnemonic(
+		Mnemonic_BREAK,
+		[]StaticInstFlag{StaticInstFlag_TRAP},
+		NewDecodeMethod(0x0000000d, 0xfc00003f),
+		nil,
+		nil)
+
+	SystemCall = NewMnemonic(
+		Mnemonic_SYSTEM_CALL,
+		[]StaticInstFlag{StaticInstFlag_TRAP},
+		NewDecodeMethod(0x0000000c, 0xfc00003f),
+		nil,
+		nil)
+
+	Nop = NewMnemonic(
+		Mnemonic_NOP,
+		[]StaticInstFlag{StaticInstFlag_NOP},
+		NewDecodeMethod(0x00000000, 0xffffffff),
+		nil,
+		nil)
+
+	Unknown = NewMnemonic(
+		Mnemonic_UNKNOWN,
+		[]StaticInstFlag{StaticInstFlag_UNKNOWN},
+		NewDecodeMethod(0x0, 0x0), //TODO: special support for unknown instruction
 		nil,
 		nil)
 )
