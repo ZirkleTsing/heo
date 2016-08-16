@@ -1,128 +1,128 @@
 package acogo
 
 const (
-	NOP = "nop"
-	BREAK = "break"
-	SYSTEM_CALL = "system_call"
-	ADD = "add"
-	ADDI = "addi"
-	ADDIU = "addiu"
-	ADDU = "addu"
-	SUB = "sub"
-	SUBU = "subu"
-	AND = "and"
-	ANDI = "andi"
-	NOR = "nor"
-	OR = "or"
-	ORI = "ori"
-	XOR = "xor"
-	XORI = "xori"
-	MULT = "mult"
-	MULTU = "multu"
-	DIV = "div"
-	DIVU = "divu"
-	SLL = "sll"
-	SLLV = "sllv"
-	SLT = "slt"
-	SLTI = "slti"
-	SLTIU = "sltiu"
-	SLTU = "sltu"
-	SRA = "sra"
-	SRAV = "srav"
-	SRL = "srl"
-	SRLV = "srlv"
-	MADD = "madd"
-	MSUB = "msub"
-	B = "b"
-	BAL = "bal"
-	BEQ = "beq"
-	BEQL = "beql"
-	BGEZ = "bgez"
-	BGEZL = "bgezl"
-	BGEZAL = "bgezal"
-	BGEZALL = "bgezall"
-	BGTZ = "bgtz"
-	BGTZL = "bgtzl"
-	BLEZ = "blez"
-	BLEZL = "blezl"
-	BLTZ = "bltz"
-	BLTZL = "bltzl"
-	BLTZAL = "bltzal"
-	BLTZALL = "bltzall"
-	BNE = "bne"
-	BNEL = "bnel"
-	J = "j"
-	JAL = "jal"
-	JALR = "jalr"
-	JR = "jr"
-	LB = "lb"
-	LBU = "lbu"
-	LH = "lh"
-	LHU = "lhu"
-	LUI = "lui"
-	LW = "lw"
-	LWL = "lwl"
-	LWR = "lwr"
-	SB = "sb"
-	SH = "sh"
-	SW = "sw"
-	SWL = "swl"
-	SWR = "swr"
-	LDC1 = "ldc1"
-	LWC1 = "lwc1"
-	SDC1 = "sdc1"
-	SWC1 = "swc1"
-	MFHI = "mfhi"
-	MFLO = "mflo"
-	MTHI = "mthi"
-	MTLO = "mtlo"
-	CFC1 = "cfc1"
-	CTC1 = "ctc1"
-	MFC1 = "mfc1"
-	LL = "ll"
-	SC = "sc"
-	NEG_D = "neg_d"
-	MOV_D = "mov_d"
-	SQRT_D = "sqrt_d"
-	ABS_D = "abs_d"
-	MUL_D = "mul_d"
-	DIV_D = "div_d"
-	ADD_D = "add_d"
-	SUB_D = "sub_d"
-	MUL_S = "mul_s"
-	DIV_S = "div_s"
-	ADD_S = "add_s"
-	SUB_S = "sub_s"
-	MOV_S = "mov_s"
-	NEG_S = "neg_s"
-	ABS_S = "abs_s"
-	SQRT_S = "sqrt_s"
-	C_COND_D = "c_cond_d"
-	C_COND_S = "c_cond_s"
-	CVT_D_L = "cvt_d_l"
-	CVT_S_L = "cvt_s_l"
-	CVT_D_W = "cvt_d_w"
-	CVT_S_W = "cvt_s_w"
-	CVT_L_D = "cvt_l_d"
-	CVT_W_D = "cvt_w_d"
-	CVT_S_D = "cvt_s_d"
-	CVT_L_S = "cvt_l_s"
-	CVT_W_S = "cvt_w_s"
-	CVT_D_S = "cvt_d_s"
-	BC1FL = "bc1fl"
-	BC1TL = "bc1tl"
-	BC1F = "bc1f"
-	BC1T = "bc1t"
-	MOVF = "movf"
-	_MOVF = "_movf"
-	MOVN = "movn"
-	_MOVN = "movn"
-	_MOVT = "movt"
-	MOVZ = "movz"
-	_MOVZ = "_movz"
-	MUL = "mul"
-	TRUNC_W = "trunc_w"
-	UNKNOWN = "unknown"
+	Mnemonic_NOP = "nop"
+	Mnemonic_BREAK = "break"
+	Mnemonic_SYSTEM_CALL = "system_call"
+	Mnemonic_ADD = "add"
+	Mnemonic_ADDI = "addi"
+	Mnemonic_ADDIU = "addiu"
+	Mnemonic_ADDU = "addu"
+	Mnemonic_SUB = "sub"
+	Mnemonic_SUBU = "subu"
+	Mnemonic_AND = "and"
+	Mnemonic_ANDI = "andi"
+	Mnemonic_NOR = "nor"
+	Mnemonic_OR = "or"
+	Mnemonic_ORI = "ori"
+	Mnemonic_XOR = "xor"
+	Mnemonic_XORI = "xori"
+	Mnemonic_MULT = "mult"
+	Mnemonic_MULTU = "multu"
+	Mnemonic_DIV = "div"
+	Mnemonic_DIVU = "divu"
+	Mnemonic_SLL = "sll"
+	Mnemonic_SLLV = "sllv"
+	Mnemonic_SLT = "slt"
+	Mnemonic_SLTI = "slti"
+	Mnemonic_SLTIU = "sltiu"
+	Mnemonic_SLTU = "sltu"
+	Mnemonic_SRA = "sra"
+	Mnemonic_SRAV = "srav"
+	Mnemonic_SRL = "srl"
+	Mnemonic_SRLV = "srlv"
+	Mnemonic_MADD = "madd"
+	Mnemonic_MSUB = "msub"
+	Mnemonic_B = "b"
+	Mnemonic_BAL = "bal"
+	Mnemonic_BEQ = "beq"
+	Mnemonic_BEQL = "beql"
+	Mnemonic_BGEZ = "bgez"
+	Mnemonic_BGEZL = "bgezl"
+	Mnemonic_BGEZAL = "bgezal"
+	Mnemonic_BGEZALL = "bgezall"
+	Mnemonic_BGTZ = "bgtz"
+	Mnemonic_BGTZL = "bgtzl"
+	Mnemonic_BLEZ = "blez"
+	Mnemonic_BLEZL = "blezl"
+	Mnemonic_BLTZ = "bltz"
+	Mnemonic_BLTZL = "bltzl"
+	Mnemonic_BLTZAL = "bltzal"
+	Mnemonic_BLTZALL = "bltzall"
+	Mnemonic_BNE = "bne"
+	Mnemonic_BNEL = "bnel"
+	Mnemonic_J = "j"
+	Mnemonic_JAL = "jal"
+	Mnemonic_JALR = "jalr"
+	Mnemonic_JR = "jr"
+	Mnemonic_LB = "lb"
+	Mnemonic_LBU = "lbu"
+	Mnemonic_LH = "lh"
+	Mnemonic_LHU = "lhu"
+	Mnemonic_LUI = "lui"
+	Mnemonic_LW = "lw"
+	Mnemonic_LWL = "lwl"
+	Mnemonic_LWR = "lwr"
+	Mnemonic_SB = "sb"
+	Mnemonic_SH = "sh"
+	Mnemonic_SW = "sw"
+	Mnemonic_SWL = "swl"
+	Mnemonic_SWR = "swr"
+	Mnemonic_LDC1 = "ldc1"
+	Mnemonic_LWC1 = "lwc1"
+	Mnemonic_SDC1 = "sdc1"
+	Mnemonic_SWC1 = "swc1"
+	Mnemonic_MFHI = "mfhi"
+	Mnemonic_MFLO = "mflo"
+	Mnemonic_MTHI = "mthi"
+	Mnemonic_MTLO = "mtlo"
+	Mnemonic_CFC1 = "cfc1"
+	Mnemonic_CTC1 = "ctc1"
+	Mnemonic_MFC1 = "mfc1"
+	Mnemonic_LL = "ll"
+	Mnemonic_SC = "sc"
+	Mnemonic_NEG_D = "neg_d"
+	Mnemonic_MOV_D = "mov_d"
+	Mnemonic_SQRT_D = "sqrt_d"
+	Mnemonic_ABS_D = "abs_d"
+	Mnemonic_MUL_D = "mul_d"
+	Mnemonic_DIV_D = "div_d"
+	Mnemonic_ADD_D = "add_d"
+	Mnemonic_SUB_D = "sub_d"
+	Mnemonic_MUL_S = "mul_s"
+	Mnemonic_DIV_S = "div_s"
+	Mnemonic_ADD_S = "add_s"
+	Mnemonic_SUB_S = "sub_s"
+	Mnemonic_MOV_S = "mov_s"
+	Mnemonic_NEG_S = "neg_s"
+	Mnemonic_ABS_S = "abs_s"
+	Mnemonic_SQRT_S = "sqrt_s"
+	Mnemonic_C_COND_D = "c_cond_d"
+	Mnemonic_C_COND_S = "c_cond_s"
+	Mnemonic_CVT_D_L = "cvt_d_l"
+	Mnemonic_CVT_S_L = "cvt_s_l"
+	Mnemonic_CVT_D_W = "cvt_d_w"
+	Mnemonic_CVT_S_W = "cvt_s_w"
+	Mnemonic_CVT_L_D = "cvt_l_d"
+	Mnemonic_CVT_W_D = "cvt_w_d"
+	Mnemonic_CVT_S_D = "cvt_s_d"
+	Mnemonic_CVT_L_S = "cvt_l_s"
+	Mnemonic_CVT_W_S = "cvt_w_s"
+	Mnemonic_CVT_D_S = "cvt_d_s"
+	Mnemonic_BC1FL = "bc1fl"
+	Mnemonic_BC1TL = "bc1tl"
+	Mnemonic_BC1F = "bc1f"
+	Mnemonic_BC1T = "bc1t"
+	Mnemonic_MOVF = "movf"
+	Mnemonic__MOVF = "_movf"
+	Mnemonic_MOVN = "movn"
+	Mnemonic__MOVN = "movn"
+	Mnemonic_MOVT = "movt"
+	Mnemonic_MOVZ = "movz"
+	Mnemonic__MOVZ = "_movz"
+	Mnemonic_MUL = "mul"
+	Mnemonic_TRUNC_W = "trunc_w"
+	Mnemonic_UNKNOWN = "unknown"
 )
 
 type MnemonicName string
@@ -207,380 +207,492 @@ const (
 
 var (
 	Add = NewMnemonic(
-		ADD,
+		Mnemonic_ADD,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x00000020, 0xfc0007ff),
 		nil,
 		add)
 
 	Addi = NewMnemonic(
-		ADDI,
+		Mnemonic_ADDI,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION, StaticInstFlag_IMMEDIATE},
 		NewDecodeMethod(0x20000000, 0xfc000000),
 		nil,
 		addi)
 
 	Addiu = NewMnemonic(
-		ADDIU,
+		Mnemonic_ADDIU,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION, StaticInstFlag_IMMEDIATE},
 		NewDecodeMethod(0x24000000, 0xfc000000),
 		nil,
 		addiu)
 
 	Addu = NewMnemonic(
-		ADDU,
+		Mnemonic_ADDU,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x00000021, 0xfc0007ff),
 		nil,
 		addu)
 
 	And = NewMnemonic(
-		AND,
+		Mnemonic_AND,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x00000024, 0xfc0007ff),
 		nil,
 		and)
 
 	Andi = NewMnemonic(
-		ANDI,
+		Mnemonic_ANDI,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION, StaticInstFlag_IMMEDIATE},
 		NewDecodeMethod(0x30000000, 0xfc000000),
 		nil,
 		andi)
 
 	Div = NewMnemonic(
-		DIV,
+		Mnemonic_DIV,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x0000001a, 0xfc00ffff),
 		nil,
 		div)
 
 	Divu = NewMnemonic(
-		DIVU,
+		Mnemonic_DIVU,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x0000001a, 0xfc00ffff),
 		nil,
 		divu)
 
 	Lui = NewMnemonic(
-		LUI,
+		Mnemonic_LUI,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x3c000000, 0xffe00000),
 		nil,
 		nil)
 
 	Madd = NewMnemonic(
-		MADD,
+		Mnemonic_MADD,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x70000000, 0xfc00ffff),
 		nil,
 		nil)
 
 	Mfhi = NewMnemonic(
-		MFHI,
+		Mnemonic_MFHI,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x00000010, 0xffff07ff),
 		nil,
 		nil)
 
 	Mflo = NewMnemonic(
-		MFLO,
+		Mnemonic_MFLO,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x00000012, 0xffff07ff),
 		nil,
 		nil)
 
 	Msub = NewMnemonic(
-		MSUB,
+		Mnemonic_MSUB,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x70000004, 0xfc00ffff),
 		nil,
 		nil)
 
 	Mthi = NewMnemonic(
-		MTHI,
+		Mnemonic_MTHI,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
 		nil,
 		nil)
 
 	Mtlo = NewMnemonic(
-		MTLO,
+		Mnemonic_MTLO,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x00000013, 0xfc1fffff),
 		nil,
 		nil)
 
 	Mult = NewMnemonic(
-		MULT,
+		Mnemonic_MULT,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x00000018, 0xfc00003f),
 		nil,
 		nil)
 
 	Multu = NewMnemonic(
-		MULTU,
+		Mnemonic_MULTU,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x00000019, 0xfc00003f),
 		nil,
 		nil)
 
 	Nor = NewMnemonic(
-		NOR,
+		Mnemonic_NOR,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x00000027, 0xfc00003f),
 		nil,
 		nil)
 
 	Or = NewMnemonic(
-		OR,
+		Mnemonic_OR,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x00000025, 0xfc0007ff),
 		nil,
 		nil)
 
 	Ori = NewMnemonic(
-		ORI,
+		Mnemonic_ORI,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x34000000, 0xfc000000),
 		nil,
 		nil)
 
 	Sll = NewMnemonic(
-		SLL,
+		Mnemonic_SLL,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x00000000, 0xffe0003f),
 		nil,
 		nil)
 
 	Sllv = NewMnemonic(
-		SLLV,
+		Mnemonic_SLLV,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x00000004, 0xfc0007ff),
 		nil,
 		nil)
 
 	Slt = NewMnemonic(
-		SLT,
+		Mnemonic_SLT,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x0000002a, 0xfc00003f),
 		nil,
 		nil)
 
 	Slti = NewMnemonic(
-		SLTI,
+		Mnemonic_SLTI,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION, StaticInstFlag_IMMEDIATE},
 		NewDecodeMethod(0x28000000, 0xfc000000),
 		nil,
 		nil)
 
 	Sltiu = NewMnemonic(
-		SLTIU,
+		Mnemonic_SLTIU,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION, StaticInstFlag_IMMEDIATE},
 		NewDecodeMethod(0x2c000000, 0xfc000000),
 		nil,
 		nil)
 
 	Sltu = NewMnemonic(
-		SLTU,
+		Mnemonic_SLTU,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION, StaticInstFlag_IMMEDIATE},
 		NewDecodeMethod(0x0000002b, 0xfc0007ff),
 		nil,
 		nil)
 
 	Sra = NewMnemonic(
-		SRA,
+		Mnemonic_SRA,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x00000003, 0xffe0003f),
 		nil,
 		nil)
 
 	Srav = NewMnemonic(
-		SRAV,
+		Mnemonic_SRAV,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x00000007, 0xfc0007ff),
 		nil,
 		nil)
 
 	Srl = NewMnemonic(
-		SRL,
+		Mnemonic_SRL,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x00000002, 0xffe0003f),
 		nil,
 		nil)
 
 	Srlv = NewMnemonic(
-		SRLV,
+		Mnemonic_SRLV,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x00000006, 0xfc0007ff),
 		nil,
 		nil)
 
 	Sub = NewMnemonic(
-		SUB,
+		Mnemonic_SUB,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x0, 0x0), // TODO: missing decoding information
 		nil,
 		nil)
 
 	Subu = NewMnemonic(
-		SUBU,
+		Mnemonic_SUBU,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x00000023, 0xfc0007ff),
 		nil,
 		nil)
 
 	Xor = NewMnemonic(
-		XOR,
+		Mnemonic_XOR,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION},
 		NewDecodeMethod(0x00000026, 0xfc0007ff),
 		nil,
 		nil)
 
 	Xori = NewMnemonic(
-		XORI,
+		Mnemonic_XORI,
 		[]StaticInstFlag{StaticInstFlag_INTEGER_COMPUTATION, StaticInstFlag_IMMEDIATE},
 		NewDecodeMethod(0x38000000, 0xfc000000),
 		nil,
 		nil)
 
 	AbsD = NewMnemonic(
-		ABS_D,
+		Mnemonic_ABS_D,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x44000005, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
 		nil)
 
 	AbsS = NewMnemonic(
-		ABS_S,
+		Mnemonic_ABS_S,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x44000005, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_SINGLE),
 		nil)
 
 	AddD = NewMnemonic(
-		ADD_D,
+		Mnemonic_ADD_D,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x44000000, 0xfc00003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
 		nil)
 
 	AddS = NewMnemonic(
-		ADD_S,
+		Mnemonic_ADD_S,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x44000000, 0xfc00003f),
 		NewDecodeCondition(FMT, FMT_SINGLE),
 		nil)
 
 	CCondD = NewMnemonic(
-		C_COND_D,
+		Mnemonic_C_COND_D,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x44000030, 0xfc0000f0),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
 		nil)
 
 	CCondS = NewMnemonic(
-		C_COND_S,
+		Mnemonic_C_COND_S,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x44000030, 0xfc0000f0),
 		NewDecodeCondition(FMT, FMT_SINGLE),
 		nil)
 
 	CvtDL = NewMnemonic(
-		CVT_D_L,
+		Mnemonic_CVT_D_L,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x44000021, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_LONG),
 		nil)
 
 	CvtDS = NewMnemonic(
-		CVT_D_S,
+		Mnemonic_CVT_D_S,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x44000021, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_SINGLE),
 		nil)
 
 	CvtDW = NewMnemonic(
-		CVT_D_W,
+		Mnemonic_CVT_D_W,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x44000021, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_WORD),
 		nil)
 
 	CvtLD = NewMnemonic(
-		CVT_L_D,
+		Mnemonic_CVT_L_D,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
 		nil,
 		nil)
 
 	CvtLS = NewMnemonic(
-		CVT_L_S,
+		Mnemonic_CVT_L_S,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
 		nil,
 		nil)
 
 	CvtSD = NewMnemonic(
-		CVT_S_D,
+		Mnemonic_CVT_S_D,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x44000020, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
 		nil)
 
 	CvtSL = NewMnemonic(
-		CVT_S_L,
+		Mnemonic_CVT_S_L,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x44000020, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_LONG),
 		nil)
 
 	CvtSW = NewMnemonic(
-		CVT_S_W,
+		Mnemonic_CVT_S_W,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x44000020, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_WORD),
 		nil)
 
 	CvtWD = NewMnemonic(
-		CVT_W_D,
+		Mnemonic_CVT_W_D,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x44000024, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
 		nil)
 
-	CvtWD = NewMnemonic(
-		CVT_W_D,
+	CvtWS = NewMnemonic(
+		Mnemonic_CVT_W_S,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x44000024, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_SINGLE),
 		nil)
 
 	DivD = NewMnemonic(
-		DIV_D,
+		Mnemonic_DIV_D,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x44000003, 0xfc00003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
 		nil)
 
 	DivS = NewMnemonic(
-		DIV_S,
+		Mnemonic_DIV_S,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x44000003, 0xfc00003f),
 		NewDecodeCondition(FMT, FMT_SINGLE),
 		nil)
 
 	MovD = NewMnemonic(
-		MOV_D,
+		Mnemonic_MOV_D,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x44000006, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
 		nil)
 
 	MovS = NewMnemonic(
-		MOV_S,
+		Mnemonic_MOV_S,
 		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
 		NewDecodeMethod(0x44000006, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		nil)
+
+	Movf = NewMnemonic(
+		Mnemonic_MOVF,
+		[]StaticInstFlag{StaticInstFlag_UNIMPLEMENTED},
+		NewDecodeMethod(0x00000001, 0xfc0307ff),
+		nil,
+		nil)
+
+	_Movf = NewMnemonic(
+		Mnemonic__MOVF,
+		[]StaticInstFlag{StaticInstFlag_UNIMPLEMENTED},
+		NewDecodeMethod(0x44000011, 0xfc03003f),
+		nil,
+		nil)
+
+	Movn = NewMnemonic(
+		Mnemonic_MOVN,
+		[]StaticInstFlag{StaticInstFlag_UNIMPLEMENTED},
+		NewDecodeMethod(0x0000000b, 0xfc0007ff),
+		nil,
+		nil)
+
+	_Movn = NewMnemonic(
+		Mnemonic__MOVN,
+		[]StaticInstFlag{StaticInstFlag_UNIMPLEMENTED},
+		NewDecodeMethod(0x44000013, 0xfc00003f),
+		nil,
+		nil)
+
+	Movz = NewMnemonic(
+		Mnemonic_MOVZ,
+		[]StaticInstFlag{StaticInstFlag_UNIMPLEMENTED},
+		NewDecodeMethod(0x0000000a, 0xfc0007ff),
+		nil,
+		nil)
+
+	_Movz = NewMnemonic(
+		Mnemonic__MOVZ,
+		[]StaticInstFlag{StaticInstFlag_UNIMPLEMENTED},
+		NewDecodeMethod(0x44000012, 0xfc00003f),
+		nil,
+		nil)
+
+	Mul = NewMnemonic(
+		Mnemonic_MUL,
+		[]StaticInstFlag{StaticInstFlag_UNIMPLEMENTED},
+		NewDecodeMethod(0x70000002, 0xfc0007ff),
+		nil,
+		nil)
+
+	TruncW = NewMnemonic(
+		Mnemonic_TRUNC_W,
+		[]StaticInstFlag{StaticInstFlag_UNIMPLEMENTED},
+		NewDecodeMethod(0x4400000d, 0xfc1f003f),
+		nil,
+		nil)
+
+	MulD = NewMnemonic(
+		Mnemonic_MUL_D,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000002, 0xfc00003f),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		nil)
+
+	MulS = NewMnemonic(
+		Mnemonic_MUL_S,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000002, 0xfc00003f),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		nil)
+
+	NegD = NewMnemonic(
+		Mnemonic_NEG_D,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000007, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		nil)
+
+	NegS = NewMnemonic(
+		Mnemonic_NEG_S,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000007, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		nil)
+
+	SqrtD = NewMnemonic(
+		Mnemonic_SQRT_D,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000004, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		nil)
+
+	SqrtS = NewMnemonic(
+		Mnemonic_SQRT_S,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000004, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		nil)
+
+	SubD = NewMnemonic(
+		Mnemonic_SUB_D,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000001, 0xfc00003f),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		nil)
+
+	SubS = NewMnemonic(
+		Mnemonic_SUB_S,
+		[]StaticInstFlag{StaticInstFlag_FLOAT_COMPUTATION},
+		NewDecodeMethod(0x44000001, 0xfc00003f),
 		NewDecodeCondition(FMT, FMT_SINGLE),
 		nil)
 )
