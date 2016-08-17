@@ -137,8 +137,8 @@ func NewFloatingPointRegisters(littleEndian bool) *FloatingPointRegisters {
 	return floatingPointRegisters
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) Uint32(index int) uint32 {
-	var size = 4
+func (floatingPointRegisters *FloatingPointRegisters) Uint32(index uint32) uint32 {
+	var size = uint32(4)
 
 	var buffer = make([]byte, size)
 
@@ -147,8 +147,8 @@ func (floatingPointRegisters *FloatingPointRegisters) Uint32(index int) uint32 {
 	return floatingPointRegisters.ByteOrder.Uint32(buffer)
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) SetUint32(index int, value uint32) {
-	var size = 4
+func (floatingPointRegisters *FloatingPointRegisters) SetUint32(index uint32, value uint32) {
+	var size = uint32(4)
 
 	var buffer = make([]byte, size)
 
@@ -157,8 +157,8 @@ func (floatingPointRegisters *FloatingPointRegisters) SetUint32(index int, value
 	copy(floatingPointRegisters.data[index * size:index * size + size], buffer)
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) Float32(index int) float32 {
-	var size = 4
+func (floatingPointRegisters *FloatingPointRegisters) Float32(index uint32) float32 {
+	var size = uint32(4)
 
 	var buffer = make([]byte, size)
 
@@ -167,8 +167,8 @@ func (floatingPointRegisters *FloatingPointRegisters) Float32(index int) float32
 	return math.Float32frombits(floatingPointRegisters.ByteOrder.Uint32(buffer))
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) SetFloat32(index int, value float32) {
-	var size = 4
+func (floatingPointRegisters *FloatingPointRegisters) SetFloat32(index uint32, value float32) {
+	var size = uint32(4)
 
 	var buffer = make([]byte, size)
 
@@ -177,8 +177,8 @@ func (floatingPointRegisters *FloatingPointRegisters) SetFloat32(index int, valu
 	copy(floatingPointRegisters.data[index * size:index * size + size], buffer)
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) Uint64(index int) uint64 {
-	var size = 8
+func (floatingPointRegisters *FloatingPointRegisters) Uint64(index uint32) uint64 {
+	var size = uint32(8)
 
 	var buffer = make([]byte, size)
 
@@ -187,8 +187,8 @@ func (floatingPointRegisters *FloatingPointRegisters) Uint64(index int) uint64 {
 	return floatingPointRegisters.ByteOrder.Uint64(buffer)
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) SetUint64(index int, value uint64) {
-	var size = 8
+func (floatingPointRegisters *FloatingPointRegisters) SetUint64(index uint32, value uint64) {
+	var size = uint32(8)
 
 	var buffer = make([]byte, size)
 
@@ -197,8 +197,8 @@ func (floatingPointRegisters *FloatingPointRegisters) SetUint64(index int, value
 	copy(floatingPointRegisters.data[index * size:index * size + size], buffer)
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) Float64(index int) float64 {
-	var size = 8
+func (floatingPointRegisters *FloatingPointRegisters) Float64(index uint32) float64 {
+	var size = uint32(8)
 
 	var buffer = make([]byte, size)
 
@@ -207,8 +207,8 @@ func (floatingPointRegisters *FloatingPointRegisters) Float64(index int) float64
 	return math.Float64frombits(floatingPointRegisters.ByteOrder.Uint64(buffer))
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) SetFloat64(index int, value float64) {
-	var size = 8
+func (floatingPointRegisters *FloatingPointRegisters) SetFloat64(index uint32, value float64) {
+	var size = uint32(8)
 
 	var buffer = make([]byte, size)
 
