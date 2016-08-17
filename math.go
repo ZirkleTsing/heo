@@ -1,14 +1,5 @@
 package acogo
 
-type half uint16
-type word uint32
-type dword uint64
-
-type sbyte int8
-type shalf int16
-type sword int32
-type sdword int64
-
 func Sext32(x uint32, b uint32) int32 {
 	if uint32(x) & (uint32(1) << (b - 1)) != 0 {
 		return int32(uint32(x) | ^((uint32(1) << b) - 1))
