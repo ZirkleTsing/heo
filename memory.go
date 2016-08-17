@@ -121,6 +121,10 @@ func (memory *Memory) WriteString(virtualAddress uint32, data string) {
 	memory.Access(virtualAddress, uint32(len(buffer)), &buffer, true, true)
 }
 
+func (memory *Memory) WriteBlock(virtualAddress uint32, size uint32, data []byte) {
+	memory.Access(virtualAddress, size, &data, true, true)
+}
+
 func (memory *Memory) Access(virtualAddress uint32, size uint32, buffer *[]byte, write bool, createNewPageIfNecessary bool) {
 	var offset uint32 = 0
 
