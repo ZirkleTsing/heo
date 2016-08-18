@@ -14,7 +14,7 @@ type Process struct {
 	DataTop              uint32
 	ProgramEntry         uint32
 	LittleEndian         bool
-	Memory               *Memory
+	Memory               *PagedMemory
 }
 
 func NewProcess(kernel *Kernel, contextMapping *ContextMapping) *Process {

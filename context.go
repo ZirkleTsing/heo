@@ -14,7 +14,7 @@ type Context struct {
 	State            ContextState
 	SignalMasks      SignalMasks
 	SignalFinish     uint32
-	Memory           *Memory
+	Memory           *PagedMemory
 	Regs             *ArchitecturalRegisterFile
 	Kernel           *Kernel
 	ThreadId         int32
@@ -30,7 +30,7 @@ type Context struct {
 func NewContext(id int, littleEndian bool) *Context {
 	var context = &Context{
 		Id: id,
-		Memory:NewMemory(littleEndian),
+		Memory:NewPagedMemory(littleEndian),
 		Regs:NewArchitecturalRegisterFile(littleEndian),
 	}
 
