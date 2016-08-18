@@ -1,7 +1,7 @@
 package acogo
 
 type ACOSelectionAlgorithm struct {
-	Node *Node
+	Node           *Node
 	PheromoneTable *PheromoneTable
 }
 

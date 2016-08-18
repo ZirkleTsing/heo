@@ -15,7 +15,7 @@ func NewVirtualChannelArbiter(outputVirtualChannel *OutputVirtualChannel) *Virtu
 }
 
 func (arbiter *VirtualChannelArbiter) Next() *InputVirtualChannel {
-	for i:= 0; i < len(arbiter.InputVirtualChannelRing.GetChannels()); i++ {
+	for i := 0; i < len(arbiter.InputVirtualChannelRing.GetChannels()); i++ {
 		var inputVirtualChannel = arbiter.InputVirtualChannelRing.Next()
 		if inputVirtualChannel.Route == arbiter.OutputVirtualChannel.OutputPort.Direction {
 			var flit = inputVirtualChannel.InputBuffer.Peek()

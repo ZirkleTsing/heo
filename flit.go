@@ -3,13 +3,14 @@ package acogo
 import "fmt"
 
 type Flit struct {
-	Packet    Packet
-	Num       int
-	Head      bool
-	Tail      bool
-	node      *Node
-	state     FlitState
-	prevStateTimestamp, Timestamp int64
+	Packet             Packet
+	Num                int
+	Head               bool
+	Tail               bool
+	node               *Node
+	state              FlitState
+	prevStateTimestamp int64
+	Timestamp          int64
 }
 
 func NewFlit(packet Packet, num int, head bool, tail bool) *Flit {
@@ -31,7 +32,6 @@ func NewFlit(packet Packet, num int, head bool, tail bool) *Flit {
 func (flit *Flit) GetNode() *Node {
 	return flit.node
 }
-
 
 func (flit *Flit) GetState() FlitState {
 	return flit.state

@@ -40,7 +40,7 @@ func (signalCriterion *SignalCriterion) NeedProcess(context *Context) bool {
 }
 
 type WaitForProcessIdCriterion struct {
-	ProcessId uint32
+	ProcessId        uint32
 	HasProcessKilled bool
 }
 
@@ -61,8 +61,8 @@ func (waitForProcessIdCriterion *WaitForProcessIdCriterion) NeedProcess(context 
 type WaitForFileDescriptorCriterion struct {
 	//TODO: buffer
 	Address uint32
-	Size uint32
-	Pufds uint32
+	Size    uint32
+	Pufds   uint32
 }
 
 func NewWaitForFileDescriptorCriterion() *WaitForFileDescriptorCriterion {
@@ -87,14 +87,14 @@ const (
 type SystemEventType uint32
 
 type SystemEvent interface {
-	GetContext()   *Context
+	GetContext() *Context
 	GetEventType() SystemEventType
 	NeedProcess() bool
 	Process()
 }
 
 type BaseSystemEvent struct {
-	Context *Context
+	Context   *Context
 	EventType SystemEventType
 }
 
@@ -109,7 +109,7 @@ func NewBaseSystemEvent(context *Context, eventType SystemEventType) *BaseSystem
 
 type PollEvent struct {
 	*BaseSystemEvent
-	TimeCriterion *TimeCriterion
+	TimeCriterion                  *TimeCriterion
 	WaitForFileDescriptorCriterion *WaitForFileDescriptorCriterion
 }
 
@@ -191,7 +191,7 @@ func NewSignalSuspendEvent(context *Context) *SignalSuspendEvent {
 }
 
 func (signalSuspendEvent *SignalSuspendEvent) NeedProcess(context *Context) bool {
-	return  signalSuspendEvent.SignalCriterion.NeedProcess(context)
+	return signalSuspendEvent.SignalCriterion.NeedProcess(context)
 }
 
 func (signalSuspendEvent *SignalSuspendEvent) Process() {
@@ -201,7 +201,7 @@ func (signalSuspendEvent *SignalSuspendEvent) Process() {
 type WaitEvent struct {
 	*BaseSystemEvent
 	WaitForProcessIdCriterion *WaitForProcessIdCriterion
-	SignalCriterion *SignalCriterion
+	SignalCriterion           *SignalCriterion
 }
 
 func NewWaitEvent(context *Context, processId uint32) *WaitEvent {

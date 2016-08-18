@@ -1,7 +1,7 @@
 package acogo
 
 type NorthLastRoutingAlgorithm struct {
-	Node *Node
+	Node               *Node
 	XYRoutingAlgorithm *XYRoutingAlgorithm
 }
 

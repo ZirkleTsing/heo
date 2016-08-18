@@ -3,9 +3,9 @@ package acogo
 import "container/ring"
 
 type InputVirtualChannelRing struct {
-	Router *Router
+	Router   *Router
 	Channels []*InputVirtualChannel
-	ring   *ring.Ring
+	ring     *ring.Ring
 }
 
 func NewInputVirtualChannelRing(router *Router) *InputVirtualChannelRing {

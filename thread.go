@@ -1,9 +1,9 @@
 package acogo
 
 type Thread struct {
-	Num int
-	Context *Context
-	Core *Core
+	Num             int
+	Context         *Context
+	Core            *Core
 	NumInstructions int64
 }
 

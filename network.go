@@ -5,35 +5,35 @@ import (
 )
 
 type Network struct {
-	Experiment            *Experiment
-	CurrentPacketId       int64
-	NumNodes              int
-	Nodes                 []*Node
-	Width                 int
-	AcceptPacket          bool
-	TrafficGenerators     []TrafficGenerator
+	Experiment                   *Experiment
+	CurrentPacketId              int64
+	NumNodes                     int
+	Nodes                        []*Node
+	Width                        int
+	AcceptPacket                 bool
+	TrafficGenerators            []TrafficGenerator
 
-	NumPacketsReceived    int64
-	NumPacketsTransmitted int64
+	NumPacketsReceived           int64
+	NumPacketsTransmitted        int64
 
-	totalPacketDelays int64
-	MaxPacketDelay int
+	totalPacketDelays            int64
+	MaxPacketDelay               int
 
-	totalPacketHops int64
-	MaxPacketHops int
+	totalPacketHops              int64
+	MaxPacketHops                int
 
-	NumPayloadPacketsReceived int64
+	NumPayloadPacketsReceived    int64
 	NumPayloadPacketsTransmitted int64
 
-	totalPayloadPacketDelays int64
-	MaxPayloadPacketDelay int
+	totalPayloadPacketDelays     int64
+	MaxPayloadPacketDelay        int
 
-	totalPayloadPacketHops int64
-	MaxPayloadPacketHops int
+	totalPayloadPacketHops       int64
+	MaxPayloadPacketHops         int
 
-	numFlitPerStateDelaySamples map[FlitState]int64
-	totalFlitPerStateDelays map[FlitState]int64
-	MaxFlitPerStateDelay map[FlitState]int
+	numFlitPerStateDelaySamples  map[FlitState]int64
+	totalFlitPerStateDelays      map[FlitState]int64
+	MaxFlitPerStateDelay         map[FlitState]int
 }
 
 func NewNetwork(experiment *Experiment) *Network {

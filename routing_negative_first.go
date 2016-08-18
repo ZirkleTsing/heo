@@ -1,7 +1,7 @@
 package acogo
 
 type NegativeFirstRoutingAlgorithm struct {
-	Node *Node
+	Node               *Node
 	XYRoutingAlgorithm *XYRoutingAlgorithm
 }
 

@@ -1,7 +1,7 @@
 package acogo
 
 type WestFirstRoutingAlgorithm struct {
-	Node *Node
+	Node               *Node
 	XYRoutingAlgorithm *XYRoutingAlgorithm
 }
 

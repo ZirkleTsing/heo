@@ -15,7 +15,7 @@ func NewSwitchArbiter(outputPort *OutputPort) *SwitchArbiter {
 }
 
 func (arbiter *SwitchArbiter) Next() *InputVirtualChannel {
-	for i:= 0; i < len(arbiter.InputVirtualChannelRing.GetChannels()); i++ {
+	for i := 0; i < len(arbiter.InputVirtualChannelRing.GetChannels()); i++ {
 		var inputVirtualChannel = arbiter.InputVirtualChannelRing.Next()
 		if inputVirtualChannel.OutputVirtualChannel != nil && inputVirtualChannel.OutputVirtualChannel.OutputPort == arbiter.OutputPort {
 			var flit = inputVirtualChannel.InputBuffer.Peek()
