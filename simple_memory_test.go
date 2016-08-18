@@ -8,7 +8,7 @@ import (
 func TestSimpleMemory(t *testing.T) {
 	var data = make([]byte, 1024)
 
-	var memory = NewSimpleMemory(true, data)
+	var memory Memory = NewSimpleMemory(true, data)
 
 	memory.WriteString(12, "你好 world.")
 

@@ -6,7 +6,7 @@ import (
 )
 
 func TestPagedMemory(t *testing.T) {
-	var memory = NewPagedMemory(true)
+	var memory Memory = NewPagedMemory(true)
 
 	memory.WriteString(12, "你好 world.")
 
