@@ -20,3 +20,11 @@ func NewKernel() *Kernel {
 func (kernel *Kernel) MustProcessSignal(context *Context, signal uint32) bool {
 	return false //TODO
 }
+
+func (kernel *Kernel) ProcessSystemEvents() {
+	//TODO
+}
+
+func (kernel *Kernel) ProcessSignals() {
+	//TODO
+}
