@@ -4,15 +4,20 @@ import (
 	"io/ioutil"
 	"fmt"
 	"encoding/binary"
+	"bytes"
 )
 
 type ElfFile struct {
-	Data           *SimpleMemory
-	Identification *ElfIdentification
-	Header         *ElfHeader
-	SectionHeaders []*ElfSectionHeader
-	ProgramHeaders []*ElfProgramHeader
-	StringTable    *ElfStringTable
+	Data                 *SimpleMemory
+	Identification       *ElfIdentification
+	Header               *ElfHeader
+	SectionHeaders       []*ElfSectionHeader
+	ProgramHeaders       []*ElfProgramHeader
+	StringTable          *ElfStringTable
+	Symbols              map[uint32]*Symbol
+	LocalFunctionSymbols map[uint32]*Symbol
+	LocalObjectSymbols   map[uint32]*Symbol
+	CommonObjectSymbols  map[uint32]*Symbol
 }
 
 func NewElfFile(fileName string) *ElfFile {
@@ -62,7 +67,97 @@ func NewElfFile(fileName string) *ElfFile {
 		elfFile.ProgramHeaders = append(elfFile.ProgramHeaders, NewElfProgramHeader(elfFile))
 	}
 
+	elfFile.Symbols = make(map[uint32]*Symbol)
+	elfFile.LocalFunctionSymbols = make(map[uint32]*Symbol)
+	elfFile.LocalObjectSymbols = make(map[uint32]*Symbol)
+	elfFile.CommonObjectSymbols = make(map[uint32]*Symbol)
+
+	elfFile.loadSymbols()
+
 	return elfFile
+}
+
+func (elfFile *ElfFile) loadSymbols() {
+	for _, sectionHeader := range elfFile.SectionHeaders {
+		if sectionHeader.HeaderType == SHT_SYMTAB {
+			elfFile.loadSymbolsBySection(sectionHeader)
+		}
+	}
+
+	elfFile.loadLocalFunctions()
+	elfFile.loadLocalObjects()
+	elfFile.loadCommonObjects()
+}
+
+func (elfFile *ElfFile) loadSymbolsBySection(elfSectionHeader *ElfSectionHeader) {
+	var numSymbols uint32 = 1
+
+	if elfSectionHeader.EntrySize != 0 {
+		numSymbols = elfSectionHeader.Size / elfSectionHeader.EntrySize
+	}
+
+	var offset = elfSectionHeader.Offset
+
+	for i := uint32(0); i < numSymbols; i++ {
+		elfFile.Data.ReadPosition = uint64(offset)
+
+		var symbol = NewSymbol(elfFile, elfSectionHeader)
+
+		elfFile.Symbols[symbol.Value] = symbol
+
+		offset += elfSectionHeader.EntrySize
+	}
+}
+
+func (elfFile *ElfFile) GetSymbolAt(address uint32) *Symbol {
+	for _, symbol := range elfFile.Symbols {
+		if symbol.Value == address {
+			return symbol
+		}
+	}
+
+	return nil
+}
+
+func (elfFile *ElfFile) loadLocalFunctions() {
+	for _, symbol := range elfFile.Symbols {
+		if symbol.GetSymbolType() == STT_FUNC {
+			var idx = symbol.SectionHeaderTableIndex
+			if idx > SHN_LOPROC && idx < SHN_HIPROC {
+				if len(symbol.GetName(elfFile)) > 0 {
+					elfFile.LocalFunctionSymbols[symbol.Value] = symbol
+				}
+			} else if idx >= 0 && elfFile.SectionHeaders[idx].HeaderType != SHT_NULL {
+				elfFile.LocalFunctionSymbols[symbol.Value] = symbol
+			}
+		}
+	}
+}
+
+func (elfFile *ElfFile) loadLocalObjects() {
+	for _, symbol := range elfFile.Symbols {
+		if symbol.GetSymbolType() == STT_OBJECT {
+			var idx = symbol.SectionHeaderTableIndex
+			if idx > SHN_LOPROC && idx < SHN_HIPROC {
+				if len(symbol.GetName(elfFile)) > 0 {
+					elfFile.LocalObjectSymbols[symbol.Value] = symbol
+				}
+			} else if idx >= 0 && elfFile.SectionHeaders[idx].HeaderType != SHT_NULL {
+				elfFile.LocalObjectSymbols[symbol.Value] = symbol
+			}
+		}
+	}
+}
+
+func (elfFile *ElfFile) loadCommonObjects() {
+	for _, symbol := range elfFile.Symbols {
+		if symbol.GetBind() == STB_GLOBAL && symbol.GetSymbolType() == STT_OBJECT {
+			var idx = symbol.SectionHeaderTableIndex
+			if idx == SHN_COMMON {
+				elfFile.CommonObjectSymbols[symbol.Value] = symbol
+			}
+		}
+	}
 }
 
 type ElfClass string
@@ -197,7 +292,7 @@ type ElfSectionHeader struct {
 	AddressAlignment uint32
 	EntrySize        uint32
 	ElfFile          *ElfFile
-	Name             string
+	name             string
 }
 
 func NewElfSectionHeader(elfFile *ElfFile) *ElfSectionHeader {
@@ -220,6 +315,14 @@ func NewElfSectionHeader(elfFile *ElfFile) *ElfSectionHeader {
 
 func (elfSectionHeader *ElfSectionHeader) ReadContent(elfFile *ElfFile) []byte {
 	return elfFile.Data.ReadBlockAt(uint64(elfSectionHeader.Offset), uint64(elfSectionHeader.Size))
+}
+
+func (elfSectionHeader *ElfSectionHeader) GetName(elfFile *ElfFile) string {
+	if elfSectionHeader.name == "" {
+		elfSectionHeader.name = elfSectionHeader.ElfFile.StringTable.GetString(elfSectionHeader.NameIndex)
+	}
+
+	return elfSectionHeader.name
 }
 
 type ElfProgramHeader struct {
@@ -268,4 +371,98 @@ func NewElfStringTable(elfFile *ElfFile, sectionHeader *ElfSectionHeader) *ElfSt
 	elfStringTable.Data = sectionHeader.ReadContent(elfFile)
 
 	return elfStringTable
+}
+
+func (elfStringTable *ElfStringTable) GetString(index uint32) string {
+	var buf bytes.Buffer
+
+	for i := index; string(elfStringTable.Data[i]) != ""; i++ {
+		//TODO: '\0'
+		buf.WriteByte(elfStringTable.Data[i])
+	}
+
+	return buf.String()
+}
+
+const (
+	STB_LOCAL = 0
+
+	STB_GLOBAL = 1
+
+	STB_WEAK = 2
+
+	STT_NOTYPE = 0
+
+	STT_OBJECT = 1
+
+	STT_FUNC = 2
+
+	STT_SECTION = 3
+
+	STT_FILE = 4
+)
+
+const (
+	SHN_UNDEF = 0
+
+	SHN_LORESERVE = 0xffffff00
+
+	SHN_LOPROC = 0xffffff00
+
+	SHN_HIPROC = 0xffffff1f
+
+	SHN_LOOS = 0xffffff20
+
+	SHN_HIOS = 0xffffff3f
+
+	SHN_ABS = 0xfffffff1
+
+	SHN_COMMON = 0xfffffff2
+
+	SHN_XINDEX = 0xffffffff
+
+	SHN_HIRESERVE = 0xffffffff
+)
+
+type Symbol struct {
+	NameIndex               uint32
+	Value                   uint32
+	Size                    uint32
+	Info                    byte
+	Other                   byte
+	SectionHeaderTableIndex uint16
+	name                    string
+	SymbolSectionHeader     *ElfSectionHeader
+}
+
+func NewSymbol(elfFile *ElfFile, symbolSectionHeader *ElfSectionHeader) *Symbol {
+	var symbol = &Symbol{
+		SymbolSectionHeader:symbolSectionHeader,
+	}
+
+	symbol.NameIndex = elfFile.Data.ReadWord()
+	symbol.Value = elfFile.Data.ReadWord()
+	symbol.Size = elfFile.Data.ReadWord()
+	symbol.Info = elfFile.Data.ReadByte()
+	symbol.Other = elfFile.Data.ReadByte()
+	symbol.SectionHeaderTableIndex = elfFile.Data.ReadHalfWord()
+
+	return symbol
+}
+
+func (symbol *Symbol) GetSymbolType() byte {
+	return symbol.Info & 0xf
+}
+
+func (symbol *Symbol) GetBind() byte {
+	return (symbol.Info >> 4) & 0xf
+}
+
+func (symbol *Symbol) GetName(elfFile *ElfFile) string {
+	if symbol.name == "" {
+		var elfSectionHeader = elfFile.SectionHeaders[symbol.SymbolSectionHeader.Link]
+		symbol.name = NewElfStringTable(elfFile, elfSectionHeader).GetString(symbol.NameIndex)
+	}
+
+	return symbol.name
 }
