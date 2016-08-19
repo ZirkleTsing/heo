@@ -10,11 +10,11 @@ func TestSimpleMemory(t *testing.T) {
 
 	var memory Memory = NewSimpleMemory(true, data)
 
-	memory.WriteString(12, "你好 world.")
+	memory.WriteStringAt(12, "你好 world.")
 
-	fmt.Printf("%s\n", memory.ReadString(12, uint64(len([]byte("Hello world.")))))
+	fmt.Printf("%s\n", memory.ReadStringAt(12, uint64(len([]byte("Hello world.")))))
 
-	memory.WriteWord(1, 12)
+	memory.WriteWordAt(1, 12)
 
-	fmt.Println(memory.ReadWord(1))
+	fmt.Println(memory.ReadWordAt(1))
 }

@@ -6,14 +6,12 @@ import (
 )
 
 type ElfFile struct {
-	Data []byte
+	Data           *SimpleMemory
 	Identification *ElfIdentification
-	Header *ElfHeader
+	Header         *ElfHeader
 	SectionHeaders []ElfSectionHeader
 	ProgramHeaders []ElfProgramHeader
-	StringTable *ElfStringTable
-	LittleEndian bool
-	Position uint64
+	StringTable    *ElfStringTable
 }
 
 func NewElfFile(fileName string) *ElfFile {
@@ -26,7 +24,7 @@ func NewElfFile(fileName string) *ElfFile {
 		panic(fmt.Sprintf("Cannot read ELF file (%s)", err))
 	}
 
-	elfFile.Data = data
+	elfFile.Data = NewSimpleMemory(false, data)
 
 	return elfFile
 }
@@ -35,10 +33,27 @@ func (elfFile *ElfFile) Dump() {
 	//TODO
 }
 
+const (
+	ElfClassNone = 0
+	ElfClass32 = 1
+	ElfClass64 = 2
+)
+
+const (
+	ElfDataNone = 0
+	ElfData2Lsb = 1
+	ElfData2Msb = 2
+)
+
 type ElfIdentification struct {
 	Clz     uint32
 	Data    uint32
 	Version uint32
+}
+
+func (elfIdentification *ElfIdentification) Read(elfFile *ElfFile) {
+	//var e_ident = make([]byte, 16)
+	//elfFile.Read()
 }
 
 type ElfHeader struct {

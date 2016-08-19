@@ -46,13 +46,13 @@ func (signalMask *SignalMask) Contains(signal uint32) bool {
 
 func (signalMask *SignalMask) LoadFrom(memory *PagedMemory, virtualAddress uint64) {
 	for i := uint64(0); i < MAX_SIGNAL / 32; i++ {
-		signalMask.Signals[i] = memory.ReadWord(virtualAddress + i * 4)
+		signalMask.Signals[i] = memory.ReadWordAt(virtualAddress + i * 4)
 	}
 }
 
 func (signalMask *SignalMask) SaveTo(memory *PagedMemory, virtualAddress uint64) {
 	for i := uint64(0); i < MAX_SIGNAL / 32; i++ {
-		memory.WriteWord(virtualAddress + i * 4, signalMask.Signals[i])
+		memory.WriteWordAt(virtualAddress + i * 4, signalMask.Signals[i])
 	}
 }
 
@@ -94,15 +94,15 @@ func NewSignalAction() *SignalAction {
 }
 
 func (signalAction *SignalAction) LoadFrom(memory *PagedMemory, virtualAddress uint64) {
-	signalAction.Flags = memory.ReadWord(virtualAddress)
-	signalAction.Handler = memory.ReadWord(virtualAddress + SignalAction_HANDLER_OFFSET)
-	signalAction.Restorer = memory.ReadWord(virtualAddress + SignalAction_RESTORER_OFFSET)
+	signalAction.Flags = memory.ReadWordAt(virtualAddress)
+	signalAction.Handler = memory.ReadWordAt(virtualAddress + SignalAction_HANDLER_OFFSET)
+	signalAction.Restorer = memory.ReadWordAt(virtualAddress + SignalAction_RESTORER_OFFSET)
 	signalAction.Mask.LoadFrom(memory, virtualAddress + SignalAction_MASK_OFFSET)
 }
 
 func (signalAction *SignalAction) SaveTo(memory *PagedMemory, virtualAddress uint64) {
-	memory.WriteWord(virtualAddress, signalAction.Flags)
-	memory.WriteWord(virtualAddress + SignalAction_HANDLER_OFFSET, signalAction.Handler)
-	memory.WriteWord(virtualAddress + SignalAction_RESTORER_OFFSET, signalAction.Restorer)
+	memory.WriteWordAt(virtualAddress, signalAction.Flags)
+	memory.WriteWordAt(virtualAddress + SignalAction_HANDLER_OFFSET, signalAction.Handler)
+	memory.WriteWordAt(virtualAddress + SignalAction_RESTORER_OFFSET, signalAction.Restorer)
 	signalAction.Mask.SaveTo(memory, virtualAddress + SignalAction_MASK_OFFSET)
 }

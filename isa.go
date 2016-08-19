@@ -554,49 +554,49 @@ func bnel(context *Context, machInst MachInst) {
 
 func lb(context *Context, machInst MachInst) {
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	var temp byte = context.Memory.ReadByte(addr)
+	var temp byte = context.Memory.ReadByteAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = uint32(Sext32(uint32(temp), 8))
 }
 
 func lbu(context *Context, machInst MachInst) {
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	var temp byte = context.Memory.ReadByte(addr)
+	var temp byte = context.Memory.ReadByteAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = uint32(temp)
 }
 
 func ldc1(context *Context, machInst MachInst) {
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	var temp uint64 = context.Memory.ReadDoubleWord(addr)
+	var temp uint64 = context.Memory.ReadDoubleWordAt(addr)
 	context.Regs.Fpr.SetFloat64(machInst.Ft(), float64(temp))
 }
 
 func lh(context *Context, machInst MachInst) {
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	var temp uint16 = context.Memory.ReadHalfWord(addr)
+	var temp uint16 = context.Memory.ReadHalfWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = uint32(Sext32(uint32(temp), 16))
 }
 
 func lhu(context *Context, machInst MachInst) {
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	var temp uint16 = context.Memory.ReadHalfWord(addr)
+	var temp uint16 = context.Memory.ReadHalfWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = uint32(temp)
 }
 
 func ll(context *Context, machInst MachInst) {
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	var temp uint32 = context.Memory.ReadWord(addr)
+	var temp uint32 = context.Memory.ReadWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = temp
 }
 
 func lw(context *Context, machInst MachInst) {
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	var temp uint32 = context.Memory.ReadWord(addr)
+	var temp uint32 = context.Memory.ReadWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = temp
 }
 
 func lwc1(context *Context, machInst MachInst) {
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	var temp uint32 = context.Memory.ReadWord(addr)
+	var temp uint32 = context.Memory.ReadWordAt(addr)
 	context.Regs.Fpr.SetFloat32(machInst.Ft(), float32(temp))
 }
 
@@ -607,7 +607,7 @@ func lwl(context *Context, machInst MachInst) {
 
 	var size = uint64(4 - (addr & 3))
 
-	var src = context.Memory.ReadBlock(addr, size)
+	var src = context.Memory.ReadBlockAt(addr, size)
 
 	for i := uint64(0); i < size; i++ {
 		dst[3 - i] = src[i]
@@ -623,7 +623,7 @@ func lwr(context *Context, machInst MachInst) {
 
 	var size = uint64(1 + (addr & 3))
 
-	var src = context.Memory.ReadBlock(addr - size + 1, size)
+	var src = context.Memory.ReadBlockAt(addr - size + 1, size)
 
 	for i := uint64(0); i < size; i++ {
 		dst[size - i - 1] = src[i]
@@ -635,13 +635,13 @@ func lwr(context *Context, machInst MachInst) {
 func sb(context *Context, machInst MachInst) {
 	var temp byte = byte(context.Regs.Gpr[machInst.Rt()])
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	context.Memory.WriteByte(addr, temp)
+	context.Memory.WriteByteAt(addr, temp)
 }
 
 func sc(context *Context, machInst MachInst) {
 	var temp = context.Regs.Gpr[machInst.Rt()]
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	context.Memory.WriteWord(addr, temp)
+	context.Memory.WriteWordAt(addr, temp)
 	context.Regs.Gpr[machInst.Rt()] = 1
 }
 
@@ -649,26 +649,26 @@ func sdc1(context *Context, machInst MachInst) {
 	var dbl = context.Regs.Fpr.Float64(machInst.Ft())
 	var temp = uint64(dbl)
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	context.Memory.WriteDoubleWord(addr, temp)
+	context.Memory.WriteDoubleWordAt(addr, temp)
 }
 
 func sh(context *Context, machInst MachInst) {
 	var temp = uint16(context.Regs.Gpr[machInst.Rt()])
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	context.Memory.WriteHalfWord(addr, temp)
+	context.Memory.WriteHalfWordAt(addr, temp)
 }
 
 func sw(context *Context, machInst MachInst) {
 	var temp = context.Regs.Gpr[machInst.Rt()]
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	context.Memory.WriteWord(addr, temp)
+	context.Memory.WriteWordAt(addr, temp)
 }
 
 func swc1(context *Context, machInst MachInst) {
 	var f = context.Regs.Fpr.Float32(machInst.Ft())
 	var temp = uint32(f)
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	context.Memory.WriteWord(addr, temp)
+	context.Memory.WriteWordAt(addr, temp)
 }
 
 func swl(context *Context, machInst MachInst) {
@@ -685,7 +685,7 @@ func swl(context *Context, machInst MachInst) {
 		dst[i] = src[3 - i]
 	}
 
-	context.Memory.WriteBlock(addr, size, dst)
+	context.Memory.WriteBlockAt(addr, size, dst)
 }
 
 func swr(context *Context, machInst MachInst) {
@@ -702,7 +702,7 @@ func swr(context *Context, machInst MachInst) {
 		dst[i] = src[size - i - 1]
 	}
 
-	context.Memory.WriteBlock(addr - size + 1, size, dst)
+	context.Memory.WriteBlockAt(addr - size + 1, size, dst)
 }
 
 func cfc1(context *Context, machInst MachInst) {

@@ -57,71 +57,71 @@ func NewPagedMemory(littleEndian bool) *PagedMemory {
 	return memory
 }
 
-func (memory *PagedMemory) ReadByte(virtualAddress uint64) byte {
+func (memory *PagedMemory) ReadByteAt(virtualAddress uint64) byte {
 	var buffer = make([]byte, 1)
 	memory.access(virtualAddress, 1, &buffer, false, true)
 	return buffer[0]
 }
 
-func (memory *PagedMemory) ReadHalfWord(virtualAddress uint64) uint16 {
+func (memory *PagedMemory) ReadHalfWordAt(virtualAddress uint64) uint16 {
 	var buffer = make([]byte, 2)
 	memory.access(virtualAddress, 2, &buffer, false, true)
 	return memory.ByteOrder.Uint16(buffer)
 }
 
-func (memory *PagedMemory) ReadWord(virtualAddress uint64) uint32 {
+func (memory *PagedMemory) ReadWordAt(virtualAddress uint64) uint32 {
 	var buffer = make([]byte, 4)
 	memory.access(virtualAddress, 4, &buffer, false, true)
 	return memory.ByteOrder.Uint32(buffer)
 }
 
-func (memory *PagedMemory) ReadDoubleWord(virtualAddress uint64) uint64 {
+func (memory *PagedMemory) ReadDoubleWordAt(virtualAddress uint64) uint64 {
 	var buffer = make([]byte, 8)
 	memory.access(virtualAddress, 8, &buffer, false, true)
 	return memory.ByteOrder.Uint64(buffer)
 }
 
-func (memory *PagedMemory) ReadBlock(virtualAddress uint64, size uint64) []byte {
+func (memory *PagedMemory) ReadBlockAt(virtualAddress uint64, size uint64) []byte {
 	var buffer = make([]byte, size)
 	memory.access(virtualAddress, size, &buffer, false, true)
 	return buffer
 }
 
-func (memory *PagedMemory) ReadString(virtualAddress uint64, size uint64) string {
-	var data = memory.ReadBlock(virtualAddress, size)
+func (memory *PagedMemory) ReadStringAt(virtualAddress uint64, size uint64) string {
+	var data = memory.ReadBlockAt(virtualAddress, size)
 	return string(data)
 }
 
-func (memory *PagedMemory) WriteByte(virtualAddress uint64, data byte) {
+func (memory *PagedMemory) WriteByteAt(virtualAddress uint64, data byte) {
 	var buffer = make([]byte, 1)
 	buffer[0] = data
 	memory.access(virtualAddress, 1, &buffer, true, true)
 }
 
-func (memory *PagedMemory) WriteHalfWord(virtualAddress uint64, data uint16) {
+func (memory *PagedMemory) WriteHalfWordAt(virtualAddress uint64, data uint16) {
 	var buffer = make([]byte, 2)
 	memory.ByteOrder.PutUint16(buffer, data)
 	memory.access(virtualAddress, 2, &buffer, true, true)
 }
 
-func (memory *PagedMemory) WriteWord(virtualAddress uint64, data uint32) {
+func (memory *PagedMemory) WriteWordAt(virtualAddress uint64, data uint32) {
 	var buffer = make([]byte, 4)
 	memory.ByteOrder.PutUint32(buffer, data)
 	memory.access(virtualAddress, 4, &buffer, true, true)
 }
 
-func (memory *PagedMemory) WriteDoubleWord(virtualAddress uint64, data uint64) {
+func (memory *PagedMemory) WriteDoubleWordAt(virtualAddress uint64, data uint64) {
 	var buffer = make([]byte, 8)
 	memory.ByteOrder.PutUint64(buffer, data)
 	memory.access(virtualAddress, 8, &buffer, true, true)
 }
 
-func (memory *PagedMemory) WriteString(virtualAddress uint64, data string) {
+func (memory *PagedMemory) WriteStringAt(virtualAddress uint64, data string) {
 	var buffer = []byte(data)
 	memory.access(virtualAddress, uint64(len(buffer)), &buffer, true, true)
 }
 
-func (memory *PagedMemory) WriteBlock(virtualAddress uint64, size uint64, data []byte) {
+func (memory *PagedMemory) WriteBlockAt(virtualAddress uint64, size uint64, data []byte) {
 	memory.access(virtualAddress, size, &data, true, true)
 }
 
