@@ -20,6 +20,7 @@ type MemoryReader interface {
 	ReadHalfWord() uint16
 	ReadWord() uint32
 	ReadDoubleWord() uint64
+	ReadString(size uint64) string
 	ReadBlock(size uint64) []byte
 }
 
@@ -28,5 +29,6 @@ type MemoryWriter interface {
 	WriteHalfWord(data uint16)
 	WriteWord(data uint32)
 	WriteDoubleWord(data uint64)
+	WriteString(data string)
 	WriteBlock(size uint64, data []byte)
 }

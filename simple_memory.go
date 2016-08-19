@@ -117,6 +117,12 @@ func (memory *SimpleMemory) ReadDoubleWord() uint64 {
 	return data
 }
 
+func (memory *SimpleMemory) ReadString(size uint64) string {
+	var data = memory.ReadStringAt(memory.ReadPosition, size)
+	memory.ReadPosition += size
+	return data
+}
+
 func (memory *SimpleMemory) ReadBlock(size uint64) []byte {
 	var data = memory.ReadBlockAt(memory.ReadPosition, size)
 	memory.ReadPosition += size
@@ -141,6 +147,11 @@ func (memory *SimpleMemory) WriteWord(data uint32) {
 func (memory *SimpleMemory) WriteDoubleWord(data uint64) {
 	memory.WriteDoubleWordAt(memory.WritePosition, data)
 	memory.WritePosition += 8
+}
+
+func (memory *SimpleMemory) WriteString(data string) {
+	memory.WriteStringAt(memory.WritePosition, data)
+	memory.WritePosition += uint64(len([]byte(data)))
 }
 
 func (memory *SimpleMemory) WriteBlock(size uint64, data []byte) {

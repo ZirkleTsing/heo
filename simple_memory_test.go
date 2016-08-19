@@ -8,7 +8,7 @@ import (
 func TestSimpleMemory(t *testing.T) {
 	var data = make([]byte, 1024)
 
-	var memory Memory = NewSimpleMemory(true, data)
+	var memory *SimpleMemory = NewSimpleMemory(true, data)
 
 	memory.WriteStringAt(12, "你好 world.")
 
@@ -17,4 +17,8 @@ func TestSimpleMemory(t *testing.T) {
 	memory.WriteWordAt(1, 12)
 
 	fmt.Println(memory.ReadWordAt(1))
+
+	memory.WriteString("Hello 世界.")
+
+	fmt.Printf("%s\n", memory.ReadString(uint64(len([]byte("Hello 世界.")))))
 }
