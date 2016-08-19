@@ -160,6 +160,23 @@ func (elfFile *ElfFile) loadCommonObjects() {
 	}
 }
 
+func (elfFile *ElfFile) Dump() {
+	fmt.Printf("Clz: %s, data: %s\n", elfFile.Identification.Clz, elfFile.Identification.Data)
+
+	for i, sectionHeader := range elfFile.SectionHeaders {
+		fmt.Printf("sectionHeader[%d].Type = 0x%08x\n", i, sectionHeader.HeaderType)
+	}
+
+	for i, programHeader := range elfFile.ProgramHeaders {
+		fmt.Printf("programHeader[%d].Type = 0x%08x\n", i, programHeader.HeaderType)
+	}
+
+	for i, symbol := range elfFile.Symbols {
+		fmt.Printf("symbol[0x%08x].Type = 0x%08x\n", i, symbol.GetSymbolType())
+		fmt.Printf("symbol[0x%08x].Name = %s\n", i, symbol.GetName(elfFile))
+	}
+}
+
 type ElfClass string
 
 const (
@@ -376,8 +393,7 @@ func NewElfStringTable(elfFile *ElfFile, sectionHeader *ElfSectionHeader) *ElfSt
 func (elfStringTable *ElfStringTable) GetString(index uint32) string {
 	var buf bytes.Buffer
 
-	for i := index; string(elfStringTable.Data[i]) != ""; i++ {
-		//TODO: '\0'
+	for i := index; string(elfStringTable.Data[i]) != "\x00"; i++ {
 		buf.WriteByte(elfStringTable.Data[i])
 	}
 
@@ -405,23 +421,23 @@ const (
 const (
 	SHN_UNDEF = 0
 
-	SHN_LORESERVE = 0xffffff00
+	SHN_LORESERVE = 0xff00
 
-	SHN_LOPROC = 0xffffff00
+	SHN_LOPROC = 0xff00
 
-	SHN_HIPROC = 0xffffff1f
+	SHN_HIPROC = 0xff1f
 
-	SHN_LOOS = 0xffffff20
+	SHN_LOOS = 0xff20
 
-	SHN_HIOS = 0xffffff3f
+	SHN_HIOS = 0xff3f
 
-	SHN_ABS = 0xfffffff1
+	SHN_ABS = 0xfff1
 
-	SHN_COMMON = 0xfffffff2
+	SHN_COMMON = 0xfff2
 
-	SHN_XINDEX = 0xffffffff
+	SHN_XINDEX = 0xffff
 
-	SHN_HIRESERVE = 0xffffffff
+	SHN_HIRESERVE = 0xffff
 )
 
 type Symbol struct {
