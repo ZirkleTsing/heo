@@ -4,6 +4,7 @@ import (
 	"time"
 	"os"
 	"fmt"
+	"github.com/mcai/acogo/simutil"
 )
 
 type Experiment struct {
@@ -12,14 +13,14 @@ type Experiment struct {
 	statMap                 map[string]interface{}
 
 	BeginTime, EndTime      time.Time
-	CycleAccurateEventQueue *CycleAccurateEventQueue
+	CycleAccurateEventQueue *simutil.CycleAccurateEventQueue
 	Network                 *Network
 }
 
 func NewExperiment(config *NoCConfig) *Experiment {
 	var experiment = &Experiment{
 		Config:config,
-		CycleAccurateEventQueue:NewCycleAccurateEventQueue(),
+		CycleAccurateEventQueue:simutil.NewCycleAccurateEventQueue(),
 	}
 
 	var network = NewNetwork(experiment)
@@ -62,17 +63,17 @@ func RunExperiments(experiments []*Experiment, skipIfStatsFileExists bool) {
 
 	for i, e := range experiments {
 		go func(i int, experiment *Experiment, c chan bool) {
-			var len = len(experiments)
+			var l = len(experiments)
 
 			fmt.Printf("[%s] Experiment %d/%d started.\n",
-				time.Now().Format("2006-01-02 15:04:05"), i + 1, len)
+				time.Now().Format("2006-01-02 15:04:05"), i + 1, l)
 
 			experiment.Run(skipIfStatsFileExists)
 
 			done <- true
 
 			fmt.Printf("[%s] Experiment %d/%d ended.\n",
-				time.Now().Format("2006-01-02 15:04:05"), i + 1, len)
+				time.Now().Format("2006-01-02 15:04:05"), i + 1, l)
 		}(i, e, done)
 	}
 

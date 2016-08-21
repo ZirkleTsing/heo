@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"bytes"
 	"encoding/json"
+	"github.com/mcai/acogo/simutil"
 )
 
 const STATS_JSON_FILE_NAME = "stats.json"
@@ -150,11 +151,11 @@ func (experiment *Experiment) DumpStats() {
 		})
 	}
 
-	WriteJsonFile(experiment.Stats, experiment.Config.OutputDirectory, STATS_JSON_FILE_NAME)
+	simutil.WriteJsonFile(experiment.Stats, experiment.Config.OutputDirectory, STATS_JSON_FILE_NAME)
 }
 
 func (experiment *Experiment) LoadStats() {
-	LoadJsonFile(experiment.Config.OutputDirectory, STATS_JSON_FILE_NAME, &experiment.statMap)
+	simutil.LoadJsonFile(experiment.Config.OutputDirectory, STATS_JSON_FILE_NAME, &experiment.statMap)
 }
 
 func (experiment *Experiment) GetStatMap() map[string]interface{} {

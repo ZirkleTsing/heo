@@ -1,4 +1,4 @@
-package noc
+package simutil
 
 import (
 	"container/heap"
