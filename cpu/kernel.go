@@ -1,5 +1,7 @@
 package cpu
 
+import "github.com/mcai/acogo/cpu/regs"
+
 type Kernel struct {
 	Pipes            []*Pipe
 	SystemEvents     []SystemEvent
@@ -113,9 +115,9 @@ func (kernel *Kernel) RunSignalHandler(context *Context, signal uint32) {
 
 	var oldRegs = context.Regs.Clone()
 
-	context.Regs.Gpr[REGISTER_A0] = signal
-	context.Regs.Gpr[REGISTER_T9] = kernel.SignalActions[signal - 1].Handler
-	context.Regs.Gpr[REGISTER_RA] = 0xffffffff
+	context.Regs.Gpr[regs.REGISTER_A0] = signal
+	context.Regs.Gpr[regs.REGISTER_T9] = kernel.SignalActions[signal - 1].Handler
+	context.Regs.Gpr[regs.REGISTER_RA] = 0xffffffff
 	context.Regs.Npc = kernel.SignalActions[signal - 1].Handler
 	context.Regs.Nnpc = context.Regs.Npc + 4
 

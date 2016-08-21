@@ -37,7 +37,7 @@ type PagedMemory struct {
 	LittleEndian bool
 	ByteOrder    binary.ByteOrder
 	Pages        map[uint64]*MemoryPage
-	Geometry     *CacheGeometry
+	Geometry     *Geometry
 	NumPages     uint32
 }
 
@@ -45,7 +45,7 @@ func NewPagedMemory(littleEndian bool) *PagedMemory {
 	var memory = &PagedMemory{
 		LittleEndian:littleEndian,
 		Pages:make(map[uint64]*MemoryPage),
-		Geometry:NewCacheGeometry(0xffffffff, 1, 1 << 12),
+		Geometry:NewGeometry(0xffffffff, 1, 1 << 12),
 	}
 
 	if littleEndian {

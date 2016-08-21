@@ -3,6 +3,7 @@ package cpu
 import (
 	"fmt"
 	//"math"
+	"github.com/mcai/acogo/cpu/regs"
 )
 
 type ErrNo uint32
@@ -275,12 +276,12 @@ func (syscallEmulation *SyscallEmulation) findAndRunSystemCallHandler(syscallInd
 }
 
 func (syscallEmulation *SyscallEmulation) checkSystemCallError(context *Context) bool {
-	if int32(context.Regs.Gpr[REGISTER_V0]) != -1 {
-		context.Regs.Gpr[REGISTER_A3] = 0
+	if int32(context.Regs.Gpr[regs.REGISTER_V0]) != -1 {
+		context.Regs.Gpr[regs.REGISTER_A3] = 0
 		return false
 	} else {
-		context.Regs.Gpr[REGISTER_V0] = 0
-		context.Regs.Gpr[REGISTER_A3] = 1
+		context.Regs.Gpr[regs.REGISTER_V0] = 0
+		context.Regs.Gpr[regs.REGISTER_A3] = 1
 		return true
 	}
 }

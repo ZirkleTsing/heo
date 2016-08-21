@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"github.com/mcai/acogo/cpu/regs"
+	"github.com/mcai/acogo/cpu/cpuutil"
 )
 
 const (
@@ -18,7 +20,7 @@ type MachInstType string
 type MachInst uint32
 
 func (machInst MachInst) ValueOf(field *BitField) uint32 {
-	return Bits32(uint32(machInst), field.Hi, field.Lo)
+	return cpuutil.Bits32(uint32(machInst), field.Hi, field.Lo)
 }
 
 func (machInst MachInst) GetType() MachInstType {
@@ -157,7 +159,7 @@ func (machInst MachInst) Uimm() uint32 {
 }
 
 func (machInst MachInst) Imm() int32 {
-	return Sext32(machInst.Uimm(), 16)
+	return cpuutil.Sext32(machInst.Uimm(), 16)
 }
 
 func (machInst MachInst) Target() uint32 {
@@ -229,13 +231,13 @@ func Disassemble(pc uint, staticInst *StaticInst) string {
 		buf.WriteString(fmt.Sprintf("%x", target))
 	case MachInstType_I:
 		if (machInst.IsOneOpBranch()) {
-			buf.WriteString(fmt.Sprintf("$%s, %d", GPR_NAMES[rs], imm))
+			buf.WriteString(fmt.Sprintf("$%s, %d", regs.GPR_NAMES[rs], imm))
 		} else if (machInst.IsLoadStore()) {
-			buf.WriteString(fmt.Sprintf("$%s, %d($%s)", GPR_NAMES[rt], imm, GPR_NAMES[rs]))
+			buf.WriteString(fmt.Sprintf("$%s, %d($%s)", regs.GPR_NAMES[rt], imm, regs.GPR_NAMES[rs]))
 		} else if (machInst.IsFPLoadStore()) {
-			buf.WriteString(fmt.Sprintf("$f%d, %d($%s)", ft, imm, GPR_NAMES[rs]))
+			buf.WriteString(fmt.Sprintf("$f%d, %d($%s)", ft, imm, regs.GPR_NAMES[rs]))
 		} else {
-			buf.WriteString(fmt.Sprintf("$%s, $%s, %d", GPR_NAMES[rt], GPR_NAMES[rs], imm))
+			buf.WriteString(fmt.Sprintf("$%s, $%s, %d", regs.GPR_NAMES[rt], regs.GPR_NAMES[rs], imm))
 		}
 	case MachInstType_F:
 		if (machInst.IsCVT()) {
@@ -245,26 +247,26 @@ func Disassemble(pc uint, staticInst *StaticInst) string {
 		} else if (machInst.IsFpBranch()) {
 			buf.WriteString(fmt.Sprintf("%d, %d", fd >> 2, imm))
 		} else if (machInst.IsGprFpMove()) {
-			buf.WriteString(fmt.Sprintf("$%s, $f%d", GPR_NAMES[rt], fs))
+			buf.WriteString(fmt.Sprintf("$%s, $f%d", regs.GPR_NAMES[rt], fs))
 		} else if (machInst.IsGprFcrMove()) {
-			buf.WriteString(fmt.Sprintf("$%s, $%d", GPR_NAMES[rt], fs))
+			buf.WriteString(fmt.Sprintf("$%s, $%d", regs.GPR_NAMES[rt], fs))
 		} else {
 			buf.WriteString(fmt.Sprintf("$f%d, $f%d, $f%d", fd, fs, ft))
 		}
 	case MachInstType_R:
 		if (!machInst.IsSystemCall()) {
 			if (machInst.IsShift()) {
-				buf.WriteString(fmt.Sprintf("$%s, $%s, %d", GPR_NAMES[rd], GPR_NAMES[rt], shift))
+				buf.WriteString(fmt.Sprintf("$%s, $%s, %d", regs.GPR_NAMES[rd], regs.GPR_NAMES[rt], shift))
 			} else if (machInst.IsROneOp()) {
-				buf.WriteString(fmt.Sprintf("$%s", GPR_NAMES[rs]))
+				buf.WriteString(fmt.Sprintf("$%s", regs.GPR_NAMES[rs]))
 			} else if (machInst.IsRTwoOp()) {
-				buf.WriteString(fmt.Sprintf("$%s, $%s", GPR_NAMES[rs], GPR_NAMES[rt]))
+				buf.WriteString(fmt.Sprintf("$%s, $%s", regs.GPR_NAMES[rs], regs.GPR_NAMES[rt]))
 			} else if (machInst.IsRMt()) {
-				buf.WriteString(fmt.Sprintf("$%s", GPR_NAMES[rs]))
+				buf.WriteString(fmt.Sprintf("$%s", regs.GPR_NAMES[rs]))
 			} else if (machInst.IsRMf()) {
-				buf.WriteString(fmt.Sprintf("$%s", GPR_NAMES[rd]))
+				buf.WriteString(fmt.Sprintf("$%s", regs.GPR_NAMES[rd]))
 			} else {
-				buf.WriteString(fmt.Sprintf("$%s, $%s, $%s", GPR_NAMES[rd], GPR_NAMES[rs], GPR_NAMES[rt]))
+				buf.WriteString(fmt.Sprintf("$%s, $%s, $%s", regs.GPR_NAMES[rd], regs.GPR_NAMES[rs], regs.GPR_NAMES[rt]))
 			}
 		}
 	default:

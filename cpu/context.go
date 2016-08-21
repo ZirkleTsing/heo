@@ -1,5 +1,7 @@
 package cpu
 
+import "github.com/mcai/acogo/cpu/regs"
+
 const (
 	ContextState_IDLE = 0
 	ContextState_BLOCKED = 1
@@ -14,7 +16,7 @@ type Context struct {
 	State            ContextState
 	SignalMasks      *SignalMasks
 	SignalFinish     uint32
-	Regs             *ArchitecturalRegisterFile
+	Regs             *regs.ArchitecturalRegisterFile
 	Kernel           *Kernel
 	ThreadId         uint32
 	UserId           uint32
@@ -26,7 +28,7 @@ type Context struct {
 	Parent           *Context
 }
 
-func NewContext(kernel *Kernel, process *Process, parent *Context, regs *ArchitecturalRegisterFile, signalFinish uint32) *Context {
+func NewContext(kernel *Kernel, process *Process, parent *Context, regs *regs.ArchitecturalRegisterFile, signalFinish uint32) *Context {
 	var context = &Context{
 		Kernel:kernel,
 		Parent:parent,
@@ -49,7 +51,7 @@ func (context *Context) DecodeNextStaticInstruction() *StaticInst {
 	context.Regs.Pc = context.Regs.Npc
 	context.Regs.Npc = context.Regs.Nnpc
 	context.Regs.Nnpc = context.Regs.Nnpc + 4
-	context.Regs.Gpr[REGISTER_ZERO] = 0
+	context.Regs.Gpr[regs.REGISTER_ZERO] = 0
 
 	return context.Decode(context.Regs.Pc)
 }

@@ -1,4 +1,4 @@
-package cpu
+package cpuutil
 
 func Sext32(x uint32, b uint32) int32 {
 	if uint32(x) & (uint32(1) << (b - 1)) != 0 {

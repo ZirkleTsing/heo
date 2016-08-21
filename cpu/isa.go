@@ -1,6 +1,10 @@
 package cpu
 
-import "math"
+import (
+	"math"
+	"github.com/mcai/acogo/cpu/regs"
+	"github.com/mcai/acogo/cpu/cpuutil"
+)
 
 func add(context *Context, machInst MachInst) {
 	var temp = context.Regs.Sgpr(machInst.Rs()) + context.Regs.Sgpr(machInst.Rt())
@@ -52,8 +56,8 @@ func madd(context *Context, machInst MachInst) {
 	temp2 = int64(context.Regs.Sgpr(machInst.Rt()))
 	temp3 = (int64(context.Regs.Hi << 32) | int64(context.Regs.Lo))
 	temp = temp1 * temp2 + temp3
-	context.Regs.Hi = uint32(Bits64(uint64(temp), 63, 32))
-	context.Regs.Lo = uint32(Bits64(uint64(temp), 31, 0))
+	context.Regs.Hi = uint32(cpuutil.Bits64(uint64(temp), 63, 32))
+	context.Regs.Lo = uint32(cpuutil.Bits64(uint64(temp), 31, 0))
 }
 
 func mfhi(context *Context, machInst MachInst) {
@@ -70,8 +74,8 @@ func msub(context *Context, machInst MachInst) {
 	temp2 = int64(context.Regs.Sgpr(machInst.Rt()))
 	temp3 = int64(context.Regs.Hi << 32) | int64(context.Regs.Lo)
 	temp = temp3 - temp1 * temp2 + temp3
-	context.Regs.Hi = uint32(Bits64(uint64(temp), 63, 32))
-	context.Regs.Lo = uint32(Bits64(uint64(temp), 31, 0))
+	context.Regs.Hi = uint32(cpuutil.Bits64(uint64(temp), 63, 32))
+	context.Regs.Lo = uint32(cpuutil.Bits64(uint64(temp), 31, 0))
 }
 
 func mthi(context *Context, machInst MachInst) {
@@ -84,14 +88,14 @@ func mtlo(context *Context, machInst MachInst) {
 
 func mult(context *Context, machInst MachInst) {
 	var temp = uint64(int64(context.Regs.Sgpr(machInst.Rs())) * int64(context.Regs.Sgpr(machInst.Rt())))
-	context.Regs.Lo = uint32(Bits64(temp, 31, 0))
-	context.Regs.Hi = uint32(Bits64(temp, 63, 32))
+	context.Regs.Lo = uint32(cpuutil.Bits64(temp, 31, 0))
+	context.Regs.Hi = uint32(cpuutil.Bits64(temp, 63, 32))
 }
 
 func multu(context *Context, machInst MachInst) {
 	var temp = uint64(context.Regs.Sgpr(machInst.Rs())) * uint64(context.Regs.Sgpr(machInst.Rt()))
-	context.Regs.Lo = uint32(Bits64(temp, 31, 0))
-	context.Regs.Hi = uint32(Bits64(temp, 63, 32))
+	context.Regs.Lo = uint32(cpuutil.Bits64(temp, 31, 0))
+	context.Regs.Hi = uint32(cpuutil.Bits64(temp, 63, 32))
 }
 
 func nor(context *Context, machInst MachInst) {
@@ -112,7 +116,7 @@ func sll(context *Context, machInst MachInst) {
 }
 
 func sllv(context *Context, machInst MachInst) {
-	var s uint32 = Bits32(context.Regs.Gpr[machInst.Rs()], 4, 0)
+	var s uint32 = cpuutil.Bits32(context.Regs.Gpr[machInst.Rs()], 4, 0)
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rt()] << s
 }
 
@@ -153,7 +157,7 @@ func sra(context *Context, machInst MachInst) {
 }
 
 func srav(context *Context, machInst MachInst) {
-	var s = int32(Bits32(context.Regs.Gpr[machInst.Rs()], 4, 0))
+	var s = int32(cpuutil.Bits32(context.Regs.Gpr[machInst.Rs()], 4, 0))
 	context.Regs.Gpr[machInst.Rd()] = uint32(context.Regs.Sgpr(machInst.Rt() >> uint32(s)))
 }
 
@@ -162,7 +166,7 @@ func srl(context *Context, machInst MachInst) {
 }
 
 func srlv(context *Context, machInst MachInst) {
-	var s = Bits32(context.Regs.Gpr[machInst.Rs()], 4, 0)
+	var s = cpuutil.Bits32(context.Regs.Gpr[machInst.Rs()], 4, 0)
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rt()] >> s
 }
 
@@ -247,14 +251,14 @@ func cCondS(context *Context, machInst MachInst) {
 func cCond(context *Context, machInst MachInst, less bool, equal bool, unordered bool) {
 	var cc = machInst.Cc()
 
-	var condition = (GetBit32(machInst.Cond(), 2) != 0 && less) ||
-		(GetBit32(machInst.Cond(), 1) != 0 && equal) ||
-		(GetBit32(machInst.Cond(), 0) != 0 && unordered)
+	var condition = (cpuutil.GetBit32(machInst.Cond(), 2) != 0 && less) ||
+		(cpuutil.GetBit32(machInst.Cond(), 1) != 0 && equal) ||
+		(cpuutil.GetBit32(machInst.Cond(), 0) != 0 && unordered)
 
 	if cc != 0 {
-		context.Regs.Fcsr = SetBitValue32(context.Regs.Fcsr, 24 + cc, condition)
+		context.Regs.Fcsr = cpuutil.SetBitValue32(context.Regs.Fcsr, 24 + cc, condition)
 	} else {
-		context.Regs.Fcsr = SetBitValue32(context.Regs.Fcsr, 23, condition)
+		context.Regs.Fcsr = cpuutil.SetBitValue32(context.Regs.Fcsr, 23, condition)
 	}
 }
 
@@ -409,13 +413,13 @@ func relBranch(context *Context, v int32) {
 }
 
 func j(context *Context, machInst MachInst) {
-	var dest = (Bits32(context.Regs.Pc + 4, 32, 28) << 28) | (machInst.Target() << 2)
+	var dest = (cpuutil.Bits32(context.Regs.Pc + 4, 32, 28) << 28) | (machInst.Target() << 2)
 	branch(context, dest)
 }
 
 func jal(context *Context, machInst MachInst) {
-	var dest = (Bits32(context.Regs.Pc + 4, 32, 28) << 28) | (machInst.Target() << 2)
-	context.Regs.Gpr[REGISTER_RA] = context.Regs.Pc + 8
+	var dest = (cpuutil.Bits32(context.Regs.Pc + 4, 32, 28) << 28) | (machInst.Target() << 2)
+	context.Regs.Gpr[regs.REGISTER_RA] = context.Regs.Pc + 8
 	branch(context, dest)
 }
 
@@ -433,23 +437,23 @@ func b(context *Context, machInst MachInst) {
 }
 
 func bal(context *Context, machInst MachInst) {
-	context.Regs.Gpr[REGISTER_RA] = context.Regs.Pc + 8
+	context.Regs.Gpr[regs.REGISTER_RA] = context.Regs.Pc + 8
 	relBranch(context, machInst.Imm() << 2)
 }
 
 func fPCC(context *Context, c uint32) uint32 {
 	if c != 0 {
-		return GetBit32(context.Regs.Fcsr, 24 + c)
+		return cpuutil.GetBit32(context.Regs.Fcsr, 24 + c)
 	} else {
-		return GetBit32(context.Regs.Fcsr, 23)
+		return cpuutil.GetBit32(context.Regs.Fcsr, 23)
 	}
 }
 
 func SetFPCC(context *Context, c uint32, v bool) {
 	if c != 0 {
-		context.Regs.Fcsr = SetBitValue32(context.Regs.Fcsr, 24 + c, v)
+		context.Regs.Fcsr = cpuutil.SetBitValue32(context.Regs.Fcsr, 24 + c, v)
 	} else {
-		context.Regs.Fcsr = SetBitValue32(context.Regs.Fcsr, 23, v)
+		context.Regs.Fcsr = cpuutil.SetBitValue32(context.Regs.Fcsr, 23, v)
 	}
 }
 
@@ -490,7 +494,7 @@ func bgez(context *Context, machInst MachInst) {
 }
 
 func bgezal(context *Context, machInst MachInst) {
-	context.Regs.Gpr[REGISTER_RA] = context.Regs.Pc + 8
+	context.Regs.Gpr[regs.REGISTER_RA] = context.Regs.Pc + 8
 	if context.Regs.Sgpr(machInst.Rs()) >= 0 {
 		relBranch(context, machInst.Imm() << 2)
 	}
@@ -555,7 +559,7 @@ func bnel(context *Context, machInst MachInst) {
 func lb(context *Context, machInst MachInst) {
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	var temp byte = context.Process.Memory.ReadByteAt(addr)
-	context.Regs.Gpr[machInst.Rt()] = uint32(Sext32(uint32(temp), 8))
+	context.Regs.Gpr[machInst.Rt()] = uint32(cpuutil.Sext32(uint32(temp), 8))
 }
 
 func lbu(context *Context, machInst MachInst) {
@@ -573,7 +577,7 @@ func ldc1(context *Context, machInst MachInst) {
 func lh(context *Context, machInst MachInst) {
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	var temp uint16 = context.Process.Memory.ReadHalfWordAt(addr)
-	context.Regs.Gpr[machInst.Rt()] = uint32(Sext32(uint32(temp), 16))
+	context.Regs.Gpr[machInst.Rt()] = uint32(cpuutil.Sext32(uint32(temp), 16))
 }
 
 func lhu(context *Context, machInst MachInst) {

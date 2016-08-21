@@ -1,4 +1,4 @@
-package cpu
+package regs
 
 import (
 	"testing"

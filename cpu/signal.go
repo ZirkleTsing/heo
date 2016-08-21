@@ -1,6 +1,9 @@
 package cpu
 
-import "github.com/mcai/acogo/cpu/mem"
+import (
+	"github.com/mcai/acogo/cpu/mem"
+	"github.com/mcai/acogo/cpu/cpuutil"
+)
 
 const MAX_SIGNAL = 64
 
@@ -23,7 +26,7 @@ func (signalMask *SignalMask) Set(signal uint32) {
 
 	signal--
 
-	signalMask.Signals[signal / 32] = SetBit32(signalMask.Signals[signal / 32], signal % 32)
+	signalMask.Signals[signal / 32] = cpuutil.SetBit32(signalMask.Signals[signal / 32], signal % 32)
 }
 
 func (signalMask *SignalMask) Clear(signal uint32) {
@@ -33,7 +36,7 @@ func (signalMask *SignalMask) Clear(signal uint32) {
 
 	signal--
 
-	signalMask.Signals[signal / 32] = ClearBit32(signalMask.Signals[signal / 32], signal % 32)
+	signalMask.Signals[signal / 32] = cpuutil.ClearBit32(signalMask.Signals[signal / 32], signal % 32)
 }
 
 func (signalMask *SignalMask) Contains(signal uint32) bool {
@@ -43,7 +46,7 @@ func (signalMask *SignalMask) Contains(signal uint32) bool {
 
 	signal--
 
-	return GetBit32(signalMask.Signals[signal / 32], signal % 32) != 0
+	return cpuutil.GetBit32(signalMask.Signals[signal / 32], signal % 32) != 0
 }
 
 func (signalMask *SignalMask) LoadFrom(memory *mem.PagedMemory, virtualAddress uint64) {
