@@ -1,6 +1,10 @@
 package cpu
 
-import "github.com/mcai/acogo/cpu/regs"
+import (
+	"github.com/mcai/acogo/cpu/regs"
+	"github.com/mcai/acogo/cpu/os"
+	"github.com/mcai/acogo/cpu/isa"
+)
 
 const (
 	ContextState_IDLE = 0
@@ -14,10 +18,10 @@ type ContextState uint32
 type Context struct {
 	Id               uint32
 	State            ContextState
-	SignalMasks      *SignalMasks
+	SignalMasks      *os.SignalMasks
 	SignalFinish     uint32
 	Regs             *regs.ArchitecturalRegisterFile
-	Kernel           *Kernel
+	Kernel           *os.Kernel
 	ThreadId         uint32
 	UserId           uint32
 	EffectiveUserId  uint32
@@ -28,7 +32,7 @@ type Context struct {
 	Parent           *Context
 }
 
-func NewContext(kernel *Kernel, process *Process, parent *Context, regs *regs.ArchitecturalRegisterFile, signalFinish uint32) *Context {
+func NewContext(kernel *os.Kernel, process *Process, parent *Context, regs *regs.ArchitecturalRegisterFile, signalFinish uint32) *Context {
 	var context = &Context{
 		Kernel:kernel,
 		Parent:parent,
@@ -36,7 +40,7 @@ func NewContext(kernel *Kernel, process *Process, parent *Context, regs *regs.Ar
 		SignalFinish:signalFinish,
 		Id: kernel.CurrentContextId,
 		ProcessId:kernel.CurrentPid,
-		SignalMasks:NewSignalMasks(),
+		SignalMasks:os.NewSignalMasks(),
 		State:ContextState_IDLE,
 		Process:process,
 	}
@@ -47,7 +51,7 @@ func NewContext(kernel *Kernel, process *Process, parent *Context, regs *regs.Ar
 	return context
 }
 
-func (context *Context) DecodeNextStaticInstruction() *StaticInst {
+func (context *Context) DecodeNextStaticInstruction() *isa.StaticInst {
 	context.Regs.Pc = context.Regs.Npc
 	context.Regs.Npc = context.Regs.Nnpc
 	context.Regs.Nnpc = context.Regs.Nnpc + 4
@@ -56,7 +60,7 @@ func (context *Context) DecodeNextStaticInstruction() *StaticInst {
 	return context.Decode(context.Regs.Pc)
 }
 
-func (context *Context) Decode(mappedPc uint32) *StaticInst {
+func (context *Context) Decode(mappedPc uint32) *isa.StaticInst {
 	//return context.Process.GetStaticInst(mappedPc)
 	return nil // TODO
 }

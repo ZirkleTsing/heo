@@ -1,14 +1,16 @@
-package cpu
+package os
+
+import "github.com/mcai/acogo/cpu/mem"
 
 type Pipe struct {
 	FileDescriptors []int
-	Buffer *CircularByteBuffer
+	Buffer *mem.CircularByteBuffer
 }
 
 func NewPipe(fileDescriptors []int) *Pipe {
 	var pipe = &Pipe{
 		FileDescriptors:fileDescriptors,
-		Buffer:NewCircularByteBuffer(1024),
+		Buffer:mem.NewCircularByteBuffer(1024),
 	}
 
 	return pipe

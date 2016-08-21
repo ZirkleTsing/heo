@@ -1,7 +1,9 @@
-package cpu
+package os
+
+import "github.com/mcai/acogo/cpu"
 
 type SystemEventCriterion interface {
-	NeedProcess(context *Context) bool
+	NeedProcess(context *cpu.Context) bool
 }
 
 type TimeCriterion struct {
@@ -15,7 +17,7 @@ func NewTimeCriterion() *TimeCriterion {
 	return timeCriterion
 }
 
-func (timeCriterion *TimeCriterion) NeedProcess(context *Context) bool {
+func (timeCriterion *TimeCriterion) NeedProcess(context *cpu.Context) bool {
 	return timeCriterion.When <= Clock(context.Kernel.CurrentCycle)
 }
 
@@ -29,7 +31,7 @@ func NewSignalCriterion() *SignalCriterion {
 	return signalCriterion
 }
 
-func (signalCriterion *SignalCriterion) NeedProcess(context *Context) bool {
+func (signalCriterion *SignalCriterion) NeedProcess(context *cpu.Context) bool {
 	for signal := uint32(1); signal <= MAX_SIGNAL; signal++ {
 		if context.Kernel.MustProcessSignal(context, signal) {
 			return true
@@ -44,7 +46,7 @@ type WaitForProcessIdCriterion struct {
 	HasProcessKilled bool
 }
 
-func NewWaitForProcessIdCriterion(context *Context, processId uint32) *WaitForProcessIdCriterion {
+func NewWaitForProcessIdCriterion(context *cpu.Context, processId uint32) *WaitForProcessIdCriterion {
 	var waitForProcessIdCriterion = &WaitForProcessIdCriterion{
 		ProcessId:processId,
 	}
@@ -54,7 +56,7 @@ func NewWaitForProcessIdCriterion(context *Context, processId uint32) *WaitForPr
 	return waitForProcessIdCriterion
 }
 
-func (waitForProcessIdCriterion *WaitForProcessIdCriterion) NeedProcess(context *Context) bool {
+func (waitForProcessIdCriterion *WaitForProcessIdCriterion) NeedProcess(context *cpu.Context) bool {
 	return false //TODO
 }
 
@@ -72,7 +74,7 @@ func NewWaitForFileDescriptorCriterion() *WaitForFileDescriptorCriterion {
 	return waitForFileDescriptorCriterion
 }
 
-func (waitForFileDescriptorCriterion *WaitForFileDescriptorCriterion) NeedProcess(context *Context) bool {
+func (waitForFileDescriptorCriterion *WaitForFileDescriptorCriterion) NeedProcess(context *cpu.Context) bool {
 	return false //TODO
 }
 
@@ -87,18 +89,18 @@ const (
 type SystemEventType uint32
 
 type SystemEvent interface {
-	GetContext() *Context
+	GetContext() *cpu.Context
 	GetEventType() SystemEventType
 	NeedProcess() bool
 	Process()
 }
 
 type BaseSystemEvent struct {
-	Context   *Context
+	Context   *cpu.Context
 	EventType SystemEventType
 }
 
-func NewBaseSystemEvent(context *Context, eventType SystemEventType) *BaseSystemEvent {
+func NewBaseSystemEvent(context *cpu.Context, eventType SystemEventType) *BaseSystemEvent {
 	var baseSystemEvent = &BaseSystemEvent{
 		Context:context,
 		EventType:eventType,
@@ -113,7 +115,7 @@ type PollEvent struct {
 	WaitForFileDescriptorCriterion *WaitForFileDescriptorCriterion
 }
 
-func NewPollEvent(context *Context) *PollEvent {
+func NewPollEvent(context *cpu.Context) *PollEvent {
 	var pollEvent = &PollEvent{
 		BaseSystemEvent:NewBaseSystemEvent(context, SystemEventType_POLL),
 		TimeCriterion:NewTimeCriterion(),
@@ -137,7 +139,7 @@ type ReadEvent struct {
 	WaitForFileDescriptorCriterion *WaitForFileDescriptorCriterion
 }
 
-func NewReadEvent(context *Context) *ReadEvent {
+func NewReadEvent(context *cpu.Context) *ReadEvent {
 	var readEvent = &ReadEvent{
 		BaseSystemEvent: NewBaseSystemEvent(context, SystemEventType_READ),
 		WaitForFileDescriptorCriterion:NewWaitForFileDescriptorCriterion(),
@@ -159,7 +161,7 @@ type ResumeEvent struct {
 	TimeCriterion *TimeCriterion
 }
 
-func NewResumeEvent(context *Context) *ResumeEvent {
+func NewResumeEvent(context *cpu.Context) *ResumeEvent {
 	var resumeEvent = &ResumeEvent{
 		BaseSystemEvent: NewBaseSystemEvent(context, SystemEventType_RESUME),
 		TimeCriterion:NewTimeCriterion(),
@@ -168,7 +170,7 @@ func NewResumeEvent(context *Context) *ResumeEvent {
 	return resumeEvent
 }
 
-func (resumeEvent *ResumeEvent) NeedProcess(context *Context) bool {
+func (resumeEvent *ResumeEvent) NeedProcess(context *cpu.Context) bool {
 	return resumeEvent.TimeCriterion.NeedProcess(context)
 }
 
@@ -181,7 +183,7 @@ type SignalSuspendEvent struct {
 	SignalCriterion *SignalCriterion
 }
 
-func NewSignalSuspendEvent(context *Context) *SignalSuspendEvent {
+func NewSignalSuspendEvent(context *cpu.Context) *SignalSuspendEvent {
 	var signalSuspendEvent = &SignalSuspendEvent{
 		BaseSystemEvent: NewBaseSystemEvent(context, SystemEventType_SIGNAL_SUSPEND),
 		SignalCriterion:NewSignalCriterion(),
@@ -190,7 +192,7 @@ func NewSignalSuspendEvent(context *Context) *SignalSuspendEvent {
 	return signalSuspendEvent
 }
 
-func (signalSuspendEvent *SignalSuspendEvent) NeedProcess(context *Context) bool {
+func (signalSuspendEvent *SignalSuspendEvent) NeedProcess(context *cpu.Context) bool {
 	return signalSuspendEvent.SignalCriterion.NeedProcess(context)
 }
 
@@ -204,7 +206,7 @@ type WaitEvent struct {
 	SignalCriterion           *SignalCriterion
 }
 
-func NewWaitEvent(context *Context, processId uint32) *WaitEvent {
+func NewWaitEvent(context *cpu.Context, processId uint32) *WaitEvent {
 	var waitEvent = &WaitEvent{
 		BaseSystemEvent: NewBaseSystemEvent(context, SystemEventType_WAIT),
 		WaitForProcessIdCriterion: NewWaitForProcessIdCriterion(context, processId),

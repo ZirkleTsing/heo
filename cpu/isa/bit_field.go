@@ -1,4 +1,4 @@
-package cpu
+package isa
 
 type BitField struct {
 	Hi uint32

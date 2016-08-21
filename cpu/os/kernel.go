@@ -1,13 +1,17 @@
-package cpu
+package os
 
-import "github.com/mcai/acogo/cpu/regs"
+import (
+	"github.com/mcai/acogo/cpu/regs"
+	"github.com/mcai/acogo/cpu"
+	"github.com/mcai/acogo/cpu/mem"
+)
 
 type Kernel struct {
 	Pipes            []*Pipe
 	SystemEvents     []SystemEvent
 	SignalActions    []*SignalAction
-	Contexts         []*Context
-	Processes        []*Process
+	Contexts         []*cpu.Context
+	Processes        []*cpu.Process
 	SyscallEmulation *SyscallEmulation
 
 	CurrentCycle     uint64
@@ -34,7 +38,7 @@ func NewKernel() *Kernel {
 	return kernel
 }
 
-func (kernel *Kernel) GetProcessFromId(id uint32) *Process {
+func (kernel *Kernel) GetProcessFromId(id uint32) *cpu.Process {
 	for _, process := range kernel.Processes {
 		if process.Id == id {
 			return process
@@ -44,7 +48,7 @@ func (kernel *Kernel) GetProcessFromId(id uint32) *Process {
 	return nil
 }
 
-func (kernel *Kernel) GetContextFromId(id uint32) *Context {
+func (kernel *Kernel) GetContextFromId(id uint32) *cpu.Context {
 	for _, context := range kernel.Contexts {
 		if context.Id == id {
 			return context
@@ -54,7 +58,7 @@ func (kernel *Kernel) GetContextFromId(id uint32) *Context {
 	return nil
 }
 
-func (kernel *Kernel) GetContextFromProcessId(processId uint32) *Context {
+func (kernel *Kernel) GetContextFromProcessId(processId uint32) *cpu.Context {
 	for _, context := range kernel.Contexts {
 		if context.ProcessId == processId {
 			return context
@@ -88,7 +92,7 @@ func (kernel *Kernel) CreatePipe() []int {
 	return fileDescriptors
 }
 
-func (kernel *Kernel) getBuffer(fileDescriptor int, index uint32) *CircularByteBuffer {
+func (kernel *Kernel) getBuffer(fileDescriptor int, index uint32) *mem.CircularByteBuffer {
 	for _, pipe := range kernel.Pipes {
 		if pipe.FileDescriptors[index] == fileDescriptor {
 			return pipe.Buffer
@@ -98,15 +102,15 @@ func (kernel *Kernel) getBuffer(fileDescriptor int, index uint32) *CircularByteB
 	return nil
 }
 
-func (kernel *Kernel) GetReadBuffer(fileDescriptor int) *CircularByteBuffer {
+func (kernel *Kernel) GetReadBuffer(fileDescriptor int) *mem.CircularByteBuffer {
 	return kernel.getBuffer(fileDescriptor, 0)
 }
 
-func (kernel *Kernel) GetWriteBuffer(fileDescriptor int) *CircularByteBuffer {
+func (kernel *Kernel) GetWriteBuffer(fileDescriptor int) *mem.CircularByteBuffer {
 	return kernel.getBuffer(fileDescriptor, 1)
 }
 
-func (kernel *Kernel) RunSignalHandler(context *Context, signal uint32) {
+func (kernel *Kernel) RunSignalHandler(context *cpu.Context, signal uint32) {
 	if kernel.SignalActions[signal - 1].Handler == 0 {
 		panic("Impossible")
 	}
@@ -121,14 +125,14 @@ func (kernel *Kernel) RunSignalHandler(context *Context, signal uint32) {
 	context.Regs.Npc = kernel.SignalActions[signal - 1].Handler
 	context.Regs.Nnpc = context.Regs.Npc + 4
 
-	for context.State == ContextState_RUNNING && context.Regs.Npc != 0xfffffff {
+	for context.State == cpu.ContextState_RUNNING && context.Regs.Npc != 0xfffffff {
 		//TODO
 	}
 
 	context.Regs = oldRegs
 }
 
-func (kernel *Kernel) MustProcessSignal(context *Context, signal uint32) bool {
+func (kernel *Kernel) MustProcessSignal(context *cpu.Context, signal uint32) bool {
 	return context.SignalMasks.Pending.Contains(signal) && !context.SignalMasks.Blocked.Contains(signal)
 }
 

@@ -1,4 +1,4 @@
-package cpu
+package isa
 
 const (
 	StaticInstType_INTEGER_COMPUTATION = 0

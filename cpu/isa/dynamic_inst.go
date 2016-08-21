@@ -1,4 +1,4 @@
-package cpu
+package isa
 
 type DynamicInst struct {
 

@@ -1,4 +1,4 @@
-package cpu
+package os
 
 const (
 	CLOCKS_PER_SEC = 1000000

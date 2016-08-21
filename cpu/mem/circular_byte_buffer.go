@@ -1,16 +1,14 @@
-package cpu
-
-import "github.com/mcai/acogo/cpu/mem"
+package mem
 
 type CircularByteBuffer struct {
-	Data          *mem.SimpleMemory
+	Data          *SimpleMemory
 	ReadPosition  uint64
 	WritePosition uint64
 }
 
 func NewCircularByteBuffer(capacity uint64) *CircularByteBuffer {
 	var circularByteBuffer = &CircularByteBuffer{
-		Data:mem.NewSimpleMemory(true, make([]byte, capacity)),
+		Data:NewSimpleMemory(true, make([]byte, capacity)),
 	}
 
 	return circularByteBuffer

@@ -1,4 +1,4 @@
-package cpu
+package isa
 
 import (
 	"bytes"
@@ -198,13 +198,11 @@ func (machInst MachInst) Cc() uint32 {
 	return machInst.ValueOf(CC)
 }
 
-func Disassemble(pc uint, staticInst *StaticInst) string {
+func Disassemble(pc uint, mnemonicName string, machInst MachInst) string {
 	var buf bytes.Buffer
 
-	var machInst = staticInst.MachInst
-
 	buf.WriteString(fmt.Sprintf("0x%08x: 0x%08x %s ",
-		pc, machInst, strings.ToLower(string(staticInst.Mnemonic.Name))))
+		pc, machInst, strings.ToLower(mnemonicName)))
 
 	if machInst == 0x00000000 {
 		return buf.String()
