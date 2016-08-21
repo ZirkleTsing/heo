@@ -187,6 +187,8 @@ func NewMnemonic(name MnemonicName, staticInstFlags []StaticInstFlag, decodeMeth
 		mnemonic.ExtraBitFieldValue = decodeCondition.Value
 	}
 
+	Mnemonics = append(Mnemonics, mnemonic)
+
 	return mnemonic
 }
 
@@ -204,6 +206,10 @@ const (
 	FMT3_WORD = 4
 	FMT3_LONG = 5
 	FMT3_PS = 6
+)
+
+var (
+	Mnemonics = []*Mnemonic{}
 )
 
 var (

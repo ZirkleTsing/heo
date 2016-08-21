@@ -8,7 +8,7 @@ func TestExperiment(t *testing.T) {
 	var maxPackets = int64(-1)
 	var drainPackets = true
 
-	var config = NewConfig("test_results/synthetic/aco", numNodes, maxCycles, maxPackets, drainPackets)
+	var config = NewNoCConfig("test_results/synthetic/aco", numNodes, maxCycles, maxPackets, drainPackets)
 
 	config.Routing = ROUTING_ODD_EVEN
 	config.Selection = SELECTION_ACO

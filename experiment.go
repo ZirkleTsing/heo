@@ -7,7 +7,7 @@ import (
 )
 
 type Experiment struct {
-	Config                  *Config
+	Config                  *NoCConfig
 	Stats                   Stats
 	statMap                 map[string]interface{}
 
@@ -16,7 +16,7 @@ type Experiment struct {
 	Network                 *Network
 }
 
-func NewExperiment(config *Config) *Experiment {
+func NewExperiment(config *NoCConfig) *Experiment {
 	var experiment = &Experiment{
 		Config:config,
 		CycleAccurateEventQueue:NewCycleAccurateEventQueue(),

@@ -112,6 +112,25 @@ func NewArchitecturalRegisterFile(littleEndian bool) *ArchitecturalRegisterFile 
 	return architecturalRegisterFile
 }
 
+func (architecturalRegisterFile *ArchitecturalRegisterFile) Clone() *ArchitecturalRegisterFile {
+	var newArchitecturalRegisterFile = NewArchitecturalRegisterFile(architecturalRegisterFile.LittleEndian)
+
+	newArchitecturalRegisterFile.Pc = architecturalRegisterFile.Pc
+	newArchitecturalRegisterFile.Npc = architecturalRegisterFile.Npc
+	newArchitecturalRegisterFile.Nnpc = architecturalRegisterFile.Nnpc
+
+	copy(newArchitecturalRegisterFile.Gpr, architecturalRegisterFile.Gpr)
+
+	newArchitecturalRegisterFile.Fpr = NewFloatingPointRegisters(architecturalRegisterFile.LittleEndian)
+	copy(newArchitecturalRegisterFile.Fpr.data, architecturalRegisterFile.Fpr.data)
+
+	newArchitecturalRegisterFile.Hi = architecturalRegisterFile.Hi
+	newArchitecturalRegisterFile.Lo = architecturalRegisterFile.Lo
+	newArchitecturalRegisterFile.Fcsr = architecturalRegisterFile.Fcsr
+
+	return newArchitecturalRegisterFile
+}
+
 func (architecturalRegisterFile *ArchitecturalRegisterFile) Sgpr(i uint32) int32 {
 	return int32(architecturalRegisterFile.Gpr[i])
 }

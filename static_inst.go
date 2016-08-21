@@ -39,14 +39,14 @@ const (
 type StaticInstFlag uint
 
 type StaticInst struct {
-	MachInst MachInst
 	Mnemonic *Mnemonic
+	MachInst MachInst
 }
 
-func NewStaticInst(machInst MachInst, mnemonic *Mnemonic) *StaticInst {
+func NewStaticInst(mnemonic *Mnemonic, machInst MachInst) *StaticInst {
 	var staticInst = &StaticInst{
-		MachInst:machInst,
 		Mnemonic:mnemonic,
+		MachInst:machInst,
 	}
 
 	return staticInst

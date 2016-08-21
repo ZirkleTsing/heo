@@ -48,7 +48,7 @@ var SELECTIONS = []SelectionType{
 	SELECTION_ACO,
 }
 
-type Config struct {
+type NoCConfig struct {
 	OutputDirectory         string
 
 	NumNodes                int
@@ -84,8 +84,8 @@ type Config struct {
 	ReinforcementFactor     float64
 }
 
-func NewConfig(outputDirectory string, numNodes int, maxCycles int64, maxPackets int64, drainPackets bool) *Config {
-	var config = &Config{
+func NewNoCConfig(outputDirectory string, numNodes int, maxCycles int64, maxPackets int64, drainPackets bool) *NoCConfig {
+	var nocConfig = &NoCConfig{
 		OutputDirectory:outputDirectory,
 
 		NumNodes:numNodes,
@@ -121,7 +121,7 @@ func NewConfig(outputDirectory string, numNodes int, maxCycles int64, maxPackets
 		ReinforcementFactor:0.05,
 	}
 
-	return config
+	return nocConfig
 }
 
 func (experiment *Experiment) DumpConfig() {
