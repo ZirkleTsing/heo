@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"encoding/binary"
 	"bytes"
+	"github.com/mcai/acogo/cpu/mem"
 )
 
 type ElfFile struct {
-	Data                 *SimpleMemory
+	Data                 *mem.SimpleMemory
 	Identification       *ElfIdentification
 	Header               *ElfHeader
 	SectionHeaders       []*ElfSectionHeader
@@ -30,7 +31,7 @@ func NewElfFile(fileName string) *ElfFile {
 		panic(fmt.Sprintf("Cannot read ELF file (%s)", err))
 	}
 
-	elfFile.Data = NewSimpleMemory(false, data)
+	elfFile.Data = mem.NewSimpleMemory(false, data)
 
 	elfFile.Identification = NewElfIdentification(elfFile)
 

@@ -1,5 +1,7 @@
 package cpu
 
+import "github.com/mcai/acogo/cpu/mem"
+
 const MAX_SIGNAL = 64
 
 type SignalMask struct {
@@ -44,13 +46,13 @@ func (signalMask *SignalMask) Contains(signal uint32) bool {
 	return GetBit32(signalMask.Signals[signal / 32], signal % 32) != 0
 }
 
-func (signalMask *SignalMask) LoadFrom(memory *PagedMemory, virtualAddress uint64) {
+func (signalMask *SignalMask) LoadFrom(memory *mem.PagedMemory, virtualAddress uint64) {
 	for i := uint64(0); i < MAX_SIGNAL / 32; i++ {
 		signalMask.Signals[i] = memory.ReadWordAt(virtualAddress + i * 4)
 	}
 }
 
-func (signalMask *SignalMask) SaveTo(memory *PagedMemory, virtualAddress uint64) {
+func (signalMask *SignalMask) SaveTo(memory *mem.PagedMemory, virtualAddress uint64) {
 	for i := uint64(0); i < MAX_SIGNAL / 32; i++ {
 		memory.WriteWordAt(virtualAddress + i * 4, signalMask.Signals[i])
 	}
@@ -93,14 +95,14 @@ func NewSignalAction() *SignalAction {
 	return signalAction
 }
 
-func (signalAction *SignalAction) LoadFrom(memory *PagedMemory, virtualAddress uint64) {
+func (signalAction *SignalAction) LoadFrom(memory *mem.PagedMemory, virtualAddress uint64) {
 	signalAction.Flags = memory.ReadWordAt(virtualAddress)
 	signalAction.Handler = memory.ReadWordAt(virtualAddress + SignalAction_HANDLER_OFFSET)
 	signalAction.Restorer = memory.ReadWordAt(virtualAddress + SignalAction_RESTORER_OFFSET)
 	signalAction.Mask.LoadFrom(memory, virtualAddress + SignalAction_MASK_OFFSET)
 }
 
-func (signalAction *SignalAction) SaveTo(memory *PagedMemory, virtualAddress uint64) {
+func (signalAction *SignalAction) SaveTo(memory *mem.PagedMemory, virtualAddress uint64) {
 	memory.WriteWordAt(virtualAddress, signalAction.Flags)
 	memory.WriteWordAt(virtualAddress + SignalAction_HANDLER_OFFSET, signalAction.Handler)
 	memory.WriteWordAt(virtualAddress + SignalAction_RESTORER_OFFSET, signalAction.Restorer)

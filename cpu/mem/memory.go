@@ -1,4 +1,4 @@
-package cpu
+package mem
 
 type Memory interface {
 	ReadByteAt(virtualAddress uint64) byte

@@ -1,6 +1,9 @@
 package cpu
 
-import "syscall"
+import (
+	"syscall"
+	"github.com/mcai/acogo/cpu/mem"
+)
 
 type Process struct {
 	Id                   uint32
@@ -16,7 +19,7 @@ type Process struct {
 	DataTop              uint32
 	ProgramEntry         uint32
 	LittleEndian         bool
-	Memory               *PagedMemory
+	Memory               *mem.PagedMemory
 }
 
 func NewProcess(kernel *Kernel, contextMapping *ContextMapping) *Process {
