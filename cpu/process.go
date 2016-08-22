@@ -3,29 +3,32 @@ package cpu
 import (
 	"syscall"
 	"github.com/mcai/acogo/cpu/mem"
+	"github.com/mcai/acogo/cpu/os"
+	"github.com/mcai/acogo/cpu/isa"
 )
 
 type Process struct {
-	Id                   uint32
-	ContextMapping       *ContextMapping
-	Environments         []string
-	StdInFileDescriptor  uint32
-	StdOutFileDescriptor uint32
-	StackBase            uint32
-	StackSize            uint32
-	TextSize             uint32
-	EnvironmentBase      uint32
-	HeapTop              uint32
-	DataTop              uint32
-	ProgramEntry         uint32
-	LittleEndian         bool
-	Memory               *mem.PagedMemory
+	Id                     uint32
+	ContextMapping         *ContextMapping
+	Environments           []string
+	StdInFileDescriptor    uint32
+	StdOutFileDescriptor   uint32
+	StackBase              uint32
+	StackSize              uint32
+	TextSize               uint32
+	EnvironmentBase        uint32
+	HeapTop                uint32
+	DataTop                uint32
+	ProgramEntry           uint32
+	LittleEndian           bool
+	Memory                 *mem.PagedMemory
+	pcToMachInsts          map[uint32]isa.MachInst
+	machInstsToStaticInsts map[isa.MachInst]*isa.StaticInst
 }
 
-func NewProcess(kernel *Kernel, contextMapping *ContextMapping) *Process {
+func NewProcess(kernel *os.Kernel, contextMapping *ContextMapping) *Process {
 	var process = &Process{
 		ContextMapping:contextMapping,
-
 	}
 
 	//TODO
@@ -33,7 +36,7 @@ func NewProcess(kernel *Kernel, contextMapping *ContextMapping) *Process {
 	return process
 }
 
-func (process *Process) LoadProgram(kernel *Kernel, contextMapping *ContextMapping) {
+func (process *Process) LoadProgram(kernel *os.Kernel, contextMapping *ContextMapping) {
 	//TODO
 }
 
@@ -57,10 +60,10 @@ func (process *Process) CloseProgram() {
 	}
 }
 
-func (process *Process) Decode(machInst MachInst) *StaticInst {
-	for _, mnemonic := range Mnemonics {
+func (process *Process) Decode(machInst isa.MachInst) *isa.StaticInst {
+	for _, mnemonic := range isa.Mnemonics {
 		if machInst != 0 && mnemonic.Mask == mnemonic.Bits && (mnemonic.ExtraBitField == nil || machInst.ValueOf(mnemonic.ExtraBitField) == mnemonic.ExtraBitFieldValue) {
-			return NewStaticInst(mnemonic, machInst)
+			return isa.NewStaticInst(mnemonic, machInst)
 		}
 	}
 
