@@ -5,7 +5,7 @@ import (
 )
 
 type Network struct {
-	Experiment                   *Experiment
+	Experiment                   *NoCExperiment
 	CurrentPacketId              int64
 	NumNodes                     int
 	Nodes                        []*Node
@@ -36,7 +36,7 @@ type Network struct {
 	MaxFlitPerStateDelay         map[FlitState]int
 }
 
-func NewNetwork(experiment *Experiment) *Network {
+func NewNetwork(experiment *NoCExperiment) *Network {
 	var network = &Network{
 		Experiment:experiment,
 		NumNodes:experiment.Config.NumNodes,

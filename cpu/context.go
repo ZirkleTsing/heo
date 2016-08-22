@@ -2,8 +2,6 @@ package cpu
 
 import (
 	"github.com/mcai/acogo/cpu/regs"
-	"github.com/mcai/acogo/cpu/os"
-	"github.com/mcai/acogo/cpu/isa"
 )
 
 const (
@@ -18,11 +16,11 @@ type ContextState uint32
 type Context struct {
 	Id               uint32
 	State            ContextState
-	SignalMasks      *os.SignalMasks
+	SignalMasks      *SignalMasks
 	SignalFinish     uint32
 	Regs             *regs.ArchitecturalRegisterFile
-	Kernel           *os.Kernel
-	ThreadId         uint32
+	Kernel           *Kernel
+	ThreadId         int32
 	UserId           uint32
 	EffectiveUserId  uint32
 	GroupId          uint32
@@ -32,7 +30,7 @@ type Context struct {
 	Parent           *Context
 }
 
-func NewContext(kernel *os.Kernel, process *Process, parent *Context, regs *regs.ArchitecturalRegisterFile, signalFinish uint32) *Context {
+func NewContext(kernel *Kernel, process *Process, parent *Context, regs *regs.ArchitecturalRegisterFile, signalFinish uint32) *Context {
 	var context = &Context{
 		Kernel:kernel,
 		Parent:parent,
@@ -40,7 +38,7 @@ func NewContext(kernel *os.Kernel, process *Process, parent *Context, regs *regs
 		SignalFinish:signalFinish,
 		Id: kernel.CurrentContextId,
 		ProcessId:kernel.CurrentPid,
-		SignalMasks:os.NewSignalMasks(),
+		SignalMasks:NewSignalMasks(),
 		State:ContextState_IDLE,
 		Process:process,
 	}
@@ -51,7 +49,7 @@ func NewContext(kernel *os.Kernel, process *Process, parent *Context, regs *regs
 	return context
 }
 
-func (context *Context) DecodeNextStaticInstruction() *isa.StaticInst {
+func (context *Context) DecodeNextStaticInst() *StaticInst {
 	context.Regs.Pc = context.Regs.Npc
 	context.Regs.Npc = context.Regs.Nnpc
 	context.Regs.Nnpc = context.Regs.Nnpc + 4
@@ -60,7 +58,7 @@ func (context *Context) DecodeNextStaticInstruction() *isa.StaticInst {
 	return context.Decode(context.Regs.Pc)
 }
 
-func (context *Context) Decode(mappedPc uint32) *isa.StaticInst {
+func (context *Context) Decode(mappedPc uint32) *StaticInst {
 	//return context.Process.GetStaticInst(mappedPc)
 	return nil // TODO
 }

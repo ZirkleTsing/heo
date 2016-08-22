@@ -1,4 +1,4 @@
-package isa
+package cpu
 
 const (
 	StaticInstType_INTEGER_COMPUTATION = 0
@@ -50,4 +50,8 @@ func NewStaticInst(mnemonic *Mnemonic, machInst MachInst) *StaticInst {
 	}
 
 	return staticInst
+}
+
+func (staticInst *StaticInst) Execute(context *Context) {
+	staticInst.Mnemonic.Execute(context, staticInst.MachInst)
 }

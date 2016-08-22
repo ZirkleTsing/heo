@@ -8,122 +8,122 @@ import (
 
 type CSVField struct {
 	Name     string
-	Callback func(experiment *Experiment) interface{}
+	Callback func(experiment *NoCExperiment) interface{}
 }
 
 func GetCSVFields() []CSVField {
 	var csvFields = []CSVField{
 		{
 			Name: "Data_Packet_Traffic",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.Config.DataPacketTraffic
 			},
 		},
 		{
 			Name: "Data_Packet_Injection_Rate_(packets/cycle/node)",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.Config.DataPacketInjectionRate
 			},
 		},
 		{
 			Name: "Routing_Algorithm",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.Config.Routing
 			},
 		},
 		{
 			Name: "Selection_Policy",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.Config.Selection
 			},
 		},
 		{
 			Name: "Ant_Packet_Traffic",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.Config.AntPacketTraffic
 			},
 		},
 		{
 			Name: "Ant_Packet_Injection_Rate_(packets/cycle/node)",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.Config.AntPacketInjectionRate
 			},
 		},
 		{
 			Name: "Alpha",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.Config.AcoSelectionAlpha
 			},
 		},
 		{
 			Name: "Reinforcement_Factor",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return fmt.Sprintf("rf=%f", experiment.Config.ReinforcementFactor)
 			},
 		},
 		{
 			Name: "NoC_Routing_Solution",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return fmt.Sprintf("%s+%s", experiment.Config.Routing, experiment.Config.Selection)
 			},
 		},
 		{
 			Name: "Simulation_Time",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.GetStatMap()["SimulationTime"]
 			},
 		},
 		{
 			Name: "Total_Cycles",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.GetStatMap()["TotalCycles"]
 			},
 		},
 		{
 			Name: "Num_Packets_Transmitted",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.GetStatMap()["NumPacketsTransmitted"]
 			},
 		},
 		{
 			Name: "Throughput_(packets/cycle/node)",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.GetStatMap()["Throughput"]
 			},
 		},
 		{
 			Name: "Avg._Packet_Delay_(cycles)",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.GetStatMap()["AveragePacketDelay"]
 			},
 		},
 		{
 			Name: "Avg._Packet_Hops",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.GetStatMap()["AveragePacketHops"]
 			},
 		},
 		{
 			Name: "Num_Payload_Packets_Transmitted",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.GetStatMap()["NumPayloadPacketsTransmitted"]
 			},
 		},
 		{
 			Name: "Payload_Throughput_(packets/cycle/node)",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.GetStatMap()["PayloadThroughput"]
 			},
 		},
 		{
 			Name: "Avg._Payload_Packet_Delay_(cycles)",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.GetStatMap()["AveragePayloadPacketDelay"]
 			},
 		},
 		{
 			Name: "Avg._Payload_Packet_Hops",
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.GetStatMap()["AveragePayloadPacketHops"]
 			},
 		},
@@ -134,14 +134,14 @@ func GetCSVFields() []CSVField {
 
 		csvFields = append(csvFields, CSVField{
 			Name: fmt.Sprintf("Average_Flit_per_State_Delay[%s]", state),
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.GetStatMap()[fmt.Sprintf("AverageFlitPerStateDelay[%s]", state)]
 			},
 		})
 
 		csvFields = append(csvFields, CSVField{
 			Name: fmt.Sprintf("Max_Flit_per_State_Delay[%s]", state),
-			Callback: func(experiment *Experiment) interface{} {
+			Callback: func(experiment *NoCExperiment) interface{} {
 				return experiment.GetStatMap()[fmt.Sprintf("MaxFlitPerStateDelay[%s]", state)]
 			},
 		})
@@ -150,7 +150,7 @@ func GetCSVFields() []CSVField {
 	return csvFields
 }
 
-func WriteCSVFile(outputDirectory string, outputCSVFileName string, experiments []*Experiment, fields []CSVField) {
+func WriteCSVFile(outputDirectory string, outputCSVFileName string, experiments []*NoCExperiment, fields []CSVField) {
 	if err := os.MkdirAll(outputDirectory, os.ModePerm); err != nil {
 		panic(fmt.Sprintf("Cannot create output directory (%s)", err))
 	}

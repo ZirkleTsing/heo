@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
-	"os/exec"
-	"os"
 	"sync"
 	"github.com/mcai/acogo/noc"
+	"github.com/mcai/acogo/simutil"
 )
 
 var (
@@ -15,7 +14,7 @@ var (
 	drainPackets = false
 )
 
-func NewExperiment(outputDirectoryPrefix string, traffic noc.TrafficType, dataPacketInjectionRate float64, routing noc.RoutingType, selection noc.SelectionType, antPacketInjectionRate float64, acoSelectionAlpha float64, reinforcementFactor float64) *noc.Experiment {
+func NewExperiment(outputDirectoryPrefix string, traffic noc.TrafficType, dataPacketInjectionRate float64, routing noc.RoutingType, selection noc.SelectionType, antPacketInjectionRate float64, acoSelectionAlpha float64, reinforcementFactor float64) *noc.NoCExperiment {
 	var outputDirectory string
 
 	switch {
@@ -45,7 +44,7 @@ func NewExperiment(outputDirectoryPrefix string, traffic noc.TrafficType, dataPa
 		config.ReinforcementFactor = reinforcementFactor
 	}
 
-	return noc.NewExperiment(config)
+	return noc.NewNoCExperiment(config)
 }
 
 type NoCRoutingSolution struct {
@@ -53,7 +52,7 @@ type NoCRoutingSolution struct {
 	Selection noc.SelectionType
 }
 
-func TestTrafficsAndDataPacketInjectionRates() map[noc.TrafficType]([]*noc.Experiment) {
+func TestTrafficsAndDataPacketInjectionRates() map[noc.TrafficType]([]*noc.NoCExperiment) {
 	var dataPacketInjectionRates = []float64{
 		0.015,
 		0.030,
@@ -72,7 +71,7 @@ func TestTrafficsAndDataPacketInjectionRates() map[noc.TrafficType]([]*noc.Exper
 
 	var outputDirectoryPrefix = "trafficsAndDataPacketInjectionRates"
 
-	var experiments = make(map[noc.TrafficType]([]*noc.Experiment))
+	var experiments = make(map[noc.TrafficType]([]*noc.NoCExperiment))
 
 	for _, traffic := range noc.TRAFFICS {
 		for _, dataPacketInjectionRate := range dataPacketInjectionRates {
@@ -106,7 +105,7 @@ func TestTrafficsAndDataPacketInjectionRates() map[noc.TrafficType]([]*noc.Exper
 	return experiments
 }
 
-func TestAntPacketInjectionRates() []*noc.Experiment {
+func TestAntPacketInjectionRates() []*noc.NoCExperiment {
 	var traffic = noc.TRAFFIC_TRANSPOSE1
 	var dataPacketInjectionRate = 0.060
 
@@ -129,7 +128,7 @@ func TestAntPacketInjectionRates() []*noc.Experiment {
 
 	var outputDirectoryPrefix = "antPacketInjectionRates"
 
-	var experiments []*noc.Experiment
+	var experiments []*noc.NoCExperiment
 
 	for _, antPacketInjectionRate := range antPacketInjectionRates {
 		experiments = append(
@@ -148,7 +147,7 @@ func TestAntPacketInjectionRates() []*noc.Experiment {
 	return experiments
 }
 
-func TestAcoSelectionAlphasAndReinforcementFactors() []*noc.Experiment {
+func TestAcoSelectionAlphasAndReinforcementFactors() []*noc.NoCExperiment {
 	var traffic = noc.TRAFFIC_TRANSPOSE1
 	var dataPacketInjectionRate = 0.060
 
@@ -178,7 +177,7 @@ func TestAcoSelectionAlphasAndReinforcementFactors() []*noc.Experiment {
 
 	var outputDirectoryPrefix = "acoSelectionAlphasAndReinforcementFactors"
 
-	var experiments []*noc.Experiment
+	var experiments []*noc.NoCExperiment
 
 	for _, acoSelectionAlpha := range acoSelectionAlphas {
 		for _, reinforcementFactor := range reinforcementFactors {
@@ -206,7 +205,7 @@ var (
 )
 
 func run() {
-	var experiments []*noc.Experiment
+	var experiments []simutil.Experiment
 
 	for _, traffic := range noc.TRAFFICS {
 		for _, experiment := range TrafficsAndDataPacketInjectionRates[traffic] {
@@ -222,7 +221,7 @@ func run() {
 		experiments = append(experiments, experiment)
 	}
 
-	noc.RunExperiments(experiments, true)
+	simutil.RunExperiments(experiments, true)
 }
 
 func analyze() {
@@ -234,30 +233,36 @@ func analyze() {
 		noc.WriteCSVFile(outputDirectory, "result.csv", TrafficsAndDataPacketInjectionRates[traffic], noc.GetCSVFields())
 
 		wg.Add(1)
-		go generatePlot(
-			wg,
-			outputDirectory,
-			"result.csv",
-			"throughput.pdf",
-			"Data_Packet_Injection_Rate_(packets/cycle/node)",
-			"NoC_Routing_Solution",
-			"Payload_Throughput_(packets/cycle/node)",
-			90,
-			BAR_PLOT,
-		)
+		go func() {
+			simutil.GeneratePlot(
+				outputDirectory,
+				"result.csv",
+				"throughput.pdf",
+				"Data_Packet_Injection_Rate_(packets/cycle/node)",
+				"NoC_Routing_Solution",
+				"Payload_Throughput_(packets/cycle/node)",
+				90,
+				simutil.BAR_PLOT,
+			)
+
+			wg.Done()
+		}()
 
 		wg.Add(1)
-		go generatePlot(
-			wg,
-			outputDirectory,
-			"result.csv",
-			"average_packet_delay.pdf",
-			"Data_Packet_Injection_Rate_(packets/cycle/node)",
-			"NoC_Routing_Solution",
-			"Avg._Payload_Packet_Delay_(cycles)",
-			90,
-			BAR_PLOT,
-		)
+		go func() {
+			simutil.GeneratePlot(
+				outputDirectory,
+				"result.csv",
+				"average_packet_delay.pdf",
+				"Data_Packet_Injection_Rate_(packets/cycle/node)",
+				"NoC_Routing_Solution",
+				"Avg._Payload_Packet_Delay_(cycles)",
+				90,
+				simutil.BAR_PLOT,
+			)
+
+			wg.Done()
+		}()
 	}
 
 	outputDirectory := "results/antPacketInjectionRates"
@@ -265,108 +270,74 @@ func analyze() {
 	noc.WriteCSVFile(outputDirectory, "result.csv", AntPacketInjectionRates, noc.GetCSVFields())
 
 	wg.Add(1)
-	go generatePlot(
-		wg,
-		outputDirectory,
-		"result.csv",
-		"throughput.pdf",
-		"Ant_Packet_Injection_Rate_(packets/cycle/node)",
-		"",
-		"Payload_Throughput_(packets/cycle/node)",
-		90,
-		BAR_PLOT,
-	)
+	go func() {
+		simutil.GeneratePlot(
+			outputDirectory,
+			"result.csv",
+			"throughput.pdf",
+			"Ant_Packet_Injection_Rate_(packets/cycle/node)",
+			"",
+			"Payload_Throughput_(packets/cycle/node)",
+			90,
+			simutil.BAR_PLOT,
+		)
+
+		wg.Done()
+	}()
 
 	wg.Add(1)
-	go generatePlot(
-		wg,
-		outputDirectory,
-		"result.csv",
-		"average_packet_delay.pdf",
-		"Ant_Packet_Injection_Rate_(packets/cycle/node)",
-		"",
-		"Avg._Payload_Packet_Delay_(cycles)",
-		90,
-		BAR_PLOT,
-	)
+	go func() {
+		simutil.GeneratePlot(
+			outputDirectory,
+			"result.csv",
+			"average_packet_delay.pdf",
+			"Ant_Packet_Injection_Rate_(packets/cycle/node)",
+			"",
+			"Avg._Payload_Packet_Delay_(cycles)",
+			90,
+			simutil.BAR_PLOT,
+		)
 
-	outputDirectory = "results/acoSelectionAlphasAndReinforcementFactors"
+		wg.Done()
+	}()
 
-	noc.WriteCSVFile(outputDirectory, "result.csv", AcoSelectionAlphasAndReinforcementFactors, noc.GetCSVFields())
+	outputDirectory2 := "results/acoSelectionAlphasAndReinforcementFactors"
 
-	wg.Add(1)
-	go generatePlot(
-		wg,
-		outputDirectory,
-		"result.csv",
-		"throughput.pdf",
-		"Alpha",
-		"Reinforcement_Factor",
-		"Payload_Throughput_(packets/cycle/node)",
-		90,
-		BAR_PLOT,
-	)
+	noc.WriteCSVFile(outputDirectory2, "result.csv", AcoSelectionAlphasAndReinforcementFactors, noc.GetCSVFields())
 
 	wg.Add(1)
-	go generatePlot(
-		wg,
-		outputDirectory,
-		"result.csv",
-		"average_packet_delay.pdf",
-		"Alpha",
-		"Reinforcement_Factor",
-		"Avg._Payload_Packet_Delay_(cycles)",
-		90,
-		BAR_PLOT,
-	)
+	go func() {
+		simutil.GeneratePlot(
+			outputDirectory2,
+			"result.csv",
+			"throughput.pdf",
+			"Alpha",
+			"Reinforcement_Factor",
+			"Payload_Throughput_(packets/cycle/node)",
+			90,
+			simutil.BAR_PLOT,
+		)
+
+		wg.Done()
+	}()
+
+	wg.Add(1)
+	go func() {
+		simutil.GeneratePlot(
+			outputDirectory2,
+			"result.csv",
+			"average_packet_delay.pdf",
+			"Alpha",
+			"Reinforcement_Factor",
+			"Avg._Payload_Packet_Delay_(cycles)",
+			90,
+			simutil.BAR_PLOT,
+		)
+
+		wg.Done()
+	}()
 
 	wg.Wait()
-}
-
-const (
-	BAR_PLOT = 0
-	LINE_PLOT = 1
-)
-
-type PlotType int
-
-func generatePlot(wg *sync.WaitGroup, outputDirectory string, csvFileName string, plotFileName string, x string, hue string, y string, xticklabelsRotation int, plotType PlotType) {
-	var cmd *exec.Cmd
-
-	switch hue {
-	case "":
-		cmd = exec.Command(
-			"./plots.sh",
-			"--csv_file_name", outputDirectory + "/" + csvFileName,
-			"--plot_file_name", outputDirectory + "/" + plotFileName,
-			"--x", x,
-			"--y", y,
-			"--xticklabels_rotation", fmt.Sprintf("%d", xticklabelsRotation),
-			"--plot_type", fmt.Sprintf("%d", plotType),
-		)
-	default:
-		cmd = exec.Command(
-			"./plots.sh",
-			"--csv_file_name", outputDirectory + "/" + csvFileName,
-			"--plot_file_name", outputDirectory + "/" + plotFileName,
-			"--x", x,
-			"--hue", hue,
-			"--y", y,
-			"--xticklabels_rotation", fmt.Sprintf("%d", xticklabelsRotation),
-			"--plot_type", fmt.Sprintf("%d", plotType),
-		)
-	}
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	err := cmd.Run()
-
-	if err != nil {
-		panic(err)
-	}
-
-	wg.Done()
 }
 
 func main() {

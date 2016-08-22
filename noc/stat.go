@@ -2,163 +2,122 @@ package noc
 
 import (
 	"fmt"
-	"bytes"
-	"encoding/json"
 	"github.com/mcai/acogo/simutil"
 )
 
-const STATS_JSON_FILE_NAME = "stats.json"
-
-type Stat struct {
-	Key   string
-	Value interface{}
-}
-
-type Stats []Stat
-
-func (stats Stats) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
-
-	buf.WriteString("{")
-
-	for i, stat := range stats {
-		if i != 0 {
-			buf.WriteString(",")
-		}
-
-		key, err := json.Marshal(stat.Key)
-		if err != nil {
-			return nil, err
-		}
-		buf.Write(key)
-
-		buf.WriteString(":")
-
-		val, err := json.Marshal(stat.Value)
-		if err != nil {
-			return nil, err
-		}
-		buf.Write(val)
-	}
-
-	buf.WriteString("}")
-
-	return buf.Bytes(), nil
-}
-
-func (experiment *Experiment) DumpStats() {
-	experiment.Stats = append(experiment.Stats, Stat{
+func (experiment *NoCExperiment) DumpStats() {
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "TotalCycles",
 		Value: experiment.CycleAccurateEventQueue.CurrentCycle,
 	})
 
-	experiment.Stats = append(experiment.Stats, Stat{
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "SimulationTime",
 		Value: fmt.Sprintf("%v", experiment.EndTime.Sub(experiment.BeginTime)),
 	})
 
-	experiment.Stats = append(experiment.Stats, Stat{
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "CyclesPerSecond",
 		Value: float64(experiment.CycleAccurateEventQueue.CurrentCycle) / experiment.EndTime.Sub(experiment.BeginTime).Seconds(),
 	})
 
-	experiment.Stats = append(experiment.Stats, Stat{
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "PacketsPerSecond",
 		Value: float64(experiment.Network.NumPacketsTransmitted) / experiment.EndTime.Sub(experiment.BeginTime).Seconds(),
 	})
 
-	experiment.Stats = append(experiment.Stats, Stat{
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "NumPacketsReceived",
 		Value: experiment.Network.NumPacketsReceived,
 	})
 
-	experiment.Stats = append(experiment.Stats, Stat{
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "NumPacketsTransmitted",
 		Value: experiment.Network.NumPacketsTransmitted,
 	})
 
-	experiment.Stats = append(experiment.Stats, Stat{
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "Throughput",
 		Value: experiment.Network.Throughput(),
 	})
 
-	experiment.Stats = append(experiment.Stats, Stat{
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "AveragePacketDelay",
 		Value: experiment.Network.AveragePacketDelay(),
 	})
 
-	experiment.Stats = append(experiment.Stats, Stat{
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "AveragePacketHops",
 		Value: experiment.Network.AveragePacketHops(),
 	})
 
-	experiment.Stats = append(experiment.Stats, Stat{
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "MaxPacketDelay",
 		Value: experiment.Network.MaxPacketDelay,
 	})
 
-	experiment.Stats = append(experiment.Stats, Stat{
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "MaxPacketHops",
 		Value: experiment.Network.MaxPacketHops,
 	})
 
-	experiment.Stats = append(experiment.Stats, Stat{
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "NumPayloadPacketsReceived",
 		Value: experiment.Network.NumPayloadPacketsReceived,
 	})
 
-	experiment.Stats = append(experiment.Stats, Stat{
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "NumPayloadPacketsTransmitted",
 		Value: experiment.Network.NumPayloadPacketsTransmitted,
 	})
 
-	experiment.Stats = append(experiment.Stats, Stat{
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "PayloadThroughput",
 		Value: experiment.Network.PayloadThroughput(),
 	})
 
-	experiment.Stats = append(experiment.Stats, Stat{
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "AveragePayloadPacketDelay",
 		Value: experiment.Network.AveragePayloadPacketDelay(),
 	})
 
-	experiment.Stats = append(experiment.Stats, Stat{
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "AveragePayloadPacketHops",
 		Value: experiment.Network.AveragePayloadPacketHops(),
 	})
 
-	experiment.Stats = append(experiment.Stats, Stat{
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "MaxPayloadPacketDelay",
 		Value: experiment.Network.MaxPayloadPacketDelay,
 	})
 
-	experiment.Stats = append(experiment.Stats, Stat{
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "MaxPayloadPacketHops",
 		Value: experiment.Network.MaxPayloadPacketHops,
 	})
 
 	for _, state := range VALID_FLIT_STATES {
-		experiment.Stats = append(experiment.Stats, Stat{
+		experiment.Stats = append(experiment.Stats, simutil.Stat{
 			Key: fmt.Sprintf("AverageFlitPerStateDelay[%s]", state),
 			Value: experiment.Network.AverageFlitPerStateDelay(state),
 		})
 	}
 
 	for _, state := range VALID_FLIT_STATES {
-		experiment.Stats = append(experiment.Stats, Stat{
+		experiment.Stats = append(experiment.Stats, simutil.Stat{
 			Key: fmt.Sprintf("MaxFlitPerStateDelay[%s]", state),
 			Value: experiment.Network.MaxFlitPerStateDelay[state],
 		})
 	}
 
-	simutil.WriteJsonFile(experiment.Stats, experiment.Config.OutputDirectory, STATS_JSON_FILE_NAME)
+	simutil.WriteJsonFile(experiment.Stats, experiment.Config.OutputDirectory, simutil.STATS_JSON_FILE_NAME)
 }
 
-func (experiment *Experiment) LoadStats() {
-	simutil.LoadJsonFile(experiment.Config.OutputDirectory, STATS_JSON_FILE_NAME, &experiment.statMap)
+func (experiment *NoCExperiment) LoadStats() {
+	simutil.LoadJsonFile(experiment.Config.OutputDirectory, simutil.STATS_JSON_FILE_NAME, &experiment.statMap)
 }
 
-func (experiment *Experiment) GetStatMap() map[string]interface{} {
+func (experiment *NoCExperiment) GetStatMap() map[string]interface{} {
 	if experiment.statMap == nil {
 		experiment.statMap = make(map[string]interface{})
 

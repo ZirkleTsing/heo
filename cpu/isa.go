@@ -1,57 +1,56 @@
-package isa
+package cpu
 
 import (
 	"math"
 	"github.com/mcai/acogo/cpu/regs"
 	"github.com/mcai/acogo/cpu/cpuutil"
-	"github.com/mcai/acogo/cpu"
 )
 
-func add(context *cpu.Context, machInst MachInst) {
+func add(context *Context, machInst MachInst) {
 	var temp = context.Regs.Sgpr(machInst.Rs()) + context.Regs.Sgpr(machInst.Rt())
 	context.Regs.Gpr[machInst.Rd()] = uint32(temp)
 }
 
-func addi(context *cpu.Context, machInst MachInst) {
+func addi(context *Context, machInst MachInst) {
 	var temp = context.Regs.Sgpr(machInst.Rs()) + machInst.Imm()
 	context.Regs.Gpr[machInst.Rt()] = uint32(temp)
 }
 
-func addiu(context *cpu.Context, machInst MachInst) {
+func addiu(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rt()] = uint32(context.Regs.Sgpr(machInst.Rs()) + machInst.Imm())
 }
 
-func addu(context *cpu.Context, machInst MachInst) {
+func addu(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] + context.Regs.Gpr[machInst.Rt()]
 }
 
-func and(context *cpu.Context, machInst MachInst) {
+func and(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] & context.Regs.Gpr[machInst.Rt()]
 }
 
-func andi(context *cpu.Context, machInst MachInst) {
+func andi(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] & machInst.Uimm()
 }
 
-func div(context *cpu.Context, machInst MachInst) {
+func div(context *Context, machInst MachInst) {
 	if machInst.Rt() == 0 {
 		context.Regs.Lo = uint32(context.Regs.Sgpr(machInst.Rs()) / context.Regs.Sgpr(machInst.Rt()))
 		context.Regs.Hi = uint32(context.Regs.Sgpr(machInst.Rs()) % context.Regs.Sgpr(machInst.Rt()))
 	}
 }
 
-func divu(context *cpu.Context, machInst MachInst) {
+func divu(context *Context, machInst MachInst) {
 	if machInst.Rt() == 0 {
 		context.Regs.Lo = uint32(context.Regs.Gpr[machInst.Rs()] / context.Regs.Gpr[machInst.Rt()])
 		context.Regs.Hi = uint32(context.Regs.Gpr[machInst.Rs()] % context.Regs.Gpr[machInst.Rt()])
 	}
 }
 
-func lui(context *cpu.Context, machInst MachInst) {
+func lui(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rt()] = machInst.Uimm() << 16
 }
 
-func madd(context *cpu.Context, machInst MachInst) {
+func madd(context *Context, machInst MachInst) {
 	var temp, temp1, temp2, temp3 int64
 	temp1 = int64(context.Regs.Sgpr(machInst.Rs()))
 	temp2 = int64(context.Regs.Sgpr(machInst.Rt()))
@@ -61,15 +60,15 @@ func madd(context *cpu.Context, machInst MachInst) {
 	context.Regs.Lo = uint32(cpuutil.Bits64(uint64(temp), 31, 0))
 }
 
-func mfhi(context *cpu.Context, machInst MachInst) {
+func mfhi(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Hi
 }
 
-func mflo(context *cpu.Context, machInst MachInst) {
+func mflo(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Lo
 }
 
-func msub(context *cpu.Context, machInst MachInst) {
+func msub(context *Context, machInst MachInst) {
 	var temp, temp1, temp2, temp3 int64
 	temp1 = int64(context.Regs.Sgpr(machInst.Rs()))
 	temp2 = int64(context.Regs.Sgpr(machInst.Rt()))
@@ -79,49 +78,49 @@ func msub(context *cpu.Context, machInst MachInst) {
 	context.Regs.Lo = uint32(cpuutil.Bits64(uint64(temp), 31, 0))
 }
 
-func mthi(context *cpu.Context, machInst MachInst) {
+func mthi(context *Context, machInst MachInst) {
 	context.Regs.Hi = context.Regs.Gpr[machInst.Rd()]
 }
 
-func mtlo(context *cpu.Context, machInst MachInst) {
+func mtlo(context *Context, machInst MachInst) {
 	context.Regs.Lo = context.Regs.Gpr[machInst.Rd()]
 }
 
-func mult(context *cpu.Context, machInst MachInst) {
+func mult(context *Context, machInst MachInst) {
 	var temp = uint64(int64(context.Regs.Sgpr(machInst.Rs())) * int64(context.Regs.Sgpr(machInst.Rt())))
 	context.Regs.Lo = uint32(cpuutil.Bits64(temp, 31, 0))
 	context.Regs.Hi = uint32(cpuutil.Bits64(temp, 63, 32))
 }
 
-func multu(context *cpu.Context, machInst MachInst) {
+func multu(context *Context, machInst MachInst) {
 	var temp = uint64(context.Regs.Sgpr(machInst.Rs())) * uint64(context.Regs.Sgpr(machInst.Rt()))
 	context.Regs.Lo = uint32(cpuutil.Bits64(temp, 31, 0))
 	context.Regs.Hi = uint32(cpuutil.Bits64(temp, 63, 32))
 }
 
-func nor(context *cpu.Context, machInst MachInst) {
+func nor(context *Context, machInst MachInst) {
 	var temp = context.Regs.Gpr[machInst.Rs()] | context.Regs.Gpr[machInst.Rt()]
 	context.Regs.Gpr[machInst.Rd()] = ^temp
 }
 
-func or(context *cpu.Context, machInst MachInst) {
+func or(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] | context.Regs.Gpr[machInst.Rt()]
 }
 
-func ori(context *cpu.Context, machInst MachInst) {
+func ori(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] | machInst.Uimm()
 }
 
-func sll(context *cpu.Context, machInst MachInst) {
+func sll(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rt()] << machInst.Shift()
 }
 
-func sllv(context *cpu.Context, machInst MachInst) {
+func sllv(context *Context, machInst MachInst) {
 	var s uint32 = cpuutil.Bits32(context.Regs.Gpr[machInst.Rs()], 4, 0)
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rt()] << s
 }
 
-func slt(context *cpu.Context, machInst MachInst) {
+func slt(context *Context, machInst MachInst) {
 	if context.Regs.Sgpr(machInst.Rs()) < context.Regs.Sgpr(machInst.Rt()) {
 		context.Regs.Gpr[machInst.Rd()] = 1
 	} else {
@@ -129,7 +128,7 @@ func slt(context *cpu.Context, machInst MachInst) {
 	}
 }
 
-func slti(context *cpu.Context, machInst MachInst) {
+func slti(context *Context, machInst MachInst) {
 	if context.Regs.Sgpr(machInst.Rs()) < machInst.Imm() {
 		context.Regs.Gpr[machInst.Rt()] = 1
 	} else {
@@ -137,7 +136,7 @@ func slti(context *cpu.Context, machInst MachInst) {
 	}
 }
 
-func sltiu(context *cpu.Context, machInst MachInst) {
+func sltiu(context *Context, machInst MachInst) {
 	if context.Regs.Gpr[machInst.Rs()] < uint32(machInst.Imm()) {
 		context.Regs.Gpr[machInst.Rt()] = 1
 	} else {
@@ -145,7 +144,7 @@ func sltiu(context *cpu.Context, machInst MachInst) {
 	}
 }
 
-func sltu(context *cpu.Context, machInst MachInst) {
+func sltu(context *Context, machInst MachInst) {
 	if context.Regs.Gpr[machInst.Rs()] < context.Regs.Gpr[machInst.Rt()] {
 		context.Regs.Gpr[machInst.Rd()] = 1
 	} else {
@@ -153,41 +152,41 @@ func sltu(context *cpu.Context, machInst MachInst) {
 	}
 }
 
-func sra(context *cpu.Context, machInst MachInst) {
+func sra(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rd()] = uint32(context.Regs.Sgpr(machInst.Rt()) >> machInst.Shift())
 }
 
-func srav(context *cpu.Context, machInst MachInst) {
+func srav(context *Context, machInst MachInst) {
 	var s = int32(cpuutil.Bits32(context.Regs.Gpr[machInst.Rs()], 4, 0))
 	context.Regs.Gpr[machInst.Rd()] = uint32(context.Regs.Sgpr(machInst.Rt() >> uint32(s)))
 }
 
-func srl(context *cpu.Context, machInst MachInst) {
+func srl(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rt()] >> machInst.Shift()
 }
 
-func srlv(context *cpu.Context, machInst MachInst) {
+func srlv(context *Context, machInst MachInst) {
 	var s = cpuutil.Bits32(context.Regs.Gpr[machInst.Rs()], 4, 0)
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rt()] >> s
 }
 
-func sub(context *cpu.Context, machInst MachInst) {
+func sub(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] - context.Regs.Gpr[machInst.Rt()]
 }
 
-func subu(context *cpu.Context, machInst MachInst) {
+func subu(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] - context.Regs.Gpr[machInst.Rt()]
 }
 
-func xor(context *cpu.Context, machInst MachInst) {
+func xor(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] ^ context.Regs.Gpr[machInst.Rt()]
 }
 
-func xori(context *cpu.Context, machInst MachInst) {
+func xori(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] ^ machInst.Uimm()
 }
 
-func absD(context *cpu.Context, machInst MachInst) {
+func absD(context *Context, machInst MachInst) {
 	var temp float64
 
 	var fs = context.Regs.Fpr.Float64(machInst.Fs())
@@ -201,7 +200,7 @@ func absD(context *cpu.Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
-func absS(context *cpu.Context, machInst MachInst) {
+func absS(context *Context, machInst MachInst) {
 	var temp float32
 
 	var fs = context.Regs.Fpr.Float32(machInst.Fs())
@@ -215,17 +214,17 @@ func absS(context *cpu.Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
-func addD(context *cpu.Context, machInst MachInst) {
+func addD(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat64(
 		machInst.Fd(), context.Regs.Fpr.Float64(machInst.Fs()) + context.Regs.Fpr.Float64(machInst.Ft()))
 }
 
-func addS(context *cpu.Context, machInst MachInst) {
+func addS(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat32(
 		machInst.Fd(), context.Regs.Fpr.Float32(machInst.Fs()) + context.Regs.Fpr.Float32(machInst.Ft()))
 }
 
-func cCondD(context *cpu.Context, machInst MachInst) {
+func cCondD(context *Context, machInst MachInst) {
 	var op1 = context.Regs.Fpr.Float64(machInst.Fs())
 	var op2 = context.Regs.Fpr.Float64(machInst.Ft())
 
@@ -237,7 +236,7 @@ func cCondD(context *cpu.Context, machInst MachInst) {
 	cCond(context, machInst, less, equal, unordered)
 }
 
-func cCondS(context *cpu.Context, machInst MachInst) {
+func cCondS(context *Context, machInst MachInst) {
 	var op1 = context.Regs.Fpr.Float32(machInst.Fs())
 	var op2 = context.Regs.Fpr.Float32(machInst.Ft())
 
@@ -249,7 +248,7 @@ func cCondS(context *cpu.Context, machInst MachInst) {
 	cCond(context, machInst, less, equal, unordered)
 }
 
-func cCond(context *cpu.Context, machInst MachInst, less bool, equal bool, unordered bool) {
+func cCond(context *Context, machInst MachInst, less bool, equal bool, unordered bool) {
 	var cc = machInst.Cc()
 
 	var condition = (cpuutil.GetBit32(machInst.Cond(), 2) != 0 && less) ||
@@ -263,186 +262,186 @@ func cCond(context *cpu.Context, machInst MachInst, less bool, equal bool, unord
 	}
 }
 
-func cvtDL(context *cpu.Context, machInst MachInst) {
+func cvtDL(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat64(machInst.Fd(),
 		float64(context.Regs.Fpr.Uint64(machInst.Fs())))
 }
 
-func cvtDS(context *cpu.Context, machInst MachInst) {
+func cvtDS(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat64(machInst.Fd(),
 		float64(context.Regs.Fpr.Float32(machInst.Fs())))
 }
 
-func cvtDW(context *cpu.Context, machInst MachInst) {
+func cvtDW(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat64(machInst.Fd(),
 		float64(context.Regs.Fpr.Uint32(machInst.Fs())))
 }
 
-func cvtLD(context *cpu.Context, machInst MachInst) {
+func cvtLD(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetUint64(machInst.Fd(),
 		uint64(context.Regs.Fpr.Float64(machInst.Fs())))
 }
 
-func cvtLS(context *cpu.Context, machInst MachInst) {
+func cvtLS(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetUint64(machInst.Fd(),
 		uint64(context.Regs.Fpr.Float32(machInst.Fs())))
 }
 
-func cvtSD(context *cpu.Context, machInst MachInst) {
+func cvtSD(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat32(machInst.Fd(),
 		float32(context.Regs.Fpr.Float64(machInst.Fs())))
 }
 
-func cvtSL(context *cpu.Context, machInst MachInst) {
+func cvtSL(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat32(machInst.Fd(),
 		float32(context.Regs.Fpr.Uint64(machInst.Fs())))
 }
 
-func cvtSW(context *cpu.Context, machInst MachInst) {
+func cvtSW(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat32(machInst.Fd(),
 		float32(context.Regs.Fpr.Uint32(machInst.Fs())))
 }
 
-func cvtWD(context *cpu.Context, machInst MachInst) {
+func cvtWD(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetUint32(machInst.Fd(),
 		uint32(context.Regs.Fpr.Float64(machInst.Fs())))
 }
 
-func cvtWS(context *cpu.Context, machInst MachInst) {
+func cvtWS(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetUint32(machInst.Fd(),
 		uint32(context.Regs.Fpr.Float32(machInst.Fs())))
 }
 
-func divD(context *cpu.Context, machInst MachInst) {
+func divD(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat64(machInst.Fd(),
 		context.Regs.Fpr.Float64(machInst.Fs()) / context.Regs.Fpr.Float64(machInst.Ft()))
 }
 
-func divS(context *cpu.Context, machInst MachInst) {
+func divS(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat32(machInst.Fd(),
 		context.Regs.Fpr.Float32(machInst.Fs()) / context.Regs.Fpr.Float32(machInst.Ft()))
 }
 
-func movD(context *cpu.Context, machInst MachInst) {
+func movD(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat64(machInst.Fd(), context.Regs.Fpr.Float64(machInst.Fs()))
 }
 
-func movS(context *cpu.Context, machInst MachInst) {
+func movS(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat32(machInst.Fd(), context.Regs.Fpr.Float32(machInst.Fs()))
 }
 
-func movf(context *cpu.Context, machInst MachInst) {
+func movf(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func _movf(context *cpu.Context, machInst MachInst) {
+func _movf(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func movn(context *cpu.Context, machInst MachInst) {
+func movn(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func _movn(context *cpu.Context, machInst MachInst) {
+func _movn(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func _movt(context *cpu.Context, machInst MachInst) {
+func _movt(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func movz(context *cpu.Context, machInst MachInst) {
+func movz(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func _movz(context *cpu.Context, machInst MachInst) {
+func _movz(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func mul(context *cpu.Context, machInst MachInst) {
+func mul(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func truncW(context *cpu.Context, machInst MachInst) {
+func truncW(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func mulD(context *cpu.Context, machInst MachInst) {
+func mulD(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat64(machInst.Fd(),
 		context.Regs.Fpr.Float64(machInst.Fs()) * context.Regs.Fpr.Float64(machInst.Ft()))
 }
 
-func mulS(context *cpu.Context, machInst MachInst) {
+func mulS(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat32(machInst.Fd(),
 		context.Regs.Fpr.Float32(machInst.Fs()) * context.Regs.Fpr.Float32(machInst.Ft()))
 }
 
-func negD(context *cpu.Context, machInst MachInst) {
+func negD(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat64(machInst.Fd(), -context.Regs.Fpr.Float64(machInst.Fs()))
 }
 
-func negS(context *cpu.Context, machInst MachInst) {
+func negS(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat32(machInst.Fd(), -context.Regs.Fpr.Float32(machInst.Fs()))
 }
 
-func sqrtD(context *cpu.Context, machInst MachInst) {
+func sqrtD(context *Context, machInst MachInst) {
 	var temp = math.Sqrt(context.Regs.Fpr.Float64(machInst.Fs()))
 	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
-func sqrtS(context *cpu.Context, machInst MachInst) {
+func sqrtS(context *Context, machInst MachInst) {
 	var temp = float32(math.Sqrt(float64(context.Regs.Fpr.Float32(machInst.Fs()))))
 	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
-func subD(context *cpu.Context, machInst MachInst) {
+func subD(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat64(machInst.Fd(),
 		context.Regs.Fpr.Float64(machInst.Fs()) - context.Regs.Fpr.Float64(machInst.Ft()))
 }
 
-func subS(context *cpu.Context, machInst MachInst) {
+func subS(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat32(machInst.Fd(),
 		context.Regs.Fpr.Float32(machInst.Fs()) - context.Regs.Fpr.Float32(machInst.Ft()))
 }
 
-func branch(context *cpu.Context, v uint32) {
+func branch(context *Context, v uint32) {
 	context.Regs.Nnpc = v
 }
 
-func relBranch(context *cpu.Context, v int32) {
+func relBranch(context *Context, v int32) {
 	context.Regs.Nnpc = uint32(int32(context.Regs.Pc) + v + 4)
 }
 
-func j(context *cpu.Context, machInst MachInst) {
+func j(context *Context, machInst MachInst) {
 	var dest = (cpuutil.Bits32(context.Regs.Pc + 4, 32, 28) << 28) | (machInst.Target() << 2)
 	branch(context, dest)
 }
 
-func jal(context *cpu.Context, machInst MachInst) {
+func jal(context *Context, machInst MachInst) {
 	var dest = (cpuutil.Bits32(context.Regs.Pc + 4, 32, 28) << 28) | (machInst.Target() << 2)
 	context.Regs.Gpr[regs.REGISTER_RA] = context.Regs.Pc + 8
 	branch(context, dest)
 }
 
-func jalr(context *cpu.Context, machInst MachInst) {
+func jalr(context *Context, machInst MachInst) {
 	branch(context, context.Regs.Gpr[machInst.Rs()])
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Pc + 8
 }
 
-func jr(context *cpu.Context, machInst MachInst) {
+func jr(context *Context, machInst MachInst) {
 	branch(context, context.Regs.Gpr[machInst.Rs()])
 }
 
-func b(context *cpu.Context, machInst MachInst) {
+func b(context *Context, machInst MachInst) {
 	relBranch(context, machInst.Imm() << 2)
 }
 
-func bal(context *cpu.Context, machInst MachInst) {
+func bal(context *Context, machInst MachInst) {
 	context.Regs.Gpr[regs.REGISTER_RA] = context.Regs.Pc + 8
 	relBranch(context, machInst.Imm() << 2)
 }
 
-func fPCC(context *cpu.Context, c uint32) uint32 {
+func fPCC(context *Context, c uint32) uint32 {
 	if c != 0 {
 		return cpuutil.GetBit32(context.Regs.Fcsr, 24 + c)
 	} else {
@@ -450,7 +449,7 @@ func fPCC(context *cpu.Context, c uint32) uint32 {
 	}
 }
 
-func SetFPCC(context *cpu.Context, c uint32, v bool) {
+func SetFPCC(context *Context, c uint32, v bool) {
 	if c != 0 {
 		context.Regs.Fcsr = cpuutil.SetBitValue32(context.Regs.Fcsr, 24 + c, v)
 	} else {
@@ -458,154 +457,154 @@ func SetFPCC(context *cpu.Context, c uint32, v bool) {
 	}
 }
 
-func bc1f(context *cpu.Context, machInst MachInst) {
+func bc1f(context *Context, machInst MachInst) {
 	if fPCC(context, machInst.BranchCc()) == 0 {
 		relBranch(context, machInst.Imm() << 2)
 	}
 }
 
-func bc1fl(context *cpu.Context, machInst MachInst) {
+func bc1fl(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func bc1t(context *cpu.Context, machInst MachInst) {
+func bc1t(context *Context, machInst MachInst) {
 	if fPCC(context, machInst.BranchCc()) != 0 {
 		relBranch(context, machInst.Imm() << 2)
 	}
 }
 
-func bc1tl(context *cpu.Context, machInst MachInst) {
+func bc1tl(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func beq(context *cpu.Context, machInst MachInst) {
+func beq(context *Context, machInst MachInst) {
 	if context.Regs.Gpr[machInst.Rs()] == context.Regs.Gpr[machInst.Rt()] {
 		relBranch(context, machInst.Imm() << 2)
 	}
 }
 
-func beql(context *cpu.Context, machInst MachInst) {
+func beql(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func bgez(context *cpu.Context, machInst MachInst) {
+func bgez(context *Context, machInst MachInst) {
 	if context.Regs.Sgpr(machInst.Rs()) >= 0 {
 		relBranch(context, machInst.Imm() << 2)
 	}
 }
 
-func bgezal(context *cpu.Context, machInst MachInst) {
+func bgezal(context *Context, machInst MachInst) {
 	context.Regs.Gpr[regs.REGISTER_RA] = context.Regs.Pc + 8
 	if context.Regs.Sgpr(machInst.Rs()) >= 0 {
 		relBranch(context, machInst.Imm() << 2)
 	}
 }
 
-func bgezall(context *cpu.Context, machInst MachInst) {
+func bgezall(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func bgezl(context *cpu.Context, machInst MachInst) {
+func bgezl(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func bgtz(context *cpu.Context, machInst MachInst) {
+func bgtz(context *Context, machInst MachInst) {
 	if context.Regs.Sgpr(machInst.Rs()) > 0 {
 		relBranch(context, machInst.Imm() << 2)
 	}
 }
 
-func bgtzl(context *cpu.Context, machInst MachInst) {
+func bgtzl(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func blez(context *cpu.Context, machInst MachInst) {
+func blez(context *Context, machInst MachInst) {
 	if context.Regs.Sgpr(machInst.Rs()) <= 0 {
 		relBranch(context, machInst.Imm() << 2)
 	}
 }
 
-func blezl(context *cpu.Context, machInst MachInst) {
+func blezl(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func bltz(context *cpu.Context, machInst MachInst) {
+func bltz(context *Context, machInst MachInst) {
 	if context.Regs.Sgpr(machInst.Rs()) < 0 {
 		relBranch(context, machInst.Imm() << 2)
 	}
 }
 
-func bltzal(context *cpu.Context, machInst MachInst) {
+func bltzal(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func bltzall(context *cpu.Context, machInst MachInst) {
+func bltzall(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func bltzl(context *cpu.Context, machInst MachInst) {
+func bltzl(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func bne(context *cpu.Context, machInst MachInst) {
+func bne(context *Context, machInst MachInst) {
 	if context.Regs.Gpr[machInst.Rs()] != context.Regs.Gpr[machInst.Rt()] {
 		relBranch(context, machInst.Imm() << 2)
 	}
 }
 
-func bnel(context *cpu.Context, machInst MachInst) {
+func bnel(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func lb(context *cpu.Context, machInst MachInst) {
+func lb(context *Context, machInst MachInst) {
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	var temp byte = context.Process.Memory.ReadByteAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = uint32(cpuutil.Sext32(uint32(temp), 8))
 }
 
-func lbu(context *cpu.Context, machInst MachInst) {
+func lbu(context *Context, machInst MachInst) {
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	var temp byte = context.Process.Memory.ReadByteAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = uint32(temp)
 }
 
-func ldc1(context *cpu.Context, machInst MachInst) {
+func ldc1(context *Context, machInst MachInst) {
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	var temp uint64 = context.Process.Memory.ReadDoubleWordAt(addr)
 	context.Regs.Fpr.SetFloat64(machInst.Ft(), float64(temp))
 }
 
-func lh(context *cpu.Context, machInst MachInst) {
+func lh(context *Context, machInst MachInst) {
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	var temp uint16 = context.Process.Memory.ReadHalfWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = uint32(cpuutil.Sext32(uint32(temp), 16))
 }
 
-func lhu(context *cpu.Context, machInst MachInst) {
+func lhu(context *Context, machInst MachInst) {
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	var temp uint16 = context.Process.Memory.ReadHalfWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = uint32(temp)
 }
 
-func ll(context *cpu.Context, machInst MachInst) {
+func ll(context *Context, machInst MachInst) {
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	var temp uint32 = context.Process.Memory.ReadWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = temp
 }
 
-func lw(context *cpu.Context, machInst MachInst) {
+func lw(context *Context, machInst MachInst) {
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	var temp uint32 = context.Process.Memory.ReadWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = temp
 }
 
-func lwc1(context *cpu.Context, machInst MachInst) {
+func lwc1(context *Context, machInst MachInst) {
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	var temp uint32 = context.Process.Memory.ReadWordAt(addr)
 	context.Regs.Fpr.SetFloat32(machInst.Ft(), float32(temp))
 }
 
-func lwl(context *cpu.Context, machInst MachInst) {
+func lwl(context *Context, machInst MachInst) {
 	var dst = make([]byte, 4)
 
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
@@ -621,7 +620,7 @@ func lwl(context *cpu.Context, machInst MachInst) {
 	context.Process.Memory.ByteOrder.PutUint32(dst, context.Regs.Gpr[machInst.Rt()])
 }
 
-func lwr(context *cpu.Context, machInst MachInst) {
+func lwr(context *Context, machInst MachInst) {
 	var dst = make([]byte, 4)
 
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
@@ -637,46 +636,46 @@ func lwr(context *cpu.Context, machInst MachInst) {
 	context.Process.Memory.ByteOrder.PutUint32(dst, context.Regs.Gpr[machInst.Rt()])
 }
 
-func sb(context *cpu.Context, machInst MachInst) {
+func sb(context *Context, machInst MachInst) {
 	var temp byte = byte(context.Regs.Gpr[machInst.Rt()])
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	context.Process.Memory.WriteByteAt(addr, temp)
 }
 
-func sc(context *cpu.Context, machInst MachInst) {
+func sc(context *Context, machInst MachInst) {
 	var temp = context.Regs.Gpr[machInst.Rt()]
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	context.Process.Memory.WriteWordAt(addr, temp)
 	context.Regs.Gpr[machInst.Rt()] = 1
 }
 
-func sdc1(context *cpu.Context, machInst MachInst) {
+func sdc1(context *Context, machInst MachInst) {
 	var dbl = context.Regs.Fpr.Float64(machInst.Ft())
 	var temp = uint64(dbl)
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	context.Process.Memory.WriteDoubleWordAt(addr, temp)
 }
 
-func sh(context *cpu.Context, machInst MachInst) {
+func sh(context *Context, machInst MachInst) {
 	var temp = uint16(context.Regs.Gpr[machInst.Rt()])
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	context.Process.Memory.WriteHalfWordAt(addr, temp)
 }
 
-func sw(context *cpu.Context, machInst MachInst) {
+func sw(context *Context, machInst MachInst) {
 	var temp = context.Regs.Gpr[machInst.Rt()]
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	context.Process.Memory.WriteWordAt(addr, temp)
 }
 
-func swc1(context *cpu.Context, machInst MachInst) {
+func swc1(context *Context, machInst MachInst) {
 	var f = context.Regs.Fpr.Float32(machInst.Ft())
 	var temp = uint32(f)
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	context.Process.Memory.WriteWordAt(addr, temp)
 }
 
-func swl(context *cpu.Context, machInst MachInst) {
+func swl(context *Context, machInst MachInst) {
 	var dst = make([]byte, 4)
 
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
@@ -693,7 +692,7 @@ func swl(context *cpu.Context, machInst MachInst) {
 	context.Process.Memory.WriteBlockAt(addr, size, dst)
 }
 
-func swr(context *cpu.Context, machInst MachInst) {
+func swr(context *Context, machInst MachInst) {
 	var dst = make([]byte, 4)
 
 	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
@@ -710,41 +709,41 @@ func swr(context *cpu.Context, machInst MachInst) {
 	context.Process.Memory.WriteBlockAt(addr - size + 1, size, dst)
 }
 
-func cfc1(context *cpu.Context, machInst MachInst) {
+func cfc1(context *Context, machInst MachInst) {
 	if machInst.Fs() == 31 {
 		var temp = context.Regs.Fcsr
 		context.Regs.Gpr[machInst.Rt()] = temp
 	}
 }
 
-func ctc1(context *cpu.Context, machInst MachInst) {
+func ctc1(context *Context, machInst MachInst) {
 	if machInst.Fs() != 0 {
 		var temp = context.Regs.Gpr[machInst.Rt()]
 		context.Regs.Fcsr = temp
 	}
 }
 
-func mfc1(context *cpu.Context, machInst MachInst) {
+func mfc1(context *Context, machInst MachInst) {
 	var temp = context.Regs.Fpr.Uint32(machInst.Fs())
 	context.Regs.Gpr[machInst.Rt()] = temp
 }
 
-func mtc1(context *cpu.Context, machInst MachInst) {
+func mtc1(context *Context, machInst MachInst) {
 	var temp = context.Regs.Gpr[machInst.Rt()]
 	context.Regs.Fpr.SetUint32(machInst.Fs(), temp)
 }
 
-func _break(context *cpu.Context, machInst MachInst) {
+func _break(context *Context, machInst MachInst) {
 	//TODO
 }
 
-func systemCall(context *cpu.Context, machInst MachInst) {
+func systemCall(context *Context, machInst MachInst) {
 	//TODO
 }
 
-func nop(context *cpu.Context, machInst MachInst) {
+func nop(context *Context, machInst MachInst) {
 }
 
-func unknown(context *cpu.Context, machInst MachInst) {
+func unknown(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }

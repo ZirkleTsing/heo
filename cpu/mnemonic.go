@@ -1,6 +1,4 @@
-package isa
-
-import "github.com/mcai/acogo/cpu"
+package cpu
 
 const (
 	Mnemonic_NOP = "nop"
@@ -168,10 +166,10 @@ type Mnemonic struct {
 	Mask               uint32
 	ExtraBitField      *BitField
 	ExtraBitFieldValue uint32
-	Execute            func(context *cpu.Context, machInst MachInst)
+	Execute            func(context *Context, machInst MachInst)
 }
 
-func NewMnemonic(name MnemonicName, staticInstFlags []StaticInstFlag, decodeMethod *DecodeMethod, decodeCondition *DecodeCondition, execute func(context *cpu.Context, machInst MachInst)) *Mnemonic {
+func NewMnemonic(name MnemonicName, staticInstFlags []StaticInstFlag, decodeMethod *DecodeMethod, decodeCondition *DecodeCondition, execute func(context *Context, machInst MachInst)) *Mnemonic {
 	var mnemonic = &Mnemonic{
 		Name:name,
 		StaticInstFlags:staticInstFlags,

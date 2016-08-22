@@ -2,9 +2,9 @@ package noc
 
 import "testing"
 
-func TestExperiment(t *testing.T) {
+func TestNoCExperiment(t *testing.T) {
 	var numNodes = 64
-	var maxCycles = int64(1000000)
+	var maxCycles = int64(10000)
 	var maxPackets = int64(-1)
 	var drainPackets = true
 
@@ -22,7 +22,7 @@ func TestExperiment(t *testing.T) {
 	config.AcoSelectionAlpha = 0.45
 	config.ReinforcementFactor = 0.001
 
-	var experiment = NewExperiment(config)
+	var experiment = NewNoCExperiment(config)
 
 	experiment.Run(false)
 }

@@ -3,8 +3,6 @@ package cpu
 import (
 	"syscall"
 	"github.com/mcai/acogo/cpu/mem"
-	"github.com/mcai/acogo/cpu/os"
-	"github.com/mcai/acogo/cpu/isa"
 )
 
 type Process struct {
@@ -22,11 +20,11 @@ type Process struct {
 	ProgramEntry           uint32
 	LittleEndian           bool
 	Memory                 *mem.PagedMemory
-	pcToMachInsts          map[uint32]isa.MachInst
-	machInstsToStaticInsts map[isa.MachInst]*isa.StaticInst
+	pcToMachInsts          map[uint32]MachInst
+	machInstsToStaticInsts map[MachInst]*StaticInst
 }
 
-func NewProcess(kernel *os.Kernel, contextMapping *ContextMapping) *Process {
+func NewProcess(kernel *Kernel, contextMapping *ContextMapping) *Process {
 	var process = &Process{
 		ContextMapping:contextMapping,
 	}
@@ -36,7 +34,7 @@ func NewProcess(kernel *os.Kernel, contextMapping *ContextMapping) *Process {
 	return process
 }
 
-func (process *Process) LoadProgram(kernel *os.Kernel, contextMapping *ContextMapping) {
+func (process *Process) LoadProgram(kernel *Kernel, contextMapping *ContextMapping) {
 	//TODO
 }
 
@@ -60,10 +58,10 @@ func (process *Process) CloseProgram() {
 	}
 }
 
-func (process *Process) Decode(machInst isa.MachInst) *isa.StaticInst {
-	for _, mnemonic := range isa.Mnemonics {
+func (process *Process) Decode(machInst MachInst) *StaticInst {
+	for _, mnemonic := range Mnemonics {
 		if machInst != 0 && mnemonic.Mask == mnemonic.Bits && (mnemonic.ExtraBitField == nil || machInst.ValueOf(mnemonic.ExtraBitField) == mnemonic.ExtraBitFieldValue) {
-			return isa.NewStaticInst(mnemonic, machInst)
+			return NewStaticInst(mnemonic, machInst)
 		}
 	}
 

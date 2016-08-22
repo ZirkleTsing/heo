@@ -1,10 +1,9 @@
-package os
+package cpu
 
 import (
 	"fmt"
 	//"math"
 	"github.com/mcai/acogo/cpu/regs"
-	"github.com/mcai/acogo/cpu"
 )
 
 type ErrNo uint32
@@ -157,10 +156,10 @@ type SysCtrlArgs struct {
 type SyscallHandler struct {
 	Index uint32
 	Name  string
-	Run   func(context *cpu.Context)
+	Run   func(context *Context)
 }
 
-func NewSyscallHandler(index uint32, name string, run func(context *cpu.Context)) *SyscallHandler {
+func NewSyscallHandler(index uint32, name string, run func(context *Context)) *SyscallHandler {
 	var syscallHandler = &SyscallHandler{
 		Index:index,
 		Name:name,
@@ -222,39 +221,39 @@ func NewSyscallEmulation() *SyscallEmulation {
 		syscallEmulation.OpenFlagMappings,
 		NewOpenFlagMapping(TargetOpenFlag(0x2000), OpenFlag(0)))
 
-	syscallEmulation.registerHandler(NewSyscallHandler(1, "exit", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(3, "read", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(4, "write", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(5, "open", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(6, "close", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(7, "waitpid", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(20, "getpid", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(24, "getuid", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(37, "kill", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(42, "pipe", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(45, "brk", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(47, "getgid", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(49, "geteuid", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(50, "getegid", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(54, "ioctl", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(64, "getppid", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(75, "setrlimit", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(76, "getrlimit", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(90, "mmap", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(91, "munmap", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(120, "clone", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(122, "uname", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(125, "mprotect", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(140, "_llseek", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(153, "_sysctl", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(166, "nanosleep", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(167, "mremap", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(188, "poll", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(194, "rt_sigaction", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(195, "rt_sigprocmask", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(199, "rt_sigsuspend", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(215, "fstat64", func(context *cpu.Context) {}))
-	syscallEmulation.registerHandler(NewSyscallHandler(246, "exit_group", func(context *cpu.Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(1, "exit", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(3, "read", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(4, "write", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(5, "open", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(6, "close", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(7, "waitpid", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(20, "getpid", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(24, "getuid", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(37, "kill", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(42, "pipe", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(45, "brk", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(47, "getgid", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(49, "geteuid", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(50, "getegid", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(54, "ioctl", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(64, "getppid", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(75, "setrlimit", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(76, "getrlimit", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(90, "mmap", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(91, "munmap", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(120, "clone", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(122, "uname", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(125, "mprotect", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(140, "_llseek", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(153, "_sysctl", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(166, "nanosleep", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(167, "mremap", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(188, "poll", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(194, "rt_sigaction", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(195, "rt_sigprocmask", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(199, "rt_sigsuspend", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(215, "fstat64", func(context *Context) {}))
+	syscallEmulation.registerHandler(NewSyscallHandler(246, "exit_group", func(context *Context) {}))
 
 	return syscallEmulation
 }
@@ -263,7 +262,7 @@ func (syscallEmulation *SyscallEmulation) registerHandler(handler *SyscallHandle
 	syscallEmulation.Handlers[handler.Index] = handler
 }
 
-func (syscallEmulation *SyscallEmulation) findAndRunSystemCallHandler(syscallIndex uint32, context *cpu.Context) bool {
+func (syscallEmulation *SyscallEmulation) findAndRunSystemCallHandler(syscallIndex uint32, context *Context) bool {
 	if handler, ok := syscallEmulation.Handlers[syscallIndex]; ok {
 		handler.Run(context)
 
@@ -276,7 +275,7 @@ func (syscallEmulation *SyscallEmulation) findAndRunSystemCallHandler(syscallInd
 	return false
 }
 
-func (syscallEmulation *SyscallEmulation) checkSystemCallError(context *cpu.Context) bool {
+func (syscallEmulation *SyscallEmulation) checkSystemCallError(context *Context) bool {
 	if int32(context.Regs.Gpr[regs.REGISTER_V0]) != -1 {
 		context.Regs.Gpr[regs.REGISTER_A3] = 0
 		return false
@@ -287,7 +286,7 @@ func (syscallEmulation *SyscallEmulation) checkSystemCallError(context *cpu.Cont
 	}
 }
 
-func (syscallEmulation *SyscallEmulation) DoSystemCall(callNum uint32, context *cpu.Context) {
+func (syscallEmulation *SyscallEmulation) DoSystemCall(callNum uint32, context *Context) {
 	var syscallIndex = callNum - 4000
 
 	if !syscallEmulation.findAndRunSystemCallHandler(syscallIndex, context) {
@@ -295,11 +294,11 @@ func (syscallEmulation *SyscallEmulation) DoSystemCall(callNum uint32, context *
 	}
 }
 
-func exit_impl(context *cpu.Context) {
+func exit_impl(context *Context) {
 	context.Finish()
 }
 
-func read_impl(context *cpu.Context) {
+func read_impl(context *Context) {
 	//var readMaxSize = 1 << 25
 	//
 	//var fd = context.Process.TranslateFileDescriptor(context.Regs.Gpr[REGISTER_A0])

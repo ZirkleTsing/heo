@@ -2,8 +2,6 @@ package noc
 
 import "github.com/mcai/acogo/simutil"
 
-const CONFIG_JSON_FILE_NAME = "config.json"
-
 type TrafficType string
 
 const (
@@ -126,6 +124,6 @@ func NewNoCConfig(outputDirectory string, numNodes int, maxCycles int64, maxPack
 	return nocConfig
 }
 
-func (experiment *Experiment) DumpConfig() {
-	simutil.WriteJsonFile(experiment.Config, experiment.Config.OutputDirectory, CONFIG_JSON_FILE_NAME)
+func (experiment *NoCExperiment) DumpConfig() {
+	simutil.WriteJsonFile(experiment.Config, experiment.Config.OutputDirectory, simutil.CONFIG_JSON_FILE_NAME)
 }

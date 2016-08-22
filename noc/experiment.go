@@ -3,13 +3,12 @@ package noc
 import (
 	"time"
 	"os"
-	"fmt"
 	"github.com/mcai/acogo/simutil"
 )
 
-type Experiment struct {
+type NoCExperiment struct {
 	Config                  *NoCConfig
-	Stats                   Stats
+	Stats                   simutil.Stats
 	statMap                 map[string]interface{}
 
 	BeginTime, EndTime      time.Time
@@ -17,8 +16,8 @@ type Experiment struct {
 	Network                 *Network
 }
 
-func NewExperiment(config *NoCConfig) *Experiment {
-	var experiment = &Experiment{
+func NewNoCExperiment(config *NoCConfig) *NoCExperiment {
+	var experiment = &NoCExperiment{
 		Config:config,
 		CycleAccurateEventQueue:simutil.NewCycleAccurateEventQueue(),
 	}
@@ -30,9 +29,9 @@ func NewExperiment(config *NoCConfig) *Experiment {
 	return experiment
 }
 
-func (experiment *Experiment) Run(skipIfStatsFileExists bool) {
+func (experiment *NoCExperiment) Run(skipIfStatsFileExists bool) {
 	if skipIfStatsFileExists {
-		if _, err := os.Stat(experiment.Config.OutputDirectory + "/" + STATS_JSON_FILE_NAME); err == nil {
+		if _, err := os.Stat(experiment.Config.OutputDirectory + "/" + simutil.STATS_JSON_FILE_NAME); err == nil {
 			return
 		}
 	}
@@ -56,31 +55,4 @@ func (experiment *Experiment) Run(skipIfStatsFileExists bool) {
 	experiment.DumpConfig()
 
 	experiment.DumpStats()
-}
-
-func RunExperiments(experiments []*Experiment, skipIfStatsFileExists bool) {
-	var done = make(chan bool)
-
-	for i, e := range experiments {
-		go func(i int, experiment *Experiment, c chan bool) {
-			var l = len(experiments)
-
-			fmt.Printf("[%s] Experiment %d/%d started.\n",
-				time.Now().Format("2006-01-02 15:04:05"), i + 1, l)
-
-			experiment.Run(skipIfStatsFileExists)
-
-			done <- true
-
-			fmt.Printf("[%s] Experiment %d/%d ended.\n",
-				time.Now().Format("2006-01-02 15:04:05"), i + 1, l)
-		}(i, e, done)
-	}
-
-	for i := 0; i < len(experiments); i++ {
-		<-done
-
-		fmt.Printf("[%s] There are %d experiments to be run.\n",
-			time.Now().Format("2006-01-02 15:04:05"), len(experiments) - i - 1)
-	}
 }

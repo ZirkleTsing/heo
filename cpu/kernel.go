@@ -1,17 +1,18 @@
-package os
+package cpu
 
 import (
 	"github.com/mcai/acogo/cpu/regs"
-	"github.com/mcai/acogo/cpu"
 	"github.com/mcai/acogo/cpu/mem"
 )
 
 type Kernel struct {
+	Experiment       *CPUExperiment
+
 	Pipes            []*Pipe
 	SystemEvents     []SystemEvent
 	SignalActions    []*SignalAction
-	Contexts         []*cpu.Context
-	Processes        []*cpu.Process
+	Contexts         []*Context
+	Processes        []*Process
 	SyscallEmulation *SyscallEmulation
 
 	CurrentCycle     uint64
@@ -21,8 +22,9 @@ type Kernel struct {
 	CurrentFd        int
 }
 
-func NewKernel() *Kernel {
+func NewKernel(experiment *CPUExperiment) *Kernel {
 	var kernel = &Kernel{
+		Experiment:experiment,
 		SyscallEmulation:NewSyscallEmulation(),
 		CurrentCycle:0,
 		CurrentPid:1000,
@@ -38,7 +40,7 @@ func NewKernel() *Kernel {
 	return kernel
 }
 
-func (kernel *Kernel) GetProcessFromId(id uint32) *cpu.Process {
+func (kernel *Kernel) GetProcessFromId(id uint32) *Process {
 	for _, process := range kernel.Processes {
 		if process.Id == id {
 			return process
@@ -48,7 +50,7 @@ func (kernel *Kernel) GetProcessFromId(id uint32) *cpu.Process {
 	return nil
 }
 
-func (kernel *Kernel) GetContextFromId(id uint32) *cpu.Context {
+func (kernel *Kernel) GetContextFromId(id uint32) *Context {
 	for _, context := range kernel.Contexts {
 		if context.Id == id {
 			return context
@@ -58,7 +60,7 @@ func (kernel *Kernel) GetContextFromId(id uint32) *cpu.Context {
 	return nil
 }
 
-func (kernel *Kernel) GetContextFromProcessId(processId uint32) *cpu.Context {
+func (kernel *Kernel) GetContextFromProcessId(processId uint32) *Context {
 	for _, context := range kernel.Contexts {
 		if context.ProcessId == processId {
 			return context
@@ -110,7 +112,7 @@ func (kernel *Kernel) GetWriteBuffer(fileDescriptor int) *mem.CircularByteBuffer
 	return kernel.getBuffer(fileDescriptor, 1)
 }
 
-func (kernel *Kernel) RunSignalHandler(context *cpu.Context, signal uint32) {
+func (kernel *Kernel) RunSignalHandler(context *Context, signal uint32) {
 	if kernel.SignalActions[signal - 1].Handler == 0 {
 		panic("Impossible")
 	}
@@ -125,14 +127,14 @@ func (kernel *Kernel) RunSignalHandler(context *cpu.Context, signal uint32) {
 	context.Regs.Npc = kernel.SignalActions[signal - 1].Handler
 	context.Regs.Nnpc = context.Regs.Npc + 4
 
-	for context.State == cpu.ContextState_RUNNING && context.Regs.Npc != 0xfffffff {
+	for context.State == ContextState_RUNNING && context.Regs.Npc != 0xfffffff {
 		//TODO
 	}
 
 	context.Regs = oldRegs
 }
 
-func (kernel *Kernel) MustProcessSignal(context *cpu.Context, signal uint32) bool {
+func (kernel *Kernel) MustProcessSignal(context *Context, signal uint32) bool {
 	return context.SignalMasks.Pending.Contains(signal) && !context.SignalMasks.Blocked.Contains(signal)
 }
 

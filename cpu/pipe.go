@@ -1,4 +1,4 @@
-package os
+package cpu
 
 import "github.com/mcai/acogo/cpu/mem"
 

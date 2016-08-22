@@ -1,13 +1,13 @@
 package cpu
 
 type Thread struct {
-	Num             int
-	Context         *Context
 	Core            *Core
-	NumInstructions int64
+	Num             uint32
+	Context         *Context
+	NumInstructions uint64
 }
 
-func NewThread(core *Core, num int) *Thread {
+func NewThread(core *Core, num uint32) *Thread {
 	var thread = &Thread{
 		Core:core,
 		Num:num,
@@ -17,5 +17,22 @@ func NewThread(core *Core, num int) *Thread {
 }
 
 func (thread *Thread) AdvanceOneCycle() {
-	//TODO
+	if thread.Context != nil && thread.Context.State == ContextState_RUNNING {
+		var staticInst *StaticInst
+
+		for {
+			staticInst = thread.Context.DecodeNextStaticInst()
+			staticInst.Execute(thread.Context)
+
+			if staticInst.Mnemonic.Name != Mnemonic_NOP {
+				thread.NumInstructions++
+			}
+
+			if !(thread.Context != nil &&
+				thread.Context.State == ContextState_RUNNING &&
+				staticInst.Mnemonic.Name == Mnemonic_NOP) {
+				break
+			}
+		}
+	}
 }
