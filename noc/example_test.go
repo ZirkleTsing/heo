@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 	"github.com/mcai/acogo/simutil"
-	"sync"
 )
 
 var (
@@ -71,7 +70,7 @@ func TestTrafficsAndDataPacketInjectionRates(t *testing.T) {
 
 	var outputDirectoryPrefix = "trafficsAndDataPacketInjectionRates"
 
-	var experimentsPerTraffic = make(map[TrafficType]([]*NoCExperiment))
+	var nocExperimentsPerTraffic = make(map[TrafficType]([]*NoCExperiment))
 
 	for _, traffic := range TRAFFICS {
 		for _, dataPacketInjectionRate := range dataPacketInjectionRates {
@@ -87,8 +86,8 @@ func TestTrafficsAndDataPacketInjectionRates(t *testing.T) {
 			}
 
 			for _, nocRoutingSolution := range nocRoutingSolutions {
-				experimentsPerTraffic[traffic] = append(
-					experimentsPerTraffic[traffic],
+				nocExperimentsPerTraffic[traffic] = append(
+					nocExperimentsPerTraffic[traffic],
 					NewExperiment(
 						outputDirectoryPrefix,
 						traffic,
@@ -105,54 +104,18 @@ func TestTrafficsAndDataPacketInjectionRates(t *testing.T) {
 	var experiments []simutil.Experiment
 
 	for _, traffic := range TRAFFICS {
-		for _, experiment := range experimentsPerTraffic[traffic] {
-			experiments = append(experiments, experiment)
+		for _, nocExperiment := range nocExperimentsPerTraffic[traffic] {
+			experiments = append(experiments, nocExperiment)
 		}
 	}
 
 	simutil.RunExperiments(experiments, true)
 
-	var wg = &sync.WaitGroup{}
-
 	for _, traffic := range TRAFFICS {
 		outputDirectory := fmt.Sprintf("results/trafficsAndDataPacketInjectionRates/t_%s", traffic)
 
-		WriteCSVFile(outputDirectory, "result.csv", experimentsPerTraffic[traffic], GetCSVFields())
-
-		wg.Add(1)
-		go func() {
-			simutil.GeneratePlot(
-				outputDirectory,
-				"result.csv",
-				"throughput.pdf",
-				"Data_Packet_Injection_Rate_(packets/cycle/node)",
-				"NoC_Routing_Solution",
-				"Payload_Throughput_(packets/cycle/node)",
-				90,
-				simutil.BAR_PLOT,
-			)
-
-			wg.Done()
-		}()
-
-		wg.Add(1)
-		go func() {
-			simutil.GeneratePlot(
-				outputDirectory,
-				"result.csv",
-				"average_packet_delay.pdf",
-				"Data_Packet_Injection_Rate_(packets/cycle/node)",
-				"NoC_Routing_Solution",
-				"Avg._Payload_Packet_Delay_(cycles)",
-				90,
-				simutil.BAR_PLOT,
-			)
-
-			wg.Done()
-		}()
+		WriteCSVFile(outputDirectory, "result.csv", nocExperimentsPerTraffic[traffic], GetCSVFields())
 	}
-
-	wg.Wait()
 }
 
 func TestAntPacketInjectionRates(t *testing.T) {
@@ -178,11 +141,11 @@ func TestAntPacketInjectionRates(t *testing.T) {
 
 	var outputDirectoryPrefix = "antPacketInjectionRates"
 
-	var experiments []simutil.Experiment
+	var nocExperiments []*NoCExperiment
 
 	for _, antPacketInjectionRate := range antPacketInjectionRates {
-		experiments = append(
-			experiments,
+		nocExperiments = append(
+			nocExperiments,
 			NewExperiment(
 				outputDirectoryPrefix,
 				traffic,
@@ -194,47 +157,17 @@ func TestAntPacketInjectionRates(t *testing.T) {
 				reinforcementFactor))
 	}
 
-	simutil.RunExperiments(experiments, true)
+	var experiments []simutil.Experiment
 
-	var wg = &sync.WaitGroup{}
+	for _, nocExperiment := range nocExperiments {
+		experiments = append(experiments, nocExperiment)
+	}
+
+	simutil.RunExperiments(experiments, true)
 
 	outputDirectory := "results/antPacketInjectionRates"
 
-	WriteCSVFile(outputDirectory, "result.csv", experiments, GetCSVFields())
-
-	wg.Add(1)
-	go func() {
-		simutil.GeneratePlot(
-			outputDirectory,
-			"result.csv",
-			"throughput.pdf",
-			"Ant_Packet_Injection_Rate_(packets/cycle/node)",
-			"",
-			"Payload_Throughput_(packets/cycle/node)",
-			90,
-			simutil.BAR_PLOT,
-		)
-
-		wg.Done()
-	}()
-
-	wg.Add(1)
-	go func() {
-		simutil.GeneratePlot(
-			outputDirectory,
-			"result.csv",
-			"average_packet_delay.pdf",
-			"Ant_Packet_Injection_Rate_(packets/cycle/node)",
-			"",
-			"Avg._Payload_Packet_Delay_(cycles)",
-			90,
-			simutil.BAR_PLOT,
-		)
-
-		wg.Done()
-	}()
-
-	wg.Wait()
+	WriteCSVFile(outputDirectory, "result.csv", nocExperiments, GetCSVFields())
 }
 
 func TestAcoSelectionAlphasAndReinforcementFactors(t *testing.T) {
@@ -267,12 +200,12 @@ func TestAcoSelectionAlphasAndReinforcementFactors(t *testing.T) {
 
 	var outputDirectoryPrefix = "acoSelectionAlphasAndReinforcementFactors"
 
-	var experiments []simutil.Experiment
+	var nocExperiments []*NoCExperiment
 
 	for _, acoSelectionAlpha := range acoSelectionAlphas {
 		for _, reinforcementFactor := range reinforcementFactors {
-			experiments = append(
-				experiments,
+			nocExperiments = append(
+				nocExperiments,
 				NewExperiment(
 					outputDirectoryPrefix,
 					traffic,
@@ -285,45 +218,15 @@ func TestAcoSelectionAlphasAndReinforcementFactors(t *testing.T) {
 		}
 	}
 
-	simutil.RunExperiments(experiments, true)
+	var experiments []simutil.Experiment
 
-	var wg = &sync.WaitGroup{}
+	for _, nocExperiment := range nocExperiments {
+		experiments = append(experiments, nocExperiment)
+	}
+
+	simutil.RunExperiments(experiments, true)
 
 	var outputDirectory = "results/acoSelectionAlphasAndReinforcementFactors"
 
-	WriteCSVFile(outputDirectory, "result.csv", experiments, GetCSVFields())
-
-	wg.Add(1)
-	go func() {
-		simutil.GeneratePlot(
-			outputDirectory,
-			"result.csv",
-			"throughput.pdf",
-			"Alpha",
-			"Reinforcement_Factor",
-			"Payload_Throughput_(packets/cycle/node)",
-			90,
-			simutil.BAR_PLOT,
-		)
-
-		wg.Done()
-	}()
-
-	wg.Add(1)
-	go func() {
-		simutil.GeneratePlot(
-			outputDirectory,
-			"result.csv",
-			"average_packet_delay.pdf",
-			"Alpha",
-			"Reinforcement_Factor",
-			"Avg._Payload_Packet_Delay_(cycles)",
-			90,
-			simutil.BAR_PLOT,
-		)
-
-		wg.Done()
-	}()
-
-	wg.Wait()
+	WriteCSVFile(outputDirectory, "result.csv", nocExperiments, GetCSVFields())
 }
