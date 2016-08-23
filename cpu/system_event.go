@@ -1,5 +1,10 @@
 package cpu
 
+import (
+	"github.com/mcai/acogo/cpu/mem"
+	"github.com/mcai/acogo/cpu/native"
+)
+
 type SystemEventCriterion interface {
 	NeedProcess(context *Context) bool
 }
@@ -16,7 +21,7 @@ func NewTimeCriterion() *TimeCriterion {
 }
 
 func (timeCriterion *TimeCriterion) NeedProcess(context *Context) bool {
-	return timeCriterion.When <= Clock(context.Kernel.CurrentCycle)
+	return timeCriterion.When <= native.Clock(context.Kernel.CurrentCycle)
 }
 
 type SignalCriterion struct {
@@ -59,10 +64,10 @@ func (waitForProcessIdCriterion *WaitForProcessIdCriterion) NeedProcess(context 
 }
 
 type WaitForFileDescriptorCriterion struct {
-	//TODO: buffer
-	Address uint32
-	Size    uint32
-	Pufds   uint32
+	Buffer  *mem.CircularByteBuffer
+	Address uint64
+	Size    uint64
+	Pufds   uint64
 }
 
 func NewWaitForFileDescriptorCriterion() *WaitForFileDescriptorCriterion {
@@ -73,7 +78,7 @@ func NewWaitForFileDescriptorCriterion() *WaitForFileDescriptorCriterion {
 }
 
 func (waitForFileDescriptorCriterion *WaitForFileDescriptorCriterion) NeedProcess(context *Context) bool {
-	return false //TODO
+	return !waitForFileDescriptorCriterion.Buffer.IsEmpty()
 }
 
 const (
@@ -87,24 +92,32 @@ const (
 type SystemEventType uint32
 
 type SystemEvent interface {
-	GetContext() *Context
-	GetEventType() SystemEventType
+	Context() *Context
+	EventType() SystemEventType
 	NeedProcess() bool
 	Process()
 }
 
 type BaseSystemEvent struct {
-	Context   *Context
-	EventType SystemEventType
+	context   *Context
+	eventType SystemEventType
 }
 
 func NewBaseSystemEvent(context *Context, eventType SystemEventType) *BaseSystemEvent {
 	var baseSystemEvent = &BaseSystemEvent{
-		Context:context,
-		EventType:eventType,
+		context:context,
+		eventType:eventType,
 	}
 
 	return baseSystemEvent
+}
+
+func (baseSystemEvent *BaseSystemEvent) Context() *Context {
+	return baseSystemEvent.context
+}
+
+func (baseSystemEvent *BaseSystemEvent) EventType() SystemEventType {
+	return baseSystemEvent.eventType
 }
 
 type PollEvent struct {
@@ -124,8 +137,8 @@ func NewPollEvent(context *Context) *PollEvent {
 }
 
 func (pollEvent *PollEvent) NeedProcess() bool {
-	return pollEvent.TimeCriterion.NeedProcess(pollEvent.Context) ||
-		pollEvent.WaitForFileDescriptorCriterion.NeedProcess(pollEvent.Context)
+	return pollEvent.TimeCriterion.NeedProcess(pollEvent.context) ||
+		pollEvent.WaitForFileDescriptorCriterion.NeedProcess(pollEvent.context)
 }
 
 func (pollEvent *PollEvent) Process() {
@@ -147,7 +160,7 @@ func NewReadEvent(context *Context) *ReadEvent {
 }
 
 func (readEvent *ReadEvent) NeedProcess() bool {
-	return readEvent.WaitForFileDescriptorCriterion.NeedProcess(readEvent.Context)
+	return readEvent.WaitForFileDescriptorCriterion.NeedProcess(readEvent.context)
 }
 
 func (readEvent *ReadEvent) Process() {
@@ -215,8 +228,8 @@ func NewWaitEvent(context *Context, processId uint32) *WaitEvent {
 }
 
 func (waitEvent *WaitEvent) NeedProcess() bool {
-	return waitEvent.WaitForProcessIdCriterion.NeedProcess(waitEvent.Context) ||
-		waitEvent.SignalCriterion.NeedProcess(waitEvent.Context)
+	return waitEvent.WaitForProcessIdCriterion.NeedProcess(waitEvent.context) ||
+		waitEvent.SignalCriterion.NeedProcess(waitEvent.context)
 }
 
 func (waitEvent *WaitEvent) Process() {

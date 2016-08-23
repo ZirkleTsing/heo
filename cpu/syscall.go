@@ -2,8 +2,9 @@ package cpu
 
 import (
 	"fmt"
-	//"math"
+	"math"
 	"github.com/mcai/acogo/cpu/regs"
+	"github.com/mcai/acogo/cpu/native"
 )
 
 type ErrNo uint32
@@ -178,6 +179,7 @@ type SyscallEmulation struct {
 
 func NewSyscallEmulation() *SyscallEmulation {
 	var syscallEmulation = &SyscallEmulation{
+		Handlers:make(map[uint32]*SyscallHandler),
 		StackLimit: 0x800000,
 	}
 
@@ -294,19 +296,45 @@ func (syscallEmulation *SyscallEmulation) DoSystemCall(callNum uint32, context *
 	}
 }
 
-func exit_impl(context *Context) {
+func (syscallEmulation *SyscallEmulation) exit_impl(context *Context) {
 	context.Finish()
 }
 
-func read_impl(context *Context) {
-	//var readMaxSize = 1 << 25
-	//
-	//var fd = context.Process.TranslateFileDescriptor(context.Regs.Gpr[REGISTER_A0])
-	//var bufAddr = context.Regs.Gpr[REGISTER_A1]
-	//var count = math.Min(float64(readMaxSize), float64(context.Regs.Gpr[REGISTER_A2]))
-	//
-	//var ret uint32
-	//var buf []byte
-	//
-	//var buffer = context.Kernel
+func (syscallEmulation *SyscallEmulation) read_impl(context *Context) {
+	var readMaxSize = uint64(1 << 25)
+
+	var fd = int(context.Process.TranslateFileDescriptor(context.Regs.Gpr[regs.REGISTER_A0]))
+	var bufAddr = uint64(context.Regs.Gpr[regs.REGISTER_A1])
+	var count = uint64(math.Min(float64(readMaxSize), float64(context.Regs.Gpr[regs.REGISTER_A2])))
+
+	var ret uint64
+	var buf []byte
+
+	var buffer = context.Kernel.GetReadBuffer(fd)
+	if buffer != nil {
+		if buffer.IsEmpty() {
+			var e = NewReadEvent(context)
+			e.WaitForFileDescriptorCriterion.Buffer = buffer
+			e.WaitForFileDescriptorCriterion.Address = bufAddr
+			e.WaitForFileDescriptorCriterion.Size = count
+			context.Kernel.SystemEvents = append(context.Kernel.SystemEvents, e)
+			context.Suspend()
+			return
+		} else {
+			buf = make([]byte, count)
+			ret = buffer.Read(&buf, count)
+		}
+	} else {
+		buf = make([]byte, count)
+		ret = uint64(native.Read(fd, buf))
+	}
+
+	if uint64(ret) >= readMaxSize {
+		panic("Impossible")
+	}
+
+	context.Regs.Gpr[regs.REGISTER_V0] = uint32(ret)
+	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+
+	context.Process.Memory.WriteBlockAt(bufAddr, ret, buf)
 }

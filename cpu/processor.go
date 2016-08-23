@@ -35,7 +35,7 @@ func (processor *Processor) UpdateContextToThreadAssignments() {
 
 	close(ch)
 
-	for _, context := range processor.Experiment.Kernel.Contexts {
+	for context := range ch {
 		if context.ThreadId != -1 && processor.ContextToThreadMappings[context] == nil {
 			context.State = ContextState_RUNNING
 

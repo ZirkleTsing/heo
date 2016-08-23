@@ -14,9 +14,9 @@ type CPUExperiment struct {
 	BeginTime, EndTime      time.Time
 	CycleAccurateEventQueue *simutil.CycleAccurateEventQueue
 
+	Kernel                  *Kernel
 	Processor               *Processor
 	MemoryHierarchy         *MemoryHierarchy
-	Kernel                  *Kernel
 }
 
 func NewCPUExperiment(config *CPUConfig) *CPUExperiment {
@@ -25,9 +25,9 @@ func NewCPUExperiment(config *CPUConfig) *CPUExperiment {
 		CycleAccurateEventQueue:simutil.NewCycleAccurateEventQueue(),
 	}
 
+	experiment.Kernel = NewKernel(experiment)
 	experiment.Processor = NewProcessor(experiment)
 	experiment.MemoryHierarchy = NewMemoryHierarchy(experiment)
-	experiment.Kernel = NewKernel(experiment)
 
 	return experiment
 }
@@ -60,6 +60,6 @@ func (experiment *CPUExperiment) Run(skipIfStatsFileExists bool) {
 }
 
 func (experiment *CPUExperiment) canAdvanceOneCycle() bool {
-	return experiment.Config.MaxInstructions == 0 ||
-		experiment.Processor.Cores[0].Threads[0].NumInstructions < experiment.Config.MaxInstructions
+	return experiment.Config.MaxInstructions == -1 ||
+		experiment.Processor.Cores[0].Threads[0].NumInstructions < uint64(experiment.Config.MaxInstructions)
 }
