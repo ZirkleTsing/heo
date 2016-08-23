@@ -112,7 +112,7 @@ func TestTrafficsAndDataPacketInjectionRates(t *testing.T) {
 	simutil.RunExperiments(experiments, true)
 
 	for _, traffic := range TRAFFICS {
-		outputDirectory := fmt.Sprintf("results/trafficsAndDataPacketInjectionRates/t_%s", traffic)
+		var outputDirectory = fmt.Sprintf("results/%s/t_%s", outputDirectoryPrefix, traffic)
 
 		WriteCSVFile(outputDirectory, "result.csv", nocExperimentsPerTraffic[traffic], GetCSVFields())
 	}
@@ -165,7 +165,7 @@ func TestAntPacketInjectionRates(t *testing.T) {
 
 	simutil.RunExperiments(experiments, true)
 
-	outputDirectory := "results/antPacketInjectionRates"
+	var outputDirectory = fmt.Sprintf("results/%s", outputDirectoryPrefix)
 
 	WriteCSVFile(outputDirectory, "result.csv", nocExperiments, GetCSVFields())
 }
@@ -226,7 +226,7 @@ func TestAcoSelectionAlphasAndReinforcementFactors(t *testing.T) {
 
 	simutil.RunExperiments(experiments, true)
 
-	var outputDirectory = "results/acoSelectionAlphasAndReinforcementFactors"
+	var outputDirectory = fmt.Sprintf("results/%s", outputDirectoryPrefix)
 
 	WriteCSVFile(outputDirectory, "result.csv", nocExperiments, GetCSVFields())
 }
