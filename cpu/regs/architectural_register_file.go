@@ -135,6 +135,10 @@ func (architecturalRegisterFile *ArchitecturalRegisterFile) Sgpr(i uint32) int32
 	return int32(architecturalRegisterFile.Gpr[i])
 }
 
+func (architecturalRegisterFile *ArchitecturalRegisterFile) SetSgpr(i uint32, v int32) {
+	architecturalRegisterFile.Gpr[i] = uint32(v)
+}
+
 type FloatingPointRegisters struct {
 	LittleEndian bool
 	ByteOrder    binary.ByteOrder

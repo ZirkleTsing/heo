@@ -338,3 +338,167 @@ func (syscallEmulation *SyscallEmulation) read_impl(context *Context) {
 
 	context.Process.Memory.WriteBlockAt(bufAddr, ret, buf)
 }
+
+func (syscallEmulation *SyscallEmulation) write_impl(context *Context) {
+	var fd = int(context.Process.TranslateFileDescriptor(context.Regs.Gpr[regs.REGISTER_A0]))
+	var bufAddr = uint64(context.Regs.Gpr[regs.REGISTER_A1])
+	var count = uint64(context.Regs.Gpr[regs.REGISTER_A2])
+
+	var buf = context.Process.Memory.ReadBlockAt(bufAddr, count)
+
+	var ret uint64
+
+	var buffer = context.Kernel.GetWriteBuffer(fd)
+	if buffer != nil {
+		buffer.Write(&buf, count)
+		ret = count
+	} else {
+		ret = uint64(native.Write(fd, buf))
+	}
+
+	context.Regs.Gpr[regs.REGISTER_V0] = uint32(ret)
+	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+}
+
+func (syscallEmulation *SyscallEmulation) open_impl(context *Context) {
+	var addr = uint64(context.Regs.Gpr[regs.REGISTER_A0])
+	var targetFlags = context.Regs.Gpr[regs.REGISTER_A1]
+	var mode = int(context.Regs.Gpr[regs.REGISTER_A2])
+
+	var hostFlags = uint32(0)
+	for _, mapping := range syscallEmulation.OpenFlagMappings {
+		if targetFlags & uint32(mapping.TargetFlag) != 0 {
+			targetFlags &= ^uint32(mapping.TargetFlag)
+			hostFlags |= uint32(mapping.HostFlag)
+		}
+	}
+
+	if targetFlags != 0 {
+		panic(fmt.Sprintf("syscall open: cannot decode flags 0x%08x", targetFlags))
+	}
+
+	var path = context.Process.Memory.ReadStringAt(addr, MAX_BUFFER_SIZE)
+
+	var ret = native.Open(path, mode, hostFlags)
+
+	context.Regs.Gpr[regs.REGISTER_V0] = uint32(ret)
+	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+}
+
+func (syscallEmulation *SyscallEmulation) close_impl(context *Context) {
+	var fd = int(context.Regs.Gpr[regs.REGISTER_A0])
+
+	if fd == 0 || fd == 1 || fd == 2 {
+		context.Regs.Gpr[regs.REGISTER_A3] = 0
+		return
+	}
+
+	var ret = native.Close(fd)
+
+	context.Regs.Gpr[regs.REGISTER_V0] = uint32(ret)
+	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+}
+
+func (syscallEmulation *SyscallEmulation) waitpid_impl(context *Context) {
+	var pid = context.Regs.Gpr[regs.REGISTER_A0]
+	var pstatus = context.Regs.Gpr[regs.REGISTER_A1]
+
+	if pid < 1 {
+		panic("Impossible")
+	}
+
+	if context.Kernel.GetContextFromProcessId(pid) == nil {
+		context.Regs.Gpr[regs.REGISTER_A3] = uint32(ECHILD)
+		context.Regs.SetSgpr(regs.REGISTER_V0, -1)
+		return
+	}
+
+	var e = NewWaitEvent(context, pid)
+	context.Kernel.SystemEvents = append(context.Kernel.SystemEvents, e)
+	context.Suspend()
+	if pstatus != 0 {
+		panic("Impossible")
+	}
+}
+
+func (syscallEmulation *SyscallEmulation) getpid_impl(context *Context) {
+	context.Regs.Gpr[regs.REGISTER_V0] = context.ProcessId
+	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+}
+
+func (syscallEmulation *SyscallEmulation) getuid_impl(context *Context) {
+	context.Regs.Gpr[regs.REGISTER_V0] = context.UserId
+	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+}
+
+func (SyscallEmulation *SyscallEmulation) kill_impl(context *Context) {
+	var pid = int(context.Regs.Gpr[regs.REGISTER_A0])
+	var sig = context.Regs.Gpr[regs.REGISTER_A1]
+	if pid < 0 {
+		panic("Impossible")
+	}
+
+	var destContext = context.Kernel.GetContextFromProcessId(uint32(pid))
+	if destContext == nil {
+		context.Regs.Gpr[regs.REGISTER_A3] = uint32(ESRCH)
+		context.Regs.SetSgpr(regs.REGISTER_V0, -1)
+		return
+	}
+
+	destContext.SignalMasks.Pending.Set(sig)
+	context.Regs.Gpr[regs.REGISTER_A3] = 0
+	context.Regs.Gpr[regs.REGISTER_V0] = 0
+}
+
+func (syscallEmulation *SyscallEmulation) pipe_impl(context *Context) {
+	var fileDescriptors =  context.Kernel.CreatePipe()
+
+	context.Regs.Gpr[regs.REGISTER_V0] = uint32(fileDescriptors[0])
+	context.Regs.Gpr[regs.REGISTER_V1] = uint32(fileDescriptors[1])
+
+	context.Regs.Gpr[regs.REGISTER_A3] = 0
+}
+
+func (syscallEmulation *SyscallEmulation) brk_impl(context *Context) {
+	context.Regs.Gpr[regs.REGISTER_A3] = 0
+	context.Regs.Gpr[regs.REGISTER_V0] = 0
+}
+
+func (SyscallEmulation *SyscallEmulation) getgid_impl(context *Context) {
+	context.Regs.Gpr[regs.REGISTER_V0] = context.GroupId
+	SyscallEmulation.Error = SyscallEmulation.checkSystemCallError(context)
+}
+
+func (syscallEmulation *SyscallEmulation) geteuid_impl(context *Context) {
+	context.Regs.Gpr[regs.REGISTER_V0] = context.EffectiveUserId
+	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+}
+
+func (syscallEmulation *SyscallEmulation) getegid_impl(context *Context) {
+	context.Regs.Gpr[regs.REGISTER_V0] = context.EffectiveGroupId
+	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+}
+
+func (syscallEmulation *SyscallEmulation) ioctl_impl(context *Context) {
+	var buf = make([]byte, 128)
+
+	if context.Regs.Gpr[regs.REGISTER_A2] != 0 {
+		buf = context.Process.Memory.ReadBlockAt(uint64(context.Regs.Gpr[regs.REGISTER_A2]), 128)
+	}
+
+	var fd = int(context.Process.TranslateFileDescriptor(context.Regs.Gpr[regs.REGISTER_A0]))
+	if fd < 3 {
+		context.Regs.Gpr[regs.REGISTER_V0] = uint32(native.Ioctl(fd, int(context.Regs.Gpr[regs.REGISTER_A1]), buf))
+
+		syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+
+		if context.Regs.Gpr[regs.REGISTER_A2] != 0 {
+			context.Process.Memory.WriteBlockAt(uint64(context.Regs.Gpr[regs.REGISTER_A2]), 128, buf)
+		}
+	} else {
+		context.Regs.Gpr[regs.REGISTER_A3] = 0
+		context.Regs.Gpr[regs.REGISTER_V0] = 0
+	}
+}
+
+//TODO...
