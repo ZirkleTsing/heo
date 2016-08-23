@@ -125,6 +125,68 @@ func (memory *PagedMemory) WriteBlockAt(virtualAddress uint64, size uint64, data
 	memory.access(virtualAddress, size, &data, true, true)
 }
 
+func (memory *PagedMemory) Zero(virtualAddress uint64, size uint64) {
+	memory.WriteBlockAt(virtualAddress, size, make([]byte, size))
+}
+
+func (memory *PagedMemory) Map(virtualAddress uint64, size uint64) uint64 {
+	var tagStart, tagEnd uint64
+
+	tagStart = memory.GetTag(virtualAddress)
+	tagEnd = tagStart
+
+	var pageSize = memory.GetPageSize()
+
+	for pageCount := (memory.GetTag(virtualAddress + size - 1) - tagStart) / pageSize + 1; ; {
+		if tagEnd == 0 {
+			return 0 //TODO
+			//return uint64(-1)
+		}
+
+		if memory.GetPage(tagEnd) != nil {
+			tagEnd += pageSize
+			tagStart = tagEnd
+			continue
+		}
+
+		if (tagEnd - tagStart) / pageSize + 1 == pageCount {
+			break
+		}
+
+		tagEnd += pageSize
+	}
+
+	for tag := tagStart; tag <= tagEnd; tag += pageSize {
+		if memory.GetPage(tag) != nil {
+			panic("Impossible")
+		}
+		memory.addPage(tag)
+	}
+
+	return tagStart
+}
+
+func (memory *PagedMemory) Unmap(virtualAddress uint64, size uint64) {
+	var tagStart = memory.GetTag(virtualAddress)
+	var tagEnd = memory.GetTag(virtualAddress + size - 1)
+
+	var pageSize = memory.GetPageSize()
+
+	for tag := tagStart; tag <= tagEnd; tag += pageSize {
+		memory.removePage(tag)
+	}
+}
+
+func (memory *PagedMemory) Remap(oldAddr uint64, oldSize uint64, newSize uint64) uint64 {
+	var start = memory.Map(0, newSize)
+
+	if int64(start) != -1 {
+		panic("Not supported")
+	}
+
+	return start
+}
+
 func (memory *PagedMemory) access(virtualAddress uint64, size uint64, buffer *[]byte, write bool, createNewPageIfNecessary bool) {
 	var offset uint64 = 0
 

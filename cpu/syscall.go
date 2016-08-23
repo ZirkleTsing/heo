@@ -501,4 +501,62 @@ func (syscallEmulation *SyscallEmulation) ioctl_impl(context *Context) {
 	}
 }
 
-//TODO...
+func (syscallEmulation *SyscallEmulation) getppid_impl(context *Context) {
+	context.Regs.Gpr[regs.REGISTER_V0] = context.GetParentProcessId()
+	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+}
+
+func (syscallEmulation *SyscallEmulation) setrlimit_impl(context *Context) {
+	if context.Regs.Gpr[regs.REGISTER_A0] != 3 {
+		panic("Impossbile")
+	}
+
+	syscallEmulation.StackLimit = context.Regs.Gpr[regs.REGISTER_A1]
+
+	context.Regs.Gpr[regs.REGISTER_A3] = 0
+	context.Regs.Gpr[regs.REGISTER_V0] = 0
+}
+
+func (syscallEmulation *SyscallEmulation) getrlimit_impl(context *Context) {
+	var prlimit = uint64(context.Regs.Gpr[regs.REGISTER_A1])
+
+	if context.Regs.Gpr[regs.REGISTER_A0] != 3 {
+		panic("Impossible")
+	}
+
+	context.Process.Memory.WriteWordAt(prlimit, syscallEmulation.StackLimit)
+	context.Process.Memory.WriteWordAt(prlimit + 4, 0xffffffff)
+
+	context.Regs.Gpr[regs.REGISTER_A3] = 0
+	context.Regs.Gpr[regs.REGISTER_V0] = 0
+}
+
+func (syscallEmulation *SyscallEmulation) mmap_impl(context *Context) {
+	var start = uint64(context.Regs.Gpr[regs.REGISTER_A0])
+	var length = uint64(context.Regs.Gpr[regs.REGISTER_A1])
+
+	var fd = int(context.Process.Memory.ReadWordAt(uint64(context.Regs.Gpr[regs.REGISTER_SP] + 16)))
+
+	if fd != -1 {
+		panic("syscall mmap: syscall is only supported with fd = -1")
+	}
+
+	if start == 0 {
+		start = uint64(context.Process.HeapTop)
+	}
+
+	start = context.Process.Memory.Map(start, length)
+
+	context.Regs.Gpr[regs.REGISTER_A3] = 0
+	context.Regs.Gpr[regs.REGISTER_V0] = uint32(start)
+}
+
+func (syscallEmulation *SyscallEmulation) munmap_impl(context *Context) {
+	var start = uint64(context.Regs.Gpr[regs.REGISTER_A0])
+	var length = uint64(context.Regs.Gpr[regs.REGISTER_A1])
+	
+	context.Process.Memory.Unmap(start, length)
+
+	context.Regs.Gpr[regs.REGISTER_A3] = 0
+	context.Regs.Gpr[regs.REGISTER_V0] = 0
+}
