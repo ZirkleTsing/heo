@@ -13,6 +13,7 @@ type CPUExperiment struct {
 
 	BeginTime, EndTime      time.Time
 	CycleAccurateEventQueue *simutil.CycleAccurateEventQueue
+	BlockingEventDispatcher *simutil.BlockingEventDispatcher
 
 	Kernel                  *Kernel
 	Processor               *Processor
@@ -23,6 +24,7 @@ func NewCPUExperiment(config *CPUConfig) *CPUExperiment {
 	var experiment = &CPUExperiment{
 		Config:config,
 		CycleAccurateEventQueue:simutil.NewCycleAccurateEventQueue(),
+		BlockingEventDispatcher:simutil.NewBlockingEventDispatcher(),
 	}
 
 	experiment.Kernel = NewKernel(experiment)
