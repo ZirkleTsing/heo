@@ -49,6 +49,21 @@ func NewContext(kernel *Kernel, process *Process, parent *Context, regs *regs.Ar
 	return context
 }
 
+func NewContextFromParent(parent *Context, regs *regs.ArchitecturalRegisterFile, signalFinish uint32) *Context {
+	return NewContext(parent.Kernel, parent.Process, parent, regs, signalFinish)
+}
+
+func LoadContext(kernel *Kernel, contextMapping *ContextMapping) *Context {
+	var process = NewProcess(kernel, contextMapping)
+
+	var r = regs.NewArchitecturalRegisterFile(process.LittleEndian)
+	r.Npc = process.ProgramEntry
+	r.Nnpc = r.Npc + 4
+	r.Gpr[regs.REGISTER_SP] = process.EnvironmentBase
+
+	return NewContext(kernel, process, nil, r, 0)
+}
+
 func (context *Context) DecodeNextStaticInst() *StaticInst {
 	context.Regs.Pc = context.Regs.Npc
 	context.Regs.Npc = context.Regs.Nnpc

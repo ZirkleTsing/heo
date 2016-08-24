@@ -70,6 +70,34 @@ func (kernel *Kernel) GetContextFromProcessId(processId uint32) *Context {
 	return nil
 }
 
+func (kernel *Kernel) Map(contextToMap *Context, predicate func(candidateThreadId uint32) bool) bool {
+	if contextToMap.ThreadId != -1 {
+		panic("Impossible")
+	}
+
+	for coreNum := uint32(0); coreNum < kernel.Experiment.Config.NumCores; coreNum++ {
+		for threadNum := uint32(0); threadNum < kernel.Experiment.Config.NumThreadsPerCore; threadNum++ {
+			var threadId = coreNum * kernel.Experiment.Config.NumThreadsPerCore + threadNum
+
+			var hasMapped bool
+
+			for _, context := range kernel.Contexts {
+				if uint32(context.ThreadId) == threadId {
+					hasMapped = true
+					break
+				}
+			}
+
+			if !hasMapped && predicate(threadId) {
+				contextToMap.ThreadId = int32(threadId)
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 func (kernel *Kernel) ProcessSystemEvents() {
 	//TODO
 }

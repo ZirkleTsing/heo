@@ -181,8 +181,8 @@ func NewResumeEvent(context *Context) *ResumeEvent {
 	return resumeEvent
 }
 
-func (resumeEvent *ResumeEvent) NeedProcess(context *Context) bool {
-	return resumeEvent.TimeCriterion.NeedProcess(context)
+func (resumeEvent *ResumeEvent) NeedProcess() bool {
+	return resumeEvent.TimeCriterion.NeedProcess(resumeEvent.context)
 }
 
 func (resumeEvent *ResumeEvent) Process() {
@@ -203,8 +203,8 @@ func NewSignalSuspendEvent(context *Context) *SignalSuspendEvent {
 	return signalSuspendEvent
 }
 
-func (signalSuspendEvent *SignalSuspendEvent) NeedProcess(context *Context) bool {
-	return signalSuspendEvent.SignalCriterion.NeedProcess(context)
+func (signalSuspendEvent *SignalSuspendEvent) NeedProcess() bool {
+	return signalSuspendEvent.SignalCriterion.NeedProcess(signalSuspendEvent.context)
 }
 
 func (signalSuspendEvent *SignalSuspendEvent) Process() {

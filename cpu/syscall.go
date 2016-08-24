@@ -5,6 +5,8 @@ import (
 	"math"
 	"github.com/mcai/acogo/cpu/regs"
 	"github.com/mcai/acogo/cpu/native"
+	"github.com/mcai/acogo/cpu/mem"
+	"syscall"
 )
 
 type ErrNo uint32
@@ -143,15 +145,6 @@ func NewOpenFlagMapping(targetFlag TargetOpenFlag, hostFlag OpenFlag) *OpenFlagM
 	}
 
 	return openFlagMapping
-}
-
-type SysCtrlArgs struct {
-	Name    uint32
-	Nlen    uint32
-	Oldval  uint32
-	Oldlenp uint32
-	Newval  uint32
-	Newlen  uint32
 }
 
 type SyscallHandler struct {
@@ -554,9 +547,256 @@ func (syscallEmulation *SyscallEmulation) mmap_impl(context *Context) {
 func (syscallEmulation *SyscallEmulation) munmap_impl(context *Context) {
 	var start = uint64(context.Regs.Gpr[regs.REGISTER_A0])
 	var length = uint64(context.Regs.Gpr[regs.REGISTER_A1])
-	
+
 	context.Process.Memory.Unmap(start, length)
 
 	context.Regs.Gpr[regs.REGISTER_A3] = 0
 	context.Regs.Gpr[regs.REGISTER_V0] = 0
+}
+
+func (syscallEmulation *SyscallEmulation) clone_impl(context *Context) {
+	var cloneFlags = context.Regs.Gpr[regs.REGISTER_A0]
+	var newSp = context.Regs.Gpr[regs.REGISTER_A1]
+
+	var newContext *Context = NewContextFromParent(context, context.Regs.Clone(), cloneFlags & 0xff)
+
+	if !context.Kernel.Map(newContext, func(candidateThreadId uint32) bool {return true}) {
+		panic("Impossible")
+	}
+
+	context.Kernel.Contexts = append(context.Kernel.Contexts, newContext)
+
+	newContext.Regs.Gpr[regs.REGISTER_SP] = newSp
+	newContext.Regs.Gpr[regs.REGISTER_A3] = 0
+	newContext.Regs.Gpr[regs.REGISTER_V0] = 0
+
+	context.Regs.Gpr[regs.REGISTER_A3] = 0
+	context.Regs.Gpr[regs.REGISTER_V0] = newContext.ProcessId
+}
+
+func (syscallEmulation *SyscallEmulation) uname_impl(context *Context) {
+	var un = NewUtsname()
+	un.Sysname = "Linux"
+	un.Nodename = "sim"
+	un.Release = "2.6"
+	un.Version = "Tue Apr 5 12:21:57 UTC 2005"
+	un.Machine = "mips"
+
+	var un_buf = un.GetBytes(context.Process.LittleEndian)
+	context.Process.Memory.WriteBlockAt(uint64(context.Regs.Gpr[regs.REGISTER_A0]), uint64(len(un_buf)), un_buf)
+
+	context.Regs.Gpr[regs.REGISTER_A3] = 0
+	context.Regs.Gpr[regs.REGISTER_V0] = 0
+}
+
+func (syscallEmulation *SyscallEmulation) mprotect_impl(context *Context) {
+	context.Regs.Gpr[regs.REGISTER_A3] = 0
+	context.Regs.Gpr[regs.REGISTER_V0] = 0
+}
+
+func (syscallEmulation *SyscallEmulation) _llseek_impl(context *Context) {
+	var fd = int(context.Process.TranslateFileDescriptor(context.Regs.Gpr[regs.REGISTER_A0]))
+	var offset = context.Regs.Gpr[regs.REGISTER_A1]
+	var whence = context.Regs.Gpr[regs.REGISTER_A2]
+
+	var ret = native.Seek(fd, int64(offset), int(whence))
+
+	context.Regs.Gpr[regs.REGISTER_V0] = uint32(ret)
+
+	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+}
+
+func (syscallEmulation *SyscallEmulation) _sysctl_impl(context *Context) {
+	var buf = context.Process.Memory.ReadBlockAt(uint64(context.Regs.Gpr[regs.REGISTER_A0]), 4 * 6)
+	var memory = mem.NewSimpleMemory(context.Process.LittleEndian, buf)
+
+	var args = NewSysctlArgs()
+	args.Name = memory.ReadWord()
+	args.Nlen = memory.ReadWord()
+	args.Oldval = memory.ReadWord()
+	args.Oldlenp = memory.ReadWord()
+	args.Newval = memory.ReadWord()
+	args.Newlen = memory.ReadWord()
+
+	var buf2 = context.Process.Memory.ReadBlockAt(uint64(args.Name), 4 * 10)
+	var memory2 = mem.NewSimpleMemory(context.Process.LittleEndian, buf2)
+
+	var name = make([]uint32, 10)
+
+	for i := 0; i < len(name); i++ {
+		name[i] = memory2.ReadWord()
+	}
+
+	context.Regs.Gpr[regs.REGISTER_A3] = 0
+
+	name[0] = 0 //TODO: hack for the moment
+
+	if name[0] != 0 {
+		panic("syscall sysctl is not supported with name[0] != 0")
+	}
+}
+
+func (sysallEmulation *SyscallEmulation) mremap_impl(context *Context) {
+	var oldAddr = context.Regs.Gpr[regs.REGISTER_A0]
+	var oldSize = context.Regs.Gpr[regs.REGISTER_A1]
+	var newSize = context.Regs.Gpr[regs.REGISTER_A2]
+
+	var start = context.Process.Memory.Remap(uint64(oldAddr), uint64(oldSize), uint64(newSize))
+
+	context.Regs.Gpr[regs.REGISTER_V0] = uint32(start)
+
+	sysallEmulation.Error = sysallEmulation.checkSystemCallError(context)
+}
+
+func (syscallEmulation *SyscallEmulation) nanosleep_impl(context *Context) {
+	var preq = context.Regs.Gpr[regs.REGISTER_A0]
+	var sec = context.Process.Memory.ReadWordAt(uint64(preq))
+	var nsec = context.Process.Memory.ReadWordAt(uint64(preq + 4))
+
+	var total = sec * native.CLOCKS_PER_SEC + nsec / 1e9 * native.CLOCKS_PER_SEC
+
+	var e = NewResumeEvent(context)
+	e.TimeCriterion.When = native.Clock(context.Kernel.CurrentCycle + uint64(total))
+	context.Kernel.SystemEvents = append(context.Kernel.SystemEvents, e)
+	context.Suspend()
+}
+
+func (syscallEmulation *SyscallEmulation) poll_impl(context *Context) {
+	var pufds = context.Regs.Gpr[regs.REGISTER_A0]
+	var nfds = context.Regs.Gpr[regs.REGISTER_A1]
+	var timeout = context.Regs.Gpr[regs.REGISTER_A2]
+
+	if nfds < 1 {
+		panic("syscall poll: nfds < 1")
+	}
+
+	for i := uint32(0); i < nfds; i++ {
+		var fd = int(context.Process.Memory.ReadWordAt(uint64(pufds)))
+		var events = int16(context.Process.Memory.ReadHalfWordAt(uint64(pufds) + 4))
+
+		if events != -1 {
+			panic("syscall poll: ufds.events != POLLIN")
+		}
+
+		var e = NewPollEvent(context)
+		e.TimeCriterion.When = native.Clock(context.Kernel.CurrentCycle) + uint64(timeout) * native.CLOCKS_PER_SEC / 1000
+		e.WaitForFileDescriptorCriterion.Buffer = context.Kernel.GetReadBuffer(fd)
+
+		if e.WaitForFileDescriptorCriterion.Buffer == nil {
+			panic("syscall poll: fd does not belong to a pipe read buffer")
+		}
+
+		e.WaitForFileDescriptorCriterion.Pufds = uint64(pufds)
+		context.Kernel.SystemEvents = append(context.Kernel.SystemEvents, e)
+
+		pufds += 8
+	}
+
+	context.Suspend()
+}
+
+func (syscallEmulation *SyscallEmulation) rt_sigaction_impl(context *Context) {
+	var signum = context.Regs.Gpr[regs.REGISTER_A0]
+	var pact = context.Regs.Gpr[regs.REGISTER_A1]
+	var poact = context.Regs.Gpr[regs.REGISTER_A2]
+
+	if poact != 0 {
+		context.Kernel.SignalActions[signum - 1].SaveTo(context.Process.Memory, uint64(poact))
+	}
+
+	if pact != 0 {
+		context.Kernel.SignalActions[signum - 1].LoadFrom(context.Process.Memory, uint64(pact))
+	}
+
+	context.Regs.Gpr[regs.REGISTER_A3] = 0
+	context.Regs.Gpr[regs.REGISTER_V0] = 0
+}
+
+func (syscallEmulation *SyscallEmulation) rt_sigprocmask_impl(context *Context) {
+	var how = context.Regs.Gpr[regs.REGISTER_A0]
+	var pset = uint64(context.Regs.Gpr[regs.REGISTER_A1])
+	var poset = uint64(context.Regs.Gpr[regs.REGISTER_A2])
+
+	if poset != 0 {
+		context.SignalMasks.Blocked.SaveTo(context.Process.Memory, poset)
+	}
+
+	if pset != 0 {
+		var set = NewSignalMask()
+		set.LoadFrom(context.Process.Memory, pset)
+
+		switch how {
+		case 1:
+			for i := uint32(1); i <= MAX_SIGNAL; i++ {
+				if set.Contains(i) {
+					context.SignalMasks.Blocked.Set(i)
+				}
+			}
+		case 2:
+			for i := uint32(1); i <= MAX_SIGNAL; i++ {
+				if set.Contains(i) {
+					context.SignalMasks.Blocked.Clear(i)
+				}
+			}
+		case 3:
+			context.SignalMasks.Blocked = set.Clone()
+		}
+	}
+
+	context.Regs.Gpr[regs.REGISTER_A3] = 0
+	context.Regs.Gpr[regs.REGISTER_V0] = 0
+}
+
+func (syscallEmulation *SyscallEmulation) rt_sigsuspend_impl(context *Context) {
+	var pmask = context.Regs.Gpr[regs.REGISTER_A0]
+
+	if pmask == 0 {
+		panic("syscall sigsuspend: mask is nil")
+	}
+
+	context.SignalMasks.Blocked.LoadFrom(context.Process.Memory, uint64(pmask))
+	context.Suspend()
+
+	var e = NewSignalSuspendEvent(context)
+	context.Kernel.SystemEvents = append(context.Kernel.SystemEvents, e)
+
+	context.Regs.Gpr[regs.REGISTER_A3] = 0
+	context.Regs.Gpr[regs.REGISTER_V0] = 0
+}
+
+func (syscallEmulation *SyscallEmulation) fstat64_impl(context *Context) {
+	var fd = int(context.Process.TranslateFileDescriptor(context.Regs.Gpr[regs.REGISTER_A0]))
+	var bufAddr = context.Regs.Gpr[regs.REGISTER_A1]
+
+	var fstat syscall.Stat_t
+
+	syscall.Fstat(fd, &fstat)
+
+	context.Regs.Gpr[regs.REGISTER_V0] = 0
+
+	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+
+	if !syscallEmulation.Error {
+		var sizeOfDataToWrite = uint64(64)
+		var dataToWrite = make([]byte, sizeOfDataToWrite)
+
+		var memory = mem.NewSimpleMemory(context.Process.LittleEndian, dataToWrite)
+
+		//TODO: correct?
+		memory.WriteWordAt(0, uint32(fstat.Dev))
+		memory.WriteWordAt(16, uint32(fstat.Ino))
+		memory.WriteWordAt(24, uint32(fstat.Mode))
+		memory.WriteWordAt(28, uint32(fstat.Nlink))
+		memory.WriteWordAt(32, uint32(fstat.Uid))
+		memory.WriteWordAt(36, uint32(fstat.Gid))
+		memory.WriteWordAt(40, uint32(fstat.Rdev))
+		memory.WriteWordAt(56, uint32(fstat.Size))
+		memory.WriteWordAt(64, uint32(fstat.Atim.Nano()))
+		memory.WriteWordAt(72, uint32(fstat.Mtim.Nano()))
+		memory.WriteWordAt(80, uint32(fstat.Ctim.Nano()))
+		memory.WriteWordAt(88, uint32(fstat.Blksize))
+		memory.WriteWordAt(96, uint32(fstat.Blocks))
+
+		context.Process.Memory.WriteBlockAt(uint64(bufAddr), sizeOfDataToWrite, dataToWrite)
+	}
 }

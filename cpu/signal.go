@@ -19,6 +19,12 @@ func NewSignalMask() *SignalMask {
 	return signalMask
 }
 
+func (signalMask *SignalMask) Clone() *SignalMask {
+	var newSignalMask = NewSignalMask()
+	copy(newSignalMask.Signals, signalMask.Signals)
+	return newSignalMask
+}
+
 func (signalMask *SignalMask) Set(signal uint32) {
 	if signal < 1 || signal > MAX_SIGNAL {
 		return
