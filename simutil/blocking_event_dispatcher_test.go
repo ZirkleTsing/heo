@@ -28,5 +28,4 @@ func TestBlockingEventDispatcher(t *testing.T) {
 	})
 
 	blockingEventDispatcher.Dispatch(helloEvent)
-
 }
