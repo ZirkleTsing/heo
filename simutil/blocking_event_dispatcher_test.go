@@ -23,7 +23,7 @@ func TestBlockingEventDispatcher(t *testing.T) {
 
 	var helloEvent = NewHelloEvent("Test")
 
-	blockingEventDispatcher.AddListener(reflect.TypeOf(helloEvent), func(event interface{}) {
+	blockingEventDispatcher.AddListener(reflect.TypeOf((*HelloEvent)(nil)), func(event interface{}) {
 		fmt.Printf("hello event fired with name = %s\n", event.(*HelloEvent).Name)
 	})
 
