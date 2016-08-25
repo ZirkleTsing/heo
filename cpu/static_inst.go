@@ -53,5 +53,25 @@ func NewStaticInst(mnemonic *Mnemonic, machInst MachInst) *StaticInst {
 }
 
 func (staticInst *StaticInst) Execute(context *Context) {
+	var oldPc = context.Regs.Pc
+
 	staticInst.Mnemonic.Execute(context, staticInst.MachInst)
+
+	context.Kernel.Experiment.BlockingEventDispatcher.Dispatch(NewStaticInstExecutedEvent(context, oldPc, staticInst))
+}
+
+type StaticInstExecutedEvent struct {
+	Context    *Context
+	Pc         uint32
+	StaticInst *StaticInst
+}
+
+func NewStaticInstExecutedEvent(context *Context, pc uint32, staticInst *StaticInst) *StaticInstExecutedEvent {
+	var staticInstExecutedEvent = &StaticInstExecutedEvent{
+		Context:context,
+		Pc:pc,
+		StaticInst:staticInst,
+	}
+
+	return staticInstExecutedEvent
 }
