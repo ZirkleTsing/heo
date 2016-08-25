@@ -17,7 +17,9 @@ type Kernel struct {
 
 	CurrentCycle     uint64
 	CurrentPid       uint32
+	CurrentProcessId uint32
 	CurrentMemoryId  uint32
+	CurrentMemoryPageId uint32
 	CurrentContextId uint32
 	CurrentFd        int
 }
@@ -35,6 +37,16 @@ func NewKernel(experiment *CPUExperiment) *Kernel {
 
 	for i := 0; i < MAX_SIGNAL; i++ {
 		kernel.SignalActions = append(kernel.SignalActions, NewSignalAction())
+	}
+
+	for _, contextMapping := range experiment.Config.ContextMappings {
+		var context = LoadContext(kernel, contextMapping)
+
+		if !kernel.Map(context, func(candidateThreadId uint32) bool { return candidateThreadId == contextMapping.ThreadId}) {
+			panic("Impossible")
+		}
+
+		kernel.Contexts = append(kernel.Contexts, context)
 	}
 
 	return kernel

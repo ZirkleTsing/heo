@@ -2,6 +2,7 @@ package cpu
 
 import (
 	"github.com/mcai/acogo/cpu/regs"
+	"github.com/mcai/acogo/cpu/native"
 )
 
 const (
@@ -37,6 +38,10 @@ func NewContext(kernel *Kernel, process *Process, parent *Context, regs *regs.Ar
 		Regs:regs,
 		SignalFinish:signalFinish,
 		Id: kernel.CurrentContextId,
+		UserId:uint32(native.Getuid()),
+		EffectiveUserId:uint32(native.Geteuid()),
+		GroupId:uint32(native.Getgid()),
+		EffectiveGroupId:uint32(native.Getegid()),
 		ProcessId:kernel.CurrentPid,
 		SignalMasks:NewSignalMasks(),
 		State:ContextState_IDLE,
@@ -45,6 +50,8 @@ func NewContext(kernel *Kernel, process *Process, parent *Context, regs *regs.Ar
 
 	kernel.CurrentContextId++
 	kernel.CurrentPid++
+
+	kernel.Experiment.BlockingEventDispatcher.Dispatch(NewContextCreatedEvent(context))
 
 	return context
 }
@@ -74,8 +81,7 @@ func (context *Context) DecodeNextStaticInst() *StaticInst {
 }
 
 func (context *Context) Decode(mappedPc uint32) *StaticInst {
-	//return context.Process.GetStaticInst(mappedPc)
-	return nil // TODO
+	return context.Process.GetStaticInst(mappedPc)
 }
 
 func (context *Context) Suspend() {
@@ -134,4 +140,28 @@ func NewContextMapping(threadId uint32, executable string, arguments string) *Co
 	}
 
 	return contextMapping
+}
+
+type ContextCreatedEvent struct {
+	Context *Context
+}
+
+func NewContextCreatedEvent(context *Context) *ContextCreatedEvent {
+	var contextCreatedEvent = &ContextCreatedEvent{
+		Context:context,
+	}
+
+	return contextCreatedEvent
+}
+
+type ContextKilledEvent struct {
+	Context *Context
+}
+
+func NewContextKilledEvent(context *Context) *ContextKilledEvent {
+	var contextKilledEvent = &ContextKilledEvent{
+		Context:context,
+	}
+
+	return contextKilledEvent
 }

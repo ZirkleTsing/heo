@@ -198,7 +198,7 @@ func (machInst MachInst) Cc() uint32 {
 	return machInst.ValueOf(CC)
 }
 
-func Disassemble(pc uint, mnemonicName string, machInst MachInst) string {
+func Disassemble(pc uint32, mnemonicName string, machInst MachInst) string {
 	var buf bytes.Buffer
 
 	buf.WriteString(fmt.Sprintf("0x%08x: 0x%08x %s ",

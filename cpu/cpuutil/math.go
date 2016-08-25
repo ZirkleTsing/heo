@@ -55,3 +55,7 @@ func SetBitValue64(x uint64, b uint64, v bool) uint64 {
 		return ClearBit64(x, b)
 	}
 }
+
+func RoundUp(n uint32, alignment uint32) uint32 {
+	return (n + alignment - 1) & ^(alignment - 1)
+}

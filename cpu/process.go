@@ -3,6 +3,20 @@ package cpu
 import (
 	"syscall"
 	"github.com/mcai/acogo/cpu/mem"
+	"strings"
+	"github.com/mcai/acogo/cpu/elf"
+	"math"
+	"github.com/mcai/acogo/cpu/cpuutil"
+)
+
+const (
+	TEXT_BASE = 0x00400000
+
+	DATA_BASE = 0x10000000
+
+	STACK_BASE = 0x7fffc000
+
+	MAX_ENVIRON = 16 * 1024
 )
 
 type Process struct {
@@ -26,16 +40,101 @@ type Process struct {
 
 func NewProcess(kernel *Kernel, contextMapping *ContextMapping) *Process {
 	var process = &Process{
+		Id:kernel.CurrentProcessId,
 		ContextMapping:contextMapping,
+		StdInFileDescriptor:0,
+		StdOutFileDescriptor:1,
+		Memory:mem.NewPagedMemory(false),
 	}
 
-	//TODO
+	kernel.CurrentProcessId++
+
+	kernel.Processes = append(kernel.Processes, process)
+
+	process.LoadProgram(kernel, contextMapping)
 
 	return process
 }
 
 func (process *Process) LoadProgram(kernel *Kernel, contextMapping *ContextMapping) {
-	//TODO
+	process.pcToMachInsts = make(map[uint32]MachInst)
+	process.machInstsToStaticInsts = make(map[MachInst]*StaticInst)
+
+	var cmdArgs = strings.Split(contextMapping.Executable + " " + contextMapping.Arguments, " ")
+
+	var elfFileName = cmdArgs[0]
+
+	var elfFile = elf.NewElfFile(elfFileName)
+
+	for _, sectionHeader := range elfFile.SectionHeaders {
+		if sectionHeader.GetName(elfFile) == ".dynamic" {
+			panic("dynamic linking is not supported")
+		}
+
+		if sectionHeader.HeaderType == elf.SHT_PROGBITS || sectionHeader.HeaderType == elf.SHT_NOBITS {
+			if sectionHeader.Size > 0 && (sectionHeader.Flags & uint32(elf.SHF_ALLOC)) != 0 {
+				if sectionHeader.HeaderType == elf.SHT_NOBITS {
+					process.Memory.Zero(uint64(sectionHeader.Address), uint64(sectionHeader.Size))
+				} else {
+					process.Memory.WriteBlockAt(uint64(sectionHeader.Address), uint64(sectionHeader.Size), sectionHeader.ReadContent(elfFile))
+
+					if sectionHeader.Flags & uint32(elf.SHF_EXECINSTR) != 0 {
+						for i := uint32(0); i < sectionHeader.Size; i += 4 {
+							var pc = sectionHeader.Address + i
+							process.predecode(pc)
+						}
+					}
+				}
+
+				if sectionHeader.Address >= DATA_BASE {
+					process.DataTop = uint32(math.Max(float64(process.DataTop), float64(sectionHeader.Address + sectionHeader.Size - 1)))
+				}
+			}
+		}
+
+		if sectionHeader.GetName(elfFile) == ".text" {
+			process.TextSize = sectionHeader.Address + sectionHeader.Size - TEXT_BASE
+		}
+	}
+
+	process.ProgramEntry = elfFile.Header.Entry
+	process.HeapTop = cpuutil.RoundUp(process.DataTop, uint32(process.Memory.GetPageSize()))
+
+	process.StackBase = STACK_BASE
+	process.StackSize = MAX_ENVIRON
+	process.EnvironmentBase = STACK_BASE - MAX_ENVIRON
+
+	process.Memory.Zero(uint64(process.StackBase - process.StackSize), uint64(process.StackSize))
+
+	var stackPointer = process.EnvironmentBase
+	process.Memory.WriteWordAt(uint64(stackPointer), uint32(len(cmdArgs)))
+	stackPointer += 4
+
+	var argAddr = stackPointer
+	stackPointer += (uint32(len(cmdArgs)) + 1) * 4
+
+	var environmentAddr = stackPointer
+	stackPointer += (uint32(len(process.Environments)) + 1) * 4
+
+	for i := uint32(0); i < uint32(len(cmdArgs)); i++ {
+		process.Memory.WriteWordAt(uint64(argAddr + i * 4), stackPointer)
+		process.Memory.WriteStringAt(uint64(stackPointer), cmdArgs[i])
+		stackPointer += uint32(len([]byte(cmdArgs[i])))
+	}
+
+	process.Memory.WriteWordAt(uint64(argAddr + uint32(len(cmdArgs)) * 4), 0)
+
+	for i := uint32(0); i < uint32(len(process.Environments)); i++ {
+		process.Memory.WriteWordAt(uint64(environmentAddr + i * 4), stackPointer)
+		process.Memory.WriteStringAt(uint64(stackPointer), process.Environments[i])
+		stackPointer += uint32(len([]byte(process.Environments[i])))
+	}
+
+	process.Memory.WriteWordAt(uint64(environmentAddr + uint32(len(process.Environments)) * 4), 0)
+
+	if stackPointer > process.StackBase {
+		panic("'environ' overflow, increment MAX_ENVIRON")
+	}
 }
 
 func (process *Process) TranslateFileDescriptor(fileDescriptor uint32) uint32 {
@@ -58,7 +157,7 @@ func (process *Process) CloseProgram() {
 	}
 }
 
-func (process *Process) Decode(machInst MachInst) *StaticInst {
+func (process *Process) decode(machInst MachInst) *StaticInst {
 	for _, mnemonic := range Mnemonics {
 		if machInst != 0 && mnemonic.Mask == mnemonic.Bits && (mnemonic.ExtraBitField == nil || machInst.ValueOf(mnemonic.ExtraBitField) == mnemonic.ExtraBitFieldValue) {
 			return NewStaticInst(mnemonic, machInst)
@@ -66,4 +165,25 @@ func (process *Process) Decode(machInst MachInst) *StaticInst {
 	}
 
 	panic("Impossible")
+}
+
+func (process *Process) predecode(pc uint32) {
+	var machInst = MachInst(process.Memory.ReadWordAt(uint64(pc)))
+
+	process.pcToMachInsts[pc] = machInst
+
+	if _, ok := process.machInstsToStaticInsts[machInst]; ok {
+		var staticInst = process.decode(machInst)
+		process.machInstsToStaticInsts[machInst] = staticInst
+	}
+}
+
+func (process *Process) GetStaticInst(pc uint32) *StaticInst {
+	return process.machInstsToStaticInsts[process.pcToMachInsts[pc]]
+}
+
+func (process *Process) Disassemble(pc uint32) string {
+	var staticInst = process.GetStaticInst(pc)
+
+	return Disassemble(pc, string(staticInst.Mnemonic.Name), staticInst.MachInst)
 }
