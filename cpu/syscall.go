@@ -444,7 +444,7 @@ func (SyscallEmulation *SyscallEmulation) kill_impl(context *Context) {
 }
 
 func (syscallEmulation *SyscallEmulation) pipe_impl(context *Context) {
-	var fileDescriptors =  context.Kernel.CreatePipe()
+	var fileDescriptors = context.Kernel.CreatePipe()
 
 	context.Regs.Gpr[regs.REGISTER_V0] = uint32(fileDescriptors[0])
 	context.Regs.Gpr[regs.REGISTER_V1] = uint32(fileDescriptors[1])
@@ -560,7 +560,9 @@ func (syscallEmulation *SyscallEmulation) clone_impl(context *Context) {
 
 	var newContext *Context = NewContextFromParent(context, context.Regs.Clone(), cloneFlags & 0xff)
 
-	if !context.Kernel.Map(newContext, func(candidateThreadId uint32) bool {return true}) {
+	if !context.Kernel.Map(newContext, func(candidateThreadId uint32) bool {
+		return true
+	}) {
 		panic("Impossible")
 	}
 

@@ -6,22 +6,22 @@ import (
 )
 
 type Kernel struct {
-	Experiment       *CPUExperiment
+	Experiment          *CPUExperiment
 
-	Pipes            []*Pipe
-	SystemEvents     []SystemEvent
-	SignalActions    []*SignalAction
-	Contexts         []*Context
-	Processes        []*Process
-	SyscallEmulation *SyscallEmulation
+	Pipes               []*Pipe
+	SystemEvents        []SystemEvent
+	SignalActions       []*SignalAction
+	Contexts            []*Context
+	Processes           []*Process
+	SyscallEmulation    *SyscallEmulation
 
-	CurrentCycle     uint64
-	CurrentPid       uint32
-	CurrentProcessId uint32
-	CurrentMemoryId  uint32
+	CurrentCycle        uint64
+	CurrentPid          uint32
+	CurrentProcessId    uint32
+	CurrentMemoryId     uint32
 	CurrentMemoryPageId uint32
-	CurrentContextId uint32
-	CurrentFd        int
+	CurrentContextId    uint32
+	CurrentFd           int
 }
 
 func NewKernel(experiment *CPUExperiment) *Kernel {
@@ -42,7 +42,9 @@ func NewKernel(experiment *CPUExperiment) *Kernel {
 	for _, contextMapping := range experiment.Config.ContextMappings {
 		var context = LoadContext(kernel, contextMapping)
 
-		if !kernel.Map(context, func(candidateThreadId uint32) bool { return candidateThreadId == contextMapping.ThreadId}) {
+		if !kernel.Map(context, func(candidateThreadId uint32) bool {
+			return candidateThreadId == contextMapping.ThreadId
+		}) {
 			panic("Impossible")
 		}
 
