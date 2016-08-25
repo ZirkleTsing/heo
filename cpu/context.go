@@ -38,6 +38,7 @@ func NewContext(kernel *Kernel, process *Process, parent *Context, regs *regs.Ar
 		Regs:regs,
 		SignalFinish:signalFinish,
 		Id: kernel.CurrentContextId,
+		ThreadId:-1,
 		UserId:uint32(native.Getuid()),
 		EffectiveUserId:uint32(native.Geteuid()),
 		GroupId:uint32(native.Getgid()),

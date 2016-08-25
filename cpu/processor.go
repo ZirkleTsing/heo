@@ -19,6 +19,8 @@ func NewProcessor(experiment *CPUExperiment) *Processor {
 			var thread = NewThread(core, j)
 			core.Threads = append(core.Threads, thread)
 		}
+
+		processor.Cores = append(processor.Cores, core)
 	}
 
 	processor.UpdateContextToThreadAssignments()

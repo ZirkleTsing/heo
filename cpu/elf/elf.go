@@ -309,7 +309,6 @@ type ElfSectionHeader struct {
 	Info             uint32
 	AddressAlignment uint32
 	EntrySize        uint32
-	ElfFile          *ElfFile
 	name             string
 }
 
@@ -337,7 +336,7 @@ func (elfSectionHeader *ElfSectionHeader) ReadContent(elfFile *ElfFile) []byte {
 
 func (elfSectionHeader *ElfSectionHeader) GetName(elfFile *ElfFile) string {
 	if elfSectionHeader.name == "" {
-		elfSectionHeader.name = elfSectionHeader.ElfFile.StringTable.GetString(elfSectionHeader.NameIndex)
+		elfSectionHeader.name = elfFile.StringTable.GetString(elfSectionHeader.NameIndex)
 	}
 
 	return elfSectionHeader.name
