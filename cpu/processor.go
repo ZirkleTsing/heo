@@ -47,8 +47,10 @@ func (processor *Processor) UpdateContextToThreadAssignments() {
 			processor.ContextToThreadMappings[context] = candidateThread
 
 			candidateThread.Context = context
+			panic("Unimplemented")
 			//candidateThread.UpdateFetchNpcAndNnpcFromRegs()
 		} else if context.State == ContextState_FINISHED {
+			panic("Unimplemented")
 			//var thread = processor.ContextToThreadMappings[context]
 			//if thread.IsLastDecodedDynamicInstCommitted {
 			//	processor.Kill(context)

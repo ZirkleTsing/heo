@@ -43,6 +43,7 @@ func Open(path string, mode int, perm uint32) int {
 
 func Close(fd int) int {
 	syscall.Close(fd)
+	panic("Unimplemented")
 	return 0 //TODO
 }
 

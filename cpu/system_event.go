@@ -3,6 +3,8 @@ package cpu
 import (
 	"github.com/mcai/acogo/cpu/mem"
 	"github.com/mcai/acogo/cpu/native"
+	"reflect"
+	"github.com/mcai/acogo/cpu/regs"
 )
 
 type SystemEventCriterion interface {
@@ -45,22 +47,25 @@ func (signalCriterion *SignalCriterion) NeedProcess(context *Context) bool {
 }
 
 type WaitForProcessIdCriterion struct {
-	ProcessId        uint32
+	ProcessId        int32
 	HasProcessKilled bool
 }
 
-func NewWaitForProcessIdCriterion(context *Context, processId uint32) *WaitForProcessIdCriterion {
+func NewWaitForProcessIdCriterion(context *Context, processId int32) *WaitForProcessIdCriterion {
 	var waitForProcessIdCriterion = &WaitForProcessIdCriterion{
 		ProcessId:processId,
 	}
 
-	//TODO
+	context.Kernel.Experiment.BlockingEventDispatcher.AddListener(reflect.TypeOf((*ContextKilledEvent)(nil)), func(event interface{}) {
+		waitForProcessIdCriterion.HasProcessKilled = true
+	})
 
 	return waitForProcessIdCriterion
 }
 
 func (waitForProcessIdCriterion *WaitForProcessIdCriterion) NeedProcess(context *Context) bool {
-	return false //TODO
+	return waitForProcessIdCriterion.ProcessId == -1 && waitForProcessIdCriterion.HasProcessKilled ||
+		waitForProcessIdCriterion.ProcessId > 0 && context.Kernel.GetContextFromProcessId(uint32(waitForProcessIdCriterion.ProcessId)) == nil
 }
 
 type WaitForFileDescriptorCriterion struct {
@@ -142,7 +147,15 @@ func (pollEvent *PollEvent) NeedProcess() bool {
 }
 
 func (pollEvent *PollEvent) Process() {
-	//TODO
+	if !pollEvent.WaitForFileDescriptorCriterion.Buffer.IsEmpty() {
+		pollEvent.Context().Process.Memory.WriteHalfWordAt(pollEvent.WaitForFileDescriptorCriterion.Pufds + 6, 1)
+		pollEvent.Context().Regs.Gpr[regs.REGISTER_V0] = 1
+	} else {
+		pollEvent.Context().Regs.Gpr[regs.REGISTER_V0] = 0
+	}
+
+	pollEvent.Context().Regs.Gpr[regs.REGISTER_A3] = 0
+	pollEvent.context.Resume()
 }
 
 type ReadEvent struct {
@@ -164,7 +177,16 @@ func (readEvent *ReadEvent) NeedProcess() bool {
 }
 
 func (readEvent *ReadEvent) Process() {
-	//TODO
+	readEvent.Context().Resume()
+
+	var buf = make([]byte, readEvent.WaitForFileDescriptorCriterion.Size)
+
+	var numRead = readEvent.WaitForFileDescriptorCriterion.Buffer.Read(&buf, uint64(len(buf)))
+
+	readEvent.Context().Regs.Gpr[regs.REGISTER_V0] = uint32(numRead)
+	readEvent.Context().Regs.Gpr[regs.REGISTER_A3] = 0
+
+	readEvent.Context().Process.Memory.WriteBlockAt(readEvent.WaitForFileDescriptorCriterion.Address, numRead, buf)
 }
 
 type ResumeEvent struct {
@@ -186,7 +208,7 @@ func (resumeEvent *ResumeEvent) NeedProcess() bool {
 }
 
 func (resumeEvent *ResumeEvent) Process() {
-	//TODO
+	resumeEvent.Context().Resume()
 }
 
 type SignalSuspendEvent struct {
@@ -208,7 +230,11 @@ func (signalSuspendEvent *SignalSuspendEvent) NeedProcess() bool {
 }
 
 func (signalSuspendEvent *SignalSuspendEvent) Process() {
-	//TODO
+	signalSuspendEvent.Context().Resume()
+
+	signalSuspendEvent.Context().Kernel.ProcessSignals()
+
+	signalSuspendEvent.Context().SignalMasks.Blocked = signalSuspendEvent.Context().SignalMasks.Backup.Clone()
 }
 
 type WaitEvent struct {
@@ -220,7 +246,7 @@ type WaitEvent struct {
 func NewWaitEvent(context *Context, processId uint32) *WaitEvent {
 	var waitEvent = &WaitEvent{
 		BaseSystemEvent: NewBaseSystemEvent(context, SystemEventType_WAIT),
-		WaitForProcessIdCriterion: NewWaitForProcessIdCriterion(context, processId),
+		WaitForProcessIdCriterion: NewWaitForProcessIdCriterion(context, int32(processId)),
 		SignalCriterion: NewSignalCriterion(),
 	}
 
@@ -233,7 +259,10 @@ func (waitEvent *WaitEvent) NeedProcess() bool {
 }
 
 func (waitEvent *WaitEvent) Process() {
-	//TODO
+	waitEvent.Context().Resume()
+
+	waitEvent.Context().Regs.Gpr[regs.REGISTER_V0] = uint32(waitEvent.WaitForProcessIdCriterion.ProcessId)
+	waitEvent.Context().Regs.Gpr[regs.REGISTER_A3] = 0
 }
 
 

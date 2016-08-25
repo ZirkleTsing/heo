@@ -139,6 +139,7 @@ func (memory *PagedMemory) Map(virtualAddress uint64, size uint64) uint64 {
 
 	for pageCount := (memory.GetTag(virtualAddress + size - 1) - tagStart) / pageSize + 1; ; {
 		if tagEnd == 0 {
+			panic("Unimplemented")
 			return 0 //TODO
 			//return uint64(-1)
 		}

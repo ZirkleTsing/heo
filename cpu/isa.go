@@ -734,11 +734,11 @@ func mtc1(context *Context, machInst MachInst) {
 }
 
 func _break(context *Context, machInst MachInst) {
-	//TODO
+	context.Finish()
 }
 
 func systemCall(context *Context, machInst MachInst) {
-	//TODO
+	context.Kernel.SyscallEmulation.DoSystemCall(context.Regs.Gpr[regs.REGISTER_V0], context)
 }
 
 func nop(context *Context, machInst MachInst) {

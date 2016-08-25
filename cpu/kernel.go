@@ -111,11 +111,29 @@ func (kernel *Kernel) Map(contextToMap *Context, predicate func(candidateThreadI
 }
 
 func (kernel *Kernel) ProcessSystemEvents() {
-	//TODO
+	var systemEventsToPreserve []SystemEvent
+
+	for _, e := range kernel.SystemEvents {
+		if (e.Context().State == ContextState_RUNNING || e.Context().State == ContextState_BLOCKED) && !e.NeedProcess() {
+			e.Process()
+		} else {
+			systemEventsToPreserve = append(systemEventsToPreserve, e)
+		}
+	}
+
+	kernel.SystemEvents = systemEventsToPreserve
 }
 
 func (kernel *Kernel) ProcessSignals() {
-	//TODO
+	for _, context := range kernel.Contexts {
+		if context.State == ContextState_RUNNING || context.State == ContextState_BLOCKED {
+			for signal := uint32(1); signal <= MAX_SIGNAL; signal++ {
+				if kernel.MustProcessSignal(context, signal) {
+					kernel.RunSignalHandler(context, signal)
+				}
+			}
+		}
+	}
 }
 
 func (kernel *Kernel) CreatePipe() []int {
@@ -168,7 +186,7 @@ func (kernel *Kernel) RunSignalHandler(context *Context, signal uint32) {
 	context.Regs.Nnpc = context.Regs.Npc + 4
 
 	for context.State == ContextState_RUNNING && context.Regs.Npc != 0xfffffff {
-		//TODO
+		context.DecodeNextStaticInst().Execute(context)
 	}
 
 	context.Regs = oldRegs
