@@ -29,15 +29,9 @@ func NewProcessor(experiment *CPUExperiment) *Processor {
 }
 
 func (processor *Processor) UpdateContextToThreadAssignments() {
-	var ch = make(chan *Context, len(processor.Experiment.Kernel.Contexts))
+	var contextsToReserve []*Context
 
 	for _, context := range processor.Experiment.Kernel.Contexts {
-		ch <- context
-	}
-
-	close(ch)
-
-	for context := range ch {
 		if context.ThreadId != -1 && processor.ContextToThreadMappings[context] == nil {
 			context.State = ContextState_RUNNING
 
@@ -49,15 +43,34 @@ func (processor *Processor) UpdateContextToThreadAssignments() {
 			processor.ContextToThreadMappings[context] = candidateThread
 
 			candidateThread.Context = context
-			panic("Unimplemented")
-			//candidateThread.UpdateFetchNpcAndNnpcFromRegs()
+
+			contextsToReserve = append(contextsToReserve, context)
 		} else if context.State == ContextState_FINISHED {
-			panic("Unimplemented")
-			//var thread = processor.ContextToThreadMappings[context]
-			//if thread.IsLastDecodedDynamicInstCommitted {
-			//	processor.Kill(context)
-			//}
-			//TODO
+			processor.kill(context)
 		}
 	}
+
+	processor.Experiment.Kernel.Contexts = contextsToReserve
+}
+
+func (processor *Processor) kill(context *Context) {
+	if context.State != ContextState_FINISHED {
+		panic("Impossible")
+	}
+
+	for _, c := range processor.Experiment.Kernel.Contexts {
+		if c.Parent == context {
+			processor.kill(c)
+		}
+	}
+
+	if context.Parent == nil {
+		context.Process.CloseProgram()
+	}
+
+	processor.ContextToThreadMappings[context].Context = nil
+
+	context.ThreadId = -1
+
+	processor.Experiment.BlockingEventDispatcher.Dispatch(NewContextKilledEvent(context))
 }

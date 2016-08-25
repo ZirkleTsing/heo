@@ -159,7 +159,7 @@ func (process *Process) CloseProgram() {
 
 func (process *Process) decode(machInst MachInst) *StaticInst {
 	for _, mnemonic := range Mnemonics {
-		if machInst != 0 && mnemonic.Mask == mnemonic.Bits && (mnemonic.ExtraBitField == nil || machInst.ValueOf(mnemonic.ExtraBitField) == mnemonic.ExtraBitFieldValue) {
+		if uint32(machInst) & mnemonic.Mask == mnemonic.Bits && (mnemonic.ExtraBitField == nil || machInst.ValueOf(mnemonic.ExtraBitField) == mnemonic.ExtraBitFieldValue) {
 			return NewStaticInst(mnemonic, machInst)
 		}
 	}
@@ -172,7 +172,7 @@ func (process *Process) predecode(pc uint32) {
 
 	process.pcToMachInsts[pc] = machInst
 
-	if _, ok := process.machInstsToStaticInsts[machInst]; ok {
+	if _, ok := process.machInstsToStaticInsts[machInst]; !ok {
 		var staticInst = process.decode(machInst)
 		process.machInstsToStaticInsts[machInst] = staticInst
 	}
