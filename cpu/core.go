@@ -3,10 +3,10 @@ package cpu
 type Core struct {
 	Processor *Processor
 	Threads   []*Thread
-	Num       uint32
+	Num       int
 }
 
-func NewCore(processor *Processor, num uint32) *Core {
+func NewCore(processor *Processor, num int) *Core {
 	var core = &Core{
 		Processor:processor,
 		Num:num,

@@ -557,49 +557,49 @@ func bnel(context *Context, machInst MachInst) {
 }
 
 func lb(context *Context, machInst MachInst) {
-	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	var temp byte = context.Process.Memory.ReadByteAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = uint32(cpuutil.Sext32(uint32(temp), 8))
 }
 
 func lbu(context *Context, machInst MachInst) {
-	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	var temp byte = context.Process.Memory.ReadByteAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = uint32(temp)
 }
 
 func ldc1(context *Context, machInst MachInst) {
-	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	var temp uint64 = context.Process.Memory.ReadDoubleWordAt(addr)
 	context.Regs.Fpr.SetFloat64(machInst.Ft(), float64(temp))
 }
 
 func lh(context *Context, machInst MachInst) {
-	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	var temp uint16 = context.Process.Memory.ReadHalfWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = uint32(cpuutil.Sext32(uint32(temp), 16))
 }
 
 func lhu(context *Context, machInst MachInst) {
-	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	var temp uint16 = context.Process.Memory.ReadHalfWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = uint32(temp)
 }
 
 func ll(context *Context, machInst MachInst) {
-	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	var temp uint32 = context.Process.Memory.ReadWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = temp
 }
 
 func lw(context *Context, machInst MachInst) {
-	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	var temp uint32 = context.Process.Memory.ReadWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = temp
 }
 
 func lwc1(context *Context, machInst MachInst) {
-	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	var temp uint32 = context.Process.Memory.ReadWordAt(addr)
 	context.Regs.Fpr.SetFloat32(machInst.Ft(), float32(temp))
 }
@@ -607,13 +607,13 @@ func lwc1(context *Context, machInst MachInst) {
 func lwl(context *Context, machInst MachInst) {
 	var dst = make([]byte, 4)
 
-	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 
-	var size = uint64(4 - (addr & 3))
+	var size = 4 - (addr & 3)
 
 	var src = context.Process.Memory.ReadBlockAt(addr, size)
 
-	for i := uint64(0); i < size; i++ {
+	for i := uint32(0); i < size; i++ {
 		dst[3 - i] = src[i]
 	}
 
@@ -623,13 +623,13 @@ func lwl(context *Context, machInst MachInst) {
 func lwr(context *Context, machInst MachInst) {
 	var dst = make([]byte, 4)
 
-	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 
-	var size = uint64(1 + (addr & 3))
+	var size = 1 + (addr & 3)
 
 	var src = context.Process.Memory.ReadBlockAt(addr - size + 1, size)
 
-	for i := uint64(0); i < size; i++ {
+	for i := uint32(0); i < size; i++ {
 		dst[size - i - 1] = src[i]
 	}
 
@@ -638,13 +638,13 @@ func lwr(context *Context, machInst MachInst) {
 
 func sb(context *Context, machInst MachInst) {
 	var temp byte = byte(context.Regs.Gpr[machInst.Rt()])
-	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	context.Process.Memory.WriteByteAt(addr, temp)
 }
 
 func sc(context *Context, machInst MachInst) {
 	var temp = context.Regs.Gpr[machInst.Rt()]
-	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	context.Process.Memory.WriteWordAt(addr, temp)
 	context.Regs.Gpr[machInst.Rt()] = 1
 }
@@ -652,40 +652,40 @@ func sc(context *Context, machInst MachInst) {
 func sdc1(context *Context, machInst MachInst) {
 	var dbl = context.Regs.Fpr.Float64(machInst.Ft())
 	var temp = uint64(dbl)
-	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	context.Process.Memory.WriteDoubleWordAt(addr, temp)
 }
 
 func sh(context *Context, machInst MachInst) {
 	var temp = uint16(context.Regs.Gpr[machInst.Rt()])
-	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	context.Process.Memory.WriteHalfWordAt(addr, temp)
 }
 
 func sw(context *Context, machInst MachInst) {
 	var temp = context.Regs.Gpr[machInst.Rt()]
-	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	context.Process.Memory.WriteWordAt(addr, temp)
 }
 
 func swc1(context *Context, machInst MachInst) {
 	var f = context.Regs.Fpr.Float32(machInst.Ft())
 	var temp = uint32(f)
-	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	context.Process.Memory.WriteWordAt(addr, temp)
 }
 
 func swl(context *Context, machInst MachInst) {
 	var dst = make([]byte, 4)
 
-	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 
-	var size = uint64(4 - (addr & 3))
+	var size = 4 - (addr & 3)
 
 	var src = make([]byte, 4)
 	context.Process.Memory.ByteOrder.PutUint32(src, context.Regs.Gpr[machInst.Rt()])
 
-	for i := uint64(0); i < size; i++ {
+	for i := uint32(0); i < size; i++ {
 		dst[i] = src[3 - i]
 	}
 
@@ -695,14 +695,14 @@ func swl(context *Context, machInst MachInst) {
 func swr(context *Context, machInst MachInst) {
 	var dst = make([]byte, 4)
 
-	var addr = uint64(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 
-	var size = uint64(1 + (addr & 3))
+	var size = 1 + (addr & 3)
 
 	var src = make([]byte, 4)
 	context.Process.Memory.ByteOrder.PutUint32(src, context.Regs.Gpr[machInst.Rt()])
 
-	for i := uint64(0); i < size; i++ {
+	for i := uint32(0); i < size; i++ {
 		dst[i] = src[size - i - 1]
 	}
 

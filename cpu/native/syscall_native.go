@@ -47,7 +47,7 @@ func Close(fd int) int {
 	return 0 //TODO
 }
 
-func Clock(numCycles uint64) uint64 {
+func Clock(numCycles int) int {
 	return CLOCKS_PER_SEC * numCycles / CPU_FREQUENCY
 }
 

@@ -54,15 +54,14 @@ func NewElfFile(fileName string) *ElfFile {
 	}
 
 	for i := uint16(0); i < elfFile.Header.SectionHeaderTableEntryCount; i++ {
-		elfFile.Data.ReadPosition = uint64(
-			elfFile.Header.SectionHeaderTableOffset +
-				uint32(i * elfFile.Header.SectionHeaderTableEntrySize))
+		elfFile.Data.ReadPosition = elfFile.Header.SectionHeaderTableOffset +
+			uint32(i * elfFile.Header.SectionHeaderTableEntrySize)
 		elfFile.SectionHeaders = append(elfFile.SectionHeaders, NewElfSectionHeader(elfFile))
 	}
 
 	elfFile.StringTable = NewElfStringTable(elfFile, elfFile.SectionHeaders[elfFile.Header.SectionHeaderStringTableIndex])
 
-	elfFile.Data.ReadPosition = uint64(elfFile.Header.ProgramHeaderTableOffset)
+	elfFile.Data.ReadPosition = elfFile.Header.ProgramHeaderTableOffset
 
 	for i := uint16(0); i < elfFile.Header.ProgramHeaderTableEntryCount; i++ {
 		elfFile.ProgramHeaders = append(elfFile.ProgramHeaders, NewElfProgramHeader(elfFile))
@@ -91,7 +90,7 @@ func (elfFile *ElfFile) loadSymbols() {
 }
 
 func (elfFile *ElfFile) loadSymbolsBySection(elfSectionHeader *ElfSectionHeader) {
-	var numSymbols uint32 = 1
+	var numSymbols = uint32(1)
 
 	if elfSectionHeader.EntrySize != 0 {
 		numSymbols = elfSectionHeader.Size / elfSectionHeader.EntrySize
@@ -100,7 +99,7 @@ func (elfFile *ElfFile) loadSymbolsBySection(elfSectionHeader *ElfSectionHeader)
 	var offset = elfSectionHeader.Offset
 
 	for i := uint32(0); i < numSymbols; i++ {
-		elfFile.Data.ReadPosition = uint64(offset)
+		elfFile.Data.ReadPosition = offset
 
 		var symbol = NewSymbol(elfFile, elfSectionHeader)
 
@@ -331,7 +330,7 @@ func NewElfSectionHeader(elfFile *ElfFile) *ElfSectionHeader {
 }
 
 func (elfSectionHeader *ElfSectionHeader) ReadContent(elfFile *ElfFile) []byte {
-	return elfFile.Data.ReadBlockAt(uint64(elfSectionHeader.Offset), uint64(elfSectionHeader.Size))
+	return elfFile.Data.ReadBlockAt(elfSectionHeader.Offset, elfSectionHeader.Size)
 }
 
 func (elfSectionHeader *ElfSectionHeader) GetName(elfFile *ElfFile) string {
@@ -370,7 +369,7 @@ func NewElfProgramHeader(elfFile *ElfFile) *ElfProgramHeader {
 }
 
 func (elfProgramHeader *ElfProgramHeader) ReadContent(elfFile *ElfFile) []byte {
-	return elfFile.Data.ReadBlockAt(uint64(elfProgramHeader.Offset), uint64(elfProgramHeader.SizeInFile))
+	return elfFile.Data.ReadBlockAt(elfProgramHeader.Offset, elfProgramHeader.SizeInFile)
 }
 
 type ElfStringTable struct {

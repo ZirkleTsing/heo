@@ -15,12 +15,12 @@ type Kernel struct {
 	Processes           []*Process
 	SyscallEmulation    *SyscallEmulation
 
-	CurrentCycle        uint64
-	CurrentPid          uint32
-	CurrentProcessId    uint32
-	CurrentMemoryId     uint32
-	CurrentMemoryPageId uint32
-	CurrentContextId    uint32
+	CurrentCycle        int
+	CurrentPid          int
+	CurrentProcessId    int
+	CurrentMemoryId     int
+	CurrentMemoryPageId int
+	CurrentContextId    int
 	CurrentFd           int
 }
 
@@ -42,7 +42,7 @@ func NewKernel(experiment *CPUExperiment) *Kernel {
 	for _, contextMapping := range experiment.Config.ContextMappings {
 		var context = LoadContext(kernel, contextMapping)
 
-		if !kernel.Map(context, func(candidateThreadId uint32) bool {
+		if !kernel.Map(context, func(candidateThreadId int) bool {
 			return candidateThreadId == contextMapping.ThreadId
 		}) {
 			panic("Impossible")
@@ -54,7 +54,7 @@ func NewKernel(experiment *CPUExperiment) *Kernel {
 	return kernel
 }
 
-func (kernel *Kernel) GetProcessFromId(id uint32) *Process {
+func (kernel *Kernel) GetProcessFromId(id int) *Process {
 	for _, process := range kernel.Processes {
 		if process.Id == id {
 			return process
@@ -64,7 +64,7 @@ func (kernel *Kernel) GetProcessFromId(id uint32) *Process {
 	return nil
 }
 
-func (kernel *Kernel) GetContextFromId(id uint32) *Context {
+func (kernel *Kernel) GetContextFromId(id int) *Context {
 	for _, context := range kernel.Contexts {
 		if context.Id == id {
 			return context
@@ -74,7 +74,7 @@ func (kernel *Kernel) GetContextFromId(id uint32) *Context {
 	return nil
 }
 
-func (kernel *Kernel) GetContextFromProcessId(processId uint32) *Context {
+func (kernel *Kernel) GetContextFromProcessId(processId int) *Context {
 	for _, context := range kernel.Contexts {
 		if context.ProcessId == processId {
 			return context
@@ -84,26 +84,26 @@ func (kernel *Kernel) GetContextFromProcessId(processId uint32) *Context {
 	return nil
 }
 
-func (kernel *Kernel) Map(contextToMap *Context, predicate func(candidateThreadId uint32) bool) bool {
+func (kernel *Kernel) Map(contextToMap *Context, predicate func(candidateThreadId int) bool) bool {
 	if contextToMap.ThreadId != -1 {
 		panic("Impossible")
 	}
 
-	for coreNum := uint32(0); coreNum < kernel.Experiment.Config.NumCores; coreNum++ {
-		for threadNum := uint32(0); threadNum < kernel.Experiment.Config.NumThreadsPerCore; threadNum++ {
+	for coreNum := 0; coreNum < kernel.Experiment.Config.NumCores; coreNum++ {
+		for threadNum := 0; threadNum < kernel.Experiment.Config.NumThreadsPerCore; threadNum++ {
 			var threadId = coreNum * kernel.Experiment.Config.NumThreadsPerCore + threadNum
 
 			var hasMapped bool
 
 			for _, context := range kernel.Contexts {
-				if uint32(context.ThreadId) == threadId {
+				if context.ThreadId == threadId {
 					hasMapped = true
 					break
 				}
 			}
 
 			if !hasMapped && predicate(threadId) {
-				contextToMap.ThreadId = int32(threadId)
+				contextToMap.ThreadId = threadId
 				return true
 			}
 		}

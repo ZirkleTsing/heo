@@ -2,11 +2,11 @@ package mem
 
 type CircularByteBuffer struct {
 	Data          *SimpleMemory
-	ReadPosition  uint64
-	WritePosition uint64
+	ReadPosition  uint32
+	WritePosition uint32
 }
 
-func NewCircularByteBuffer(capacity uint64) *CircularByteBuffer {
+func NewCircularByteBuffer(capacity uint32) *CircularByteBuffer {
 	var circularByteBuffer = &CircularByteBuffer{
 		Data:NewSimpleMemory(true, make([]byte, capacity)),
 	}
@@ -19,10 +19,10 @@ func (circularByteBuffer *CircularByteBuffer) Reset() {
 	circularByteBuffer.WritePosition = 0
 }
 
-func (circularByteBuffer *CircularByteBuffer) Read(dest *[]byte, count uint64) (uint64) {
-	var offset = uint64(0)
+func (circularByteBuffer *CircularByteBuffer) Read(dest *[]byte, count uint32) (uint32) {
+	var offset = uint32(0)
 
-	if count >= uint64(len(circularByteBuffer.Data.Data)) {
+	if count >= uint32(len(circularByteBuffer.Data.Data)) {
 		panic("Requested read is greater than the buffer")
 	}
 
@@ -32,7 +32,7 @@ func (circularByteBuffer *CircularByteBuffer) Read(dest *[]byte, count uint64) (
 
 	circularByteBuffer.Data.ReadPosition = circularByteBuffer.ReadPosition
 	if circularByteBuffer.WritePosition < circularByteBuffer.ReadPosition {
-		var remainder = uint64(len(circularByteBuffer.Data.Data)) - circularByteBuffer.Data.ReadPosition
+		var remainder = uint32(len(circularByteBuffer.Data.Data)) - circularByteBuffer.Data.ReadPosition
 		if remainder < count {
 			copy((*dest)[offset:remainder], circularByteBuffer.Data.ReadBlock(remainder))
 
@@ -68,24 +68,24 @@ func (circularByteBuffer *CircularByteBuffer) Read(dest *[]byte, count uint64) (
 	}
 }
 
-func (circularByteBuffer *CircularByteBuffer) Write(src *[]byte, count uint64) bool {
-	var offset = uint64(0)
+func (circularByteBuffer *CircularByteBuffer) Write(src *[]byte, count uint32) bool {
+	var offset = uint32(0)
 
-	if count >= uint64(len(circularByteBuffer.Data.Data)) {
+	if count >= uint32(len(circularByteBuffer.Data.Data)) {
 		panic("Requested write is greater than the buffer")
 	}
 
 	circularByteBuffer.Data.WritePosition = circularByteBuffer.WritePosition
 
 	if (circularByteBuffer.ReadPosition <= circularByteBuffer.WritePosition &&
-		circularByteBuffer.WritePosition + count < uint64(len(circularByteBuffer.Data.Data))) ||
+		circularByteBuffer.WritePosition + count < uint32(len(circularByteBuffer.Data.Data))) ||
 		(circularByteBuffer.WritePosition < circularByteBuffer.ReadPosition &&
 			count < circularByteBuffer.ReadPosition - circularByteBuffer.WritePosition) {
 		circularByteBuffer.Data.WriteBlock(count, (*src)[offset:count])
 		circularByteBuffer.WritePosition += count
 		return true
 	} else {
-		var remainder = uint64(len(circularByteBuffer.Data.Data)) - circularByteBuffer.Data.ReadPosition
+		var remainder = uint32(len(circularByteBuffer.Data.Data)) - circularByteBuffer.Data.ReadPosition
 
 		if circularByteBuffer.ReadPosition < circularByteBuffer.WritePosition &&
 			count > circularByteBuffer.ReadPosition + remainder {
@@ -121,8 +121,8 @@ func (circularByteBuffer *CircularByteBuffer) IsEmpty() bool {
 }
 
 func (circularByteBuffer *CircularByteBuffer) IsFull() bool {
-	return circularByteBuffer.WritePosition + 1 <= uint64(len(circularByteBuffer.Data.Data)) &&
+	return circularByteBuffer.WritePosition + 1 <= uint32(len(circularByteBuffer.Data.Data)) &&
 		circularByteBuffer.WritePosition + 1 == circularByteBuffer.ReadPosition ||
-		circularByteBuffer.WritePosition == uint64(len(circularByteBuffer.Data.Data)) - 1 &&
+		circularByteBuffer.WritePosition == uint32(len(circularByteBuffer.Data.Data)) - 1 &&
 			circularByteBuffer.ReadPosition == 0
 }

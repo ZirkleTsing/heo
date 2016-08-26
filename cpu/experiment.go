@@ -63,5 +63,5 @@ func (experiment *CPUExperiment) Run(skipIfStatsFileExists bool) {
 
 func (experiment *CPUExperiment) canAdvanceOneCycle() bool {
 	return experiment.Config.MaxDynamicInsts == -1 ||
-		experiment.Processor.Cores[0].Threads[0].NumDynamicInsts < uint64(experiment.Config.MaxDynamicInsts)
+		experiment.Processor.Cores[0].Threads[0].NumDynamicInsts < experiment.Config.MaxDynamicInsts
 }

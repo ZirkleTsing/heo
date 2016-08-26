@@ -26,7 +26,7 @@ func (utsname *Utsname) GetBytes(littleEndian bool) []byte {
 	var machine_buf = []byte(utsname.Machine)
 	var domainname_buf = []byte(utsname.Domainname)
 
-	var _sysname_size = uint64(64 + 1)
+	var _sysname_size = uint32(64 + 1)
 	var size_of = _sysname_size * 6
 
 	var buf = make([]byte, size_of)

@@ -15,18 +15,18 @@ const (
 type ContextState uint32
 
 type Context struct {
-	Id               uint32
+	Id               int
 	State            ContextState
 	SignalMasks      *SignalMasks
 	SignalFinish     uint32
 	Regs             *regs.ArchitecturalRegisterFile
 	Kernel           *Kernel
-	ThreadId         int32
-	UserId           uint32
-	EffectiveUserId  uint32
-	GroupId          uint32
-	EffectiveGroupId uint32
-	ProcessId        uint32
+	ThreadId         int
+	UserId           int
+	EffectiveUserId  int
+	GroupId          int
+	EffectiveGroupId int
+	ProcessId        int
 	Process          *Process
 	Parent           *Context
 }
@@ -39,10 +39,10 @@ func NewContext(kernel *Kernel, process *Process, parent *Context, regs *regs.Ar
 		SignalFinish:signalFinish,
 		Id: kernel.CurrentContextId,
 		ThreadId:-1,
-		UserId:uint32(native.Getuid()),
-		EffectiveUserId:uint32(native.Geteuid()),
-		GroupId:uint32(native.Getgid()),
-		EffectiveGroupId:uint32(native.Getegid()),
+		UserId:native.Getuid(),
+		EffectiveUserId:native.Geteuid(),
+		GroupId:native.Getgid(),
+		EffectiveGroupId:native.Getegid(),
 		ProcessId:kernel.CurrentPid,
 		SignalMasks:NewSignalMasks(),
 		State:ContextState_IDLE,
@@ -119,7 +119,7 @@ func (context *Context) Finish() {
 	}
 }
 
-func (context *Context) GetParentProcessId() uint32 {
+func (context *Context) GetParentProcessId() int {
 	if context.Parent == nil {
 		return 1
 	} else {
@@ -128,12 +128,12 @@ func (context *Context) GetParentProcessId() uint32 {
 }
 
 type ContextMapping struct {
-	ThreadId   uint32
+	ThreadId   int
 	Executable string
 	Arguments  string
 }
 
-func NewContextMapping(threadId uint32, executable string, arguments string) *ContextMapping {
+func NewContextMapping(threadId int, executable string, arguments string) *ContextMapping {
 	var contextMapping = &ContextMapping{
 		ThreadId:threadId,
 		Executable:executable,

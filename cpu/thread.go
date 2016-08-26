@@ -4,19 +4,19 @@ import "reflect"
 
 type Thread struct {
 	Core                  *Core
-	Num                   uint32
+	Num                   int
 	Context               *Context
-	NumDynamicInsts       uint64
-	ExecutedMnemonicNames map[MnemonicName]uint64
-	ExecutedSyscallNames  map[string]uint64
+	NumDynamicInsts       int
+	ExecutedMnemonicNames map[MnemonicName]int
+	ExecutedSyscallNames  map[string]int
 }
 
-func NewThread(core *Core, num uint32) *Thread {
+func NewThread(core *Core, num int) *Thread {
 	var thread = &Thread{
 		Core:core,
 		Num:num,
-		ExecutedMnemonicNames:make(map[MnemonicName]uint64),
-		ExecutedSyscallNames:make(map[string]uint64),
+		ExecutedMnemonicNames:make(map[MnemonicName]int),
+		ExecutedSyscallNames:make(map[string]int),
 	}
 
 	core.Processor.Experiment.BlockingEventDispatcher.AddListener(reflect.TypeOf((*StaticInstExecutedEvent)(nil)), func(event interface{}) {

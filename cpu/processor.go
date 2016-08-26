@@ -12,10 +12,10 @@ func NewProcessor(experiment *CPUExperiment) *Processor {
 		ContextToThreadMappings:make(map[*Context]*Thread),
 	}
 
-	for i := uint32(0); i < experiment.Config.NumCores; i++ {
+	for i := 0; i < experiment.Config.NumCores; i++ {
 		var core = NewCore(processor, i)
 
-		for j := uint32(0); j < experiment.Config.NumThreadsPerCore; j++ {
+		for j := 0; j < experiment.Config.NumThreadsPerCore; j++ {
 			var thread = NewThread(core, j)
 			core.Threads = append(core.Threads, thread)
 		}
@@ -35,8 +35,8 @@ func (processor *Processor) UpdateContextToThreadAssignments() {
 		if context.ThreadId != -1 && processor.ContextToThreadMappings[context] == nil {
 			context.State = ContextState_RUNNING
 
-			var coreNum = uint32(context.ThreadId) / processor.Experiment.Config.NumThreadsPerCore
-			var threadNum = uint32(context.ThreadId) % processor.Experiment.Config.NumThreadsPerCore
+			var coreNum = context.ThreadId / processor.Experiment.Config.NumThreadsPerCore
+			var threadNum = context.ThreadId % processor.Experiment.Config.NumThreadsPerCore
 
 			var candidateThread = processor.Cores[coreNum].Threads[threadNum]
 

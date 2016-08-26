@@ -20,11 +20,11 @@ const (
 )
 
 type Process struct {
-	Id                     uint32
+	Id                     int
 	ContextMapping         *ContextMapping
 	Environments           []string
-	StdInFileDescriptor    uint32
-	StdOutFileDescriptor   uint32
+	StdInFileDescriptor    int
+	StdOutFileDescriptor   int
 	StackBase              uint32
 	StackSize              uint32
 	TextSize               uint32
@@ -74,9 +74,9 @@ func (process *Process) LoadProgram(kernel *Kernel, contextMapping *ContextMappi
 		if sectionHeader.HeaderType == elf.SHT_PROGBITS || sectionHeader.HeaderType == elf.SHT_NOBITS {
 			if sectionHeader.Size > 0 && (sectionHeader.Flags & uint32(elf.SHF_ALLOC)) != 0 {
 				if sectionHeader.HeaderType == elf.SHT_NOBITS {
-					process.Memory.Zero(uint64(sectionHeader.Address), uint64(sectionHeader.Size))
+					process.Memory.Zero(sectionHeader.Address, sectionHeader.Size)
 				} else {
-					process.Memory.WriteBlockAt(uint64(sectionHeader.Address), uint64(sectionHeader.Size), sectionHeader.ReadContent(elfFile))
+					process.Memory.WriteBlockAt(sectionHeader.Address, sectionHeader.Size, sectionHeader.ReadContent(elfFile))
 
 					if sectionHeader.Flags & uint32(elf.SHF_EXECINSTR) != 0 {
 						for i := uint32(0); i < sectionHeader.Size; i += 4 {
@@ -104,10 +104,10 @@ func (process *Process) LoadProgram(kernel *Kernel, contextMapping *ContextMappi
 	process.StackSize = MAX_ENVIRON
 	process.EnvironmentBase = STACK_BASE - MAX_ENVIRON
 
-	process.Memory.Zero(uint64(process.StackBase - process.StackSize), uint64(process.StackSize))
+	process.Memory.Zero(process.StackBase - process.StackSize, process.StackSize)
 
 	var stackPointer = process.EnvironmentBase
-	process.Memory.WriteWordAt(uint64(stackPointer), uint32(len(cmdArgs)))
+	process.Memory.WriteWordAt(stackPointer, uint32(len(cmdArgs)))
 	stackPointer += 4
 
 	var argAddr = stackPointer
@@ -117,27 +117,27 @@ func (process *Process) LoadProgram(kernel *Kernel, contextMapping *ContextMappi
 	stackPointer += (uint32(len(process.Environments)) + 1) * 4
 
 	for i := uint32(0); i < uint32(len(cmdArgs)); i++ {
-		process.Memory.WriteWordAt(uint64(argAddr + i * 4), stackPointer)
-		process.Memory.WriteStringAt(uint64(stackPointer), cmdArgs[i])
+		process.Memory.WriteWordAt(argAddr + i * 4, stackPointer)
+		process.Memory.WriteStringAt(stackPointer, cmdArgs[i])
 		stackPointer += uint32(len([]byte(cmdArgs[i])))
 	}
 
-	process.Memory.WriteWordAt(uint64(argAddr + uint32(len(cmdArgs)) * 4), 0)
+	process.Memory.WriteWordAt(argAddr + uint32(len(cmdArgs)) * 4, 0)
 
 	for i := uint32(0); i < uint32(len(process.Environments)); i++ {
-		process.Memory.WriteWordAt(uint64(environmentAddr + i * 4), stackPointer)
-		process.Memory.WriteStringAt(uint64(stackPointer), process.Environments[i])
+		process.Memory.WriteWordAt(environmentAddr + i * 4, stackPointer)
+		process.Memory.WriteStringAt(stackPointer, process.Environments[i])
 		stackPointer += uint32(len([]byte(process.Environments[i])))
 	}
 
-	process.Memory.WriteWordAt(uint64(environmentAddr + uint32(len(process.Environments)) * 4), 0)
+	process.Memory.WriteWordAt(environmentAddr + uint32(len(process.Environments)) * 4, 0)
 
 	if stackPointer > process.StackBase {
 		panic("'environ' overflow, increment MAX_ENVIRON")
 	}
 }
 
-func (process *Process) TranslateFileDescriptor(fileDescriptor uint32) uint32 {
+func (process *Process) TranslateFileDescriptor(fileDescriptor int) int {
 	if fileDescriptor == 1 || fileDescriptor == 2 {
 		return process.StdOutFileDescriptor
 	} else if fileDescriptor == 0 {
@@ -168,7 +168,7 @@ func (process *Process) decode(machInst MachInst) *StaticInst {
 }
 
 func (process *Process) predecode(pc uint32) {
-	var machInst = MachInst(process.Memory.ReadWordAt(uint64(pc)))
+	var machInst = MachInst(process.Memory.ReadWordAt(pc))
 
 	process.pcToMachInsts[pc] = machInst
 

@@ -12,7 +12,7 @@ type SystemEventCriterion interface {
 }
 
 type TimeCriterion struct {
-	When uint64
+	When int
 }
 
 func NewTimeCriterion() *TimeCriterion {
@@ -47,11 +47,11 @@ func (signalCriterion *SignalCriterion) NeedProcess(context *Context) bool {
 }
 
 type WaitForProcessIdCriterion struct {
-	ProcessId        int32
+	ProcessId        int
 	HasProcessKilled bool
 }
 
-func NewWaitForProcessIdCriterion(context *Context, processId int32) *WaitForProcessIdCriterion {
+func NewWaitForProcessIdCriterion(context *Context, processId int) *WaitForProcessIdCriterion {
 	var waitForProcessIdCriterion = &WaitForProcessIdCriterion{
 		ProcessId:processId,
 	}
@@ -65,14 +65,14 @@ func NewWaitForProcessIdCriterion(context *Context, processId int32) *WaitForPro
 
 func (waitForProcessIdCriterion *WaitForProcessIdCriterion) NeedProcess(context *Context) bool {
 	return waitForProcessIdCriterion.ProcessId == -1 && waitForProcessIdCriterion.HasProcessKilled ||
-		waitForProcessIdCriterion.ProcessId > 0 && context.Kernel.GetContextFromProcessId(uint32(waitForProcessIdCriterion.ProcessId)) == nil
+		waitForProcessIdCriterion.ProcessId > 0 && context.Kernel.GetContextFromProcessId(waitForProcessIdCriterion.ProcessId) == nil
 }
 
 type WaitForFileDescriptorCriterion struct {
 	Buffer  *mem.CircularByteBuffer
-	Address uint64
-	Size    uint64
-	Pufds   uint64
+	Address uint32
+	Size    uint32
+	Pufds   uint32
 }
 
 func NewWaitForFileDescriptorCriterion() *WaitForFileDescriptorCriterion {
@@ -181,7 +181,7 @@ func (readEvent *ReadEvent) Process() {
 
 	var buf = make([]byte, readEvent.WaitForFileDescriptorCriterion.Size)
 
-	var numRead = readEvent.WaitForFileDescriptorCriterion.Buffer.Read(&buf, uint64(len(buf)))
+	var numRead = readEvent.WaitForFileDescriptorCriterion.Buffer.Read(&buf, uint32(len(buf)))
 
 	readEvent.Context().Regs.Gpr[regs.REGISTER_V0] = uint32(numRead)
 	readEvent.Context().Regs.Gpr[regs.REGISTER_A3] = 0
@@ -243,10 +243,10 @@ type WaitEvent struct {
 	SignalCriterion           *SignalCriterion
 }
 
-func NewWaitEvent(context *Context, processId uint32) *WaitEvent {
+func NewWaitEvent(context *Context, processId int) *WaitEvent {
 	var waitEvent = &WaitEvent{
 		BaseSystemEvent: NewBaseSystemEvent(context, SystemEventType_WAIT),
-		WaitForProcessIdCriterion: NewWaitForProcessIdCriterion(context, int32(processId)),
+		WaitForProcessIdCriterion: NewWaitForProcessIdCriterion(context, processId),
 		SignalCriterion: NewSignalCriterion(),
 	}
 

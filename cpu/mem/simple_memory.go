@@ -6,8 +6,8 @@ type SimpleMemory struct {
 	LittleEndian  bool
 	ByteOrder     binary.ByteOrder
 	Data          []byte
-	ReadPosition  uint64
-	WritePosition uint64
+	ReadPosition  uint32
+	WritePosition uint32
 }
 
 func NewSimpleMemory(littleEndian bool, data []byte) *SimpleMemory {
@@ -25,71 +25,71 @@ func NewSimpleMemory(littleEndian bool, data []byte) *SimpleMemory {
 	return memory
 }
 
-func (memory *SimpleMemory) ReadByteAt(virtualAddress uint64) byte {
+func (memory *SimpleMemory) ReadByteAt(virtualAddress uint32) byte {
 	var buffer = make([]byte, 1)
 	memory.access(virtualAddress, 1, &buffer, false)
 	return buffer[0]
 }
 
-func (memory *SimpleMemory) ReadHalfWordAt(virtualAddress uint64) uint16 {
+func (memory *SimpleMemory) ReadHalfWordAt(virtualAddress uint32) uint16 {
 	var buffer = make([]byte, 2)
 	memory.access(virtualAddress, 2, &buffer, false)
 	return memory.ByteOrder.Uint16(buffer)
 }
 
-func (memory *SimpleMemory) ReadWordAt(virtualAddress uint64) uint32 {
+func (memory *SimpleMemory) ReadWordAt(virtualAddress uint32) uint32 {
 	var buffer = make([]byte, 4)
 	memory.access(virtualAddress, 4, &buffer, false)
 	return memory.ByteOrder.Uint32(buffer)
 }
 
-func (memory *SimpleMemory) ReadDoubleWordAt(virtualAddress uint64) uint64 {
+func (memory *SimpleMemory) ReadDoubleWordAt(virtualAddress uint32) uint64 {
 	var buffer = make([]byte, 8)
 	memory.access(virtualAddress, 8, &buffer, false)
 	return memory.ByteOrder.Uint64(buffer)
 }
 
-func (memory *SimpleMemory) ReadBlockAt(virtualAddress uint64, size uint64) []byte {
+func (memory *SimpleMemory) ReadBlockAt(virtualAddress uint32, size uint32) []byte {
 	var buffer = make([]byte, size)
 	memory.access(virtualAddress, size, &buffer, false)
 	return buffer
 }
 
-func (memory *SimpleMemory) ReadStringAt(virtualAddress uint64, size uint64) string {
+func (memory *SimpleMemory) ReadStringAt(virtualAddress uint32, size uint32) string {
 	var data = memory.ReadBlockAt(virtualAddress, size)
 	return string(data)
 }
 
-func (memory *SimpleMemory) WriteByteAt(virtualAddress uint64, data byte) {
+func (memory *SimpleMemory) WriteByteAt(virtualAddress uint32, data byte) {
 	var buffer = make([]byte, 1)
 	buffer[0] = data
 	memory.access(virtualAddress, 1, &buffer, true)
 }
 
-func (memory *SimpleMemory) WriteHalfWordAt(virtualAddress uint64, data uint16) {
+func (memory *SimpleMemory) WriteHalfWordAt(virtualAddress uint32, data uint16) {
 	var buffer = make([]byte, 2)
 	memory.ByteOrder.PutUint16(buffer, data)
 	memory.access(virtualAddress, 2, &buffer, true)
 }
 
-func (memory *SimpleMemory) WriteWordAt(virtualAddress uint64, data uint32) {
+func (memory *SimpleMemory) WriteWordAt(virtualAddress uint32, data uint32) {
 	var buffer = make([]byte, 4)
 	memory.ByteOrder.PutUint32(buffer, data)
 	memory.access(virtualAddress, 4, &buffer, true)
 }
 
-func (memory *SimpleMemory) WriteDoubleWordAt(virtualAddress uint64, data uint64) {
+func (memory *SimpleMemory) WriteDoubleWordAt(virtualAddress uint32, data uint64) {
 	var buffer = make([]byte, 8)
 	memory.ByteOrder.PutUint64(buffer, data)
 	memory.access(virtualAddress, 8, &buffer, true)
 }
 
-func (memory *SimpleMemory) WriteStringAt(virtualAddress uint64, data string) {
+func (memory *SimpleMemory) WriteStringAt(virtualAddress uint32, data string) {
 	var buffer = []byte(data)
-	memory.access(virtualAddress, uint64(len(buffer)), &buffer, true)
+	memory.access(virtualAddress, uint32(len(buffer)), &buffer, true)
 }
 
-func (memory *SimpleMemory) WriteBlockAt(virtualAddress uint64, size uint64, data []byte) {
+func (memory *SimpleMemory) WriteBlockAt(virtualAddress uint32, size uint32, data []byte) {
 	memory.access(virtualAddress, size, &data, true)
 }
 
@@ -117,13 +117,13 @@ func (memory *SimpleMemory) ReadDoubleWord() uint64 {
 	return data
 }
 
-func (memory *SimpleMemory) ReadString(size uint64) string {
+func (memory *SimpleMemory) ReadString(size uint32) string {
 	var data = memory.ReadStringAt(memory.ReadPosition, size)
 	memory.ReadPosition += size
 	return data
 }
 
-func (memory *SimpleMemory) ReadBlock(size uint64) []byte {
+func (memory *SimpleMemory) ReadBlock(size uint32) []byte {
 	var data = memory.ReadBlockAt(memory.ReadPosition, size)
 	memory.ReadPosition += size
 	return data
@@ -151,15 +151,15 @@ func (memory *SimpleMemory) WriteDoubleWord(data uint64) {
 
 func (memory *SimpleMemory) WriteString(data string) {
 	memory.WriteStringAt(memory.WritePosition, data)
-	memory.WritePosition += uint64(len([]byte(data)))
+	memory.WritePosition += uint32(len([]byte(data)))
 }
 
-func (memory *SimpleMemory) WriteBlock(size uint64, data []byte) {
+func (memory *SimpleMemory) WriteBlock(size uint32, data []byte) {
 	memory.WriteBlockAt(memory.WritePosition, size, data)
 	memory.WritePosition += size
 }
 
-func (memory *SimpleMemory) access(virtualAddress uint64, size uint64, buffer *[]byte, write bool) {
+func (memory *SimpleMemory) access(virtualAddress uint32, size uint32, buffer *[]byte, write bool) {
 	if write {
 		copy(memory.Data[virtualAddress:virtualAddress + size], (*buffer)[0:size])
 	} else {

@@ -12,7 +12,7 @@ func TestSimpleMemory(t *testing.T) {
 
 	memory.WriteStringAt(12, "你好 world.")
 
-	fmt.Printf("%s\n", memory.ReadStringAt(12, uint64(len([]byte("Hello world.")))))
+	fmt.Printf("%s\n", memory.ReadStringAt(12, uint32(len([]byte("Hello world.")))))
 
 	memory.WriteWordAt(1, 12)
 
@@ -20,5 +20,5 @@ func TestSimpleMemory(t *testing.T) {
 
 	memory.WriteString("Hello 世界.")
 
-	fmt.Printf("%s\n", memory.ReadString(uint64(len([]byte("Hello 世界.")))))
+	fmt.Printf("%s\n", memory.ReadString(uint32(len([]byte("Hello 世界.")))))
 }

@@ -3,46 +3,46 @@ package mem
 import "math"
 
 type Geometry struct {
-	Size           uint64
+	Size           uint32
 	Associativity  uint32
-	LineSize       uint64
+	LineSize       uint32
 	LineSizeInLog2 uint32
-	NumSets        uint64
+	NumSets        uint32
 	NumSetsInLog2  uint32
-	NumLines       uint64
+	NumLines       uint32
 }
 
-func NewGeometry(size uint64, associativity uint32, lineSize uint64) *Geometry {
+func NewGeometry(size uint32, associativity uint32, lineSize uint32) *Geometry {
 	var geometry = &Geometry{
 		Size:size,
 		Associativity:associativity,
 		LineSize:lineSize,
 		LineSizeInLog2:uint32(math.Log2(float64(lineSize))),
-		NumSets:size / uint64(associativity) / lineSize,
-		NumSetsInLog2:uint32(math.Log2(float64(size / uint64(associativity) / lineSize))),
+		NumSets:size / associativity / lineSize,
+		NumSetsInLog2:uint32(math.Log2(float64(size / uint32(associativity) / lineSize))),
 		NumLines:size / lineSize,
 	}
 
 	return geometry
 }
 
-func (geometry *Geometry) GetDisplacement(address uint64) uint64 {
-	return address & (uint64(geometry.LineSize) - 1)
+func (geometry *Geometry) GetDisplacement(address uint32) uint32 {
+	return address & (geometry.LineSize - 1)
 }
 
-func (geometry *Geometry) GetTag(address uint64) uint64 {
-	return address & ^(uint64(geometry.LineSize) - 1)
+func (geometry *Geometry) GetTag(address uint32) uint32 {
+	return address & ^(geometry.LineSize - 1)
 }
 
-func (geometry *Geometry) GetLineId(address uint64) uint64 {
-	return address >> uint64(geometry.LineSizeInLog2)
+func (geometry *Geometry) GetLineId(address uint32) uint32 {
+	return address >> geometry.LineSizeInLog2
 }
 
-func (geometry *Geometry) GetSet(address uint64) uint64 {
+func (geometry *Geometry) GetSet(address uint32) uint32 {
 	return geometry.GetLineId(address) % geometry.NumSets
 }
 
-func (geometry *Geometry) IsAligned(address uint64) bool {
+func (geometry *Geometry) IsAligned(address uint32) bool {
 	return geometry.GetDisplacement(address) == 0
 }
 
