@@ -208,11 +208,77 @@ var (
 )
 
 var (
+	Nop = NewMnemonic(
+		Mnemonic_NOP,
+		NewDecodeMethod(0x00000000, 0xffffffff),
+		nil,
+		nop)
+
+	Bc1f = NewMnemonic(
+		Mnemonic_BC1F,
+		NewDecodeMethod(0x45000000, 0xffe30000),
+		nil,
+		bc1f)
+
+	Bc1t = NewMnemonic(
+		Mnemonic_BC1T,
+		NewDecodeMethod(0x45010000, 0xffe30000),
+		nil,
+		bc1t)
+
+	Mfc1 = NewMnemonic(
+		Mnemonic_MFC1,
+		NewDecodeMethod(0x44000000, 0xffe007ff),
+		nil,
+		mfc1)
+
+	Mtc1 = NewMnemonic(
+		Mnemonic_MTC1,
+		NewDecodeMethod(0x44800000, 0xffe007ff),
+		nil,
+		mtc1)
+
+	Cfc1 = NewMnemonic(
+		Mnemonic_CFC1,
+		NewDecodeMethod(0x44400000, 0xffe007ff),
+		nil,
+		cfc1)
+
+	Ctc1 = NewMnemonic(
+		Mnemonic_CTC1,
+		NewDecodeMethod(0x44c00000, 0xffe007ff),
+		nil,
+		ctc1)
+
+	AbsS = NewMnemonic(
+		Mnemonic_ABS_S,
+		NewDecodeMethod(0x44000005, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		absS)
+
+	AbsD = NewMnemonic(
+		Mnemonic_ABS_D,
+		NewDecodeMethod(0x44000005, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		absD)
+
 	Add = NewMnemonic(
 		Mnemonic_ADD,
 		NewDecodeMethod(0x00000020, 0xfc0007ff),
 		nil,
 		add)
+
+	AddS = NewMnemonic(
+		Mnemonic_ADD_S,
+		NewDecodeMethod(0x44000000, 0xfc00003f),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		addS)
+
+	AddD = NewMnemonic(
+		Mnemonic_ADD_D,
+		NewDecodeMethod(0x44000000, 0xfc00003f),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		addD)
 
 	Addi = NewMnemonic(
 		Mnemonic_ADDI,
@@ -244,23 +310,239 @@ var (
 		nil,
 		andi)
 
+	B = NewMnemonic(
+		Mnemonic_B,
+		NewDecodeMethod(0x10000000, 0xffff0000),
+		nil,
+		b)
+
+	Bal = NewMnemonic(
+		Mnemonic_BAL,
+		NewDecodeMethod(0x04110000, 0xffff0000),
+		nil,
+		bal)
+
+	Beq = NewMnemonic(
+		Mnemonic_BEQ,
+		NewDecodeMethod(0x10000000, 0xfc000000),
+		nil,
+		beq)
+
+	Bgez = NewMnemonic(
+		Mnemonic_BGEZ,
+		NewDecodeMethod(0x04010000, 0xfc1f0000),
+		nil,
+		bgez)
+
+	Bgezal = NewMnemonic(
+		Mnemonic_BGEZAL,
+		NewDecodeMethod(0x04110000, 0xfc1f0000),
+		nil,
+		bgezal)
+
+	Bgtz = NewMnemonic(
+		Mnemonic_BGTZ,
+		NewDecodeMethod(0x1c000000, 0xfc1f0000),
+		nil,
+		bgtz)
+
+	Blez = NewMnemonic(
+		Mnemonic_BLEZ,
+		NewDecodeMethod(0x18000000, 0xfc1f0000),
+		nil,
+		blez)
+
+	Bltz = NewMnemonic(
+		Mnemonic_BLTZ,
+		NewDecodeMethod(0x04000000, 0xfc1f0000),
+		nil,
+		bltz)
+
+	Bne = NewMnemonic(
+		Mnemonic_BNE,
+		NewDecodeMethod(0x14000000, 0xfc000000),
+		nil,
+		bne)
+
+	Break = NewMnemonic(
+		Mnemonic_BREAK,
+		NewDecodeMethod(0x0000000d, 0xfc00003f),
+		nil,
+		_break)
+
+	CCondD = NewMnemonic(
+		Mnemonic_C_COND_D,
+		NewDecodeMethod(0x44000030, 0xfc0000f0),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		cCondD)
+
+	CCondS = NewMnemonic(
+		Mnemonic_C_COND_S,
+		NewDecodeMethod(0x44000030, 0xfc0000f0),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		cCondS)
+
+	CvtDS = NewMnemonic(
+		Mnemonic_CVT_D_S,
+		NewDecodeMethod(0x44000021, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		cvtDS)
+
+	CvtDW = NewMnemonic(
+		Mnemonic_CVT_D_W,
+		NewDecodeMethod(0x44000021, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_WORD),
+		cvtDW)
+
+	CvtDL = NewMnemonic(
+		Mnemonic_CVT_D_L,
+		NewDecodeMethod(0x44000021, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_LONG),
+		cvtDL)
+
+	CvtSD = NewMnemonic(
+		Mnemonic_CVT_S_D,
+		NewDecodeMethod(0x44000020, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		cvtSD)
+
+	CvtSW = NewMnemonic(
+		Mnemonic_CVT_S_W,
+		NewDecodeMethod(0x44000020, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_WORD),
+		cvtSW)
+
+	CvtSL = NewMnemonic(
+		Mnemonic_CVT_S_L,
+		NewDecodeMethod(0x44000020, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_LONG),
+		cvtSL)
+
+	CvtWS = NewMnemonic(
+		Mnemonic_CVT_W_S,
+		NewDecodeMethod(0x44000024, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		cvtWS)
+
+	CvtWD = NewMnemonic(
+		Mnemonic_CVT_W_D,
+		NewDecodeMethod(0x44000024, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		cvtWD)
+
 	Div = NewMnemonic(
 		Mnemonic_DIV,
 		NewDecodeMethod(0x0000001a, 0xfc00ffff),
 		nil,
 		div)
 
+	DivS = NewMnemonic(
+		Mnemonic_DIV_S,
+		NewDecodeMethod(0x44000003, 0xfc00003f),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		divS)
+
+	DivD = NewMnemonic(
+		Mnemonic_DIV_D,
+		NewDecodeMethod(0x44000003, 0xfc00003f),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		divD)
+
 	Divu = NewMnemonic(
 		Mnemonic_DIVU,
-		NewDecodeMethod(0x0000001a, 0xfc00ffff),
+		NewDecodeMethod(0x0000001b, 0xfc00003f),
 		nil,
 		divu)
+
+	J = NewMnemonic(
+		Mnemonic_J,
+		NewDecodeMethod(0x08000000, 0xfc000000),
+		nil,
+		j)
+
+	Jal = NewMnemonic(
+		Mnemonic_JAL,
+		NewDecodeMethod(0x0c000000, 0xfc000000),
+		nil,
+		jal)
+
+	Jalr = NewMnemonic(
+		Mnemonic_JALR,
+		NewDecodeMethod(0x00000009, 0xfc00003f),
+		nil,
+		jalr)
+
+	Jr = NewMnemonic(
+		Mnemonic_JR,
+		NewDecodeMethod(0x00000008, 0xfc00003f),
+		nil,
+		jr)
+
+	Lb = NewMnemonic(
+		Mnemonic_LB,
+		NewDecodeMethod(0x80000000, 0xfc000000),
+		nil,
+		lb)
+
+	Lbu = NewMnemonic(
+		Mnemonic_LBU,
+		NewDecodeMethod(0x90000000, 0xfc000000),
+		nil,
+		lbu)
+
+	Ldc1 = NewMnemonic(
+		Mnemonic_LDC1,
+		NewDecodeMethod(0xd4000000, 0xfc000000),
+		nil,
+		ldc1)
+
+	Lh = NewMnemonic(
+		Mnemonic_LH,
+		NewDecodeMethod(0x84000000, 0xfc000000),
+		nil,
+		lh)
+
+	Lhu = NewMnemonic(
+		Mnemonic_LHU,
+		NewDecodeMethod(0x94000000, 0xfc000000),
+		nil,
+		lhu)
+
+	Ll = NewMnemonic(
+		Mnemonic_LL,
+		NewDecodeMethod(0xc0000000, 0xfc000000),
+		nil,
+		ll)
 
 	Lui = NewMnemonic(
 		Mnemonic_LUI,
 		NewDecodeMethod(0x3c000000, 0xffe00000),
 		nil,
 		lui)
+
+	Lw = NewMnemonic(
+		Mnemonic_LW,
+		NewDecodeMethod(0x8c000000, 0xfc000000),
+		nil,
+		lw)
+
+	Lwc1 = NewMnemonic(
+		Mnemonic_LWC1,
+		NewDecodeMethod(0xc4000000, 0xfc000000),
+		nil,
+		lwc1)
+
+	Lwl = NewMnemonic(
+		Mnemonic_LWL,
+		NewDecodeMethod(0x88000000, 0xfc000000),
+		nil,
+		lwl)
+
+	Lwr = NewMnemonic(
+		Mnemonic_LWR,
+		NewDecodeMethod(0x98000000, 0xfc000000),
+		nil,
+		lwr)
 
 	Madd = NewMnemonic(
 		Mnemonic_MADD,
@@ -280,257 +562,17 @@ var (
 		nil,
 		mflo)
 
-	Msub = NewMnemonic(
-		Mnemonic_MSUB,
-		NewDecodeMethod(0x70000004, 0xfc00ffff),
-		nil,
-		msub)
-
-	Mthi = NewMnemonic(
-		Mnemonic_MTHI,
-		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
-		nil,
-		mthi)
-
-	Mtlo = NewMnemonic(
-		Mnemonic_MTLO,
-		NewDecodeMethod(0x00000013, 0xfc1fffff),
-		nil,
-		mtlo)
-
-	Mult = NewMnemonic(
-		Mnemonic_MULT,
-		NewDecodeMethod(0x00000018, 0xfc00003f),
-		nil,
-		mult)
-
-	Multu = NewMnemonic(
-		Mnemonic_MULTU,
-		NewDecodeMethod(0x00000019, 0xfc00003f),
-		nil,
-		multu)
-
-	Nor = NewMnemonic(
-		Mnemonic_NOR,
-		NewDecodeMethod(0x00000027, 0xfc00003f),
-		nil,
-		nor)
-
-	Or = NewMnemonic(
-		Mnemonic_OR,
-		NewDecodeMethod(0x00000025, 0xfc0007ff),
-		nil,
-		or)
-
-	Ori = NewMnemonic(
-		Mnemonic_ORI,
-		NewDecodeMethod(0x34000000, 0xfc000000),
-		nil,
-		ori)
-
-	Sll = NewMnemonic(
-		Mnemonic_SLL,
-		NewDecodeMethod(0x00000000, 0xffe0003f),
-		nil,
-		sll)
-
-	Sllv = NewMnemonic(
-		Mnemonic_SLLV,
-		NewDecodeMethod(0x00000004, 0xfc0007ff),
-		nil,
-		sllv)
-
-	Slt = NewMnemonic(
-		Mnemonic_SLT,
-		NewDecodeMethod(0x0000002a, 0xfc00003f),
-		nil,
-		slt)
-
-	Slti = NewMnemonic(
-		Mnemonic_SLTI,
-		NewDecodeMethod(0x28000000, 0xfc000000),
-		nil,
-		slti)
-
-	Sltiu = NewMnemonic(
-		Mnemonic_SLTIU,
-		NewDecodeMethod(0x2c000000, 0xfc000000),
-		nil,
-		sltiu)
-
-	Sltu = NewMnemonic(
-		Mnemonic_SLTU,
-		NewDecodeMethod(0x0000002b, 0xfc0007ff),
-		nil,
-		sltu)
-
-	Sra = NewMnemonic(
-		Mnemonic_SRA,
-		NewDecodeMethod(0x00000003, 0xffe0003f),
-		nil,
-		sra)
-
-	Srav = NewMnemonic(
-		Mnemonic_SRAV,
-		NewDecodeMethod(0x00000007, 0xfc0007ff),
-		nil,
-		srav)
-
-	Srl = NewMnemonic(
-		Mnemonic_SRL,
-		NewDecodeMethod(0x00000002, 0xffe0003f),
-		nil,
-		srl)
-
-	Srlv = NewMnemonic(
-		Mnemonic_SRLV,
-		NewDecodeMethod(0x00000006, 0xfc0007ff),
-		nil,
-		srlv)
-
-	Sub = NewMnemonic(
-		Mnemonic_SUB,
-		NewDecodeMethod(0x0, 0x0), // TODO: missing decoding information
-		nil,
-		sub)
-
-	Subu = NewMnemonic(
-		Mnemonic_SUBU,
-		NewDecodeMethod(0x00000023, 0xfc0007ff),
-		nil,
-		subu)
-
-	Xor = NewMnemonic(
-		Mnemonic_XOR,
-		NewDecodeMethod(0x00000026, 0xfc0007ff),
-		nil,
-		xor)
-
-	Xori = NewMnemonic(
-		Mnemonic_XORI,
-		NewDecodeMethod(0x38000000, 0xfc000000),
-		nil,
-		xori)
-
-	AbsD = NewMnemonic(
-		Mnemonic_ABS_D,
-		NewDecodeMethod(0x44000005, 0xfc1f003f),
-		NewDecodeCondition(FMT, FMT_DOUBLE),
-		absD)
-
-	AbsS = NewMnemonic(
-		Mnemonic_ABS_S,
-		NewDecodeMethod(0x44000005, 0xfc1f003f),
+	MovS = NewMnemonic(
+		Mnemonic_MOV_S,
+		NewDecodeMethod(0x44000006, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_SINGLE),
-		absS)
-
-	AddD = NewMnemonic(
-		Mnemonic_ADD_D,
-		NewDecodeMethod(0x44000000, 0xfc00003f),
-		NewDecodeCondition(FMT, FMT_DOUBLE),
-		addD)
-
-	AddS = NewMnemonic(
-		Mnemonic_ADD_S,
-		NewDecodeMethod(0x44000000, 0xfc00003f),
-		NewDecodeCondition(FMT, FMT_SINGLE),
-		addS)
-
-	CCondD = NewMnemonic(
-		Mnemonic_C_COND_D,
-		NewDecodeMethod(0x44000030, 0xfc0000f0),
-		NewDecodeCondition(FMT, FMT_DOUBLE),
-		cCondD)
-
-	CCondS = NewMnemonic(
-		Mnemonic_C_COND_S,
-		NewDecodeMethod(0x44000030, 0xfc0000f0),
-		NewDecodeCondition(FMT, FMT_SINGLE),
-		cCondS)
-
-	CvtDL = NewMnemonic(
-		Mnemonic_CVT_D_L,
-		NewDecodeMethod(0x44000021, 0xfc1f003f),
-		NewDecodeCondition(FMT, FMT_LONG),
-		cvtDL)
-
-	CvtDS = NewMnemonic(
-		Mnemonic_CVT_D_S,
-		NewDecodeMethod(0x44000021, 0xfc1f003f),
-		NewDecodeCondition(FMT, FMT_SINGLE),
-		cvtDS)
-
-	CvtDW = NewMnemonic(
-		Mnemonic_CVT_D_W,
-		NewDecodeMethod(0x44000021, 0xfc1f003f),
-		NewDecodeCondition(FMT, FMT_WORD),
-		cvtDW)
-
-	CvtLD = NewMnemonic(
-		Mnemonic_CVT_L_D,
-		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
-		nil,
-		cvtLD)
-
-	CvtLS = NewMnemonic(
-		Mnemonic_CVT_L_S,
-		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
-		nil,
-		cvtLS)
-
-	CvtSD = NewMnemonic(
-		Mnemonic_CVT_S_D,
-		NewDecodeMethod(0x44000020, 0xfc1f003f),
-		NewDecodeCondition(FMT, FMT_DOUBLE),
-		cvtSD)
-
-	CvtSL = NewMnemonic(
-		Mnemonic_CVT_S_L,
-		NewDecodeMethod(0x44000020, 0xfc1f003f),
-		NewDecodeCondition(FMT, FMT_LONG),
-		cvtSL)
-
-	CvtSW = NewMnemonic(
-		Mnemonic_CVT_S_W,
-		NewDecodeMethod(0x44000020, 0xfc1f003f),
-		NewDecodeCondition(FMT, FMT_WORD),
-		cvtSW)
-
-	CvtWD = NewMnemonic(
-		Mnemonic_CVT_W_D,
-		NewDecodeMethod(0x44000024, 0xfc1f003f),
-		NewDecodeCondition(FMT, FMT_DOUBLE),
-		cvtWD)
-
-	CvtWS = NewMnemonic(
-		Mnemonic_CVT_W_S,
-		NewDecodeMethod(0x44000024, 0xfc1f003f),
-		NewDecodeCondition(FMT, FMT_SINGLE),
-		cvtWS)
-
-	DivD = NewMnemonic(
-		Mnemonic_DIV_D,
-		NewDecodeMethod(0x44000003, 0xfc00003f),
-		NewDecodeCondition(FMT, FMT_DOUBLE),
-		divD)
-
-	DivS = NewMnemonic(
-		Mnemonic_DIV_S,
-		NewDecodeMethod(0x44000003, 0xfc00003f),
-		NewDecodeCondition(FMT, FMT_SINGLE),
-		divS)
+		movS)
 
 	MovD = NewMnemonic(
 		Mnemonic_MOV_D,
 		NewDecodeMethod(0x44000006, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
 		movD)
-
-	MovS = NewMnemonic(
-		Mnemonic_MOV_S,
-		NewDecodeMethod(0x44000006, 0xfc1f003f),
-		NewDecodeCondition(FMT, FMT_SINGLE),
-		movS)
 
 	Movf = NewMnemonic(
 		Mnemonic_MOVF,
@@ -574,23 +616,23 @@ var (
 		nil,
 		_movz)
 
+	Msub = NewMnemonic(
+		Mnemonic_MSUB,
+		NewDecodeMethod(0x70000004, 0xfc00ffff),
+		nil,
+		msub)
+
+	Mtlo = NewMnemonic(
+		Mnemonic_MTLO,
+		NewDecodeMethod(0x00000013, 0xfc1fffff),
+		nil,
+		mtlo)
+
 	Mul = NewMnemonic(
 		Mnemonic_MUL,
 		NewDecodeMethod(0x70000002, 0xfc0007ff),
 		nil,
 		mul)
-
-	TruncW = NewMnemonic(
-		Mnemonic_TRUNC_W,
-		NewDecodeMethod(0x4400000d, 0xfc1f003f),
-		nil,
-		truncW)
-
-	MulD = NewMnemonic(
-		Mnemonic_MUL_D,
-		NewDecodeMethod(0x44000002, 0xfc00003f),
-		NewDecodeCondition(FMT, FMT_DOUBLE),
-		mulD)
 
 	MulS = NewMnemonic(
 		Mnemonic_MUL_S,
@@ -598,11 +640,23 @@ var (
 		NewDecodeCondition(FMT, FMT_SINGLE),
 		mulS)
 
-	NegD = NewMnemonic(
-		Mnemonic_NEG_D,
-		NewDecodeMethod(0x44000007, 0xfc1f003f),
+	MulD = NewMnemonic(
+		Mnemonic_MUL_D,
+		NewDecodeMethod(0x44000002, 0xfc00003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
-		negD)
+		mulD)
+
+	Mult = NewMnemonic(
+		Mnemonic_MULT,
+		NewDecodeMethod(0x00000018, 0xfc00003f),
+		nil,
+		mult)
+
+	Multu = NewMnemonic(
+		Mnemonic_MULTU,
+		NewDecodeMethod(0x00000019, 0xfc00003f),
+		nil,
+		multu)
 
 	NegS = NewMnemonic(
 		Mnemonic_NEG_S,
@@ -610,245 +664,29 @@ var (
 		NewDecodeCondition(FMT, FMT_SINGLE),
 		negS)
 
-	SqrtD = NewMnemonic(
-		Mnemonic_SQRT_D,
-		NewDecodeMethod(0x44000004, 0xfc1f003f),
+	NegD = NewMnemonic(
+		Mnemonic_NEG_D,
+		NewDecodeMethod(0x44000007, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
-		sqrtD)
+		negD)
 
-	SqrtS = NewMnemonic(
-		Mnemonic_SQRT_S,
-		NewDecodeMethod(0x44000004, 0xfc1f003f),
-		NewDecodeCondition(FMT, FMT_SINGLE),
-		sqrtS)
-
-	SubD = NewMnemonic(
-		Mnemonic_SUB_D,
-		NewDecodeMethod(0x44000001, 0xfc00003f),
-		NewDecodeCondition(FMT, FMT_DOUBLE),
-		subD)
-
-	SubS = NewMnemonic(
-		Mnemonic_SUB_S,
-		NewDecodeMethod(0x44000001, 0xfc00003f),
-		NewDecodeCondition(FMT, FMT_SINGLE),
-		subS)
-
-	J = NewMnemonic(
-		Mnemonic_J,
-		NewDecodeMethod(0x08000000, 0xfc000000),
+	Nor = NewMnemonic(
+		Mnemonic_NOR,
+		NewDecodeMethod(0x00000027, 0xfc00003f),
 		nil,
-		j)
+		nor)
 
-	Jal = NewMnemonic(
-		Mnemonic_JAL,
-		NewDecodeMethod(0x0c000000, 0xfc000000),
+	Or = NewMnemonic(
+		Mnemonic_OR,
+		NewDecodeMethod(0x00000025, 0xfc0007ff),
 		nil,
-		jal)
+		or)
 
-	Jalr = NewMnemonic(
-		Mnemonic_JALR,
-		NewDecodeMethod(0x00000009, 0xfc00003f),
+	Ori = NewMnemonic(
+		Mnemonic_ORI,
+		NewDecodeMethod(0x34000000, 0xfc000000),
 		nil,
-		jalr)
-
-	Jr = NewMnemonic(
-		Mnemonic_JR,
-		NewDecodeMethod(0x00000008, 0xfc00003f),
-		nil,
-		jr)
-
-	B = NewMnemonic(
-		Mnemonic_B,
-		NewDecodeMethod(0x10000000, 0xffff0000),
-		nil,
-		b)
-
-	Bal = NewMnemonic(
-		Mnemonic_BAL,
-		NewDecodeMethod(0x04110000, 0xffff0000),
-		nil,
-		bal)
-
-	Bc1f = NewMnemonic(
-		Mnemonic_BC1F,
-		NewDecodeMethod(0x45000000, 0xffe30000),
-		nil,
-		bc1f)
-
-	Bc1fl = NewMnemonic(
-		Mnemonic_BC1FL,
-		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
-		nil,
-		bc1fl)
-
-	Bc1t = NewMnemonic(
-		Mnemonic_BC1T,
-		NewDecodeMethod(0x45010000, 0xffe30000),
-		nil,
-		bc1t)
-
-	Bc1tl = NewMnemonic(
-		Mnemonic_BC1TL,
-		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
-		nil,
-		bc1tl)
-
-	Beq = NewMnemonic(
-		Mnemonic_BEQ,
-		NewDecodeMethod(0x10000000, 0xfc000000),
-		nil,
-		beq)
-
-	Beql = NewMnemonic(
-		Mnemonic_BEQL,
-		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
-		nil,
-		beql)
-
-	Bgez = NewMnemonic(
-		Mnemonic_BGEZ,
-		NewDecodeMethod(0x04010000, 0xfc1f0000),
-		nil,
-		bgez)
-
-	Bgezal = NewMnemonic(
-		Mnemonic_BGEZAL,
-		NewDecodeMethod(0x04110000, 0xfc1f0000),
-		nil,
-		bgezal)
-
-	Bgezall = NewMnemonic(
-		Mnemonic_BGEZALL,
-		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
-		nil,
-		bgezall)
-
-	Bgezl = NewMnemonic(
-		Mnemonic_BGEZL,
-		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
-		nil,
-		bgezl)
-
-	Bgtz = NewMnemonic(
-		Mnemonic_BGTZ,
-		NewDecodeMethod(0x1c000000, 0xfc1f0000),
-		nil,
-		bgtz)
-
-	Bgtzl = NewMnemonic(
-		Mnemonic_BGTZL,
-		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
-		nil,
-		bgtzl)
-
-	Blez = NewMnemonic(
-		Mnemonic_BLEZ,
-		NewDecodeMethod(0x18000000, 0xfc1f0000),
-		nil,
-		blez)
-
-	Blezl = NewMnemonic(
-		Mnemonic_BLEZL,
-		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
-		nil,
-		blezl)
-
-	Bltz = NewMnemonic(
-		Mnemonic_BLTZ,
-		NewDecodeMethod(0x04000000, 0xfc1f0000),
-		nil,
-		bltz)
-
-	Bltzal = NewMnemonic(
-		Mnemonic_BLTZAL,
-		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
-		nil,
-		bltzal)
-
-	Bltzall = NewMnemonic(
-		Mnemonic_BLTZALL,
-		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
-		nil,
-		bltzall)
-
-	Bltzl = NewMnemonic(
-		Mnemonic_BLTZL,
-		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
-		nil,
-		bltzl)
-
-	Bne = NewMnemonic(
-		Mnemonic_BNE,
-		NewDecodeMethod(0x14000000, 0xfc000000),
-		nil,
-		bne)
-
-	Bnel = NewMnemonic(
-		Mnemonic_BNEL,
-		NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
-		nil,
-		bnel)
-
-	Lb = NewMnemonic(
-		Mnemonic_LB,
-		NewDecodeMethod(0x80000000, 0xfc000000),
-		nil,
-		lb)
-
-	Lbu = NewMnemonic(
-		Mnemonic_LBU,
-		NewDecodeMethod(0x90000000, 0xfc000000),
-		nil,
-		lbu)
-
-	Ldc1 = NewMnemonic(
-		Mnemonic_LDC1,
-		NewDecodeMethod(0xd4000000, 0xfc000000),
-		nil,
-		ldc1)
-
-	Lh = NewMnemonic(
-		Mnemonic_LH,
-		NewDecodeMethod(0x84000000, 0xfc000000),
-		nil,
-		lh)
-
-	Lhu = NewMnemonic(
-		Mnemonic_LHU,
-		NewDecodeMethod(0x94000000, 0xfc000000),
-		nil,
-		lhu)
-
-	Ll = NewMnemonic(
-		Mnemonic_LL,
-		NewDecodeMethod(0xc0000000, 0xfc000000),
-		nil,
-		ll)
-
-	Lw = NewMnemonic(
-		Mnemonic_LW,
-		NewDecodeMethod(0x8c000000, 0xfc000000),
-		nil,
-		lw)
-
-	Lwc1 = NewMnemonic(
-		Mnemonic_LWC1,
-		NewDecodeMethod(0xc4000000, 0xfc000000),
-		nil,
-		lwc1)
-
-	Lwl = NewMnemonic(
-		Mnemonic_LWL,
-		NewDecodeMethod(0x88000000, 0xfc000000),
-		nil,
-		lwl)
-
-	Lwr = NewMnemonic(
-		Mnemonic_LWR,
-		NewDecodeMethod(0x98000000, 0xfc000000),
-		nil,
-		lwr)
+		ori)
 
 	Sb = NewMnemonic(
 		Mnemonic_SB,
@@ -874,6 +712,96 @@ var (
 		nil,
 		sh)
 
+	Sll = NewMnemonic(
+		Mnemonic_SLL,
+		NewDecodeMethod(0x00000000, 0xffe0003f),
+		nil,
+		sll)
+
+	Sllv = NewMnemonic(
+		Mnemonic_SLLV,
+		NewDecodeMethod(0x00000004, 0xfc0007ff),
+		nil,
+		sllv)
+
+	Slt = NewMnemonic(
+		Mnemonic_SLT,
+		NewDecodeMethod(0x0000002a, 0xfc00003f),
+		nil,
+		slt)
+
+	Slti = NewMnemonic(
+		Mnemonic_SLTI,
+		NewDecodeMethod(0x28000000, 0xfc000000),
+		nil,
+		slti)
+
+	Sltiu = NewMnemonic(
+		Mnemonic_SLTIU,
+		NewDecodeMethod(0x2c000000, 0xfc000000),
+		nil,
+		sltiu)
+
+	Sltu = NewMnemonic(
+		Mnemonic_SLTU,
+		NewDecodeMethod(0x0000002b, 0xfc0007ff),
+		nil,
+		sltu)
+
+	SqrtS = NewMnemonic(
+		Mnemonic_SQRT_S,
+		NewDecodeMethod(0x44000004, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		sqrtS)
+
+	SqrtD = NewMnemonic(
+		Mnemonic_SQRT_D,
+		NewDecodeMethod(0x44000004, 0xfc1f003f),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		sqrtD)
+
+	Sra = NewMnemonic(
+		Mnemonic_SRA,
+		NewDecodeMethod(0x00000003, 0xffe0003f),
+		nil,
+		sra)
+
+	Srav = NewMnemonic(
+		Mnemonic_SRAV,
+		NewDecodeMethod(0x00000007, 0xfc0007ff),
+		nil,
+		srav)
+
+	Srl = NewMnemonic(
+		Mnemonic_SRL,
+		NewDecodeMethod(0x00000002, 0xffe0003f),
+		nil,
+		srl)
+
+	Srlv = NewMnemonic(
+		Mnemonic_SRLV,
+		NewDecodeMethod(0x00000006, 0xfc0007ff),
+		nil,
+		srlv)
+
+	SubS = NewMnemonic(
+		Mnemonic_SUB_S,
+		NewDecodeMethod(0x44000001, 0xfc00003f),
+		NewDecodeCondition(FMT, FMT_SINGLE),
+		subS)
+
+	SubD = NewMnemonic(
+		Mnemonic_SUB_D,
+		NewDecodeMethod(0x44000001, 0xfc00003f),
+		NewDecodeCondition(FMT, FMT_DOUBLE),
+		subD)
+
+	Subu = NewMnemonic(
+		Mnemonic_SUBU,
+		NewDecodeMethod(0x00000023, 0xfc0007ff),
+		nil,
+		subu)
+
 	Sw = NewMnemonic(
 		Mnemonic_SW,
 		NewDecodeMethod(0xac000000, 0xfc000000),
@@ -898,51 +826,126 @@ var (
 		nil,
 		swr)
 
-	Cfc1 = NewMnemonic(
-		Mnemonic_CFC1,
-		NewDecodeMethod(0x44400000, 0xffe007ff),
-		nil,
-		cfc1)
-
-	Ctc1 = NewMnemonic(
-		Mnemonic_CTC1,
-		NewDecodeMethod(0x44c00000, 0xffe007ff),
-		nil,
-		ctc1)
-
-	Mfc1 = NewMnemonic(
-		Mnemonic_MFC1,
-		NewDecodeMethod(0x44000000, 0xffe007ff),
-		nil,
-		mfc1)
-
-	Mtc1 = NewMnemonic(
-		Mnemonic_MTC1,
-		NewDecodeMethod(0x44800000, 0xffe007ff),
-		nil,
-		mtc1)
-
-	Break = NewMnemonic(
-		Mnemonic_BREAK,
-		NewDecodeMethod(0x0000000d, 0xfc00003f),
-		nil,
-		_break)
-
 	SystemCall = NewMnemonic(
 		Mnemonic_SYSTEM_CALL,
 		NewDecodeMethod(0x0000000c, 0xfc00003f),
 		nil,
 		systemCall)
 
-	Nop = NewMnemonic(
-		Mnemonic_NOP,
-		NewDecodeMethod(0x00000000, 0xffffffff),
+	TruncW = NewMnemonic(
+		Mnemonic_TRUNC_W,
+		NewDecodeMethod(0x4400000d, 0xfc1f003f),
 		nil,
-		nop)
+		truncW)
 
-	Unknown = NewMnemonic(
-		Mnemonic_UNKNOWN,
-		NewDecodeMethod(0x0, 0x0), //TODO: special support for unknown instruction
+	Xor = NewMnemonic(
+		Mnemonic_XOR,
+		NewDecodeMethod(0x00000026, 0xfc0007ff),
 		nil,
-		unknown)
+		xor)
+
+	Xori = NewMnemonic(
+		Mnemonic_XORI,
+		NewDecodeMethod(0x38000000, 0xfc000000),
+		nil,
+		xori)
+)
+
+var (
+
+	//Mthi = NewMnemonic(
+	//	Mnemonic_MTHI,
+	//	NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+	//	nil,
+	//	mthi)
+
+	//Sub = NewMnemonic(
+	//	Mnemonic_SUB,
+	//	NewDecodeMethod(0x0, 0x0), // TODO: missing decoding information
+	//	nil,
+	//	sub)
+
+	//CvtLD = NewMnemonic(
+	//	Mnemonic_CVT_L_D,
+	//	NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+	//	nil,
+	//	cvtLD)
+
+	//CvtLS = NewMnemonic(
+	//	Mnemonic_CVT_L_S,
+	//	NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+	//	nil,
+	//	cvtLS)
+
+	//Bc1fl = NewMnemonic(
+	//	Mnemonic_BC1FL,
+	//	NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+	//	nil,
+	//	bc1fl)
+
+	//Bc1tl = NewMnemonic(
+	//	Mnemonic_BC1TL,
+	//	NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+	//	nil,
+	//	bc1tl)
+
+	//Beql = NewMnemonic(
+	//	Mnemonic_BEQL,
+	//	NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+	//	nil,
+	//	beql)
+
+	//Bgezall = NewMnemonic(
+	//	Mnemonic_BGEZALL,
+	//	NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+	//	nil,
+	//	bgezall)
+
+	//Bgezl = NewMnemonic(
+	//	Mnemonic_BGEZL,
+	//	NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+	//	nil,
+	//	bgezl)
+
+	//Bgtzl = NewMnemonic(
+	//	Mnemonic_BGTZL,
+	//	NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+	//	nil,
+	//	bgtzl)
+
+	//Blezl = NewMnemonic(
+	//	Mnemonic_BLEZL,
+	//	NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+	//	nil,
+	//	blezl)
+
+	//Bltzal = NewMnemonic(
+	//	Mnemonic_BLTZAL,
+	//	NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+	//	nil,
+	//	bltzal)
+
+	//Bltzall = NewMnemonic(
+	//	Mnemonic_BLTZALL,
+	//	NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+	//	nil,
+	//	bltzall)
+
+	//Bltzl = NewMnemonic(
+	//	Mnemonic_BLTZL,
+	//	NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+	//	nil,
+	//	bltzl)
+
+	//Bnel = NewMnemonic(
+	//	Mnemonic_BNEL,
+	//	NewDecodeMethod(0x0, 0x0), //TODO: missing decoding information
+	//	nil,
+	//	bnel)
+
+	//Unknown = NewMnemonic(
+	//	Mnemonic_UNKNOWN,
+	//	NewDecodeMethod(0x0, 0x0), //TODO: special support for unknown instruction
+	//	nil,
+	//	unknown)
 )

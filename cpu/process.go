@@ -7,6 +7,7 @@ import (
 	"github.com/mcai/acogo/cpu/elf"
 	"math"
 	"github.com/mcai/acogo/cpu/cpuutil"
+	"fmt"
 )
 
 const (
@@ -157,12 +158,12 @@ func (process *Process) CloseProgram() {
 
 func (process *Process) decode(machInst MachInst) *StaticInst {
 	for _, mnemonic := range Mnemonics {
-		if uint32(machInst) & mnemonic.Mask == mnemonic.Bits && (mnemonic.ExtraBitField == nil || machInst.ValueOf(mnemonic.ExtraBitField) == mnemonic.ExtraBitFieldValue) {
+		if (uint32(machInst) & mnemonic.Mask) == mnemonic.Bits && (mnemonic.ExtraBitField == nil || machInst.ValueOf(mnemonic.ExtraBitField) == mnemonic.ExtraBitFieldValue) {
 			return NewStaticInst(mnemonic, machInst)
 		}
 	}
 
-	panic("Impossible")
+	panic(fmt.Sprintf("Cannot decode machInst: 0x%08x", machInst))
 }
 
 func (process *Process) predecode(pc uint32) {
