@@ -5,9 +5,9 @@ import "github.com/mcai/acogo/simutil"
 type CPUConfig struct {
 	OutputDirectory   string
 	ContextMappings   []*ContextMapping
-	MaxDynamicInsts   int
-	NumCores          int
-	NumThreadsPerCore int
+	MaxDynamicInsts   int32
+	NumCores          int32
+	NumThreadsPerCore int32
 }
 
 func NewCPUConfig(outputDirectory string) *CPUConfig {

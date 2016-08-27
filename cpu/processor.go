@@ -12,10 +12,10 @@ func NewProcessor(experiment *CPUExperiment) *Processor {
 		ContextToThreadMappings:make(map[*Context]*Thread),
 	}
 
-	for i := 0; i < experiment.Config.NumCores; i++ {
+	for i := int32(0); i < experiment.Config.NumCores; i++ {
 		var core = NewCore(processor, i)
 
-		for j := 0; j < experiment.Config.NumThreadsPerCore; j++ {
+		for j := int32(0); j < experiment.Config.NumThreadsPerCore; j++ {
 			var thread = NewThread(core, j)
 			core.Threads = append(core.Threads, thread)
 		}

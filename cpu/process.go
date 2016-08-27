@@ -21,11 +21,11 @@ const (
 )
 
 type Process struct {
-	Id                     int
+	Id                     int32
 	ContextMapping         *ContextMapping
 	Environments           []string
-	StdInFileDescriptor    int
-	StdOutFileDescriptor   int
+	StdInFileDescriptor    int32
+	StdOutFileDescriptor   int32
 	StackBase              uint32
 	StackSize              uint32
 	TextSize               uint32
@@ -136,7 +136,7 @@ func (process *Process) LoadProgram(kernel *Kernel, contextMapping *ContextMappi
 	}
 }
 
-func (process *Process) TranslateFileDescriptor(fileDescriptor int) int {
+func (process *Process) TranslateFileDescriptor(fileDescriptor int32) int32 {
 	if fileDescriptor == 1 || fileDescriptor == 2 {
 		return process.StdOutFileDescriptor
 	} else if fileDescriptor == 0 {

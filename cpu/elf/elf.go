@@ -392,7 +392,7 @@ func NewElfStringTable(elfFile *ElfFile, sectionHeader *ElfSectionHeader) *ElfSt
 func (elfStringTable *ElfStringTable) GetString(index uint32) string {
 	var buf bytes.Buffer
 
-	for i := index; string(elfStringTable.Data[i]) != "\x00"; i++ {
+	for i := index; elfStringTable.Data[i] != byte('\x00'); i++ {
 		buf.WriteByte(elfStringTable.Data[i])
 	}
 

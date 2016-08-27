@@ -15,18 +15,18 @@ const (
 type ContextState uint32
 
 type Context struct {
-	Id               int
+	Id               int32
 	State            ContextState
 	SignalMasks      *SignalMasks
 	SignalFinish     uint32
 	Regs             *regs.ArchitecturalRegisterFile
 	Kernel           *Kernel
-	ThreadId         int
-	UserId           int
-	EffectiveUserId  int
-	GroupId          int
-	EffectiveGroupId int
-	ProcessId        int
+	ThreadId         int32
+	UserId           int32
+	EffectiveUserId  int32
+	GroupId          int32
+	EffectiveGroupId int32
+	ProcessId        int32
 	Process          *Process
 	Parent           *Context
 }
@@ -119,7 +119,7 @@ func (context *Context) Finish() {
 	}
 }
 
-func (context *Context) GetParentProcessId() int {
+func (context *Context) GetParentProcessId() int32 {
 	if context.Parent == nil {
 		return 1
 	} else {
@@ -128,12 +128,12 @@ func (context *Context) GetParentProcessId() int {
 }
 
 type ContextMapping struct {
-	ThreadId   int
+	ThreadId   int32
 	Executable string
 	Arguments  string
 }
 
-func NewContextMapping(threadId int, executable string, arguments string) *ContextMapping {
+func NewContextMapping(threadId int32, executable string, arguments string) *ContextMapping {
 	var contextMapping = &ContextMapping{
 		ThreadId:threadId,
 		Executable:executable,

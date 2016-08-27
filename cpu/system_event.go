@@ -12,7 +12,7 @@ type SystemEventCriterion interface {
 }
 
 type TimeCriterion struct {
-	When int
+	When int32
 }
 
 func NewTimeCriterion() *TimeCriterion {
@@ -47,11 +47,11 @@ func (signalCriterion *SignalCriterion) NeedProcess(context *Context) bool {
 }
 
 type WaitForProcessIdCriterion struct {
-	ProcessId        int
+	ProcessId        int32
 	HasProcessKilled bool
 }
 
-func NewWaitForProcessIdCriterion(context *Context, processId int) *WaitForProcessIdCriterion {
+func NewWaitForProcessIdCriterion(context *Context, processId int32) *WaitForProcessIdCriterion {
 	var waitForProcessIdCriterion = &WaitForProcessIdCriterion{
 		ProcessId:processId,
 	}
@@ -243,7 +243,7 @@ type WaitEvent struct {
 	SignalCriterion           *SignalCriterion
 }
 
-func NewWaitEvent(context *Context, processId int) *WaitEvent {
+func NewWaitEvent(context *Context, processId int32) *WaitEvent {
 	var waitEvent = &WaitEvent{
 		BaseSystemEvent: NewBaseSystemEvent(context, SystemEventType_WAIT),
 		WaitForProcessIdCriterion: NewWaitForProcessIdCriterion(context, processId),

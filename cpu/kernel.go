@@ -15,13 +15,13 @@ type Kernel struct {
 	Processes           []*Process
 	SyscallEmulation    *SyscallEmulation
 
-	CurrentCycle        int
-	CurrentPid          int
-	CurrentProcessId    int
-	CurrentMemoryId     int
-	CurrentMemoryPageId int
-	CurrentContextId    int
-	CurrentFd           int
+	CurrentCycle        int32
+	CurrentPid          int32
+	CurrentProcessId    int32
+	CurrentMemoryId     int32
+	CurrentMemoryPageId int32
+	CurrentContextId    int32
+	CurrentFd           int32
 }
 
 func NewKernel(experiment *CPUExperiment) *Kernel {
@@ -42,7 +42,7 @@ func NewKernel(experiment *CPUExperiment) *Kernel {
 	for _, contextMapping := range experiment.Config.ContextMappings {
 		var context = LoadContext(kernel, contextMapping)
 
-		if !kernel.Map(context, func(candidateThreadId int) bool {
+		if !kernel.Map(context, func(candidateThreadId int32) bool {
 			return candidateThreadId == contextMapping.ThreadId
 		}) {
 			panic("Impossible")
@@ -54,7 +54,7 @@ func NewKernel(experiment *CPUExperiment) *Kernel {
 	return kernel
 }
 
-func (kernel *Kernel) GetProcessFromId(id int) *Process {
+func (kernel *Kernel) GetProcessFromId(id int32) *Process {
 	for _, process := range kernel.Processes {
 		if process.Id == id {
 			return process
@@ -64,7 +64,7 @@ func (kernel *Kernel) GetProcessFromId(id int) *Process {
 	return nil
 }
 
-func (kernel *Kernel) GetContextFromId(id int) *Context {
+func (kernel *Kernel) GetContextFromId(id int32) *Context {
 	for _, context := range kernel.Contexts {
 		if context.Id == id {
 			return context
@@ -74,7 +74,7 @@ func (kernel *Kernel) GetContextFromId(id int) *Context {
 	return nil
 }
 
-func (kernel *Kernel) GetContextFromProcessId(processId int) *Context {
+func (kernel *Kernel) GetContextFromProcessId(processId int32) *Context {
 	for _, context := range kernel.Contexts {
 		if context.ProcessId == processId {
 			return context
@@ -84,13 +84,13 @@ func (kernel *Kernel) GetContextFromProcessId(processId int) *Context {
 	return nil
 }
 
-func (kernel *Kernel) Map(contextToMap *Context, predicate func(candidateThreadId int) bool) bool {
+func (kernel *Kernel) Map(contextToMap *Context, predicate func(candidateThreadId int32) bool) bool {
 	if contextToMap.ThreadId != -1 {
 		panic("Impossible")
 	}
 
-	for coreNum := 0; coreNum < kernel.Experiment.Config.NumCores; coreNum++ {
-		for threadNum := 0; threadNum < kernel.Experiment.Config.NumThreadsPerCore; threadNum++ {
+	for coreNum := int32(0); coreNum < kernel.Experiment.Config.NumCores; coreNum++ {
+		for threadNum := int32(0); threadNum < kernel.Experiment.Config.NumThreadsPerCore; threadNum++ {
 			var threadId = coreNum * kernel.Experiment.Config.NumThreadsPerCore + threadNum
 
 			var hasMapped bool
@@ -138,8 +138,8 @@ func (kernel *Kernel) ProcessSignals() {
 	}
 }
 
-func (kernel *Kernel) CreatePipe() []int {
-	var fileDescriptors = make([]int, 2)
+func (kernel *Kernel) CreatePipe() []int32 {
+	var fileDescriptors = make([]int32, 2)
 
 	fileDescriptors[0] = kernel.CurrentFd
 
@@ -154,7 +154,7 @@ func (kernel *Kernel) CreatePipe() []int {
 	return fileDescriptors
 }
 
-func (kernel *Kernel) getBuffer(fileDescriptor int, index uint32) *mem.CircularByteBuffer {
+func (kernel *Kernel) getBuffer(fileDescriptor int32, index uint32) *mem.CircularByteBuffer {
 	for _, pipe := range kernel.Pipes {
 		if pipe.FileDescriptors[index] == fileDescriptor {
 			return pipe.Buffer
@@ -164,11 +164,11 @@ func (kernel *Kernel) getBuffer(fileDescriptor int, index uint32) *mem.CircularB
 	return nil
 }
 
-func (kernel *Kernel) GetReadBuffer(fileDescriptor int) *mem.CircularByteBuffer {
+func (kernel *Kernel) GetReadBuffer(fileDescriptor int32) *mem.CircularByteBuffer {
 	return kernel.getBuffer(fileDescriptor, 0)
 }
 
-func (kernel *Kernel) GetWriteBuffer(fileDescriptor int) *mem.CircularByteBuffer {
+func (kernel *Kernel) GetWriteBuffer(fileDescriptor int32) *mem.CircularByteBuffer {
 	return kernel.getBuffer(fileDescriptor, 1)
 }
 

@@ -298,7 +298,7 @@ func (syscallEmulation *SyscallEmulation) exit_impl(context *Context) {
 func (syscallEmulation *SyscallEmulation) read_impl(context *Context) {
 	var readMaxSize = uint32(1 << 25)
 
-	var fd = context.Process.TranslateFileDescriptor(int(context.Regs.Gpr[regs.REGISTER_A0]))
+	var fd = context.Process.TranslateFileDescriptor(int32(context.Regs.Gpr[regs.REGISTER_A0]))
 	var bufAddr = context.Regs.Gpr[regs.REGISTER_A1]
 	var count = uint32(math.Min(float64(readMaxSize), float64(context.Regs.Gpr[regs.REGISTER_A2])))
 
@@ -335,7 +335,7 @@ func (syscallEmulation *SyscallEmulation) read_impl(context *Context) {
 }
 
 func (syscallEmulation *SyscallEmulation) write_impl(context *Context) {
-	var fd = context.Process.TranslateFileDescriptor(int(context.Regs.Gpr[regs.REGISTER_A0]))
+	var fd = context.Process.TranslateFileDescriptor(int32(context.Regs.Gpr[regs.REGISTER_A0]))
 	var bufAddr = context.Regs.Gpr[regs.REGISTER_A1]
 	var count = context.Regs.Gpr[regs.REGISTER_A2]
 
@@ -358,7 +358,7 @@ func (syscallEmulation *SyscallEmulation) write_impl(context *Context) {
 func (syscallEmulation *SyscallEmulation) open_impl(context *Context) {
 	var addr = context.Regs.Gpr[regs.REGISTER_A0]
 	var targetFlags = context.Regs.Gpr[regs.REGISTER_A1]
-	var mode = int(context.Regs.Gpr[regs.REGISTER_A2])
+	var mode = int32(context.Regs.Gpr[regs.REGISTER_A2])
 
 	var hostFlags = uint32(0)
 	for _, mapping := range syscallEmulation.OpenFlagMappings {
@@ -381,7 +381,7 @@ func (syscallEmulation *SyscallEmulation) open_impl(context *Context) {
 }
 
 func (syscallEmulation *SyscallEmulation) close_impl(context *Context) {
-	var fd = int(context.Regs.Gpr[regs.REGISTER_A0])
+	var fd = int32(context.Regs.Gpr[regs.REGISTER_A0])
 
 	if fd == 0 || fd == 1 || fd == 2 {
 		context.Regs.Gpr[regs.REGISTER_A3] = 0
@@ -395,7 +395,7 @@ func (syscallEmulation *SyscallEmulation) close_impl(context *Context) {
 }
 
 func (syscallEmulation *SyscallEmulation) waitpid_impl(context *Context) {
-	var pid = int(context.Regs.Gpr[regs.REGISTER_A0])
+	var pid = int32(context.Regs.Gpr[regs.REGISTER_A0])
 	var pstatus = context.Regs.Gpr[regs.REGISTER_A1]
 
 	if pid < 1 {
@@ -428,7 +428,7 @@ func (syscallEmulation *SyscallEmulation) getuid_impl(context *Context) {
 }
 
 func (SyscallEmulation *SyscallEmulation) kill_impl(context *Context) {
-	var pid = int(context.Regs.Gpr[regs.REGISTER_A0])
+	var pid = int32(context.Regs.Gpr[regs.REGISTER_A0])
 	var sig = context.Regs.Gpr[regs.REGISTER_A1]
 	if pid < 0 {
 		panic("Impossible")
@@ -482,9 +482,9 @@ func (syscallEmulation *SyscallEmulation) ioctl_impl(context *Context) {
 		buf = context.Process.Memory.ReadBlockAt(context.Regs.Gpr[regs.REGISTER_A2], 128)
 	}
 
-	var fd = context.Process.TranslateFileDescriptor(int(context.Regs.Gpr[regs.REGISTER_A0]))
+	var fd = context.Process.TranslateFileDescriptor(int32(context.Regs.Gpr[regs.REGISTER_A0]))
 	if fd < 3 {
-		context.Regs.Gpr[regs.REGISTER_V0] = uint32(native.Ioctl(fd, int(context.Regs.Gpr[regs.REGISTER_A1]), buf))
+		context.Regs.Gpr[regs.REGISTER_V0] = uint32(native.Ioctl(fd, int32(context.Regs.Gpr[regs.REGISTER_A1]), buf))
 
 		syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
 
@@ -531,10 +531,10 @@ func (syscallEmulation *SyscallEmulation) mmap_impl(context *Context) {
 	var start = context.Regs.Gpr[regs.REGISTER_A0]
 	var length = context.Regs.Gpr[regs.REGISTER_A1]
 
-	var fd = int(context.Process.Memory.ReadWordAt(context.Regs.Gpr[regs.REGISTER_SP] + 16))
+	var fd = int32(context.Process.Memory.ReadWordAt(context.Regs.Gpr[regs.REGISTER_SP] + 16))
 
 	if fd != -1 {
-		panic("syscall mmap: syscall is only supported with fd = -1")
+		panic(fmt.Sprintf("syscall mmap: syscall is only supported with fd = -1 (%d)", fd))
 	}
 
 	if start == 0 {
@@ -563,7 +563,7 @@ func (syscallEmulation *SyscallEmulation) clone_impl(context *Context) {
 
 	var newContext *Context = NewContextFromParent(context, context.Regs.Clone(), cloneFlags & 0xff)
 
-	if !context.Kernel.Map(newContext, func(candidateThreadId int) bool {
+	if !context.Kernel.Map(newContext, func(candidateThreadId int32) bool {
 		return true
 	}) {
 		panic("Impossible")
@@ -600,9 +600,9 @@ func (syscallEmulation *SyscallEmulation) mprotect_impl(context *Context) {
 }
 
 func (syscallEmulation *SyscallEmulation) _llseek_impl(context *Context) {
-	var fd = context.Process.TranslateFileDescriptor(int(context.Regs.Gpr[regs.REGISTER_A0]))
+	var fd = context.Process.TranslateFileDescriptor(int32(context.Regs.Gpr[regs.REGISTER_A0]))
 	var offset = int64(context.Regs.Gpr[regs.REGISTER_A1])
-	var whence = int(context.Regs.Gpr[regs.REGISTER_A2])
+	var whence = int32(context.Regs.Gpr[regs.REGISTER_A2])
 
 	var ret = native.Seek(fd, offset, whence)
 
@@ -658,7 +658,7 @@ func (syscallEmulation *SyscallEmulation) nanosleep_impl(context *Context) {
 	var sec = context.Process.Memory.ReadWordAt(preq)
 	var nsec = context.Process.Memory.ReadWordAt(preq + 4)
 
-	var total = int(sec * native.CLOCKS_PER_SEC + nsec / 1e9 * native.CLOCKS_PER_SEC)
+	var total = int32(sec * native.CLOCKS_PER_SEC + nsec / 1e9 * native.CLOCKS_PER_SEC)
 
 	var e = NewResumeEvent(context)
 	e.TimeCriterion.When = native.Clock(context.Kernel.CurrentCycle + total)
@@ -668,15 +668,15 @@ func (syscallEmulation *SyscallEmulation) nanosleep_impl(context *Context) {
 
 func (syscallEmulation *SyscallEmulation) poll_impl(context *Context) {
 	var pufds = context.Regs.Gpr[regs.REGISTER_A0]
-	var nfds = int(context.Regs.Gpr[regs.REGISTER_A1])
-	var timeout = int(context.Regs.Gpr[regs.REGISTER_A2])
+	var nfds = int32(context.Regs.Gpr[regs.REGISTER_A1])
+	var timeout = int32(context.Regs.Gpr[regs.REGISTER_A2])
 
 	if nfds < 1 {
 		panic("syscall poll: nfds < 1")
 	}
 
-	for i := 0; i < nfds; i++ {
-		var fd = int(context.Process.Memory.ReadWordAt(pufds))
+	for i := int32(0); i < nfds; i++ {
+		var fd = int32(context.Process.Memory.ReadWordAt(pufds))
 		var events = int16(context.Process.Memory.ReadHalfWordAt(pufds + 4))
 
 		if events != -1 {
@@ -772,12 +772,12 @@ func (syscallEmulation *SyscallEmulation) rt_sigsuspend_impl(context *Context) {
 }
 
 func (syscallEmulation *SyscallEmulation) fstat64_impl(context *Context) {
-	var fd = context.Process.TranslateFileDescriptor(int(context.Regs.Gpr[regs.REGISTER_A0]))
+	var fd = context.Process.TranslateFileDescriptor(int32(context.Regs.Gpr[regs.REGISTER_A0]))
 	var bufAddr = context.Regs.Gpr[regs.REGISTER_A1]
 
 	var fstat syscall.Stat_t
 
-	syscall.Fstat(fd, &fstat)
+	syscall.Fstat(int(fd), &fstat)
 
 	context.Regs.Gpr[regs.REGISTER_V0] = 0
 

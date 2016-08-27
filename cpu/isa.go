@@ -111,7 +111,7 @@ func or(context *Context, machInst MachInst) {
 
 func ori(context *Context, machInst MachInst) {
 	var temp = context.Regs.Gpr[machInst.Rs()] | machInst.Uimm()
-	context.Regs.Gpr[machInst.Rd()] = temp
+	context.Regs.Gpr[machInst.Rt()] = temp
 }
 
 func sll(context *Context, machInst MachInst) {

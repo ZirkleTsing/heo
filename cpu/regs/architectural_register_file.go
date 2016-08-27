@@ -3,6 +3,8 @@ package regs
 import (
 	"encoding/binary"
 	"math"
+	"bytes"
+	"fmt"
 )
 
 var GPR_NAMES = []string{
@@ -137,6 +139,20 @@ func (architecturalRegisterFile *ArchitecturalRegisterFile) Sgpr(i uint32) int32
 
 func (architecturalRegisterFile *ArchitecturalRegisterFile) SetSgpr(i uint32, v int32) {
 	architecturalRegisterFile.Gpr[i] = uint32(v)
+}
+
+func (architecturalRegisterFile *ArchitecturalRegisterFile) Dump() string {
+	var buf bytes.Buffer
+
+	for i := 0; i < 32; i++ {
+		buf.WriteString(fmt.Sprintf("%s = 0x%08x, ", GPR_NAMES[i], architecturalRegisterFile.Gpr[i]))
+	}
+
+	buf.WriteString(
+		fmt.Sprintf("pc = 0x%08x, npc = 0x%08x, nnpc = 0x%08x",
+			architecturalRegisterFile.Pc, architecturalRegisterFile.Npc, architecturalRegisterFile.Nnpc))
+
+	return buf.String()
 }
 
 type FloatingPointRegisters struct {
