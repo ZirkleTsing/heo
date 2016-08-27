@@ -159,7 +159,7 @@ func (machInst MachInst) Uimm() uint32 {
 }
 
 func (machInst MachInst) Imm() int32 {
-	return cpuutil.Sext32(machInst.Uimm(), 16)
+	return int32(cpuutil.Sext32(machInst.Uimm(), 16))
 }
 
 func (machInst MachInst) Target() uint32 {

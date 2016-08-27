@@ -1,10 +1,10 @@
 package cpuutil
 
-func Sext32(x uint32, b uint32) int32 {
-	if uint32(x) & (uint32(1) << (b - 1)) != 0 {
-		return int32(uint32(x) | ^((uint32(1) << b) - 1))
+func Sext32(x uint32, b uint32) uint32 {
+	if x & (uint32(1) << (b - 1)) != 0 {
+		return x | ^((uint32(1) << b) - 1)
 	} else {
-		return int32(x)
+		return x
 	}
 }
 

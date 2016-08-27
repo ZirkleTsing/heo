@@ -45,7 +45,7 @@ func NewPagedMemory(littleEndian bool) *PagedMemory {
 	var memory = &PagedMemory{
 		LittleEndian:littleEndian,
 		Pages:make(map[uint32]*MemoryPage),
-		Geometry:NewGeometry(0xffffffff, 1, 1 << 12),
+		Geometry:NewGeometry(math.MaxUint32, 1, 1 << 12),
 	}
 
 	if littleEndian {

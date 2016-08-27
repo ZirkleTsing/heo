@@ -4,6 +4,8 @@ import (
 	"time"
 	"github.com/mcai/acogo/simutil"
 	"os"
+	"reflect"
+	"fmt"
 )
 
 type CPUExperiment struct {
@@ -30,6 +32,12 @@ func NewCPUExperiment(config *CPUConfig) *CPUExperiment {
 	experiment.Kernel = NewKernel(experiment)
 	experiment.Processor = NewProcessor(experiment)
 	experiment.MemoryHierarchy = NewMemoryHierarchy(experiment)
+
+	experiment.BlockingEventDispatcher.AddListener(reflect.TypeOf((*StaticInstExecutedEvent)(nil)), func(event interface{}) {
+		var staticInstExecutedEvent = event.(*StaticInstExecutedEvent)
+
+		fmt.Printf("[thread#%d] %s\n", staticInstExecutedEvent.Context.ThreadId, staticInstExecutedEvent.StaticInst.Disassemble(staticInstExecutedEvent.Pc))
+	})
 
 	return experiment
 }

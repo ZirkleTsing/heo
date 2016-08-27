@@ -60,6 +60,10 @@ func (staticInst *StaticInst) Execute(context *Context) {
 	context.Kernel.Experiment.BlockingEventDispatcher.Dispatch(NewStaticInstExecutedEvent(context, oldPc, staticInst))
 }
 
+func (staticInst *StaticInst) Disassemble(pc uint32) string {
+	return Disassemble(pc, string(staticInst.Mnemonic.Name), staticInst.MachInst)
+}
+
 type StaticInstExecutedEvent struct {
 	Context    *Context
 	Pc         uint32

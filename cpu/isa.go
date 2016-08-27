@@ -17,19 +17,22 @@ func addi(context *Context, machInst MachInst) {
 }
 
 func addiu(context *Context, machInst MachInst) {
-	context.Regs.Gpr[machInst.Rt()] = uint32(context.Regs.Sgpr(machInst.Rs()) + machInst.Imm())
+	var temp = context.Regs.Sgpr(machInst.Rs()) + machInst.Imm()
+	context.Regs.Gpr[machInst.Rt()] = uint32(temp)
 }
 
 func addu(context *Context, machInst MachInst) {
-	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] + context.Regs.Gpr[machInst.Rt()]
+	var temp = context.Regs.Gpr[machInst.Rs()] + context.Regs.Gpr[machInst.Rt()]
+	context.Regs.Gpr[machInst.Rd()] = temp
 }
 
 func and(context *Context, machInst MachInst) {
-	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] & context.Regs.Gpr[machInst.Rt()]
+	var temp = context.Regs.Gpr[machInst.Rs()] & context.Regs.Gpr[machInst.Rt()]
+	context.Regs.Gpr[machInst.Rd()] = temp
 }
 
 func andi(context *Context, machInst MachInst) {
-	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] & machInst.Uimm()
+	context.Regs.Gpr[machInst.Rt()] = context.Regs.Gpr[machInst.Rs()] & machInst.Uimm()
 }
 
 func div(context *Context, machInst MachInst) {
@@ -41,8 +44,8 @@ func div(context *Context, machInst MachInst) {
 
 func divu(context *Context, machInst MachInst) {
 	if machInst.Rt() == 0 {
-		context.Regs.Lo = uint32(context.Regs.Gpr[machInst.Rs()] / context.Regs.Gpr[machInst.Rt()])
-		context.Regs.Hi = uint32(context.Regs.Gpr[machInst.Rs()] % context.Regs.Gpr[machInst.Rt()])
+		context.Regs.Lo = context.Regs.Gpr[machInst.Rs()] / context.Regs.Gpr[machInst.Rt()]
+		context.Regs.Hi = context.Regs.Gpr[machInst.Rs()] % context.Regs.Gpr[machInst.Rt()]
 	}
 }
 
@@ -51,11 +54,10 @@ func lui(context *Context, machInst MachInst) {
 }
 
 func madd(context *Context, machInst MachInst) {
-	var temp, temp1, temp2, temp3 int64
-	temp1 = int64(context.Regs.Sgpr(machInst.Rs()))
-	temp2 = int64(context.Regs.Sgpr(machInst.Rt()))
-	temp3 = (int64(context.Regs.Hi << 32) | int64(context.Regs.Lo))
-	temp = temp1 * temp2 + temp3
+	var temp1 = int64(context.Regs.Sgpr(machInst.Rs()))
+	var temp2 = int64(context.Regs.Sgpr(machInst.Rt()))
+	var temp3 = (int64(context.Regs.Hi << 32) | int64(context.Regs.Lo))
+	var temp = temp1 * temp2 + temp3
 	context.Regs.Hi = uint32(cpuutil.Bits64(uint64(temp), 63, 32))
 	context.Regs.Lo = uint32(cpuutil.Bits64(uint64(temp), 31, 0))
 }
@@ -69,21 +71,20 @@ func mflo(context *Context, machInst MachInst) {
 }
 
 func msub(context *Context, machInst MachInst) {
-	var temp, temp1, temp2, temp3 int64
-	temp1 = int64(context.Regs.Sgpr(machInst.Rs()))
-	temp2 = int64(context.Regs.Sgpr(machInst.Rt()))
-	temp3 = int64(context.Regs.Hi << 32) | int64(context.Regs.Lo)
-	temp = temp3 - temp1 * temp2 + temp3
+	var temp1 = int64(context.Regs.Sgpr(machInst.Rs()))
+	var temp2 = int64(context.Regs.Sgpr(machInst.Rt()))
+	var temp3 = int64(context.Regs.Hi << 32) | int64(context.Regs.Lo)
+	var temp = temp3 - temp1 * temp2 + temp3
 	context.Regs.Hi = uint32(cpuutil.Bits64(uint64(temp), 63, 32))
 	context.Regs.Lo = uint32(cpuutil.Bits64(uint64(temp), 31, 0))
 }
 
 func mthi(context *Context, machInst MachInst) {
-	context.Regs.Hi = context.Regs.Gpr[machInst.Rd()]
+	context.Regs.Hi = context.Regs.Gpr[machInst.Rs()]
 }
 
 func mtlo(context *Context, machInst MachInst) {
-	context.Regs.Lo = context.Regs.Gpr[machInst.Rd()]
+	context.Regs.Lo = context.Regs.Gpr[machInst.Rs()]
 }
 
 func mult(context *Context, machInst MachInst) {
@@ -104,19 +105,22 @@ func nor(context *Context, machInst MachInst) {
 }
 
 func or(context *Context, machInst MachInst) {
-	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] | context.Regs.Gpr[machInst.Rt()]
+	var temp = context.Regs.Gpr[machInst.Rs()] | context.Regs.Gpr[machInst.Rt()]
+	context.Regs.Gpr[machInst.Rd()] = temp
 }
 
 func ori(context *Context, machInst MachInst) {
-	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] | machInst.Uimm()
+	var temp = context.Regs.Gpr[machInst.Rs()] | machInst.Uimm()
+	context.Regs.Gpr[machInst.Rd()] = temp
 }
 
 func sll(context *Context, machInst MachInst) {
-	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rt()] << machInst.Shift()
+	var temp = context.Regs.Gpr[machInst.Rt()] << machInst.Shift()
+	context.Regs.Gpr[machInst.Rd()] = temp
 }
 
 func sllv(context *Context, machInst MachInst) {
-	var s uint32 = cpuutil.Bits32(context.Regs.Gpr[machInst.Rs()], 4, 0)
+	var s = cpuutil.Bits32(context.Regs.Gpr[machInst.Rs()], 4, 0)
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rt()] << s
 }
 
@@ -158,7 +162,7 @@ func sra(context *Context, machInst MachInst) {
 
 func srav(context *Context, machInst MachInst) {
 	var s = int32(cpuutil.Bits32(context.Regs.Gpr[machInst.Rs()], 4, 0))
-	context.Regs.Gpr[machInst.Rd()] = uint32(context.Regs.Sgpr(machInst.Rt() >> uint32(s)))
+	context.Regs.Gpr[machInst.Rd()] = uint32(context.Regs.Sgpr(machInst.Rt()) >> uint32(s))
 }
 
 func srl(context *Context, machInst MachInst) {
@@ -183,7 +187,7 @@ func xor(context *Context, machInst MachInst) {
 }
 
 func xori(context *Context, machInst MachInst) {
-	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] ^ machInst.Uimm()
+	context.Regs.Gpr[machInst.Rt()] = context.Regs.Gpr[machInst.Rs()] ^ machInst.Uimm()
 }
 
 func absD(context *Context, machInst MachInst) {
@@ -215,13 +219,13 @@ func absS(context *Context, machInst MachInst) {
 }
 
 func addD(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetFloat64(
-		machInst.Fd(), context.Regs.Fpr.Float64(machInst.Fs()) + context.Regs.Fpr.Float64(machInst.Ft()))
+	var temp = context.Regs.Fpr.Float64(machInst.Fs()) + context.Regs.Fpr.Float64(machInst.Ft())
+	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
 func addS(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetFloat32(
-		machInst.Fd(), context.Regs.Fpr.Float32(machInst.Fs()) + context.Regs.Fpr.Float32(machInst.Ft()))
+	var temp = context.Regs.Fpr.Float32(machInst.Fs()) + context.Regs.Fpr.Float32(machInst.Ft())
+	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
 func cCondD(context *Context, machInst MachInst) {
@@ -255,79 +259,77 @@ func cCond(context *Context, machInst MachInst, less bool, equal bool, unordered
 		(cpuutil.GetBit32(machInst.Cond(), 1) != 0 && equal) ||
 		(cpuutil.GetBit32(machInst.Cond(), 0) != 0 && unordered)
 
-	if cc != 0 {
-		context.Regs.Fcsr = cpuutil.SetBitValue32(context.Regs.Fcsr, 24 + cc, condition)
-	} else {
-		context.Regs.Fcsr = cpuutil.SetBitValue32(context.Regs.Fcsr, 23, condition)
-	}
+	SetFPCC(context, cc, condition)
 }
 
 func cvtDL(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetFloat64(machInst.Fd(),
-		float64(context.Regs.Fpr.Uint64(machInst.Fs())))
+	var temp = math.Float64frombits(context.Regs.Fpr.Uint64(machInst.Fs()))
+	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
 func cvtDS(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetFloat64(machInst.Fd(),
-		float64(context.Regs.Fpr.Float32(machInst.Fs())))
+	var temp = float64(context.Regs.Fpr.Float32(machInst.Fs()))
+	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
 func cvtDW(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetFloat64(machInst.Fd(),
-		float64(context.Regs.Fpr.Uint32(machInst.Fs())))
+	var temp = math.Float64frombits(uint64(context.Regs.Fpr.Uint32(machInst.Fs())))
+	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
 func cvtLD(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetUint64(machInst.Fd(),
-		uint64(context.Regs.Fpr.Float64(machInst.Fs())))
+	var temp = math.Float64bits(context.Regs.Fpr.Float64(machInst.Fs()))
+	context.Regs.Fpr.SetUint64(machInst.Fd(), temp)
 }
 
 func cvtLS(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetUint64(machInst.Fd(),
-		uint64(context.Regs.Fpr.Float32(machInst.Fs())))
+	var temp = math.Float64bits(float64(context.Regs.Fpr.Float32(machInst.Fs())))
+	context.Regs.Fpr.SetUint64(machInst.Fd(), temp)
 }
 
 func cvtSD(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetFloat32(machInst.Fd(),
-		float32(context.Regs.Fpr.Float64(machInst.Fs())))
+	var temp = float32(context.Regs.Fpr.Float64(machInst.Fs()))
+	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
 func cvtSL(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetFloat32(machInst.Fd(),
-		float32(context.Regs.Fpr.Uint64(machInst.Fs())))
+	var temp = math.Float32frombits(uint32(context.Regs.Fpr.Uint64(machInst.Fs())))
+	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
 func cvtSW(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetFloat32(machInst.Fd(),
-		float32(context.Regs.Fpr.Uint32(machInst.Fs())))
+	var temp = math.Float32frombits(context.Regs.Fpr.Uint32(machInst.Fs()))
+	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
 func cvtWD(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetUint32(machInst.Fd(),
-		uint32(context.Regs.Fpr.Float64(machInst.Fs())))
+	var temp = math.Float32bits(float32(context.Regs.Fpr.Float64(machInst.Fs())))
+	context.Regs.Fpr.SetUint32(machInst.Fd(), temp)
 }
 
 func cvtWS(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetUint32(machInst.Fd(),
-		uint32(context.Regs.Fpr.Float32(machInst.Fs())))
+	var temp = math.Float32bits(context.Regs.Fpr.Float32(machInst.Fs()))
+	context.Regs.Fpr.SetUint32(machInst.Fd(), temp)
 }
 
 func divD(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetFloat64(machInst.Fd(),
-		context.Regs.Fpr.Float64(machInst.Fs()) / context.Regs.Fpr.Float64(machInst.Ft()))
+	var temp = context.Regs.Fpr.Float64(machInst.Fs()) / context.Regs.Fpr.Float64(machInst.Ft())
+	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
 func divS(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetFloat32(machInst.Fd(),
-		context.Regs.Fpr.Float32(machInst.Fs()) / context.Regs.Fpr.Float32(machInst.Ft()))
+	var temp = context.Regs.Fpr.Float32(machInst.Fs()) / context.Regs.Fpr.Float32(machInst.Ft())
+	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
 func movD(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetFloat64(machInst.Fd(), context.Regs.Fpr.Float64(machInst.Fs()))
+	var temp = context.Regs.Fpr.Float64(machInst.Fs())
+	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
 func movS(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetFloat32(machInst.Fd(), context.Regs.Fpr.Float32(machInst.Fs()))
+	var temp = context.Regs.Fpr.Float32(machInst.Fs())
+	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
 func movf(context *Context, machInst MachInst) {
@@ -367,21 +369,23 @@ func truncW(context *Context, machInst MachInst) {
 }
 
 func mulD(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetFloat64(machInst.Fd(),
-		context.Regs.Fpr.Float64(machInst.Fs()) * context.Regs.Fpr.Float64(machInst.Ft()))
+	var temp = context.Regs.Fpr.Float64(machInst.Fs()) * context.Regs.Fpr.Float64(machInst.Ft())
+	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
 func mulS(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetFloat32(machInst.Fd(),
-		context.Regs.Fpr.Float32(machInst.Fs()) * context.Regs.Fpr.Float32(machInst.Ft()))
+	var temp = context.Regs.Fpr.Float32(machInst.Fs()) * context.Regs.Fpr.Float32(machInst.Ft())
+	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
 func negD(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetFloat64(machInst.Fd(), -context.Regs.Fpr.Float64(machInst.Fs()))
+	var temp = -context.Regs.Fpr.Float64(machInst.Fs())
+	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
 func negS(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetFloat32(machInst.Fd(), -context.Regs.Fpr.Float32(machInst.Fs()))
+	var temp = -context.Regs.Fpr.Float32(machInst.Fs())
+	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
 func sqrtD(context *Context, machInst MachInst) {
@@ -395,13 +399,13 @@ func sqrtS(context *Context, machInst MachInst) {
 }
 
 func subD(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetFloat64(machInst.Fd(),
-		context.Regs.Fpr.Float64(machInst.Fs()) - context.Regs.Fpr.Float64(machInst.Ft()))
+	var temp = context.Regs.Fpr.Float64(machInst.Fs()) - context.Regs.Fpr.Float64(machInst.Ft())
+	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
 func subS(context *Context, machInst MachInst) {
-	context.Regs.Fpr.SetFloat32(machInst.Fd(),
-		context.Regs.Fpr.Float32(machInst.Fs()) - context.Regs.Fpr.Float32(machInst.Ft()))
+	var temp = context.Regs.Fpr.Float32(machInst.Fs()) - context.Regs.Fpr.Float32(machInst.Ft())
+	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
 func branch(context *Context, v uint32) {
@@ -558,50 +562,50 @@ func bnel(context *Context, machInst MachInst) {
 
 func lb(context *Context, machInst MachInst) {
 	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	var temp byte = context.Process.Memory.ReadByteAt(addr)
-	context.Regs.Gpr[machInst.Rt()] = uint32(cpuutil.Sext32(uint32(temp), 8))
+	var temp = context.Process.Memory.ReadByteAt(addr)
+	context.Regs.Gpr[machInst.Rt()] = cpuutil.Sext32(uint32(temp), 8)
 }
 
 func lbu(context *Context, machInst MachInst) {
 	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	var temp byte = context.Process.Memory.ReadByteAt(addr)
+	var temp = context.Process.Memory.ReadByteAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = uint32(temp)
 }
 
 func ldc1(context *Context, machInst MachInst) {
 	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	var temp uint64 = context.Process.Memory.ReadDoubleWordAt(addr)
-	context.Regs.Fpr.SetFloat64(machInst.Ft(), float64(temp))
+	var temp = context.Process.Memory.ReadDoubleWordAt(addr)
+	context.Regs.Fpr.SetFloat64(machInst.Ft(), math.Float64frombits(temp))
 }
 
 func lh(context *Context, machInst MachInst) {
 	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	var temp uint16 = context.Process.Memory.ReadHalfWordAt(addr)
-	context.Regs.Gpr[machInst.Rt()] = uint32(cpuutil.Sext32(uint32(temp), 16))
+	var temp = context.Process.Memory.ReadHalfWordAt(addr)
+	context.Regs.Gpr[machInst.Rt()] = cpuutil.Sext32(uint32(temp), 16)
 }
 
 func lhu(context *Context, machInst MachInst) {
 	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	var temp uint16 = context.Process.Memory.ReadHalfWordAt(addr)
+	var temp = context.Process.Memory.ReadHalfWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = uint32(temp)
 }
 
 func ll(context *Context, machInst MachInst) {
 	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	var temp uint32 = context.Process.Memory.ReadWordAt(addr)
+	var temp = context.Process.Memory.ReadWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = temp
 }
 
 func lw(context *Context, machInst MachInst) {
 	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	var temp uint32 = context.Process.Memory.ReadWordAt(addr)
+	var temp = context.Process.Memory.ReadWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = temp
 }
 
 func lwc1(context *Context, machInst MachInst) {
 	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
-	var temp uint32 = context.Process.Memory.ReadWordAt(addr)
-	context.Regs.Fpr.SetFloat32(machInst.Ft(), float32(temp))
+	var temp = context.Process.Memory.ReadWordAt(addr)
+	context.Regs.Fpr.SetFloat32(machInst.Ft(), math.Float32frombits(temp))
 }
 
 func lwl(context *Context, machInst MachInst) {
@@ -651,7 +655,7 @@ func sc(context *Context, machInst MachInst) {
 
 func sdc1(context *Context, machInst MachInst) {
 	var dbl = context.Regs.Fpr.Float64(machInst.Ft())
-	var temp = uint64(dbl)
+	var temp = math.Float64bits(dbl)
 	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	context.Process.Memory.WriteDoubleWordAt(addr, temp)
 }
@@ -670,7 +674,7 @@ func sw(context *Context, machInst MachInst) {
 
 func swc1(context *Context, machInst MachInst) {
 	var f = context.Regs.Fpr.Float32(machInst.Ft())
-	var temp = uint32(f)
+	var temp = math.Float32bits(f)
 	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 	context.Process.Memory.WriteWordAt(addr, temp)
 }
