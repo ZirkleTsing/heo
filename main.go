@@ -8,6 +8,8 @@ func main() {
 	config.ContextMappings = append(config.ContextMappings,
 		cpu.NewContextMapping(0, "/home/itecgo/Projects/Archimulator/benchmarks/Olden_Custom1/mst/ht/mst.mips", "100"))
 
+	config.MaxDynamicInsts = 10
+
 	var experiment = cpu.NewCPUExperiment(config)
 
 	experiment.Run(false)
