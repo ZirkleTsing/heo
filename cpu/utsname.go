@@ -33,12 +33,12 @@ func (utsname *Utsname) GetBytes(littleEndian bool) []byte {
 
 	var memory = mem.NewSimpleMemory(littleEndian, buf)
 
-	memory.WriteBlockAt(0, _sysname_size, sysname_buf)
-	memory.WriteBlockAt(_sysname_size, _sysname_size, nodename_buf)
-	memory.WriteBlockAt(_sysname_size * 2, _sysname_size, release_buf)
-	memory.WriteBlockAt(_sysname_size * 3, _sysname_size, version_buf)
-	memory.WriteBlockAt(_sysname_size * 4, _sysname_size, machine_buf)
-	memory.WriteBlockAt(_sysname_size * 5, _sysname_size, domainname_buf)
+	memory.WriteBlockAt(0, uint32(len(sysname_buf)), sysname_buf)
+	memory.WriteBlockAt(_sysname_size, uint32(len(nodename_buf)), nodename_buf)
+	memory.WriteBlockAt(_sysname_size * 2, uint32(len(release_buf)), release_buf)
+	memory.WriteBlockAt(_sysname_size * 3, uint32(len(version_buf)), version_buf)
+	memory.WriteBlockAt(_sysname_size * 4, uint32(len(machine_buf)), machine_buf)
+	memory.WriteBlockAt(_sysname_size * 5, uint32(len(domainname_buf)), domainname_buf)
 
 	return buf
 }
