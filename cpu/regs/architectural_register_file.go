@@ -145,12 +145,17 @@ func (architecturalRegisterFile *ArchitecturalRegisterFile) Dump() string {
 	var buf bytes.Buffer
 
 	for i := 0; i < 32; i++ {
-		buf.WriteString(fmt.Sprintf("%s = 0x%08x, ", GPR_NAMES[i], architecturalRegisterFile.Gpr[i]))
+		buf.WriteString(fmt.Sprintf("%s = 0x%08x, \n", GPR_NAMES[i], architecturalRegisterFile.Gpr[i]))
 	}
 
 	buf.WriteString(
-		fmt.Sprintf("pc = 0x%08x, npc = 0x%08x, nnpc = 0x%08x",
-			architecturalRegisterFile.Pc, architecturalRegisterFile.Npc, architecturalRegisterFile.Nnpc))
+		fmt.Sprintf("pc = 0x%08x, npc = 0x%08x, nnpc = 0x%08x, hi = 0x%08x, lo = 0x%08x, fcsr = 0x%08x",
+			architecturalRegisterFile.Pc,
+			architecturalRegisterFile.Npc,
+			architecturalRegisterFile.Nnpc,
+			architecturalRegisterFile.Hi,
+			architecturalRegisterFile.Lo,
+			architecturalRegisterFile.Fcsr))
 
 	return buf.String()
 }

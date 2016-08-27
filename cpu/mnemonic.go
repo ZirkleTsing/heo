@@ -3,7 +3,7 @@ package cpu
 const (
 	Mnemonic_NOP = "nop"
 	Mnemonic_BREAK = "break"
-	Mnemonic_SYSTEM_CALL = "system_call"
+	Mnemonic_SYSCALL = "syscall"
 	Mnemonic_ADD = "add"
 	Mnemonic_ADDI = "addi"
 	Mnemonic_ADDIU = "addiu"
@@ -826,8 +826,8 @@ var (
 		nil,
 		swr)
 
-	SystemCall = NewMnemonic(
-		Mnemonic_SYSTEM_CALL,
+	Syscall = NewMnemonic(
+		Mnemonic_SYSCALL,
 		NewDecodeMethod(0x0000000c, 0xfc00003f),
 		nil,
 		systemCall)

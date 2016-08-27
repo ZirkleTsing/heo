@@ -94,7 +94,7 @@ func mult(context *Context, machInst MachInst) {
 }
 
 func multu(context *Context, machInst MachInst) {
-	var temp = uint64(context.Regs.Sgpr(machInst.Rs())) * uint64(context.Regs.Sgpr(machInst.Rt()))
+	var temp = uint64(context.Regs.Gpr[machInst.Rs()]) * uint64(context.Regs.Gpr[machInst.Rt()])
 	context.Regs.Lo = uint32(cpuutil.Bits64(temp, 31, 0))
 	context.Regs.Hi = uint32(cpuutil.Bits64(temp, 63, 32))
 }
