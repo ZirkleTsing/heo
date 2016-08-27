@@ -19,12 +19,12 @@ func NewUtsname() *Utsname {
 }
 
 func (utsname *Utsname) GetBytes(littleEndian bool) []byte {
-	var sysname_buf = []byte(utsname.Sysname)
-	var nodename_buf = []byte(utsname.Nodename)
-	var release_buf = []byte(utsname.Release)
-	var version_buf = []byte(utsname.Version)
-	var machine_buf = []byte(utsname.Machine)
-	var domainname_buf = []byte(utsname.Domainname)
+	var sysname_buf = []byte(utsname.Sysname + "\x00")
+	var nodename_buf = []byte(utsname.Nodename + "\x00")
+	var release_buf = []byte(utsname.Release + "\x00")
+	var version_buf = []byte(utsname.Version + "\x00")
+	var machine_buf = []byte(utsname.Machine + "\x00")
+	var domainname_buf = []byte(utsname.Domainname + "\x00")
 
 	var _sysname_size = uint32(64 + 1)
 	var size_of = _sysname_size * 6

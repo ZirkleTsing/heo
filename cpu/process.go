@@ -98,7 +98,7 @@ func (process *Process) LoadProgram(kernel *Kernel, contextMapping *ContextMappi
 	}
 
 	process.ProgramEntry = elfFile.Header.Entry
-	process.HeapTop = cpuutil.RoundUp(process.DataTop, uint32(process.Memory.GetPageSize()))
+	process.HeapTop = cpuutil.RoundUp(process.DataTop, process.Memory.GetPageSize())
 
 	process.StackBase = STACK_BASE
 	process.StackSize = MAX_ENVIRON
@@ -119,17 +119,15 @@ func (process *Process) LoadProgram(kernel *Kernel, contextMapping *ContextMappi
 	for i := uint32(0); i < uint32(len(cmdArgs)); i++ {
 		process.Memory.WriteWordAt(argAddr + i * 4, stackPointer)
 		process.Memory.WriteStringAt(stackPointer, cmdArgs[i])
-		stackPointer += uint32(len([]byte(cmdArgs[i])))
+		stackPointer += uint32(len([]byte(cmdArgs[i] + "\x00")))
 	}
-
 	process.Memory.WriteWordAt(argAddr + uint32(len(cmdArgs)) * 4, 0)
 
 	for i := uint32(0); i < uint32(len(process.Environments)); i++ {
 		process.Memory.WriteWordAt(environmentAddr + i * 4, stackPointer)
 		process.Memory.WriteStringAt(stackPointer, process.Environments[i])
-		stackPointer += uint32(len([]byte(process.Environments[i])))
+		stackPointer += uint32(len([]byte(process.Environments[i] + "\x00")))
 	}
-
 	process.Memory.WriteWordAt(environmentAddr + uint32(len(process.Environments)) * 4, 0)
 
 	if stackPointer > process.StackBase {
