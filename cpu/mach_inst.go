@@ -103,7 +103,7 @@ func (machInst MachInst) IsFpBranch() bool {
 	return rs == 8
 }
 
-func (machInst MachInst) IsSystemCall() bool {
+func (machInst MachInst) IsSyscall() bool {
 	var opcodeLo = machInst.OpCodeLo()
 	var funcHi = machInst.FuncHi()
 	var funcLo = machInst.FuncLo()
@@ -252,7 +252,7 @@ func Disassemble(pc uint32, mnemonicName string, machInst MachInst) string {
 			buf.WriteString(fmt.Sprintf("$f%d, $f%d, $f%d", fd, fs, ft))
 		}
 	case MachInstType_R:
-		if (!machInst.IsSystemCall()) {
+		if (!machInst.IsSyscall()) {
 			if (machInst.IsShift()) {
 				buf.WriteString(fmt.Sprintf("$%s, $%s, %d", regs.GPR_NAMES[rd], regs.GPR_NAMES[rt], shift))
 			} else if (machInst.IsROneOp()) {

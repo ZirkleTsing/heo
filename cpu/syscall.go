@@ -257,7 +257,7 @@ func (syscallEmulation *SyscallEmulation) registerHandler(handler *SyscallHandle
 	syscallEmulation.Handlers[handler.Index] = handler
 }
 
-func (syscallEmulation *SyscallEmulation) findAndRunSystemCallHandler(syscallIndex uint32, context *Context) bool {
+func (syscallEmulation *SyscallEmulation) findAndRunSyscallHandler(syscallIndex uint32, context *Context) bool {
 	if handler, ok := syscallEmulation.Handlers[syscallIndex]; ok {
 		handler.Run(context)
 
@@ -272,7 +272,7 @@ func (syscallEmulation *SyscallEmulation) findAndRunSystemCallHandler(syscallInd
 	return false
 }
 
-func (syscallEmulation *SyscallEmulation) checkSystemCallError(context *Context) bool {
+func (syscallEmulation *SyscallEmulation) checkSyscallError(context *Context) bool {
 	if context.Regs.Sgpr(regs.REGISTER_V0) != -1 {
 		context.Regs.Gpr[regs.REGISTER_A3] = 0
 		return false
@@ -283,10 +283,10 @@ func (syscallEmulation *SyscallEmulation) checkSystemCallError(context *Context)
 	}
 }
 
-func (syscallEmulation *SyscallEmulation) DoSystemCall(callNum uint32, context *Context) {
+func (syscallEmulation *SyscallEmulation) DoSyscall(callNum uint32, context *Context) {
 	var syscallIndex = callNum - 4000
 
-	if !syscallEmulation.findAndRunSystemCallHandler(syscallIndex, context) {
+	if !syscallEmulation.findAndRunSyscallHandler(syscallIndex, context) {
 		panic(fmt.Sprintf("ctx-%d: syscall %d (%d) not implemented", context.Id, callNum, syscallIndex))
 	}
 }
@@ -329,7 +329,7 @@ func (syscallEmulation *SyscallEmulation) read_impl(context *Context) {
 	}
 
 	context.Regs.Gpr[regs.REGISTER_V0] = uint32(ret)
-	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+	syscallEmulation.Error = syscallEmulation.checkSyscallError(context)
 
 	context.Process.Memory.WriteBlockAt(bufAddr, ret, buf)
 }
@@ -352,7 +352,7 @@ func (syscallEmulation *SyscallEmulation) write_impl(context *Context) {
 	}
 
 	context.Regs.Gpr[regs.REGISTER_V0] = ret
-	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+	syscallEmulation.Error = syscallEmulation.checkSyscallError(context)
 }
 
 func (syscallEmulation *SyscallEmulation) open_impl(context *Context) {
@@ -377,7 +377,7 @@ func (syscallEmulation *SyscallEmulation) open_impl(context *Context) {
 	var ret = native.Open(path, mode, hostFlags)
 
 	context.Regs.Gpr[regs.REGISTER_V0] = uint32(ret)
-	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+	syscallEmulation.Error = syscallEmulation.checkSyscallError(context)
 }
 
 func (syscallEmulation *SyscallEmulation) close_impl(context *Context) {
@@ -391,7 +391,7 @@ func (syscallEmulation *SyscallEmulation) close_impl(context *Context) {
 	var ret = native.Close(fd)
 
 	context.Regs.Gpr[regs.REGISTER_V0] = uint32(ret)
-	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+	syscallEmulation.Error = syscallEmulation.checkSyscallError(context)
 }
 
 func (syscallEmulation *SyscallEmulation) waitpid_impl(context *Context) {
@@ -419,12 +419,12 @@ func (syscallEmulation *SyscallEmulation) waitpid_impl(context *Context) {
 
 func (syscallEmulation *SyscallEmulation) getpid_impl(context *Context) {
 	context.Regs.Gpr[regs.REGISTER_V0] = uint32(context.ProcessId)
-	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+	syscallEmulation.Error = syscallEmulation.checkSyscallError(context)
 }
 
 func (syscallEmulation *SyscallEmulation) getuid_impl(context *Context) {
 	context.Regs.Gpr[regs.REGISTER_V0] = uint32(context.UserId)
-	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+	syscallEmulation.Error = syscallEmulation.checkSyscallError(context)
 }
 
 func (SyscallEmulation *SyscallEmulation) kill_impl(context *Context) {
@@ -462,17 +462,17 @@ func (syscallEmulation *SyscallEmulation) brk_impl(context *Context) {
 
 func (SyscallEmulation *SyscallEmulation) getgid_impl(context *Context) {
 	context.Regs.Gpr[regs.REGISTER_V0] = uint32(context.GroupId)
-	SyscallEmulation.Error = SyscallEmulation.checkSystemCallError(context)
+	SyscallEmulation.Error = SyscallEmulation.checkSyscallError(context)
 }
 
 func (syscallEmulation *SyscallEmulation) geteuid_impl(context *Context) {
 	context.Regs.Gpr[regs.REGISTER_V0] = uint32(context.EffectiveUserId)
-	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+	syscallEmulation.Error = syscallEmulation.checkSyscallError(context)
 }
 
 func (syscallEmulation *SyscallEmulation) getegid_impl(context *Context) {
 	context.Regs.Gpr[regs.REGISTER_V0] = uint32(context.EffectiveGroupId)
-	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+	syscallEmulation.Error = syscallEmulation.checkSyscallError(context)
 }
 
 func (syscallEmulation *SyscallEmulation) ioctl_impl(context *Context) {
@@ -486,7 +486,7 @@ func (syscallEmulation *SyscallEmulation) ioctl_impl(context *Context) {
 	if fd < 3 {
 		context.Regs.Gpr[regs.REGISTER_V0] = uint32(native.Ioctl(fd, int32(context.Regs.Gpr[regs.REGISTER_A1]), buf))
 
-		syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+		syscallEmulation.Error = syscallEmulation.checkSyscallError(context)
 
 		if context.Regs.Gpr[regs.REGISTER_A2] != 0 {
 			context.Process.Memory.WriteBlockAt(context.Regs.Gpr[regs.REGISTER_A2], 128, buf)
@@ -499,7 +499,7 @@ func (syscallEmulation *SyscallEmulation) ioctl_impl(context *Context) {
 
 func (syscallEmulation *SyscallEmulation) getppid_impl(context *Context) {
 	context.Regs.Gpr[regs.REGISTER_V0] = uint32(context.GetParentProcessId())
-	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+	syscallEmulation.Error = syscallEmulation.checkSyscallError(context)
 }
 
 func (syscallEmulation *SyscallEmulation) setrlimit_impl(context *Context) {
@@ -608,7 +608,7 @@ func (syscallEmulation *SyscallEmulation) _llseek_impl(context *Context) {
 
 	context.Regs.Gpr[regs.REGISTER_V0] = uint32(ret)
 
-	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+	syscallEmulation.Error = syscallEmulation.checkSyscallError(context)
 }
 
 func (syscallEmulation *SyscallEmulation) _sysctl_impl(context *Context) {
@@ -650,7 +650,7 @@ func (sysallEmulation *SyscallEmulation) mremap_impl(context *Context) {
 
 	context.Regs.Gpr[regs.REGISTER_V0] = start
 
-	sysallEmulation.Error = sysallEmulation.checkSystemCallError(context)
+	sysallEmulation.Error = sysallEmulation.checkSyscallError(context)
 }
 
 func (syscallEmulation *SyscallEmulation) nanosleep_impl(context *Context) {
@@ -781,7 +781,7 @@ func (syscallEmulation *SyscallEmulation) fstat64_impl(context *Context) {
 
 	context.Regs.Gpr[regs.REGISTER_V0] = 0
 
-	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
+	syscallEmulation.Error = syscallEmulation.checkSyscallError(context)
 
 	if !syscallEmulation.Error {
 		var sizeOfDataToWrite = uint32(104)

@@ -830,7 +830,7 @@ var (
 		Mnemonic_SYSCALL,
 		NewDecodeMethod(0x0000000c, 0xfc00003f),
 		nil,
-		systemCall)
+		_syscall)
 
 	TruncW = NewMnemonic(
 		Mnemonic_TRUNC_W,
