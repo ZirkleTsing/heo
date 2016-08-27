@@ -57,7 +57,14 @@ func (memory *SimpleMemory) ReadBlockAt(virtualAddress uint32, size uint32) []by
 
 func (memory *SimpleMemory) ReadStringAt(virtualAddress uint32, size uint32) string {
 	var data = memory.ReadBlockAt(virtualAddress, size)
-	return string(data)
+
+	var str []byte
+
+	for i := 0; data[i] != byte('\x00'); i++ {
+		str = append(str, data[i])
+	}
+
+	return string(str)
 }
 
 func (memory *SimpleMemory) WriteByteAt(virtualAddress uint32, data byte) {
@@ -85,7 +92,7 @@ func (memory *SimpleMemory) WriteDoubleWordAt(virtualAddress uint32, data uint64
 }
 
 func (memory *SimpleMemory) WriteStringAt(virtualAddress uint32, data string) {
-	var buffer = []byte(data)
+	var buffer = []byte(data + "\x00")
 	memory.access(virtualAddress, uint32(len(buffer)), &buffer, true)
 }
 

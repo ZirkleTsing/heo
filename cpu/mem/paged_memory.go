@@ -89,7 +89,14 @@ func (memory *PagedMemory) ReadBlockAt(virtualAddress uint32, size uint32) []byt
 
 func (memory *PagedMemory) ReadStringAt(virtualAddress uint32, size uint32) string {
 	var data = memory.ReadBlockAt(virtualAddress, size)
-	return string(data)
+
+	var str []byte
+
+	for i := 0; data[i] != byte('\x00'); i++ {
+		str = append(str, data[i])
+	}
+
+	return string(str)
 }
 
 func (memory *PagedMemory) WriteByteAt(virtualAddress uint32, data byte) {

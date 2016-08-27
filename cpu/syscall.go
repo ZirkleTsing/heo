@@ -273,7 +273,7 @@ func (syscallEmulation *SyscallEmulation) findAndRunSystemCallHandler(syscallInd
 }
 
 func (syscallEmulation *SyscallEmulation) checkSystemCallError(context *Context) bool {
-	if int32(context.Regs.Gpr[regs.REGISTER_V0]) != -1 {
+	if context.Regs.Sgpr(regs.REGISTER_V0) != -1 {
 		context.Regs.Gpr[regs.REGISTER_A3] = 0
 		return false
 	} else {
@@ -287,7 +287,7 @@ func (syscallEmulation *SyscallEmulation) DoSystemCall(callNum uint32, context *
 	var syscallIndex = callNum - 4000
 
 	if !syscallEmulation.findAndRunSystemCallHandler(syscallIndex, context) {
-		panic(fmt.Sprintf("ctx-%d: system call %d (%d) not implemented", context.Id, callNum, syscallIndex))
+		panic(fmt.Sprintf("ctx-%d: syscall %d (%d) not implemented", context.Id, callNum, syscallIndex))
 	}
 }
 
@@ -362,7 +362,7 @@ func (syscallEmulation *SyscallEmulation) open_impl(context *Context) {
 
 	var hostFlags = uint32(0)
 	for _, mapping := range syscallEmulation.OpenFlagMappings {
-		if targetFlags & uint32(mapping.TargetFlag) != 0 {
+		if (targetFlags & uint32(mapping.TargetFlag)) != 0 {
 			targetFlags &= ^uint32(mapping.TargetFlag)
 			hostFlags |= uint32(mapping.HostFlag)
 		}
@@ -411,6 +411,7 @@ func (syscallEmulation *SyscallEmulation) waitpid_impl(context *Context) {
 	var e = NewWaitEvent(context, pid)
 	context.Kernel.SystemEvents = append(context.Kernel.SystemEvents, e)
 	context.Suspend()
+
 	if pstatus != 0 {
 		panic("Impossible")
 	}
@@ -600,10 +601,10 @@ func (syscallEmulation *SyscallEmulation) mprotect_impl(context *Context) {
 
 func (syscallEmulation *SyscallEmulation) _llseek_impl(context *Context) {
 	var fd = context.Process.TranslateFileDescriptor(int(context.Regs.Gpr[regs.REGISTER_A0]))
-	var offset = context.Regs.Gpr[regs.REGISTER_A1]
-	var whence = context.Regs.Gpr[regs.REGISTER_A2]
+	var offset = int64(context.Regs.Gpr[regs.REGISTER_A1])
+	var whence = int(context.Regs.Gpr[regs.REGISTER_A2])
 
-	var ret = native.Seek(fd, int64(offset), int(whence))
+	var ret = native.Seek(fd, offset, whence)
 
 	context.Regs.Gpr[regs.REGISTER_V0] = uint32(ret)
 
@@ -667,14 +668,14 @@ func (syscallEmulation *SyscallEmulation) nanosleep_impl(context *Context) {
 
 func (syscallEmulation *SyscallEmulation) poll_impl(context *Context) {
 	var pufds = context.Regs.Gpr[regs.REGISTER_A0]
-	var nfds = context.Regs.Gpr[regs.REGISTER_A1]
+	var nfds = int(context.Regs.Gpr[regs.REGISTER_A1])
 	var timeout = int(context.Regs.Gpr[regs.REGISTER_A2])
 
 	if nfds < 1 {
 		panic("syscall poll: nfds < 1")
 	}
 
-	for i := uint32(0); i < nfds; i++ {
+	for i := 0; i < nfds; i++ {
 		var fd = int(context.Process.Memory.ReadWordAt(pufds))
 		var events = int16(context.Process.Memory.ReadHalfWordAt(pufds + 4))
 
@@ -758,6 +759,8 @@ func (syscallEmulation *SyscallEmulation) rt_sigsuspend_impl(context *Context) {
 		panic("syscall sigsuspend: mask is nil")
 	}
 
+	context.SignalMasks.Backup = context.SignalMasks.Blocked.Clone()
+
 	context.SignalMasks.Blocked.LoadFrom(context.Process.Memory, pmask)
 	context.Suspend()
 
@@ -781,7 +784,7 @@ func (syscallEmulation *SyscallEmulation) fstat64_impl(context *Context) {
 	syscallEmulation.Error = syscallEmulation.checkSystemCallError(context)
 
 	if !syscallEmulation.Error {
-		var sizeOfDataToWrite = uint32(64)
+		var sizeOfDataToWrite = uint32(104)
 		var dataToWrite = make([]byte, sizeOfDataToWrite)
 
 		var memory = mem.NewSimpleMemory(context.Process.LittleEndian, dataToWrite)
