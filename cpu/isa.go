@@ -36,14 +36,14 @@ func andi(context *Context, machInst MachInst) {
 }
 
 func div(context *Context, machInst MachInst) {
-	if machInst.Rt() == 0 {
+	if context.Regs.Gpr[machInst.Rt()] != 0 {
 		context.Regs.Lo = uint32(context.Regs.Sgpr(machInst.Rs()) / context.Regs.Sgpr(machInst.Rt()))
 		context.Regs.Hi = uint32(context.Regs.Sgpr(machInst.Rs()) % context.Regs.Sgpr(machInst.Rt()))
 	}
 }
 
 func divu(context *Context, machInst MachInst) {
-	if machInst.Rt() == 0 {
+	if context.Regs.Gpr[machInst.Rt()] != 0 {
 		context.Regs.Lo = context.Regs.Gpr[machInst.Rs()] / context.Regs.Gpr[machInst.Rt()]
 		context.Regs.Hi = context.Regs.Gpr[machInst.Rs()] % context.Regs.Gpr[machInst.Rt()]
 	}
