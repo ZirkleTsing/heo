@@ -679,8 +679,8 @@ func (syscallEmulation *SyscallEmulation) poll_impl(context *Context) {
 		var fd = int32(context.Process.Memory.ReadWordAt(pufds))
 		var events = int16(context.Process.Memory.ReadHalfWordAt(pufds + 4))
 
-		if events != -1 {
-			panic("syscall poll: ufds.events != POLLIN")
+		if events != 1 {
+			panic(fmt.Sprintf("syscall poll: ufds.events (%d) != POLLIN", events))
 		}
 
 		var e = NewPollEvent(context)
