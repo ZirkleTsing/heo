@@ -54,9 +54,9 @@ func NewKernel(experiment *CPUExperiment) *Kernel {
 	return kernel
 }
 
-func (kernel *Kernel) GetProcessFromId(id int32) *Process {
+func (kernel *Kernel) GetProcessFromId(processId int32) *Process {
 	for _, process := range kernel.Processes {
-		if process.Id == id {
+		if process.Id == processId {
 			return process
 		}
 	}
@@ -64,9 +64,9 @@ func (kernel *Kernel) GetProcessFromId(id int32) *Process {
 	return nil
 }
 
-func (kernel *Kernel) GetContextFromId(id int32) *Context {
+func (kernel *Kernel) GetContextFromId(contextId int32) *Context {
 	for _, context := range kernel.Contexts {
-		if context.Id == id {
+		if context.Id == contextId {
 			return context
 		}
 	}
@@ -93,7 +93,7 @@ func (kernel *Kernel) Map(contextToMap *Context, predicate func(candidateThreadI
 		for threadNum := int32(0); threadNum < kernel.Experiment.Config.NumThreadsPerCore; threadNum++ {
 			var threadId = coreNum * kernel.Experiment.Config.NumThreadsPerCore + threadNum
 
-			var hasMapped bool
+			var hasMapped = false
 
 			for _, context := range kernel.Contexts {
 				if context.ThreadId == threadId {
@@ -116,7 +116,7 @@ func (kernel *Kernel) ProcessSystemEvents() {
 	var systemEventsToPreserve []SystemEvent
 
 	for _, e := range kernel.SystemEvents {
-		if (e.Context().State == ContextState_RUNNING || e.Context().State == ContextState_BLOCKED) && !e.NeedProcess() {
+		if (e.Context().State == ContextState_RUNNING || e.Context().State == ContextState_BLOCKED) && e.NeedProcess() {
 			e.Process()
 		} else {
 			systemEventsToPreserve = append(systemEventsToPreserve, e)
