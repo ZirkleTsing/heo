@@ -8,12 +8,12 @@ import (
 const MAX_SIGNAL = 64
 
 type SignalMask struct {
-	Signals []uint32
+	signals []uint32
 }
 
 func NewSignalMask() *SignalMask {
 	var signalMask = &SignalMask{
-		Signals:make([]uint32, MAX_SIGNAL),
+		signals:make([]uint32, MAX_SIGNAL),
 	}
 
 	return signalMask
@@ -21,7 +21,7 @@ func NewSignalMask() *SignalMask {
 
 func (signalMask *SignalMask) Clone() *SignalMask {
 	var newSignalMask = NewSignalMask()
-	copy(newSignalMask.Signals, signalMask.Signals)
+	copy(newSignalMask.signals, signalMask.signals)
 	return newSignalMask
 }
 
@@ -32,7 +32,7 @@ func (signalMask *SignalMask) Set(signal uint32) {
 
 	signal--
 
-	signalMask.Signals[signal / 32] = cpuutil.SetBit32(signalMask.Signals[signal / 32], signal % 32)
+	signalMask.signals[signal / 32] = cpuutil.SetBit32(signalMask.signals[signal / 32], signal % 32)
 }
 
 func (signalMask *SignalMask) Clear(signal uint32) {
@@ -42,7 +42,7 @@ func (signalMask *SignalMask) Clear(signal uint32) {
 
 	signal--
 
-	signalMask.Signals[signal / 32] = cpuutil.ClearBit32(signalMask.Signals[signal / 32], signal % 32)
+	signalMask.signals[signal / 32] = cpuutil.ClearBit32(signalMask.signals[signal / 32], signal % 32)
 }
 
 func (signalMask *SignalMask) Contains(signal uint32) bool {
@@ -52,18 +52,18 @@ func (signalMask *SignalMask) Contains(signal uint32) bool {
 
 	signal--
 
-	return cpuutil.GetBit32(signalMask.Signals[signal / 32], signal % 32) != 0
+	return cpuutil.GetBit32(signalMask.signals[signal / 32], signal % 32) != 0
 }
 
 func (signalMask *SignalMask) LoadFrom(memory *mem.PagedMemory, virtualAddress uint32) {
 	for i := uint32(0); i < MAX_SIGNAL / 32; i++ {
-		signalMask.Signals[i] = memory.ReadWordAt(virtualAddress + i * 4)
+		signalMask.signals[i] = memory.ReadWordAt(virtualAddress + i * 4)
 	}
 }
 
 func (signalMask *SignalMask) SaveTo(memory *mem.PagedMemory, virtualAddress uint32) {
 	for i := uint32(0); i < MAX_SIGNAL / 32; i++ {
-		memory.WriteWordAt(virtualAddress + i * 4, signalMask.Signals[i])
+		memory.WriteWordAt(virtualAddress + i * 4, signalMask.signals[i])
 	}
 }
 

@@ -300,7 +300,7 @@ func (syscallEmulation *SyscallEmulation) read_impl(context *Context) {
 
 	var fd = context.Process.TranslateFileDescriptor(int32(context.Regs.Gpr[regs.REGISTER_A0]))
 	var bufAddr = context.Regs.Gpr[regs.REGISTER_A1]
-	var count = uint32(math.Min(float64(readMaxSize), float64(context.Regs.Gpr[regs.REGISTER_A2])))
+	var size = uint32(math.Min(float64(readMaxSize), float64(context.Regs.Gpr[regs.REGISTER_A2])))
 
 	var ret uint32
 	var buf []byte
@@ -311,16 +311,16 @@ func (syscallEmulation *SyscallEmulation) read_impl(context *Context) {
 			var e = NewReadEvent(context)
 			e.WaitForFileDescriptorCriterion.Buffer = buffer
 			e.WaitForFileDescriptorCriterion.Address = bufAddr
-			e.WaitForFileDescriptorCriterion.Size = count
+			e.WaitForFileDescriptorCriterion.Size = size
 			context.Kernel.SystemEvents = append(context.Kernel.SystemEvents, e)
 			context.Suspend()
 			return
 		} else {
-			buf = make([]byte, count)
-			ret = buffer.Read(&buf, count)
+			buf = make([]byte, size)
+			ret = buffer.Read(&buf, size)
 		}
 	} else {
-		buf = make([]byte, count)
+		buf = make([]byte, size)
 		ret = uint32(native.Read(fd, buf))
 	}
 
@@ -337,16 +337,16 @@ func (syscallEmulation *SyscallEmulation) read_impl(context *Context) {
 func (syscallEmulation *SyscallEmulation) write_impl(context *Context) {
 	var fd = context.Process.TranslateFileDescriptor(int32(context.Regs.Gpr[regs.REGISTER_A0]))
 	var bufAddr = context.Regs.Gpr[regs.REGISTER_A1]
-	var count = context.Regs.Gpr[regs.REGISTER_A2]
+	var size = context.Regs.Gpr[regs.REGISTER_A2]
 
-	var buf = context.Process.Memory.ReadBlockAt(bufAddr, count)
+	var buf = context.Process.Memory.ReadBlockAt(bufAddr, size)
 
 	var ret uint32
 
 	var buffer = context.Kernel.GetWriteBuffer(fd)
 	if buffer != nil {
-		buffer.Write(&buf, count)
-		ret = count
+		buffer.Write(&buf, size)
+		ret = size
 	} else {
 		ret = uint32(native.Write(fd, buf))
 	}
@@ -599,7 +599,7 @@ func (syscallEmulation *SyscallEmulation) mprotect_impl(context *Context) {
 	context.Regs.Gpr[regs.REGISTER_V0] = 0
 }
 
-func (syscallEmulation *SyscallEmulation) _llseek_impl(context *Context) {
+func (syscallEmulation *SyscallEmulation) _llseek_impl(context *Context) { //TODO: correct?
 	var fd = context.Process.TranslateFileDescriptor(int32(context.Regs.Gpr[regs.REGISTER_A0]))
 	var offset = int64(context.Regs.Gpr[regs.REGISTER_A1])
 	var whence = int32(context.Regs.Gpr[regs.REGISTER_A2])
@@ -641,18 +641,6 @@ func (syscallEmulation *SyscallEmulation) _sysctl_impl(context *Context) {
 	}
 }
 
-func (sysallEmulation *SyscallEmulation) mremap_impl(context *Context) {
-	var oldAddr = context.Regs.Gpr[regs.REGISTER_A0]
-	var oldSize = context.Regs.Gpr[regs.REGISTER_A1]
-	var newSize = context.Regs.Gpr[regs.REGISTER_A2]
-
-	var start = context.Process.Memory.Remap(oldAddr, oldSize, newSize)
-
-	context.Regs.Gpr[regs.REGISTER_V0] = start
-
-	sysallEmulation.Error = sysallEmulation.checkSyscallError(context)
-}
-
 func (syscallEmulation *SyscallEmulation) nanosleep_impl(context *Context) {
 	var preq = context.Regs.Gpr[regs.REGISTER_A0]
 	var sec = context.Process.Memory.ReadWordAt(preq)
@@ -664,6 +652,18 @@ func (syscallEmulation *SyscallEmulation) nanosleep_impl(context *Context) {
 	e.TimeCriterion.When = native.Clock(context.Kernel.CurrentCycle + total)
 	context.Kernel.SystemEvents = append(context.Kernel.SystemEvents, e)
 	context.Suspend()
+}
+
+func (sysallEmulation *SyscallEmulation) mremap_impl(context *Context) {
+	var oldAddr = context.Regs.Gpr[regs.REGISTER_A0]
+	var oldSize = context.Regs.Gpr[regs.REGISTER_A1]
+	var newSize = context.Regs.Gpr[regs.REGISTER_A2]
+
+	var start = context.Process.Memory.Remap(oldAddr, oldSize, newSize)
+
+	context.Regs.Gpr[regs.REGISTER_V0] = start
+
+	sysallEmulation.Error = sysallEmulation.checkSyscallError(context)
 }
 
 func (syscallEmulation *SyscallEmulation) poll_impl(context *Context) {
