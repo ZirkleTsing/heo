@@ -5,10 +5,10 @@ type LRUPolicy struct {
 	lruStack *SimpleCache
 }
 
-func NewLRUPolicy(cache *Cache) *LRUPolicy {
+func NewLRUPolicy(cache *EvictableCache) *LRUPolicy {
 	var lruPolicy = &LRUPolicy{
 		BaseCacheReplacementPolicy: NewBaseCacheReplacementPolicy(cache),
-		lruStack:NewSimpleCacheFromCache(cache),
+		lruStack:NewSimpleCacheFromCache(cache.Cache),
 	}
 
 	return lruPolicy

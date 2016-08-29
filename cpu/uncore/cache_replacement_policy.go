@@ -1,18 +1,17 @@
 package uncore
 
 type CacheReplacementPolicy interface {
-	Cache() *Cache
-	NewMiss(access *MemoryHierarchyAccess, set uint32, address uint32) *CacheAccess
+	Cache() *EvictableCache
 	HandleReplacement(access *MemoryHierarchyAccess, set uint32, tag uint32) *CacheAccess
 	HandlePromotionOnHit(access *MemoryHierarchyAccess, set uint32, way uint32)
 	HandleInsertionOnMiss(access *MemoryHierarchyAccess, set uint32, way uint32)
 }
 
 type BaseCacheReplacementPolicy struct {
-	cache *Cache
+	cache *EvictableCache
 }
 
-func NewBaseCacheReplacementPolicy(cache *Cache) *BaseCacheReplacementPolicy {
+func NewBaseCacheReplacementPolicy(cache *EvictableCache) *BaseCacheReplacementPolicy {
 	var baseCacheReplacementPolicy = &BaseCacheReplacementPolicy{
 		cache:cache,
 	}
@@ -20,19 +19,19 @@ func NewBaseCacheReplacementPolicy(cache *Cache) *BaseCacheReplacementPolicy {
 	return baseCacheReplacementPolicy
 }
 
-func (baseCacheReplacementPolicy *BaseCacheReplacementPolicy) Cache() *Cache {
+func (baseCacheReplacementPolicy *BaseCacheReplacementPolicy) Cache() *EvictableCache {
 	return baseCacheReplacementPolicy.cache
 }
 
-func NewMiss(baseCacheReplacementPolicy CacheReplacementPolicy, access *MemoryHierarchyAccess, set uint32, address uint32) *CacheAccess {
-	var tag = baseCacheReplacementPolicy.Cache().GetTag(address)
+func NewMiss(cacheReplacementPolicy CacheReplacementPolicy, access *MemoryHierarchyAccess, set uint32, address uint32) *CacheAccess {
+	var tag = cacheReplacementPolicy.Cache().GetTag(address)
 
-	for way := uint32(0); way < baseCacheReplacementPolicy.Cache().Assoc(); way++ {
-		var line = baseCacheReplacementPolicy.Cache().Sets[set].Lines[way]
+	for way := uint32(0); way < cacheReplacementPolicy.Cache().Assoc(); way++ {
+		var line = cacheReplacementPolicy.Cache().Sets[set].Lines[way]
 		if !line.Valid() {
-			return NewCacheAccess(baseCacheReplacementPolicy.Cache(), access, set, way, tag)
+			return NewCacheAccess(cacheReplacementPolicy.Cache(), access, set, way, tag)
 		}
 	}
 
-	return baseCacheReplacementPolicy.HandleReplacement(access, set, tag)
+	return cacheReplacementPolicy.HandleReplacement(access, set, tag)
 }
