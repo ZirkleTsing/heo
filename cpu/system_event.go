@@ -179,9 +179,9 @@ func (readEvent *ReadEvent) NeedProcess() bool {
 func (readEvent *ReadEvent) Process() {
 	readEvent.Context().Resume()
 
-	var buf = make([]byte, readEvent.WaitForFileDescriptorCriterion.Size)
+	var buf = readEvent.WaitForFileDescriptorCriterion.Buffer.Read(readEvent.WaitForFileDescriptorCriterion.Size)
 
-	var numRead = readEvent.WaitForFileDescriptorCriterion.Buffer.Read(&buf, uint32(len(buf)))
+	var numRead = uint32(len(buf))
 
 	readEvent.Context().Regs.Gpr[regs.REGISTER_V0] = numRead
 	readEvent.Context().Regs.Gpr[regs.REGISTER_A3] = 0

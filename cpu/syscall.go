@@ -316,8 +316,8 @@ func (syscallEmulation *SyscallEmulation) read_impl(context *Context) {
 			context.Suspend()
 			return
 		} else {
-			buf = make([]byte, size)
-			ret = buffer.Read(&buf, size)
+			buf = buffer.Read(size)
+			ret = uint32(len(buf))
 		}
 	} else {
 		buf = make([]byte, size)
@@ -345,7 +345,7 @@ func (syscallEmulation *SyscallEmulation) write_impl(context *Context) {
 
 	var buffer = context.Kernel.GetWriteBuffer(fd)
 	if buffer != nil {
-		buffer.Write(&buf, size)
+		buffer.Write(buf)
 		ret = size
 	} else {
 		ret = uint32(native.Write(fd, buf))
