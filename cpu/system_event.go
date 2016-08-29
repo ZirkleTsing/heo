@@ -56,7 +56,7 @@ func NewWaitForProcessIdCriterion(context *Context, processId int32) *WaitForPro
 		ProcessId:processId,
 	}
 
-	context.Kernel.Experiment.BlockingEventDispatcher.AddListener(reflect.TypeOf((*ContextKilledEvent)(nil)), func(event interface{}) {
+	context.Kernel.Experiment.BlockingEventDispatcher().AddListener(reflect.TypeOf((*ContextKilledEvent)(nil)), func(event interface{}) {
 		waitForProcessIdCriterion.HasProcessKilled = true
 	})
 

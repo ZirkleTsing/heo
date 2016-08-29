@@ -19,7 +19,7 @@ func (staticInst *StaticInst) Execute(context *Context) {
 
 	staticInst.Mnemonic.Execute(context, staticInst.MachInst)
 
-	context.Kernel.Experiment.BlockingEventDispatcher.Dispatch(NewStaticInstExecutedEvent(context, oldPc, staticInst))
+	context.Kernel.Experiment.BlockingEventDispatcher().Dispatch(NewStaticInstExecutedEvent(context, oldPc, staticInst))
 }
 
 func (staticInst *StaticInst) Disassemble(pc uint32) string {

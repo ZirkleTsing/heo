@@ -261,7 +261,7 @@ func (syscallEmulation *SyscallEmulation) findAndRunSyscallHandler(syscallIndex 
 	if handler, ok := syscallEmulation.Handlers[syscallIndex]; ok {
 		handler.Run(context)
 
-		context.Kernel.Experiment.BlockingEventDispatcher.Dispatch(NewSyscallExecutedEvent(context, handler.Name))
+		context.Kernel.Experiment.BlockingEventDispatcher().Dispatch(NewSyscallExecutedEvent(context, handler.Name))
 
 		context.Kernel.ProcessSystemEvents()
 		context.Kernel.ProcessSignals()

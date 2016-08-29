@@ -8,7 +8,7 @@ import (
 func (experiment *CPUExperiment) DumpStats() {
 	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "TotalCycles",
-		Value: experiment.CycleAccurateEventQueue.CurrentCycle,
+		Value: experiment.CycleAccurateEventQueue().CurrentCycle,
 	})
 
 	experiment.Stats = append(experiment.Stats, simutil.Stat{
@@ -18,7 +18,7 @@ func (experiment *CPUExperiment) DumpStats() {
 
 	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "CyclesPerSecond",
-		Value: float64(experiment.CycleAccurateEventQueue.CurrentCycle) / experiment.EndTime.Sub(experiment.BeginTime).Seconds(),
+		Value: float64(experiment.CycleAccurateEventQueue().CurrentCycle) / experiment.EndTime.Sub(experiment.BeginTime).Seconds(),
 	})
 
 	simutil.WriteJsonFile(experiment.Stats, experiment.Config.OutputDirectory, simutil.STATS_JSON_FILE_NAME)

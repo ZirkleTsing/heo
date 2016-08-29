@@ -52,7 +52,7 @@ func NewContext(kernel *Kernel, process *Process, parent *Context, regs *regs.Ar
 	kernel.CurrentContextId++
 	kernel.CurrentPid++
 
-	kernel.Experiment.BlockingEventDispatcher.Dispatch(NewContextCreatedEvent(context))
+	kernel.Experiment.BlockingEventDispatcher().Dispatch(NewContextCreatedEvent(context))
 
 	return context
 }

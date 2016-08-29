@@ -19,7 +19,7 @@ func NewThread(core *Core, num int32) *Thread {
 		ExecutedSyscallNames:make(map[string]int32),
 	}
 
-	core.Processor.Experiment.BlockingEventDispatcher.AddListener(reflect.TypeOf((*StaticInstExecutedEvent)(nil)), func(event interface{}) {
+	core.Processor.Experiment.BlockingEventDispatcher().AddListener(reflect.TypeOf((*StaticInstExecutedEvent)(nil)), func(event interface{}) {
 		var staticInstExecutedEvent = event.(*StaticInstExecutedEvent)
 
 		if staticInstExecutedEvent.Context == thread.Context {
@@ -33,7 +33,7 @@ func NewThread(core *Core, num int32) *Thread {
 		}
 	})
 
-	core.Processor.Experiment.BlockingEventDispatcher.AddListener(reflect.TypeOf((*SyscallExecutedEvent)(nil)), func(event interface{}) {
+	core.Processor.Experiment.BlockingEventDispatcher().AddListener(reflect.TypeOf((*SyscallExecutedEvent)(nil)), func(event interface{}) {
 		var syscallExecutedEvent = event.(*SyscallExecutedEvent)
 
 		if syscallExecutedEvent.Context == thread.Context {

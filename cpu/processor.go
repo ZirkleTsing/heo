@@ -74,5 +74,5 @@ func (processor *Processor) kill(context *Context) {
 
 	context.ThreadId = -1
 
-	processor.Experiment.BlockingEventDispatcher.Dispatch(NewContextKilledEvent(context))
+	processor.Experiment.BlockingEventDispatcher().Dispatch(NewContextKilledEvent(context))
 }
