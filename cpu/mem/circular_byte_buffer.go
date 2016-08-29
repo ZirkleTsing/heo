@@ -1,116 +1,55 @@
 package mem
 
+import (
+	"bytes"
+	"math"
+)
+
 type CircularByteBuffer struct {
-	Data          *SimpleMemory
-	ReadPosition  uint32
-	WritePosition uint32
+	data  chan byte
+	Size uint32
+	Count uint32
 }
 
-func NewCircularByteBuffer(capacity uint32) *CircularByteBuffer {
-	var circularByteBuffer = &CircularByteBuffer{
-		Data:NewSimpleMemory(true, make([]byte, capacity)),
+func NewCircularByteBuffer(size uint32) *CircularByteBuffer {
+	var buffer = &CircularByteBuffer{
+		data:make(chan byte, size),
+		Size:size,
 	}
 
-	return circularByteBuffer
+	return buffer
 }
 
-func (circularByteBuffer *CircularByteBuffer) Read(dest *[]byte, count uint32) (uint32) {
-	var offset = uint32(0)
+func (buffer *CircularByteBuffer) Read(count uint32) []byte {
+	var buf bytes.Buffer
 
-	if count >= uint32(len(circularByteBuffer.Data.Data)) {
+	if count > buffer.Count {
 		panic("Requested read is greater than the buffer")
 	}
 
-	if circularByteBuffer.WritePosition == circularByteBuffer.ReadPosition {
-		return 0
+	count = uint32(math.Min(float64(count), float64(buffer.Count)))
+
+	for i := uint32(0); i < count; i++ {
+		buf.WriteByte(<-buffer.data)
 	}
 
-	circularByteBuffer.Data.ReadPosition = circularByteBuffer.ReadPosition
-	if circularByteBuffer.WritePosition < circularByteBuffer.ReadPosition {
-		var remainder = uint32(len(circularByteBuffer.Data.Data)) - circularByteBuffer.Data.ReadPosition
-		if remainder < count {
-			copy((*dest)[offset:remainder], circularByteBuffer.Data.ReadBlock(remainder))
+	buffer.Count -= count
 
-			offset += remainder
-			count -= remainder
-
-			circularByteBuffer.ReadPosition = 0
-			circularByteBuffer.Data.ReadPosition = circularByteBuffer.ReadPosition
-
-			var space = circularByteBuffer.WritePosition - circularByteBuffer.ReadPosition
-			if space <= count {
-				count = space
-			}
-
-			copy((*dest)[offset:count], circularByteBuffer.Data.ReadBlock(count))
-			circularByteBuffer.ReadPosition += count
-
-			return remainder + count
-		} else {
-			copy((*dest)[offset:remainder], circularByteBuffer.Data.ReadBlock(remainder))
-			circularByteBuffer.ReadPosition += remainder
-			return remainder
-		}
-	} else {
-		var space = circularByteBuffer.WritePosition - circularByteBuffer.ReadPosition
-		if space <= count {
-			count = space
-		}
-
-		copy((*dest)[offset:count], circularByteBuffer.Data.ReadBlock(count))
-		circularByteBuffer.ReadPosition += count
-		return count
-	}
+	return buf.Bytes()
 }
 
-func (circularByteBuffer *CircularByteBuffer) Write(src *[]byte, count uint32) bool {
-	var offset = uint32(0)
-
-	if count >= uint32(len(circularByteBuffer.Data.Data)) {
+func (buffer *CircularByteBuffer) Write(src []byte) {
+	if uint32(len(src)) > buffer.Size - buffer.Count {
 		panic("Requested write is greater than the buffer")
 	}
 
-	circularByteBuffer.Data.WritePosition = circularByteBuffer.WritePosition
-
-	if (circularByteBuffer.ReadPosition <= circularByteBuffer.WritePosition &&
-		circularByteBuffer.WritePosition + count < uint32(len(circularByteBuffer.Data.Data))) ||
-		(circularByteBuffer.WritePosition < circularByteBuffer.ReadPosition &&
-			count < circularByteBuffer.ReadPosition - circularByteBuffer.WritePosition) {
-		circularByteBuffer.Data.WriteBlock(count, (*src)[offset:count])
-		circularByteBuffer.WritePosition += count
-		return true
-	} else {
-		var remainder = uint32(len(circularByteBuffer.Data.Data)) - circularByteBuffer.Data.ReadPosition
-
-		if circularByteBuffer.ReadPosition < circularByteBuffer.WritePosition &&
-			count > circularByteBuffer.ReadPosition + remainder {
-			return false
-		}
-
-		if circularByteBuffer.WritePosition < circularByteBuffer.ReadPosition &&
-			count > circularByteBuffer.ReadPosition - circularByteBuffer.WritePosition {
-			return false
-		}
-
-		circularByteBuffer.Data.WriteBlock(remainder, (*src)[offset:remainder])
-
-		offset += remainder
-		count -= remainder
-
-		circularByteBuffer.WritePosition = 0
-		circularByteBuffer.Data.WritePosition = circularByteBuffer.WritePosition
-
-		if count >= circularByteBuffer.ReadPosition {
-			panic("There is not enough room for this write operation")
-		}
-
-		circularByteBuffer.Data.WriteBlock(count, (*src)[offset:count])
-		circularByteBuffer.WritePosition += count
-
-		return true
+	for _, b := range src {
+		buffer.data <- b
 	}
+
+	buffer.Count += uint32(len(src))
 }
 
-func (circularByteBuffer *CircularByteBuffer) IsEmpty() bool {
-	return circularByteBuffer.WritePosition == circularByteBuffer.ReadPosition
+func (buffer *CircularByteBuffer) IsEmpty() bool {
+	return buffer.Count == 0
 }
