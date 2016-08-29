@@ -11,11 +11,15 @@ type MemoryHierarchyDriver interface {
 
 type MemoryHierarchy struct {
 	Driver MemoryHierarchyDriver
+	Config *MemoryHierarchyConfig
+
+	CurrentMemoryHierarchyAccessId int32
 }
 
-func NewMemoryHierarchy(experiment MemoryHierarchyDriver) *MemoryHierarchy {
+func NewMemoryHierarchy(driver MemoryHierarchyDriver, config *MemoryHierarchyConfig) *MemoryHierarchy {
 	var memoryHierarchy = &MemoryHierarchy{
-		Driver:experiment,
+		Driver:driver,
+		Config:config,
 	}
 
 	return memoryHierarchy

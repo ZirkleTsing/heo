@@ -31,7 +31,10 @@ func NewCPUExperiment(config *CPUConfig) *CPUExperiment {
 
 	experiment.Kernel = NewKernel(experiment)
 	experiment.Processor = NewProcessor(experiment)
-	experiment.MemoryHierarchy = uncore.NewMemoryHierarchy(experiment)
+
+	var memoryHierarchyConfig = uncore.NewMemoryHierarchyConfig() //TODO: to be passed here externally
+
+	experiment.MemoryHierarchy = uncore.NewMemoryHierarchy(experiment, memoryHierarchyConfig)
 
 	experiment.blockingEventDispatcher.AddListener(reflect.TypeOf((*StaticInstExecutedEvent)(nil)), func(event interface{}) {
 		//var staticInstExecutedEvent = event.(*StaticInstExecutedEvent)

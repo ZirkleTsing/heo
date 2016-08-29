@@ -4,7 +4,7 @@ import "math"
 
 type Geometry struct {
 	Size           uint32
-	Associativity  uint32
+	Assoc          uint32
 	LineSize       uint32
 	LineSizeInLog2 uint32
 	NumSets        uint32
@@ -12,14 +12,14 @@ type Geometry struct {
 	NumLines       uint32
 }
 
-func NewGeometry(size uint32, associativity uint32, lineSize uint32) *Geometry {
+func NewGeometry(size uint32, assoc uint32, lineSize uint32) *Geometry {
 	var geometry = &Geometry{
 		Size:size,
-		Associativity:associativity,
+		Assoc:assoc,
 		LineSize:lineSize,
 		LineSizeInLog2:uint32(math.Log2(float64(lineSize))),
-		NumSets:size / associativity / lineSize,
-		NumSetsInLog2:uint32(math.Log2(float64(size / uint32(associativity) / lineSize))),
+		NumSets:size / assoc / lineSize,
+		NumSetsInLog2:uint32(math.Log2(float64(size / uint32(assoc) / lineSize))),
 		NumLines:size / lineSize,
 	}
 
