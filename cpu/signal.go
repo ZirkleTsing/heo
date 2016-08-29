@@ -13,7 +13,7 @@ type SignalMask struct {
 
 func NewSignalMask() *SignalMask {
 	var signalMask = &SignalMask{
-		signals:make([]uint32, MAX_SIGNAL),
+		signals:make([]uint32, MAX_SIGNAL / 2),
 	}
 
 	return signalMask
