@@ -187,7 +187,7 @@ func (kernel *Kernel) RunSignalHandler(context *Context, signal uint32) {
 	context.Regs.Npc = kernel.SignalActions[signal - 1].Handler
 	context.Regs.Nnpc = context.Regs.Npc + 4
 
-	for context.State == ContextState_RUNNING && context.Regs.Npc != 0xfffffff {
+	for context.State == ContextState_RUNNING && context.Regs.Npc != 0xffffffff {
 		context.DecodeNextStaticInst().Execute(context)
 	}
 
