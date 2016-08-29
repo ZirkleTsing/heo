@@ -64,8 +64,8 @@ func NewWaitForProcessIdCriterion(context *Context, processId int32) *WaitForPro
 }
 
 func (waitForProcessIdCriterion *WaitForProcessIdCriterion) NeedProcess(context *Context) bool {
-	return waitForProcessIdCriterion.ProcessId == -1 && waitForProcessIdCriterion.HasProcessKilled ||
-		waitForProcessIdCriterion.ProcessId > 0 && context.Kernel.GetContextFromProcessId(waitForProcessIdCriterion.ProcessId) == nil
+	return (waitForProcessIdCriterion.ProcessId == -1 && waitForProcessIdCriterion.HasProcessKilled) ||
+		(waitForProcessIdCriterion.ProcessId > 0 && context.Kernel.GetContextFromProcessId(waitForProcessIdCriterion.ProcessId) == nil)
 }
 
 type WaitForFileDescriptorCriterion struct {
@@ -183,7 +183,7 @@ func (readEvent *ReadEvent) Process() {
 
 	var numRead = readEvent.WaitForFileDescriptorCriterion.Buffer.Read(&buf, uint32(len(buf)))
 
-	readEvent.Context().Regs.Gpr[regs.REGISTER_V0] = uint32(numRead)
+	readEvent.Context().Regs.Gpr[regs.REGISTER_V0] = numRead
 	readEvent.Context().Regs.Gpr[regs.REGISTER_A3] = 0
 
 	readEvent.Context().Process.Memory.WriteBlockAt(readEvent.WaitForFileDescriptorCriterion.Address, numRead, buf)
