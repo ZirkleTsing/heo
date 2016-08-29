@@ -14,11 +14,6 @@ func NewCircularByteBuffer(capacity uint32) *CircularByteBuffer {
 	return circularByteBuffer
 }
 
-func (circularByteBuffer *CircularByteBuffer) Reset() {
-	circularByteBuffer.ReadPosition = 0
-	circularByteBuffer.WritePosition = 0
-}
-
 func (circularByteBuffer *CircularByteBuffer) Read(dest *[]byte, count uint32) (uint32) {
 	var offset = uint32(0)
 
@@ -118,11 +113,4 @@ func (circularByteBuffer *CircularByteBuffer) Write(src *[]byte, count uint32) b
 
 func (circularByteBuffer *CircularByteBuffer) IsEmpty() bool {
 	return circularByteBuffer.WritePosition == circularByteBuffer.ReadPosition
-}
-
-func (circularByteBuffer *CircularByteBuffer) IsFull() bool {
-	return circularByteBuffer.WritePosition + 1 <= uint32(len(circularByteBuffer.Data.Data)) &&
-		circularByteBuffer.WritePosition + 1 == circularByteBuffer.ReadPosition ||
-		circularByteBuffer.WritePosition == uint32(len(circularByteBuffer.Data.Data)) - 1 &&
-			circularByteBuffer.ReadPosition == 0
 }
