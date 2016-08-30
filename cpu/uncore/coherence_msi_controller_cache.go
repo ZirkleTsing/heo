@@ -9,6 +9,7 @@ type CacheController struct {
 	HitLatency                uint32
 	PendingAccesses           map[uint32]*MemoryHierarchyAccess
 	NumPendingAccessesPerType map[MemoryHierarchyAccessType]uint32
+	FsmFactory *CacheControllerFiniteStateMachineFactory
 }
 
 func NewCacheController(memoryHierarchy *MemoryHierarchy, name string, deviceType MemoryDeviceType, geometry *mem.Geometry, replacementPolicyType CacheReplacementPolicyType, numReadPorts uint32, numWritePorts uint32, hitLatency uint32) *CacheController {
@@ -24,6 +25,8 @@ func NewCacheController(memoryHierarchy *MemoryHierarchy, name string, deviceTyp
 	cacheController.NumPendingAccessesPerType[MemoryHierarchyAccessType_IFETCH] = 0
 	cacheController.NumPendingAccessesPerType[MemoryHierarchyAccessType_LOAD] = 0
 	cacheController.NumPendingAccessesPerType[MemoryHierarchyAccessType_STORE] = 0
+
+	cacheController.FsmFactory = NewCacheControllerFiniteStateMachineFactory()
 
 	return cacheController
 }

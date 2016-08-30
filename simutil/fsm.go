@@ -1,12 +1,12 @@
 package simutil
 
 type FiniteStateMachineEvent struct {
-	Fsm       *FiniteStateMachine
+	Fsm       *BaseFiniteStateMachine
 	Condition interface{}
 	Params    interface{}
 }
 
-func NewBaseFiniteStateMachineEvent(fsm *FiniteStateMachine, condition interface{}, params interface{}) *FiniteStateMachineEvent {
+func NewBaseFiniteStateMachineEvent(fsm *BaseFiniteStateMachine, condition interface{}, params interface{}) *FiniteStateMachineEvent {
 	var baseFiniteStateMachineEvent = &FiniteStateMachineEvent{
 		Fsm:fsm,
 		Condition:condition,
@@ -20,7 +20,7 @@ type EnterStateEvent struct {
 	*FiniteStateMachineEvent
 }
 
-func NewEnterStateEvent(fsm *FiniteStateMachine, condition interface{}, params interface{}) *EnterStateEvent {
+func NewEnterStateEvent(fsm *BaseFiniteStateMachine, condition interface{}, params interface{}) *EnterStateEvent {
 	var enterStateEvent = &EnterStateEvent{
 		FiniteStateMachineEvent:NewBaseFiniteStateMachineEvent(fsm, condition, params),
 	}
@@ -32,7 +32,7 @@ type ExitStateEvent struct {
 	*FiniteStateMachineEvent
 }
 
-func NewExitStateEvent(fsm *FiniteStateMachine, condition interface{}, params interface{}) *ExitStateEvent {
+func NewExitStateEvent(fsm *BaseFiniteStateMachine, condition interface{}, params interface{}) *ExitStateEvent {
 	var exitStateEvent = &ExitStateEvent{
 		FiniteStateMachineEvent:NewBaseFiniteStateMachineEvent(fsm, condition, params),
 	}
@@ -40,14 +40,19 @@ func NewExitStateEvent(fsm *FiniteStateMachine, condition interface{}, params in
 	return exitStateEvent
 }
 
-type FiniteStateMachine struct {
+type FiniteStateMachine interface {
+	State() interface{}
+	SetState(condition interface{}, params interface{}, state interface{})
+}
+
+type BaseFiniteStateMachine struct {
 	state                   interface{}
 	BlockingEventDispatcher *BlockingEventDispatcher
 	settingStates           bool
 }
 
-func NewFiniteStateMachine(state interface{}) *FiniteStateMachine {
-	var finiteStateMachine = &FiniteStateMachine{
+func NewBaseFiniteStateMachine(state interface{}) *BaseFiniteStateMachine {
+	var finiteStateMachine = &BaseFiniteStateMachine{
 		state:state,
 		BlockingEventDispatcher:NewBlockingEventDispatcher(),
 	}
@@ -55,11 +60,11 @@ func NewFiniteStateMachine(state interface{}) *FiniteStateMachine {
 	return finiteStateMachine
 }
 
-func (finiteStateMachine *FiniteStateMachine) State() interface{} {
+func (finiteStateMachine *BaseFiniteStateMachine) State() interface{} {
 	return finiteStateMachine.state
 }
 
-func (finiteStateMachine *FiniteStateMachine) SetState(condition interface{}, params interface{}, state interface{}) {
+func (finiteStateMachine *BaseFiniteStateMachine) SetState(condition interface{}, params interface{}, state interface{}) {
 	if finiteStateMachine.settingStates {
 		panic("Impossible")
 	}
@@ -79,11 +84,11 @@ type StateTransition struct {
 	State               interface{}
 	Condition           interface{}
 	NewState            interface{}
-	Action              func(fsm *FiniteStateMachine, condition interface{}, params interface{})
-	OnCompletedCallback func(fsm *FiniteStateMachine)
+	Action              func(fsm FiniteStateMachine, condition interface{}, params interface{})
+	OnCompletedCallback func(fsm FiniteStateMachine)
 }
 
-func NewStateTransition(state interface{}, condition interface{}, newState interface{}, action func(fsm *FiniteStateMachine, condition interface{}, params interface{}), onCompletedCallback func(fsm *FiniteStateMachine)) *StateTransition {
+func NewStateTransition(state interface{}, condition interface{}, newState interface{}, action func(fsm FiniteStateMachine, condition interface{}, params interface{}), onCompletedCallback func(fsm FiniteStateMachine)) *StateTransition {
 	var stateTransition = &StateTransition{
 		State:state,
 		Condition:condition,
@@ -99,7 +104,7 @@ type StateTransitions struct {
 	fsmFactory          *FiniteStateMachineFactory
 	state               interface{}
 	perStateTransitions map[interface{}]*StateTransition
-	onCompletedCallback func(fsm *FiniteStateMachine)
+	onCompletedCallback func(fsm FiniteStateMachine)
 }
 
 func NewStateTransitions(fsmFactory *FiniteStateMachineFactory, state interface{}) *StateTransitions {
@@ -112,11 +117,11 @@ func NewStateTransitions(fsmFactory *FiniteStateMachineFactory, state interface{
 	return stateTransitions
 }
 
-func (stateTransitions *StateTransitions) OnCondition(condition interface{}, action func(fsm *FiniteStateMachine, condition interface{}, params interface{}), newState interface{}, onCompletedCallback func(fsm *FiniteStateMachine)) {
+func (stateTransitions *StateTransitions) OnCondition(condition interface{}, action func(fsm FiniteStateMachine, condition interface{}, params interface{}), newState interface{}, onCompletedCallback func(fsm FiniteStateMachine)) {
 	stateTransitions.perStateTransitions[condition] = NewStateTransition(stateTransitions.state, condition, newState, action, onCompletedCallback)
 }
 
-func (stateTransitions *StateTransitions) fireTransition(fsm *FiniteStateMachine, condition interface{}, params interface{}) {
+func (stateTransitions *StateTransitions) fireTransition(fsm FiniteStateMachine, condition interface{}, params interface{}) {
 	var stateTransition = stateTransitions.perStateTransitions[condition]
 
 	stateTransition.Action(fsm, condition, params)
@@ -154,6 +159,6 @@ func (fsmFactory *FiniteStateMachineFactory) InState(state interface{}) *StateTr
 	return fsmFactory.transitions[state]
 }
 
-func (fsmFactory *FiniteStateMachineFactory) FireTransition(fsm *FiniteStateMachine, condition interface{}, params interface{}) {
-	fsmFactory.transitions[fsm.state].fireTransition(fsm, condition, params)
+func (fsmFactory *FiniteStateMachineFactory) FireTransition(fsm FiniteStateMachine, condition interface{}, params interface{}) {
+	fsmFactory.transitions[fsm.State()].fireTransition(fsm, condition, params)
 }

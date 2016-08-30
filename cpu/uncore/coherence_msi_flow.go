@@ -14,6 +14,7 @@ type CacheCoherenceFlow interface {
 	Completed() bool
 	Access() *MemoryHierarchyAccess
 	Tag() uint32
+	Complete()
 }
 
 type BaseCacheCoherenceFlow struct {
