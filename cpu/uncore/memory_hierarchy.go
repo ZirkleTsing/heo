@@ -14,6 +14,9 @@ type MemoryHierarchy struct {
 	Config *MemoryHierarchyConfig
 
 	CurrentMemoryHierarchyAccessId int32
+	CurrentCacheCoherenceFlowId int32
+
+	PendingFlows []CacheCoherenceFlow
 }
 
 func NewMemoryHierarchy(driver MemoryHierarchyDriver, config *MemoryHierarchyConfig) *MemoryHierarchy {
@@ -23,4 +26,8 @@ func NewMemoryHierarchy(driver MemoryHierarchyDriver, config *MemoryHierarchyCon
 	}
 
 	return memoryHierarchy
+}
+
+func (memoryHierarchy *MemoryHierarchy) Transfer(from *MemoryDevice, to *MemoryDevice, size uint32, onCompletedCallback func()) {
+	panic("Unimplemented") //TODO
 }

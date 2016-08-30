@@ -3,19 +3,19 @@ package uncore
 type MemoryHierarchyAccessType uint32
 
 const (
-	MemoryHierarchyAccess_IFETCH = 0
-	MemoryHierarchyAccess_LOAD = 1
-	MemoryHierarchyAccess_STORE = 2
-	MemoryHierarchyAccess_UNKNOWN = 3
+	MemoryHierarchyAccessType_IFETCH = MemoryHierarchyAccessType(0)
+	MemoryHierarchyAccessType_LOAD = MemoryHierarchyAccessType(1)
+	MemoryHierarchyAccessType_STORE = MemoryHierarchyAccessType(2)
+	MemoryHierarchyAccessType_UNKNOWN = MemoryHierarchyAccessType(3)
 )
 
 func (memoryHierarchyAccessType MemoryHierarchyAccessType) IsRead() bool {
-	return memoryHierarchyAccessType == MemoryHierarchyAccess_IFETCH ||
-		memoryHierarchyAccessType == MemoryHierarchyAccess_LOAD
+	return memoryHierarchyAccessType == MemoryHierarchyAccessType_IFETCH ||
+		memoryHierarchyAccessType == MemoryHierarchyAccessType_LOAD
 }
 
 func (memoryHierarchyAccessType MemoryHierarchyAccessType) IsWrite() bool {
-	return memoryHierarchyAccessType == MemoryHierarchyAccess_STORE
+	return memoryHierarchyAccessType == MemoryHierarchyAccessType_STORE
 }
 
 type MemoryHierarchyAccess struct {
