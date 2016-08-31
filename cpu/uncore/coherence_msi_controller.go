@@ -1,15 +1,18 @@
 package uncore
 
 type Controller interface {
-	GetMemoryDevice() *MemoryDevice
+	MemoryDevice
 	Cache() *EvictableCache
-	Next() *MemoryDevice
+	Next() MemoryDevice
+	SetNext(next MemoryDevice)
+	ReceiveMessage(message CoherenceMessage)
+	TransferMessage(to Controller, size uint32, message CoherenceMessage)
 }
 
 type BaseController struct {
-	*MemoryDevice
+	*BaseMemoryDevice
 	cache                  *EvictableCache
-	next                   *MemoryDevice
+	next                   MemoryDevice
 	NumDownwardReadHits    int32
 	NumDownwardReadMisses  int32
 	NumDownwardWriteHits   int32
@@ -19,14 +22,22 @@ type BaseController struct {
 
 func NewBaseController(memoryHierarchy *MemoryHierarchy, name string, deviceType MemoryDeviceType, cache *EvictableCache) *BaseController {
 	var baseController = &BaseController{
-		MemoryDevice:NewMemoryDevice(memoryHierarchy, name, deviceType),
+		BaseMemoryDevice:NewBaseMemoryDevice(memoryHierarchy, name, deviceType),
 		cache:cache,
 	}
 
 	return baseController
 }
 
-func (baseController *BaseController) updateStats(write bool, hitInCache bool) {
+func (baseController *BaseController) ReceiveMessage(message CoherenceMessage) {
+	panic("Impossible")
+}
+
+func (baseController *BaseController) TransferMessage(to Controller, size uint32, message CoherenceMessage) {
+	baseController.MemoryHierarchy().TransferMessage(baseController, to, size, message)
+}
+
+func (baseController *BaseController) UpdateStats(write bool, hitInCache bool) {
 	if write {
 		if hitInCache {
 			baseController.NumDownwardWriteHits++
@@ -66,23 +77,15 @@ func (baseController *BaseController) OccupancyRatio() float32 {
 	return baseController.cache.Cache.OccupancyRatio()
 }
 
-func (baseController *BaseController) GetMemoryDevice() *MemoryDevice {
-	return baseController.MemoryDevice
-}
-
-func (baseController *BaseController) Name() string {
-	return baseController.MemoryDevice.Name
-}
-
-func (baseController *BaseController) DeviceType() MemoryDeviceType {
-	return baseController.MemoryDevice.DeviceType
-}
-
 func (baseController *BaseController) Cache() *EvictableCache {
 	return baseController.cache
 }
 
-func (baseController *BaseController) Next() *MemoryDevice {
-	return baseController.MemoryDevice
+func (baseController *BaseController) Next() MemoryDevice {
+	return baseController.next
+}
+
+func (baseController *BaseController) SetNext(next MemoryDevice) {
+	baseController.next = next
 }
 

@@ -21,14 +21,12 @@ func NewTranslationLookasideBuffer(memoryHierarchy *MemoryHierarchy, name string
 				memoryHierarchy.Config.TlbAssoc,
 				memoryHierarchy.Config.TlbLineSize,
 			),
+			func(set uint32, way uint32) CacheLineStateProvider {
+				return NewBaseCacheLineStateProvider(false)
+			},
 			CacheReplacementPolicyType_LRU,
 		),
 	}
-
-	tlb.Cache.Traverse(func(set uint32, way uint32) {
-		tlb.Cache.Sets[set].Lines[way].InitialState = false
-		tlb.Cache.Sets[set].Lines[way].State = false
-	})
 
 	return tlb
 }
@@ -71,7 +69,7 @@ func (tlb *TranslationLookasideBuffer) Access(access *MemoryHierarchyAccess, onC
 		}
 
 		var line = tlb.Cache.Sets[set].Lines[cacheAccess.Way]
-		line.State = true
+		line.StateProvider.(*BaseCacheLineStateProvider).SetState(true)
 		line.Access = access
 		line.SetTag(int32(access.PhysicalTag))
 		tlb.Cache.ReplacementPolicy.HandleInsertionOnMiss(access, set, cacheAccess.Way)

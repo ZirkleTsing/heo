@@ -28,6 +28,10 @@ func NewMemoryHierarchy(driver MemoryHierarchyDriver, config *MemoryHierarchyCon
 	return memoryHierarchy
 }
 
-func (memoryHierarchy *MemoryHierarchy) Transfer(from *MemoryDevice, to *MemoryDevice, size uint32, onCompletedCallback func()) {
+func (memoryHierarchy *MemoryHierarchy) Transfer(from MemoryDevice, to MemoryDevice, size uint32, onCompletedCallback func()) {
+	panic("Unimplemented") //TODO
+}
+
+func (memoryHierarchy *MemoryHierarchy) TransferMessage(from Controller, to Controller, size uint32, message CoherenceMessage) {
 	panic("Unimplemented") //TODO
 }

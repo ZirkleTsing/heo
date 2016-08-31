@@ -28,7 +28,7 @@ type BaseCacheControllerEvent struct {
 	eventType CacheControllerEventType
 }
 
-func NewBaseCacheControllerEvent(generator CacheController, producerFlow CacheCoherenceFlow, eventType CacheControllerEventType, access *MemoryHierarchyAccess, tag uint32) *BaseCacheControllerEvent {
+func NewBaseCacheControllerEvent(generator *CacheController, producerFlow CacheCoherenceFlow, eventType CacheControllerEventType, access *MemoryHierarchyAccess, tag uint32) *BaseCacheControllerEvent {
 	var baseCacheControllerEvent = &BaseCacheControllerEvent{
 		BaseControllerEvent:NewBaseControllerEvent(generator, producerFlow, access, tag),
 		eventType:eventType,
@@ -46,7 +46,7 @@ type DataFromDirAcksEq0Event struct {
 	Sender Controller
 }
 
-func NewDataFromDirAcksEq0Event(generator CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, sender Controller) *DataFromDirAcksEq0Event {
+func NewDataFromDirAcksEq0Event(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, sender Controller) *DataFromDirAcksEq0Event {
 	var dataFromDirAcksEq0Event = &DataFromDirAcksEq0Event{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_DATA_FROM_DIR_ACKS_EQ_0, access, tag),
 		Sender:sender,
@@ -60,7 +60,7 @@ type DataFromDirAcksGt0Event struct {
 	Sender Controller
 }
 
-func NewDataFromDirAcksGt0Event(generator CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, sender Controller) *DataFromDirAcksGt0Event {
+func NewDataFromDirAcksGt0Event(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, sender Controller) *DataFromDirAcksGt0Event {
 	var dataFromDirAcksGt0Event = &DataFromDirAcksGt0Event{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_DATA_FROM_DIR_ACKS_GT_0, access, tag),
 		Sender:sender,
@@ -74,7 +74,7 @@ type DataFromOwnerEvent struct {
 	Sender Controller
 }
 
-func NewDataFromOwnerEvent(generator CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, sender Controller) *DataFromOwnerEvent {
+func NewDataFromOwnerEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, sender Controller) *DataFromOwnerEvent {
 	var dataFromOwnerEvent = &DataFromOwnerEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_DATA_FROM_OWNER, access, tag),
 		Sender:sender,
@@ -85,10 +85,10 @@ func NewDataFromOwnerEvent(generator CacheController, producerFlow CacheCoherenc
 
 type FwdGetMEvent struct {
 	*BaseCacheControllerEvent
-	Requester CacheController
+	Requester *CacheController
 }
 
-func NewFwdGetMEvent(generator CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, requester CacheController) *FwdGetMEvent {
+func NewFwdGetMEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, requester *CacheController) *FwdGetMEvent {
 	var fwdGetMEvent = &FwdGetMEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_FWD_GETM, access, tag),
 		Requester:requester,
@@ -99,10 +99,10 @@ func NewFwdGetMEvent(generator CacheController, producerFlow CacheCoherenceFlow,
 
 type FwdGetSEvent struct {
 	*BaseCacheControllerEvent
-	Requester CacheController
+	Requester *CacheController
 }
 
-func NewFwdGetSEvent(generator CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, requester CacheController) *FwdGetSEvent {
+func NewFwdGetSEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, requester *CacheController) *FwdGetSEvent {
 	var fwdGetSEvent = &FwdGetSEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_FWD_GETS, access, tag),
 		Requester:requester,
@@ -113,10 +113,10 @@ func NewFwdGetSEvent(generator CacheController, producerFlow CacheCoherenceFlow,
 
 type InvAckEvent struct {
 	*BaseCacheControllerEvent
-	Sender CacheController
+	Sender *CacheController
 }
 
-func NewInvAckEvent(generator CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, sender CacheController) *InvAckEvent {
+func NewInvAckEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, sender *CacheController) *InvAckEvent {
 	var invAckEvent = &InvAckEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_INV_ACK, access, tag),
 		Sender:sender,
@@ -127,10 +127,10 @@ func NewInvAckEvent(generator CacheController, producerFlow CacheCoherenceFlow, 
 
 type InvEvent struct {
 	*BaseCacheControllerEvent
-	Requester CacheController
+	Requester *CacheController
 }
 
-func NewInvEvent(generator CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, requester CacheController) *InvEvent {
+func NewInvEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, requester *CacheController) *InvEvent {
 	var invEvent = &InvEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_INV, access, tag),
 		Requester:requester,
@@ -143,7 +143,7 @@ type LastInvAckEvent struct {
 	*BaseCacheControllerEvent
 }
 
-func NewLastInvAckEvent(generator CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32) *LastInvAckEvent {
+func NewLastInvAckEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32) *LastInvAckEvent {
 	var lastInvAckEvent = &LastInvAckEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_LAST_INV_ACK, access, tag),
 	}
@@ -159,7 +159,7 @@ type LoadEvent struct {
 	OnStalledCallback   func()
 }
 
-func NewLoadEvent(generator CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, set uint32, way uint32, onCompletedCallback func(), onStalledCallback func()) *LoadEvent {
+func NewLoadEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, set uint32, way uint32, onCompletedCallback func(), onStalledCallback func()) *LoadEvent {
 	var loadEvent = &LoadEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_LOAD, access, tag),
 		Set:set,
@@ -175,7 +175,7 @@ type PutAckEvent struct {
 	*BaseCacheControllerEvent
 }
 
-func NewPutAckEvent(generator CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32) *PutAckEvent {
+func NewPutAckEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32) *PutAckEvent {
 	var putAckEvent = &PutAckEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_PUT_ACK, access, tag),
 	}
@@ -187,7 +187,7 @@ type RecallEvent struct {
 	*BaseCacheControllerEvent
 }
 
-func NewRecallEvent(generator CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32) *RecallEvent {
+func NewRecallEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32) *RecallEvent {
 	var recallEvent = &RecallEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_RECALL, access, tag),
 	}
@@ -204,7 +204,7 @@ type ReplacementEvent struct {
 	OnStalledCallback   func()
 }
 
-func NewReplacementEvent(generator CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, cacheAccess *CacheAccess, set uint32, way uint32, onCompletedCallback func(), onStalledCallback func()) *ReplacementEvent {
+func NewReplacementEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, cacheAccess *CacheAccess, set uint32, way uint32, onCompletedCallback func(), onStalledCallback func()) *ReplacementEvent {
 	var replacementEvent = &ReplacementEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_REPLACEMENT, access, tag),
 		CacheAccess:cacheAccess,
@@ -225,7 +225,7 @@ type StoreEvent struct {
 	OnStalledCallback   func()
 }
 
-func NewStoreEvent(generator CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, set uint32, way uint32, onCompletedCallback func(), onStalledCallback func()) *StoreEvent {
+func NewStoreEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, set uint32, way uint32, onCompletedCallback func(), onStalledCallback func()) *StoreEvent {
 	var storeEvent = &StoreEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_STORE, access, tag),
 		Set:set,

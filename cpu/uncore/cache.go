@@ -12,32 +12,63 @@ const (
 	INVALID_WAY = -1
 )
 
-type CacheLine struct {
-	Cache        *Cache
-
-	Set          uint32
-	Way          uint32
-
-	tag          int32
-
-	Access       *MemoryHierarchyAccess
-
-	InitialState interface{}
-	State        interface{}
+type CacheLineStateProvider interface {
+	InitialState() interface{}
+	State() interface{}
 }
 
-func newCacheLine(cache *Cache, set uint32, way uint32) *CacheLine {
+type BaseCacheLineStateProvider struct {
+	initialState interface{}
+	state        interface{}
+}
+
+func NewBaseCacheLineStateProvider(initialState bool) *BaseCacheLineStateProvider {
+	var boolCacheLineStateProvider = &BaseCacheLineStateProvider{
+		initialState:initialState,
+		state:initialState,
+	}
+
+	return boolCacheLineStateProvider
+}
+
+func (baseCacheLineStateProvider *BaseCacheLineStateProvider) InitialState() interface{} {
+	return baseCacheLineStateProvider.initialState
+}
+
+func (baseCacheLineStateProvider *BaseCacheLineStateProvider) State() interface{} {
+	return baseCacheLineStateProvider.state
+}
+
+func (baseCacheLineStateProvider *BaseCacheLineStateProvider) SetState(state interface{}) {
+	baseCacheLineStateProvider.state = state
+}
+
+type CacheLine struct {
+	Cache         *Cache
+
+	Set           uint32
+	Way           uint32
+
+	tag           int32
+
+	Access        *MemoryHierarchyAccess
+
+	StateProvider CacheLineStateProvider
+}
+
+func newCacheLine(cache *Cache, set uint32, way uint32, stateProvider CacheLineStateProvider) *CacheLine {
 	var cacheLine = &CacheLine{
 		Cache:cache,
 		Set:set,
 		Way:way,
+		StateProvider:stateProvider,
 	}
 
 	return cacheLine
 }
 
 func (cacheLine *CacheLine) Valid() bool {
-	return cacheLine.State != cacheLine.InitialState
+	return cacheLine.State() != cacheLine.InitialState()
 }
 
 func (cacheLine *CacheLine) Tag() int32 {
@@ -62,6 +93,14 @@ func (cacheLine *CacheLine) SetTag(tag int32) {
 	cacheLine.tag = tag
 }
 
+func (cacheLine *CacheLine) InitialState() interface{} {
+	return cacheLine.StateProvider.InitialState()
+}
+
+func (cacheLine *CacheLine) State() interface{} {
+	return cacheLine.StateProvider.State()
+}
+
 type CacheSet struct {
 	Cache *Cache
 	Lines []*CacheLine
@@ -75,21 +114,30 @@ func newCacheSet(cache *Cache, assoc uint32, num uint32) *CacheSet {
 	}
 
 	for i := uint32(0); i < assoc; i++ {
-		cacheSet.Lines = append(cacheSet.Lines, newCacheLine(cache, num, i))
+		cacheSet.Lines = append(cacheSet.Lines,
+			newCacheLine(
+				cache,
+				num,
+				i,
+				cache.LineStateProviderFactory(num, i),
+			),
+		)
 	}
 
 	return cacheSet
 }
 
 type Cache struct {
-	Geometry     *mem.Geometry
-	Sets         []*CacheSet
-	NumTagsInUse int32
+	Geometry                 *mem.Geometry
+	Sets                     []*CacheSet
+	NumTagsInUse             int32
+	LineStateProviderFactory func(set uint32, way uint32) CacheLineStateProvider
 }
 
-func NewCache(geometry *mem.Geometry) *Cache {
+func NewCache(geometry *mem.Geometry, lineStateProviderFactory func(set uint32, way uint32) CacheLineStateProvider) *Cache {
 	var cache = &Cache{
 		Geometry:geometry,
+		LineStateProviderFactory:lineStateProviderFactory,
 	}
 
 	for i := uint32(0); i < geometry.NumSets; i++ {
@@ -140,14 +188,6 @@ func (cache *Cache) FindLine(address uint32) *CacheLine {
 		return cache.Sets[set].Lines[way]
 	} else {
 		return nil
-	}
-}
-
-func (cache *Cache) Traverse(callback func(set uint32, way uint32)) {
-	for set := uint32(0); set < cache.NumSets(); set++ {
-		for way := uint32(0); way < cache.Assoc(); way++ {
-			callback(set, way)
-		}
 	}
 }
 

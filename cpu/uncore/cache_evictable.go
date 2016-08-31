@@ -10,9 +10,9 @@ type EvictableCache struct {
 	ReplacementPolicy CacheReplacementPolicy
 }
 
-func NewEvictableCache(geometry *mem.Geometry, replacementPolicyType CacheReplacementPolicyType) *EvictableCache {
+func NewEvictableCache(geometry *mem.Geometry, lineStateProviderFactory func(set uint32, way uint32) CacheLineStateProvider, replacementPolicyType CacheReplacementPolicyType) *EvictableCache {
 	var evictableCache = &EvictableCache{
-		Cache:NewCache(geometry),
+		Cache:NewCache(geometry, lineStateProviderFactory),
 	}
 
 	switch replacementPolicyType {
