@@ -107,7 +107,7 @@ func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) OnEventRepl
 	directoryControllerFsm.fireTransition(replacementEvent)
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) OnEventRecallAck(producerFlow CacheCoherenceFlow, sender *CacheController, tag uint32) {
+func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) OnEventRecallAck(producerFlow CacheCoherenceFlow, tag uint32, sender *CacheController) {
 	var recallAckEvent = NewRecallAckEvent(
 		directoryControllerFsm.DirectoryController,
 		producerFlow,
@@ -130,7 +130,7 @@ func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) OnEventReca
 	}
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) OnEventPutS(producerFlow CacheCoherenceFlow, requester *CacheController, tag uint32) {
+func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) OnEventPutS(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
 	if len(directoryControllerFsm.DirectoryEntry.Sharers) > 1 {
 		var putSNotLastEvent = NewPutSNotLastEvent(
 			directoryControllerFsm.DirectoryController,
@@ -154,7 +154,7 @@ func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) OnEventPutS
 	}
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) OnEventPutMAndData(producerFlow CacheCoherenceFlow, requester *CacheController, tag uint32) {
+func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) OnEventPutMAndData(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
 	if requester == directoryControllerFsm.DirectoryEntry.Owner {
 		var putMAndDataFromOwnerEvent = NewPutMAndDataFromOwnerEvent(
 			directoryControllerFsm.DirectoryController,
