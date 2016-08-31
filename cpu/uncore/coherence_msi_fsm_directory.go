@@ -190,7 +190,7 @@ func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) OnEventData
 	directoryControllerFsm.fireTransition(dataEvent)
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendDataToRequester(producerFlow CacheCoherenceFlow, requester *CacheController, tag uint32, numInvAcks int32) {
+func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendDataToRequester(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController, numInvAcks int32) {
 	directoryControllerFsm.DirectoryController.TransferMessage(
 		requester,
 		directoryControllerFsm.DirectoryController.Cache.LineSize() + 8,
@@ -205,7 +205,7 @@ func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendDataToR
 	)
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendPutAckToRequester(producerFlow CacheCoherenceFlow, requester *CacheController, tag uint32) {
+func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendPutAckToRequester(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
 	directoryControllerFsm.DirectoryController.SendPutAckToRequester(
 		producerFlow,
 		tag,
@@ -221,7 +221,7 @@ func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) CopyDataToM
 	)
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendFwdGetSToOwner(producerFlow CacheCoherenceFlow, requester *CacheController, tag uint32) {
+func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendFwdGetSToOwner(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
 	directoryControllerFsm.DirectoryController.TransferMessage(
 		directoryControllerFsm.DirectoryEntry.Owner,
 		8,
@@ -390,7 +390,657 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 		FiniteStateMachineFactory:simutil.NewFiniteStateMachineFactory(),
 	}
 
-	//TODO...
+	var actionWhenStateChanged = func(fsm simutil.FiniteStateMachine) {
+		var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+
+		if directoryControllerFsm.PreviousState != directoryControllerFsm.State() {
+			if directoryControllerFsm.State().(DirectoryControllerState).Stable() {
+				var onCompletedCallback = directoryControllerFsm.OnCompletedCallback
+				if onCompletedCallback != nil {
+					directoryControllerFsm.OnCompletedCallback = nil
+					onCompletedCallback()
+				}
+			}
+
+			var stalledEventsToProcess []func()
+
+			for _, stalledEvent := range directoryControllerFsm.StalledEvents {
+				stalledEventsToProcess = append(stalledEventsToProcess, stalledEvent)
+			}
+
+			directoryControllerFsm.StalledEvents = []func(){}
+
+			for _, stalledEventToProcess := range stalledEventsToProcess {
+				stalledEventToProcess()
+			}
+		}
+	}
+
+	directoryControllerFsmFactory.InState(DirectoryControllerState_I).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
+		DirectoryControllerEventType_GETS,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*GetSEvent)
+
+			directoryControllerFsm.DirectoryController.NumPendingMemoryAccesses++
+
+			directoryControllerFsm.DirectoryController.Transfer(
+				directoryControllerFsm.DirectoryController.Next(),
+				8,
+				func() {
+					directoryControllerFsm.DirectoryController.Next().(*MemoryController).ReceiveMemReadRequest(
+						directoryControllerFsm.DirectoryController,
+						event.Tag(),
+						func() {
+							directoryControllerFsm.DirectoryController.MemoryHierarchy().Driver.CycleAccurateEventQueue().Schedule(
+								func() {
+									directoryControllerFsm.DirectoryController.NumPendingMemoryAccesses--
+
+									var dataFromMemEvent = NewDataFromMemEvent(
+										directoryControllerFsm.DirectoryController,
+										event,
+										event.Access(),
+										event.Tag(),
+										event.Requester,
+									)
+
+									directoryControllerFsm.fireTransition(dataFromMemEvent)
+								},
+								int(directoryControllerFsm.DirectoryController.HitLatency()),
+							)
+						},
+					)
+				},
+			)
+
+			directoryControllerFsm.FireServiceNonblockingRequestEvent(event.Access(), event.Tag(), false)
+			directoryControllerFsm.Line().Access = event.Access()
+			directoryControllerFsm.Line().SetTag(int32(event.Tag()))
+		},
+		DirectoryControllerState_IS_D,
+	).OnCondition(
+		DirectoryControllerEventType_GETM,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*GetMEvent)
+
+			directoryControllerFsm.DirectoryController.NumPendingMemoryAccesses++
+
+			directoryControllerFsm.DirectoryController.Transfer(
+				directoryControllerFsm.DirectoryController.Next(),
+				8,
+				func(){
+					directoryControllerFsm.DirectoryController.Next().(*MemoryController).ReceiveMemReadRequest(
+						directoryControllerFsm.DirectoryController,
+						event.Tag(),
+						func(){
+							directoryControllerFsm.DirectoryController.MemoryHierarchy().Driver.CycleAccurateEventQueue().Schedule(
+								func(){
+									directoryControllerFsm.DirectoryController.NumPendingMemoryAccesses--
+
+									var dataFromMemEvent = NewDataFromMemEvent(
+										directoryControllerFsm.DirectoryController,
+										event,
+										event.Access(),
+										event.Tag(),
+										event.Requester,
+									)
+
+									directoryControllerFsm.fireTransition(dataFromMemEvent)
+								},
+								int(directoryControllerFsm.DirectoryController.HitLatency()),
+							)
+						},
+					)
+				},
+			)
+
+			directoryControllerFsm.FireServiceNonblockingRequestEvent(event.Access(), event.Tag(), false)
+			directoryControllerFsm.Line().Access = event.Access()
+			directoryControllerFsm.Line().SetTag(int32(event.Tag()))
+		},
+		DirectoryControllerState_IM_D,
+	)
+
+	directoryControllerFsmFactory.InState(DirectoryControllerState_IS_D).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
+		DirectoryControllerEventType_GETS,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*GetSEvent)
+
+			directoryControllerFsm.Stall(event.OnStalledCallback)
+			directoryControllerFsm.FireNonblockingRequestHitToTransientTagEvent(
+				event.Access(),
+				event.Tag(),
+			)
+		},
+		DirectoryControllerState_IS_D,
+	).OnCondition(
+		DirectoryControllerEventType_GETM,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*GetMEvent)
+
+			directoryControllerFsm.Stall(event.OnStalledCallback)
+			directoryControllerFsm.FireNonblockingRequestHitToTransientTagEvent(
+				event.Access(),
+				event.Tag(),
+			)
+		},
+		DirectoryControllerState_IS_D,
+	).OnCondition(
+		DirectoryControllerEventType_DIR_REPLACEMENT,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*DirReplacementEvent)
+
+			directoryControllerFsm.Stall(event.OnStalledCallback)
+		},
+		DirectoryControllerState_IS_D,
+	).OnCondition(
+		DirectoryControllerEventType_PUTS_NOT_LAST,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutSNotLastEvent)
+
+			directoryControllerFsm.StallEvent(event)
+		},
+		DirectoryControllerState_IS_D,
+	).OnCondition(
+		DirectoryControllerEventType_PUTS_LAST,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutSLastEvent)
+
+			directoryControllerFsm.StallEvent(event)
+		},
+		DirectoryControllerState_IS_D,
+	).OnCondition(
+		DirectoryControllerEventType_PUTM_AND_DATA_FROM_NONOWNER,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutMAndDataFromNonOwnerEvent)
+
+			directoryControllerFsm.StallEvent(event)
+		},
+		DirectoryControllerState_IS_D,
+	).OnCondition(
+		DirectoryControllerEventType_DATA_FROM_MEM,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*DataFromMemEvent)
+
+			directoryControllerFsm.SendDataToRequester(event, event.Tag(), event.Requester, 0)
+			directoryControllerFsm.AddRequesterToSharers(event.Requester)
+			directoryControllerFsm.FireCacheLineInsertEvent(event.Access(), event.Tag(), uint32(directoryControllerFsm.VictimTag))
+			directoryControllerFsm.EvicterTag = INVALID_TAG
+			directoryControllerFsm.VictimTag = INVALID_TAG
+			directoryControllerFsm.DirectoryController.Cache.ReplacementPolicy.HandleInsertionOnMiss(
+				event.Access(),
+				directoryControllerFsm.Set,
+				directoryControllerFsm.Way,
+			)
+		},
+		DirectoryControllerState_S,
+	)
+
+	directoryControllerFsmFactory.InState(DirectoryControllerState_IM_D).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
+		DirectoryControllerEventType_GETS,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*GetSEvent)
+
+			directoryControllerFsm.Stall(event.OnStalledCallback)
+			directoryControllerFsm.FireNonblockingRequestHitToTransientTagEvent(event.Access(), event.Tag())
+		},
+		DirectoryControllerState_IM_D,
+	).OnCondition(
+		DirectoryControllerEventType_GETM,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*GetMEvent)
+
+			directoryControllerFsm.Stall(event.OnStalledCallback)
+			directoryControllerFsm.FireNonblockingRequestHitToTransientTagEvent(event.Access(), event.Tag())
+		},
+		DirectoryControllerState_IM_D,
+	).OnCondition(
+		DirectoryControllerEventType_DIR_REPLACEMENT,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*DirReplacementEvent)
+
+			directoryControllerFsm.Stall(event.OnStalledCallback)
+		},
+		DirectoryControllerState_IM_D,
+	).OnCondition(
+		DirectoryControllerEventType_PUTS_NOT_LAST,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutSNotLastEvent)
+
+			directoryControllerFsm.StallEvent(event)
+		},
+		DirectoryControllerState_IM_D,
+	).OnCondition(
+		DirectoryControllerEventType_PUTS_LAST,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutSLastEvent)
+
+			directoryControllerFsm.StallEvent(event)
+		},
+		DirectoryControllerState_IM_D,
+	).OnCondition(
+		DirectoryControllerEventType_PUTM_AND_DATA_FROM_NONOWNER,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutMAndDataFromNonOwnerEvent)
+
+			directoryControllerFsm.StallEvent(event)
+		},
+		DirectoryControllerState_IM_D,
+	).OnCondition(
+		DirectoryControllerEventType_DATA_FROM_MEM,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*DataFromMemEvent)
+
+			directoryControllerFsm.SendDataToRequester(event, event.Tag(), event.Requester, 0)
+			directoryControllerFsm.SetOwnerToRequester(event.Requester)
+			directoryControllerFsm.FireCacheLineInsertEvent(event.Access(), event.Tag(), uint32(directoryControllerFsm.VictimTag))
+			directoryControllerFsm.EvicterTag = INVALID_TAG
+			directoryControllerFsm.VictimTag = INVALID_TAG
+			directoryControllerFsm.DirectoryController.Cache.ReplacementPolicy.HandleInsertionOnMiss(
+				event.Access(),
+				directoryControllerFsm.Set,
+				directoryControllerFsm.Way,
+			)
+		},
+		DirectoryControllerState_IM_D,
+	)
+
+	directoryControllerFsmFactory.InState(DirectoryControllerState_S).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
+		DirectoryControllerEventType_GETS,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*GetSEvent)
+
+			directoryControllerFsm.SendDataToRequester(event, event.Tag(), event.Requester, 0)
+			directoryControllerFsm.AddRequesterToSharers(event.Requester)
+			directoryControllerFsm.Hit(event.Access(), event.Tag(), event.Set, event.Way)
+		},
+		DirectoryControllerState_S,
+	).OnCondition(
+		DirectoryControllerEventType_GETM,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*GetMEvent)
+
+			var numInvAcks = int32(0)
+
+			for _, sharer := range directoryControllerFsm.DirectoryEntry.Sharers {
+				if sharer != event.Requester {
+					numInvAcks++
+				}
+			}
+
+			directoryControllerFsm.SendDataToRequester(event, event.Tag(), event.Requester, numInvAcks)
+
+			directoryControllerFsm.SendInvToSharers(event, event.Tag(), event.Requester)
+			directoryControllerFsm.ClearSharers()
+			directoryControllerFsm.SetOwnerToRequester(event.Requester)
+			directoryControllerFsm.Hit(event.Access(), event.Tag(), event.Set, event.Way)
+		},
+		DirectoryControllerState_M,
+	).OnCondition(
+		DirectoryControllerEventType_DIR_REPLACEMENT,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*DirReplacementEvent)
+
+			directoryControllerFsm.NumRecallAcks = int32(len(directoryControllerFsm.DirectoryEntry.Sharers))
+			directoryControllerFsm.SendRecallToSharers(event, uint32(directoryControllerFsm.Line().Tag()))
+			directoryControllerFsm.ClearSharers()
+			directoryControllerFsm.OnCompletedCallback = event.OnCompletedCallback
+			directoryControllerFsm.FireReplacementEvent(event.Access(), event.Tag())
+			directoryControllerFsm.EvicterTag = int32(event.Tag())
+			directoryControllerFsm.VictimTag = directoryControllerFsm.Line().Tag()
+			directoryControllerFsm.DirectoryController.NumEvictions++
+		},
+		DirectoryControllerState_SI_A,
+	).OnCondition(
+		DirectoryControllerEventType_PUTS_NOT_LAST,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutSNotLastEvent)
+
+			directoryControllerFsm.RemoveRequesterFromSharers(event.Requester)
+			directoryControllerFsm.SendPutAckToRequester(event, event.Tag(), event.Requester)
+		},
+		DirectoryControllerState_S,
+	).OnCondition(
+		DirectoryControllerEventType_PUTS_LAST,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutSLastEvent)
+
+			directoryControllerFsm.RemoveRequesterFromSharers(event.Requester)
+			directoryControllerFsm.SendPutAckToRequester(event, event.Tag(), event.Requester)
+			directoryControllerFsm.FirePutSOrPutMAndDataFromOwnerEvent(event.Access(), event.Tag())
+			directoryControllerFsm.Line().Access = nil
+			directoryControllerFsm.Line().SetTag(INVALID_TAG)
+		},
+		DirectoryControllerState_I,
+	).OnCondition(
+		DirectoryControllerEventType_PUTM_AND_DATA_FROM_NONOWNER,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutMAndDataFromNonOwnerEvent)
+
+			directoryControllerFsm.RemoveRequesterFromSharers(event.Requester)
+			directoryControllerFsm.SendPutAckToRequester(event, event.Tag(), event.Requester)
+		},
+		DirectoryControllerState_S,
+	)
+
+	directoryControllerFsmFactory.InState(DirectoryControllerState_M).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
+		DirectoryControllerEventType_GETS,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*GetSEvent)
+
+			directoryControllerFsm.SendFwdGetSToOwner(event, event.Tag(), event.Requester)
+			directoryControllerFsm.AddRequesterAndOwnerToSharers(event.Requester)
+			directoryControllerFsm.ClearOwner()
+			directoryControllerFsm.Hit(event.Access(), event.Tag(), event.Set, event.Way)
+		},
+		DirectoryControllerState_S_D,
+	).OnCondition(
+		DirectoryControllerEventType_GETM,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*GetMEvent)
+
+			directoryControllerFsm.SendFwdGetMToOwner(event, event.Tag(), event.Requester)
+			directoryControllerFsm.SetOwnerToRequester(event.Requester)
+			directoryControllerFsm.Hit(event.Access(), event.Tag(), event.Set, event.Way)
+		},
+		DirectoryControllerState_M,
+	).OnCondition(
+		DirectoryControllerEventType_DIR_REPLACEMENT,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*DirReplacementEvent)
+
+			directoryControllerFsm.NumRecallAcks = 1
+			directoryControllerFsm.SendRecallToOwner(event, uint32(directoryControllerFsm.Line().Tag()))
+			directoryControllerFsm.ClearOwner()
+			directoryControllerFsm.OnCompletedCallback = event.OnCompletedCallback
+			directoryControllerFsm.FireReplacementEvent(event.Access(), event.Tag())
+			directoryControllerFsm.EvicterTag = int32(event.Tag())
+			directoryControllerFsm.VictimTag = directoryControllerFsm.Line().Tag()
+			directoryControllerFsm.DirectoryController.NumEvictions++
+		},
+		DirectoryControllerState_MI_A,
+	).OnCondition(
+		DirectoryControllerEventType_PUTS_NOT_LAST,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutSNotLastEvent)
+
+			directoryControllerFsm.SendPutAckToRequester(event, event.Tag(), event.Requester)
+		},
+		DirectoryControllerState_M,
+	).OnCondition(
+		DirectoryControllerEventType_PUTS_LAST,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutSLastEvent)
+
+			directoryControllerFsm.SendPutAckToRequester(event, event.Tag(), event.Requester)
+		},
+		DirectoryControllerState_M,
+	).OnCondition(
+		DirectoryControllerEventType_PUTM_AND_DATA_FROM_OWNER,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutMAndDataFromOwnerEvent)
+
+			directoryControllerFsm.CopyDataToMem(event.Tag())
+			directoryControllerFsm.ClearOwner()
+			directoryControllerFsm.SendPutAckToRequester(event, event.Tag(), event.Requester)
+			directoryControllerFsm.FirePutSOrPutMAndDataFromOwnerEvent(event.Access(), event.Tag())
+			directoryControllerFsm.Line().Access = nil
+			directoryControllerFsm.Line().SetTag(INVALID_TAG)
+		},
+		DirectoryControllerState_I,
+	).OnCondition(
+		DirectoryControllerEventType_PUTM_AND_DATA_FROM_NONOWNER,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutMAndDataFromNonOwnerEvent)
+
+			directoryControllerFsm.SendPutAckToRequester(event, event.Tag(), event.Requester)
+		},
+		DirectoryControllerState_M,
+	)
+
+	directoryControllerFsmFactory.InState(DirectoryControllerState_S_D).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
+		DirectoryControllerEventType_GETS,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*GetSEvent)
+
+			directoryControllerFsm.Stall(event.OnStalledCallback)
+		},
+		DirectoryControllerState_S_D,
+	).OnCondition(
+		DirectoryControllerEventType_GETM,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*GetMEvent)
+
+			directoryControllerFsm.Stall(event.OnStalledCallback)
+		},
+		DirectoryControllerState_S_D,
+	).OnCondition(
+		DirectoryControllerEventType_DIR_REPLACEMENT,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*DirReplacementEvent)
+
+			directoryControllerFsm.Stall(event.OnStalledCallback)
+		},
+		DirectoryControllerState_S_D,
+	).OnCondition(
+		DirectoryControllerEventType_PUTS_NOT_LAST,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutSNotLastEvent)
+
+			directoryControllerFsm.RemoveRequesterFromSharers(event.Requester)
+			directoryControllerFsm.SendPutAckToRequester(event, event.Tag(), event.Requester)
+		},
+		DirectoryControllerState_S_D,
+	).OnCondition(
+		DirectoryControllerEventType_PUTS_LAST,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutSLastEvent)
+
+			directoryControllerFsm.RemoveRequesterFromSharers(event.Requester)
+			directoryControllerFsm.SendPutAckToRequester(event, event.Tag(), event.Requester)
+		},
+		DirectoryControllerState_S_D,
+	).OnCondition(
+		DirectoryControllerEventType_PUTM_AND_DATA_FROM_NONOWNER,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutMAndDataFromNonOwnerEvent)
+
+			directoryControllerFsm.RemoveRequesterFromSharers(event.Requester)
+			directoryControllerFsm.SendPutAckToRequester(event, event.Tag(), event.Requester)
+		},
+		DirectoryControllerState_S_D,
+	).OnCondition(
+		DirectoryControllerEventType_DATA,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*DataEvent)
+
+			directoryControllerFsm.CopyDataToMem(event.Tag())
+		},
+		DirectoryControllerState_S,
+	)
+
+	directoryControllerFsmFactory.InState(DirectoryControllerState_MI_A).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
+		DirectoryControllerEventType_GETS,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*GetSEvent)
+
+			directoryControllerFsm.Stall(event.OnStalledCallback)
+		},
+		DirectoryControllerState_MI_A,
+	).OnCondition(
+		DirectoryControllerEventType_GETM,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*GetMEvent)
+
+			directoryControllerFsm.Stall(event.OnStalledCallback)
+		},
+		DirectoryControllerState_MI_A,
+	).OnCondition(
+		DirectoryControllerEventType_DIR_REPLACEMENT,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*DirReplacementEvent)
+
+			directoryControllerFsm.Stall(event.OnStalledCallback)
+		},
+		DirectoryControllerState_MI_A,
+	).OnCondition(
+		DirectoryControllerEventType_RECALL_ACK,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+
+			directoryControllerFsm.NumRecallAcks--
+		},
+		DirectoryControllerState_MI_A,
+	).OnCondition(
+		DirectoryControllerEventType_LAST_RECALL_ACK,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*LastRecallAckEvent)
+
+			directoryControllerFsm.CopyDataToMem(event.Tag())
+			directoryControllerFsm.Line().Access = nil
+			directoryControllerFsm.Line().SetTag(INVALID_TAG)
+		},
+		DirectoryControllerState_I,
+	).OnCondition(
+		DirectoryControllerEventType_PUTS_NOT_LAST,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutSNotLastEvent)
+
+			directoryControllerFsm.SendPutAckToRequester(event, event.Tag(), event.Requester)
+		},
+		DirectoryControllerState_MI_A,
+	).OnCondition(
+		DirectoryControllerEventType_PUTS_LAST,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutSLastEvent)
+
+			directoryControllerFsm.SendPutAckToRequester(event, event.Tag(), event.Requester)
+		},
+		DirectoryControllerState_MI_A,
+	).OnCondition(
+		DirectoryControllerEventType_PUTM_AND_DATA_FROM_NONOWNER,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutMAndDataFromNonOwnerEvent)
+
+			directoryControllerFsm.SendPutAckToRequester(event, event.Tag(), event.Requester)
+		},
+		DirectoryControllerState_MI_A,
+	)
+
+	directoryControllerFsmFactory.InState(DirectoryControllerState_SI_A).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
+		DirectoryControllerEventType_GETS,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*GetSEvent)
+
+			directoryControllerFsm.Stall(event.OnStalledCallback)
+		},
+		DirectoryControllerState_SI_A,
+	).OnCondition(
+		DirectoryControllerEventType_GETM,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*GetMEvent)
+
+			directoryControllerFsm.Stall(event.OnStalledCallback)
+		},
+		DirectoryControllerState_SI_A,
+	).OnCondition(
+		DirectoryControllerEventType_DIR_REPLACEMENT,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*DirReplacementEvent)
+
+			directoryControllerFsm.Stall(event.OnStalledCallback)
+		},
+		DirectoryControllerState_SI_A,
+	).OnCondition(
+		DirectoryControllerEventType_RECALL_ACK,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+
+			directoryControllerFsm.NumRecallAcks--
+		},
+		DirectoryControllerState_SI_A,
+	).OnCondition(
+		DirectoryControllerEventType_LAST_RECALL_ACK,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+
+			directoryControllerFsm.Line().Access = nil
+			directoryControllerFsm.Line().SetTag(INVALID_TAG)
+		},
+		DirectoryControllerState_I,
+	).OnCondition(
+		DirectoryControllerEventType_PUTS_NOT_LAST,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutSNotLastEvent)
+
+			directoryControllerFsm.SendPutAckToRequester(event, event.Tag(), event.Requester)
+		},
+		DirectoryControllerState_SI_A,
+	).OnCondition(
+		DirectoryControllerEventType_PUTS_LAST,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutSLastEvent)
+
+			directoryControllerFsm.SendPutAckToRequester(event, event.Tag(), event.Requester)
+		},
+		DirectoryControllerState_SI_A,
+	).OnCondition(
+		DirectoryControllerEventType_PUTM_AND_DATA_FROM_NONOWNER,
+		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
+			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
+			var event = params.(*PutMAndDataFromNonOwnerEvent)
+
+			directoryControllerFsm.SendPutAckToRequester(event, event.Tag(), event.Requester)
+		},
+		DirectoryControllerState_SI_A,
+	)
 
 	return directoryControllerFsmFactory
 }

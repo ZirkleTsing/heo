@@ -33,6 +33,10 @@ func NewDirectoryController(memoryHierarchy *MemoryHierarchy, name string, geome
 	return directoryController
 }
 
+func (directoryController *DirectoryController) HitLatency() uint32 {
+	return directoryController.MemoryHierarchy().Config.L2HitLatency
+}
+
 func (directoryController *DirectoryController) access(producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, requester CacheController, onReplacementCompletedCallback func(set uint32, way uint32), onReplacementStalledCallback func()) {
 	//var set = directoryController.Cache().GetSet(tag)
 	//
