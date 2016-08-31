@@ -4,26 +4,28 @@ import "github.com/mcai/acogo/cpu/mem"
 
 type DirectoryController struct {
 	*BaseController
+	Cache                    *EvictableCache
 	CacheControllers         []*CacheController
 	NumPendingMemoryAccesses uint32
-	FsmFactory *DirectoryControllerFiniteStateMachineFactory
+	FsmFactory               *DirectoryControllerFiniteStateMachineFactory
 }
 
 func NewDirectoryController(memoryHierarchy *MemoryHierarchy, name string, geometry *mem.Geometry, replacementPolicyType CacheReplacementPolicyType) *DirectoryController {
 	var directoryController = &DirectoryController{
 	}
 
+	directoryController.Cache = NewEvictableCache(
+		geometry,
+		func(set uint32, way uint32) CacheLineStateProvider {
+			return NewDirectoryControllerFiniteStateMachine(set, way, directoryController)
+		},
+		replacementPolicyType,
+	)
+
 	directoryController.BaseController = NewBaseController(
 		memoryHierarchy,
 		name,
 		MemoryDeviceType_L2_CONTROLLER,
-		NewEvictableCache(
-			geometry,
-			func(set uint32, way uint32) CacheLineStateProvider {
-				return NewDirectoryControllerFiniteStateMachine(set, way, directoryController)
-			},
-			replacementPolicyType,
-		),
 	)
 
 	directoryController.FsmFactory = NewDirectoryControllerFiniteStateMachineFactory()

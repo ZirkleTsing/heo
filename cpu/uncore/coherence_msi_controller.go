@@ -2,7 +2,6 @@ package uncore
 
 type Controller interface {
 	MemoryDevice
-	Cache() *EvictableCache
 	Next() MemoryDevice
 	SetNext(next MemoryDevice)
 	ReceiveMessage(message CoherenceMessage)
@@ -11,7 +10,6 @@ type Controller interface {
 
 type BaseController struct {
 	*BaseMemoryDevice
-	cache                  *EvictableCache
 	next                   MemoryDevice
 	NumDownwardReadHits    int32
 	NumDownwardReadMisses  int32
@@ -20,10 +18,9 @@ type BaseController struct {
 	NumEvictions           int32
 }
 
-func NewBaseController(memoryHierarchy *MemoryHierarchy, name string, deviceType MemoryDeviceType, cache *EvictableCache) *BaseController {
+func NewBaseController(memoryHierarchy *MemoryHierarchy, name string, deviceType MemoryDeviceType) *BaseController {
 	var baseController = &BaseController{
 		BaseMemoryDevice:NewBaseMemoryDevice(memoryHierarchy, name, deviceType),
-		cache:cache,
 	}
 
 	return baseController
@@ -71,14 +68,6 @@ func (baseController *BaseController) HitRatio() float32 {
 	} else {
 		return float32(baseController.NumDownwardHits()) / float32(baseController.NumDownwardAccesses())
 	}
-}
-
-func (baseController *BaseController) OccupancyRatio() float32 {
-	return baseController.cache.Cache.OccupancyRatio()
-}
-
-func (baseController *BaseController) Cache() *EvictableCache {
-	return baseController.cache
 }
 
 func (baseController *BaseController) Next() MemoryDevice {

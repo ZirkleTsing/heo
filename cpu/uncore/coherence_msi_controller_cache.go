@@ -4,6 +4,7 @@ import "github.com/mcai/acogo/cpu/mem"
 
 type CacheController struct {
 	*BaseController
+	Cache                     *EvictableCache
 	NumReadPorts              uint32
 	NumWritePorts             uint32
 	HitLatency                uint32
@@ -21,17 +22,18 @@ func NewCacheController(memoryHierarchy *MemoryHierarchy, name string, deviceTyp
 		NumPendingAccessesPerType:make(map[MemoryHierarchyAccessType]uint32),
 	}
 
+	cacheController.Cache = NewEvictableCache(
+		geometry,
+		func(set uint32, way uint32) CacheLineStateProvider {
+			return NewCacheControllerFiniteStateMachine(set, way, cacheController)
+		},
+		replacementPolicyType,
+	)
+
 	cacheController.BaseController = NewBaseController(
 		memoryHierarchy,
 		name,
 		deviceType,
-		NewEvictableCache(
-			geometry,
-			func(set uint32, way uint32) CacheLineStateProvider {
-				return NewCacheControllerFiniteStateMachine(set, way, cacheController)
-			},
-			replacementPolicyType,
-		),
 	)
 
 	cacheController.NumPendingAccessesPerType[MemoryHierarchyAccessType_IFETCH] = 0
@@ -152,15 +154,15 @@ func (cacheController *CacheController) ReceiveMessage(message CoherenceMessage)
 }
 
 func (cacheController *CacheController) access(producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, onReplacementCompletedCallback func(uint32, uint32), onReplacementStalledCallback func()) {
-	var set = cacheController.Cache().GetSet(tag)
+	var set = cacheController.Cache.GetSet(tag)
 
-	var cacheAccess = cacheController.Cache().NewAccess(access, tag)
+	var cacheAccess = cacheController.Cache.NewAccess(access, tag)
 
 	if cacheAccess.HitInCache {
 		onReplacementCompletedCallback(set, cacheAccess.Way)
 	} else {
 		if cacheAccess.Replacement {
-			var line = cacheController.Cache().Sets[set].Lines[cacheAccess.Way]
+			var line = cacheController.Cache.Sets[set].Lines[cacheAccess.Way]
 			var cacheControllerFsm = line.StateProvider.(*CacheControllerFiniteStateMachine)
 			cacheControllerFsm.OnEventReplacement(
 				producerFlow,
@@ -190,7 +192,7 @@ func (cacheController *CacheController) _onLoad(access *MemoryHierarchyAccess, t
 		access,
 		tag,
 		func(set uint32, way uint32) {
-			var line = cacheController.Cache().Sets[set].Lines[way]
+			var line = cacheController.Cache.Sets[set].Lines[way]
 			var cacheControllerFsm = line.StateProvider.(*CacheControllerFiniteStateMachine)
 			cacheControllerFsm.OnEventLoad(
 				loadFlow,
@@ -217,7 +219,7 @@ func (cacheController *CacheController) _onStore(access *MemoryHierarchyAccess, 
 		access,
 		tag,
 		func(set uint32, way uint32) {
-			var line = cacheController.Cache().Sets[set].Lines[way]
+			var line = cacheController.Cache.Sets[set].Lines[way]
 			var cacheControllerFsm = line.StateProvider.(*CacheControllerFiniteStateMachine)
 			cacheControllerFsm.OnEventStore(
 				storeFlow,
@@ -235,50 +237,50 @@ func (cacheController *CacheController) OnStore(access *MemoryHierarchyAccess, t
 }
 
 func (cacheController *CacheController) onFwdGetS(message *FwdGetSMessage) {
-	var way = cacheController.Cache().FindWay(message.Tag())
-	var line = cacheController.Cache().Sets[cacheController.Cache().GetSet(message.Tag())].Lines[way]
+	var way = cacheController.Cache.FindWay(message.Tag())
+	var line = cacheController.Cache.Sets[cacheController.Cache.GetSet(message.Tag())].Lines[way]
 	var cacheControllerFsm = line.StateProvider.(*CacheControllerFiniteStateMachine)
 	cacheControllerFsm.OnEventFwdGetS(message, message.Tag(), message.Requester)
 }
 
 func (cacheController *CacheController) onFwdGetM(message *FwdGetMMessage) {
-	var way = cacheController.Cache().FindWay(message.Tag())
-	var line = cacheController.Cache().Sets[cacheController.Cache().GetSet(message.Tag())].Lines[way]
+	var way = cacheController.Cache.FindWay(message.Tag())
+	var line = cacheController.Cache.Sets[cacheController.Cache.GetSet(message.Tag())].Lines[way]
 	var cacheControllerFsm = line.StateProvider.(*CacheControllerFiniteStateMachine)
 	cacheControllerFsm.OnEventFwdGetM(message, message.Tag(), message.Requester)
 }
 
 func (cacheController *CacheController) onInv(message *InvMessage) {
-	var way = cacheController.Cache().FindWay(message.Tag())
-	var line = cacheController.Cache().Sets[cacheController.Cache().GetSet(message.Tag())].Lines[way]
+	var way = cacheController.Cache.FindWay(message.Tag())
+	var line = cacheController.Cache.Sets[cacheController.Cache.GetSet(message.Tag())].Lines[way]
 	var cacheControllerFsm = line.StateProvider.(*CacheControllerFiniteStateMachine)
 	cacheControllerFsm.OnEventInv(message, message.Tag(), message.Requester)
 }
 
 func (cacheController *CacheController) onRecall(message *RecallMessage) {
-	var way = cacheController.Cache().FindWay(message.Tag())
-	var line = cacheController.Cache().Sets[cacheController.Cache().GetSet(message.Tag())].Lines[way]
+	var way = cacheController.Cache.FindWay(message.Tag())
+	var line = cacheController.Cache.Sets[cacheController.Cache.GetSet(message.Tag())].Lines[way]
 	var cacheControllerFsm = line.StateProvider.(*CacheControllerFiniteStateMachine)
 	cacheControllerFsm.OnEventRecall(message, message.Tag())
 }
 
 func (cacheController *CacheController) onPutAck(message *PutAckMessage) {
-	var way = cacheController.Cache().FindWay(message.Tag())
-	var line = cacheController.Cache().Sets[cacheController.Cache().GetSet(message.Tag())].Lines[way]
+	var way = cacheController.Cache.FindWay(message.Tag())
+	var line = cacheController.Cache.Sets[cacheController.Cache.GetSet(message.Tag())].Lines[way]
 	var cacheControllerFsm = line.StateProvider.(*CacheControllerFiniteStateMachine)
 	cacheControllerFsm.OnEventPutAck(message, message.Tag())
 }
 
 func (cacheController *CacheController) onData(message *DataMessage) {
-	var way = cacheController.Cache().FindWay(message.Tag())
-	var line = cacheController.Cache().Sets[cacheController.Cache().GetSet(message.Tag())].Lines[way]
+	var way = cacheController.Cache.FindWay(message.Tag())
+	var line = cacheController.Cache.Sets[cacheController.Cache.GetSet(message.Tag())].Lines[way]
 	var cacheControllerFsm = line.StateProvider.(*CacheControllerFiniteStateMachine)
 	cacheControllerFsm.OnEventData(message, message.Tag(), message.Sender, message.NumInvAcks)
 }
 
 func (cacheController *CacheController) onInvAck(message *InvAckMessage) {
-	var way = cacheController.Cache().FindWay(message.Tag())
-	var line = cacheController.Cache().Sets[cacheController.Cache().GetSet(message.Tag())].Lines[way]
+	var way = cacheController.Cache.FindWay(message.Tag())
+	var line = cacheController.Cache.Sets[cacheController.Cache.GetSet(message.Tag())].Lines[way]
 	var cacheControllerFsm = line.StateProvider.(*CacheControllerFiniteStateMachine)
 	cacheControllerFsm.OnEventInvAck(message, message.Tag(), message.Sender)
 }

@@ -32,7 +32,7 @@ func NewCacheControllerFiniteStateMachine(set uint32, way uint32, cacheControlle
 }
 
 func (cacheControllerFsm *CacheControllerFiniteStateMachine) Line() *CacheLine {
-	return cacheControllerFsm.CacheController.Cache().Sets[cacheControllerFsm.Set].Lines[cacheControllerFsm.Way]
+	return cacheControllerFsm.CacheController.Cache.Sets[cacheControllerFsm.Set].Lines[cacheControllerFsm.Way]
 }
 
 func (cacheControllerFsm *CacheControllerFiniteStateMachine) fireTransition(event CacheControllerEvent) {
@@ -198,7 +198,7 @@ func (cacheControllerFsm *CacheControllerFiniteStateMachine) SendPutSToDir(produ
 func (cacheControllerFsm *CacheControllerFiniteStateMachine) SendPutMAndDataToDir(producerFlow CacheCoherenceFlow, tag uint32) {
 	cacheControllerFsm.CacheController.TransferMessage(
 		cacheControllerFsm.CacheController.Next().(DirectoryController),
-		cacheControllerFsm.CacheController.Cache().LineSize() + 8,
+		cacheControllerFsm.CacheController.Cache.LineSize() + 8,
 		NewPutMAndDataMessage(
 			cacheControllerFsm.CacheController,
 			producerFlow,
@@ -225,7 +225,7 @@ func (cacheControllerFsm *CacheControllerFiniteStateMachine) SendDataToRequester
 
 	cacheControllerFsm.CacheController.TransferMessage(
 		cacheControllerFsm.CacheController.Next().(DirectoryController),
-		cacheControllerFsm.CacheController.Cache().LineSize() + 8,
+		cacheControllerFsm.CacheController.Cache.LineSize() + 8,
 		NewDataMessage(
 			cacheControllerFsm.CacheController,
 			producerFlow,
@@ -240,7 +240,7 @@ func (cacheControllerFsm *CacheControllerFiniteStateMachine) SendDataToRequester
 func (cacheControllerFsm *CacheControllerFiniteStateMachine) SendDataToRequester(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
 	cacheControllerFsm.CacheController.TransferMessage(
 		requester,
-		cacheControllerFsm.CacheController.Cache().LineSize() + 8,
+		cacheControllerFsm.CacheController.Cache.LineSize() + 8,
 		NewDataMessage(
 			cacheControllerFsm.CacheController,
 			producerFlow,
@@ -295,7 +295,7 @@ func (cacheControllerFsm *CacheControllerFiniteStateMachine) FireNonblockingRequ
 
 func (cacheControllerFsm *CacheControllerFiniteStateMachine) Hit(access *MemoryHierarchyAccess, tag uint32, set uint32, way uint32) {
 	cacheControllerFsm.FireServiceNonblockingRequestEvent(access, tag, true)
-	cacheControllerFsm.CacheController.Cache().ReplacementPolicy.HandlePromotionOnHit(access, set, way)
+	cacheControllerFsm.CacheController.Cache.ReplacementPolicy.HandlePromotionOnHit(access, set, way)
 	cacheControllerFsm.Line().Access = access
 }
 
@@ -355,7 +355,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 			cacheControllerFsm.Line().Access = event.Access()
 			cacheControllerFsm.Line().SetTag(int32(event.Tag()))
 			cacheControllerFsm.OnCompletedCallback = func() {
-				cacheControllerFsm.CacheController.Cache().ReplacementPolicy.HandleInsertionOnMiss(
+				cacheControllerFsm.CacheController.Cache.ReplacementPolicy.HandleInsertionOnMiss(
 					event.Access(),
 					cacheControllerFsm.Set,
 					cacheControllerFsm.Way,
@@ -375,7 +375,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 			cacheControllerFsm.Line().Access = event.Access()
 			cacheControllerFsm.Line().SetTag(int32(event.Tag()))
 			cacheControllerFsm.OnCompletedCallback = func() {
-				cacheControllerFsm.CacheController.Cache().ReplacementPolicy.HandleInsertionOnMiss(
+				cacheControllerFsm.CacheController.Cache.ReplacementPolicy.HandleInsertionOnMiss(
 					event.Access(),
 					cacheControllerFsm.Set,
 					cacheControllerFsm.Way,
@@ -862,7 +862,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 			cacheControllerFsm.SendRecallAckToDir(
 				event,
 				event.Tag(),
-				cacheControllerFsm.CacheController.Cache().LineSize() + 8,
+				cacheControllerFsm.CacheController.Cache.LineSize() + 8,
 			)
 			cacheControllerFsm.Line().Access = nil
 			cacheControllerFsm.Line().SetTag(INVALID_TAG)

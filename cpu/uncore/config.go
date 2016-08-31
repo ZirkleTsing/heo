@@ -11,35 +11,38 @@ const (
 )
 
 type MemoryHierarchyConfig struct {
-	TlbSize              uint32
-	TlbAssoc             uint32
-	TlbLineSize          uint32
-	TlbHitLatency        uint32
-	TlbMissLatency       uint32
+	TlbSize                  uint32
+	TlbAssoc                 uint32
+	TlbLineSize              uint32
+	TlbHitLatency            uint32
+	TlbMissLatency           uint32
 
-	L1ISize              uint32
-	L1IAssoc             uint32
-	L1ILineSize          uint32
-	L1IHitLatency        uint32
-	L1INumReadPorts      uint32
-	L1INumWritePorts     uint32
-	L1IReplacementPolicy CacheReplacementPolicyType
+	L1ISize                  uint32
+	L1IAssoc                 uint32
+	L1ILineSize              uint32
+	L1IHitLatency            uint32
+	L1INumReadPorts          uint32
+	L1INumWritePorts         uint32
+	L1IReplacementPolicy     CacheReplacementPolicyType
 
-	L1DSize              uint32
-	L1DAssoc             uint32
-	L1DLineSize          uint32
-	L1DHitLatency        uint32
-	L1DNumReadPorts      uint32
-	L1DNumWritePorts     uint32
-	L1DReplacementPolicy CacheReplacementPolicyType
+	L1DSize                  uint32
+	L1DAssoc                 uint32
+	L1DLineSize              uint32
+	L1DHitLatency            uint32
+	L1DNumReadPorts          uint32
+	L1DNumWritePorts         uint32
+	L1DReplacementPolicy     CacheReplacementPolicyType
 
-	L2Size               uint32
-	L2Assoc              uint32
-	L2LineSize           uint32
-	L2HitLatency         uint32
-	L2NumReadPorts       uint32
-	L2NumWritePorts      uint32
-	L2ReplacementPolicy  CacheReplacementPolicyType
+	L2Size                   uint32
+	L2Assoc                  uint32
+	L2LineSize               uint32
+	L2HitLatency             uint32
+	L2NumReadPorts           uint32
+	L2NumWritePorts          uint32
+	L2ReplacementPolicy      CacheReplacementPolicyType
+
+	MemoryControllerLineSize uint32
+	MemoryControllerLatency  uint32
 }
 
 func NewMemoryHierarchyConfig() *MemoryHierarchyConfig {
@@ -71,6 +74,9 @@ func NewMemoryHierarchyConfig() *MemoryHierarchyConfig {
 		L2LineSize:64,
 		L2HitLatency:10,
 		L2ReplacementPolicy:CacheReplacementPolicyType_LRU,
+
+		MemoryControllerLineSize:64,
+		MemoryControllerLatency:200,
 	}
 
 	return config
