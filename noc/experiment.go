@@ -4,6 +4,7 @@ import (
 	"time"
 	"os"
 	"github.com/mcai/acogo/simutil"
+	"fmt"
 )
 
 type NoCExperiment struct {
@@ -25,6 +26,29 @@ func NewNoCExperiment(config *NoCConfig) *NoCExperiment {
 	}
 
 	experiment.Network = NewNetwork(experiment, config)
+
+	switch dataPacketTraffic := config.DataPacketTraffic; dataPacketTraffic {
+	case TRAFFIC_UNIFORM:
+		experiment.Network.AddTrafficGenerator(
+			NewUniformTrafficGenerator(experiment.Network, config.DataPacketInjectionRate, config.MaxPackets, func(src int, dest int) Packet {
+				return NewDataPacket(experiment.Network, src, dest, config.DataPacketSize, true, func() {})
+			}),
+		)
+	case TRAFFIC_TRANSPOSE1:
+		experiment.Network.AddTrafficGenerator(
+			NewTranspose1TrafficGenerator(experiment.Network, config.DataPacketInjectionRate, config.MaxPackets, func(src int, dest int) Packet {
+				return NewDataPacket(experiment.Network, src, dest, config.DataPacketSize, true, func() {})
+			}),
+		)
+	case TRAFFIC_TRANSPOSE2:
+		experiment.Network.AddTrafficGenerator(
+			NewTranspose2TrafficGenerator(experiment.Network, config.DataPacketInjectionRate, config.MaxPackets, func(src int, dest int) Packet {
+				return NewDataPacket(experiment.Network, src, dest, config.DataPacketSize, true, func() {})
+			}),
+		)
+	default:
+		panic(fmt.Sprintf("data packet traffic %s is not supported", dataPacketTraffic))
+	}
 
 	return experiment
 }

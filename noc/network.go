@@ -3,6 +3,7 @@ package noc
 import (
 	"math"
 	"github.com/mcai/acogo/simutil"
+	"fmt"
 )
 
 type NetworkDriver interface {
@@ -19,7 +20,7 @@ type Network struct {
 	Nodes                        []*Node
 	Width                        int
 	AcceptPacket                 bool
-	TrafficGenerators            []TrafficGenerator
+	trafficGenerators            []TrafficGenerator
 
 	NumPacketsReceived           int64
 	NumPacketsTransmitted        int64
@@ -61,47 +62,29 @@ func NewNetwork(driver NetworkDriver, config *NoCConfig) *Network {
 		var node = NewNode(network, i)
 		network.Nodes = append(network.Nodes, node)
 	}
-
-	switch dataPacketTraffic := config.DataPacketTraffic; dataPacketTraffic {
-	case TRAFFIC_UNIFORM:
-		network.TrafficGenerators = append(network.TrafficGenerators, NewUniformTrafficGenerator(network, config.DataPacketInjectionRate, config.MaxPackets, func(src int, dest int) Packet {
-			return NewDataPacket(network, src, dest, config.DataPacketSize, true, func() {})
-		}))
-	case TRAFFIC_TRANSPOSE1:
-		network.TrafficGenerators = append(network.TrafficGenerators, NewTranspose1TrafficGenerator(network, config.DataPacketInjectionRate, config.MaxPackets, func(src int, dest int) Packet {
-			return NewDataPacket(network, src, dest, config.DataPacketSize, true, func() {})
-		}))
-	case TRAFFIC_TRANSPOSE2:
-		network.TrafficGenerators = append(network.TrafficGenerators, NewTranspose2TrafficGenerator(network, config.DataPacketInjectionRate, config.MaxPackets, func(src int, dest int) Packet {
-			return NewDataPacket(network, src, dest, config.DataPacketSize, true, func() {})
-		}))
-	}
-
 	switch selection := config.Selection; selection {
 	case SELECTION_ACO:
 		switch antPacketTraffic := config.AntPacketTraffic; antPacketTraffic {
 		case TRAFFIC_UNIFORM:
-			network.TrafficGenerators = append(network.TrafficGenerators, NewUniformTrafficGenerator(network, config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
+			network.AddTrafficGenerator(NewUniformTrafficGenerator(network, config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
 				return NewAntPacket(network, src, dest, config.AntPacketSize, func() {}, true)
 			}))
 		case TRAFFIC_TRANSPOSE1:
-			network.TrafficGenerators = append(network.TrafficGenerators, NewTranspose1TrafficGenerator(network, config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
+			network.AddTrafficGenerator(NewTranspose1TrafficGenerator(network, config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
 				return NewAntPacket(network, src, dest, config.AntPacketSize, func() {}, true)
 			}))
 		case TRAFFIC_TRANSPOSE2:
-			network.TrafficGenerators = append(network.TrafficGenerators, NewTranspose2TrafficGenerator(network, config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
+			network.AddTrafficGenerator(NewTranspose2TrafficGenerator(network, config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
 				return NewAntPacket(network, src, dest, config.AntPacketSize, func() {}, true)
 			}))
+		default:
+			panic(fmt.Sprintf("ant packet traffic %s is not supported", antPacketTraffic))
 		}
 	}
 
 	driver.CycleAccurateEventQueue().AddPerCycleEvent(func() {
 		for _, node := range network.Nodes {
 			node.Router.AdvanceOneCycle()
-		}
-
-		for _, trafficGenerator := range network.TrafficGenerators {
-			trafficGenerator.AdvanceOneCycle()
 		}
 	})
 
@@ -114,6 +97,18 @@ func (network *Network) GetX(id int) int {
 
 func (network *Network) GetY(id int) int {
 	return (id - id % network.Width) / network.Width
+}
+
+func (network *Network) TrafficGenerators() []TrafficGenerator {
+	return network.trafficGenerators
+}
+
+func (network *Network) AddTrafficGenerator(trafficGenerator TrafficGenerator) {
+	network.trafficGenerators = append(network.trafficGenerators, trafficGenerator)
+
+	network.Driver.CycleAccurateEventQueue().AddPerCycleEvent(func() {
+		trafficGenerator.AdvanceOneCycle()
+	})
 }
 
 func (network *Network) Receive(packet Packet) bool {

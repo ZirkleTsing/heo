@@ -6,6 +6,7 @@ import (
 	"os"
 	"reflect"
 	"github.com/mcai/acogo/cpu/uncore"
+	"github.com/mcai/acogo/noc"
 )
 
 type CPUExperiment struct {
@@ -19,7 +20,7 @@ type CPUExperiment struct {
 
 	Kernel                  *Kernel
 	Processor               *Processor
-	MemoryHierarchy         *uncore.MemoryHierarchy
+	MemoryHierarchy         *uncore.NoCMemoryHierarchy
 }
 
 func NewCPUExperiment(cpuConfig *CPUConfig) *CPUExperiment {
@@ -36,7 +37,9 @@ func NewCPUExperiment(cpuConfig *CPUConfig) *CPUExperiment {
 	uncoreConfig.NumCores = cpuConfig.NumCores
 	uncoreConfig.NumThreadsPerCore = cpuConfig.NumThreadsPerCore
 
-	experiment.MemoryHierarchy = uncore.NewMemoryHierarchy(experiment, uncoreConfig)
+	var nocConfig = noc.NewNoCConfig(cpuConfig.OutputDirectory, -1, -1, -1, false)
+
+	experiment.MemoryHierarchy = uncore.NewNocMemoryHierarchy(experiment, uncoreConfig, nocConfig)
 
 	experiment.blockingEventDispatcher.AddListener(reflect.TypeOf((*StaticInstExecutedEvent)(nil)), func(event interface{}) {
 		//var staticInstExecutedEvent = event.(*StaticInstExecutedEvent)

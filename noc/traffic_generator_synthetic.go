@@ -2,32 +2,31 @@ package noc
 
 import "math/rand"
 
-type GeneralTrafficGenerator struct {
+type BaseSyntheticTrafficGenerator struct {
 	Network             *Network
 	PacketInjectionRate float64
 	MaxPackets          int64
 	NewPacket           func(src int, dest int) Packet
 }
 
-func NewGeneralTrafficGenerator(network *Network, packetInjectionRate float64, maxPackets int64, newPacket func(src int, dest int) Packet) *GeneralTrafficGenerator {
-	var generator = &GeneralTrafficGenerator{
+func NewBaseSyntheticTrafficGenerator(network *Network, packetInjectionRate float64, maxPackets int64, newPacket func(src int, dest int) Packet) *BaseSyntheticTrafficGenerator {
+	var baseSyntheticTrafficGenerator = &BaseSyntheticTrafficGenerator{
 		Network:network,
 		PacketInjectionRate:packetInjectionRate,
 		MaxPackets:maxPackets,
 		NewPacket:newPacket,
 	}
 
-	return generator
+	return baseSyntheticTrafficGenerator
 }
 
-func (generator *GeneralTrafficGenerator) AdvanceOneCycle(dest func(src int) int) {
+func (generator *BaseSyntheticTrafficGenerator) AdvanceOneCycle(dest func(src int) int) {
 	for _, node := range generator.Network.Nodes {
 		if !generator.Network.AcceptPacket || generator.MaxPackets != -1 && generator.Network.NumPacketsReceived > generator.MaxPackets {
 			break
 		}
 
-		var valid = rand.Float64() <= generator.PacketInjectionRate
-		if valid {
+		if rand.Float64() <= generator.PacketInjectionRate {
 			var src = node.Id
 			var dest = dest(src)
 

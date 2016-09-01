@@ -5,13 +5,13 @@ import (
 	"fmt"
 )
 
-type MemoryHierarchyDriver interface {
+type UncoreDriver interface {
 	CycleAccurateEventQueue() *simutil.CycleAccurateEventQueue
 	BlockingEventDispatcher() *simutil.BlockingEventDispatcher
 }
 
 type MemoryHierarchy struct {
-	Driver                         MemoryHierarchyDriver
+	Driver                         UncoreDriver
 	Config                         *UncoreConfig
 
 	CurrentMemoryHierarchyAccessId int32
@@ -30,7 +30,7 @@ type MemoryHierarchy struct {
 	P2PReorderBuffers              map[Controller](map[Controller]*P2PReorderBuffer)
 }
 
-func NewMemoryHierarchy(driver MemoryHierarchyDriver, config *UncoreConfig) *MemoryHierarchy {
+func NewMemoryHierarchy(driver UncoreDriver, config *UncoreConfig) *MemoryHierarchy {
 	var memoryHierarchy = &MemoryHierarchy{
 		Driver:driver,
 		Config:config,
@@ -91,7 +91,7 @@ func (memoryHierarchy *MemoryHierarchy) TransferMessage(from Controller, to Cont
 
 	p2pReorderBuffer.Messages = append(p2pReorderBuffer.Messages, message)
 
-	memoryHierarchy.Transfer(from, to, size, func(){
+	memoryHierarchy.Transfer(from, to, size, func() {
 		p2pReorderBuffer.OnDestArrived(message)
 	})
 }
@@ -104,13 +104,13 @@ type P2PReorderBuffer struct {
 }
 
 func NewP2PReorderBuffer(from Controller, to Controller) *P2PReorderBuffer {
-	var p2pReorderBUffer = &P2PReorderBuffer{
+	var p2pReorderBuffer = &P2PReorderBuffer{
 		From:from,
 		To:to,
 		LastCompletedMessageId:-1,
 	}
 
-	return p2pReorderBUffer
+	return p2pReorderBuffer
 }
 
 func (p2pReorderBuffer *P2PReorderBuffer) OnDestArrived(message CoherenceMessage) {
