@@ -2,22 +2,22 @@ package cpu
 
 type Processor struct {
 	Experiment              *CPUExperiment
-	Cores                   []*Core
-	ContextToThreadMappings map[*Context]*Thread
+	Cores                   []Core
+	ContextToThreadMappings map[*Context]Thread
 }
 
 func NewProcessor(experiment *CPUExperiment) *Processor {
 	var processor = &Processor{
 		Experiment:experiment,
-		ContextToThreadMappings:make(map[*Context]*Thread),
+		ContextToThreadMappings:make(map[*Context]Thread),
 	}
 
 	for i := int32(0); i < experiment.CPUConfig.NumCores; i++ {
-		var core = NewCore(processor, i)
+		var core = NewMemoryHierarchyCore(processor, i)
 
 		for j := int32(0); j < experiment.CPUConfig.NumThreadsPerCore; j++ {
-			var thread = NewThread(core, j)
-			core.Threads = append(core.Threads, thread)
+			var thread = NewMemoryHierarchyThread(core, j)
+			core.AddThread(thread)
 		}
 
 		processor.Cores = append(processor.Cores, core)
@@ -38,11 +38,11 @@ func (processor *Processor) UpdateContextToThreadAssignments() {
 			var coreNum = context.ThreadId / processor.Experiment.CPUConfig.NumThreadsPerCore
 			var threadNum = context.ThreadId % processor.Experiment.CPUConfig.NumThreadsPerCore
 
-			var candidateThread = processor.Cores[coreNum].Threads[threadNum]
+			var candidateThread = processor.Cores[coreNum].Threads()[threadNum]
 
 			processor.ContextToThreadMappings[context] = candidateThread
 
-			candidateThread.Context = context
+			candidateThread.SetContext(context)
 
 			contextsToReserve = append(contextsToReserve, context)
 		} else if context.State == ContextState_FINISHED {
@@ -70,7 +70,7 @@ func (processor *Processor) kill(context *Context) {
 		context.Process.CloseProgram()
 	}
 
-	processor.ContextToThreadMappings[context].Context = nil
+	processor.ContextToThreadMappings[context].SetContext(nil)
 
 	context.ThreadId = -1
 

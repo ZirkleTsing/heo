@@ -60,16 +60,7 @@ func (experiment *CPUExperiment) Run(skipIfStatsFileExists bool) {
 
 	experiment.BeginTime = time.Now()
 
-	for len(experiment.Kernel.Contexts) > 0 && experiment.canAdvanceOneCycle() {
-		for _, core := range experiment.Processor.Cores {
-			core.AdvanceOneCycle()
-		}
-
-		experiment.Kernel.AdvanceOneCycle()
-		experiment.Processor.UpdateContextToThreadAssignments()
-
-		experiment.cycleAccurateEventQueue.AdvanceOneCycle()
-	}
+	experiment.DoFastForward()
 
 	experiment.EndTime = time.Now()
 
@@ -80,5 +71,33 @@ func (experiment *CPUExperiment) Run(skipIfStatsFileExists bool) {
 
 func (experiment *CPUExperiment) canAdvanceOneCycle() bool {
 	return experiment.CPUConfig.MaxDynamicInsts == -1 ||
-		experiment.Processor.Cores[0].Threads[0].NumDynamicInsts < experiment.CPUConfig.MaxDynamicInsts
+		experiment.Processor.Cores[0].Threads()[0].NumDynamicInsts() < experiment.CPUConfig.MaxDynamicInsts
+}
+
+func (experiment *CPUExperiment) advanceOneCycle() {
+	experiment.Kernel.AdvanceOneCycle()
+	experiment.Processor.UpdateContextToThreadAssignments()
+
+	experiment.cycleAccurateEventQueue.AdvanceOneCycle()
+}
+
+func (experiment *CPUExperiment) DoFastForward() {
+	for len(experiment.Kernel.Contexts) > 0 && experiment.canAdvanceOneCycle() {
+		for _, core := range experiment.Processor.Cores {
+			core.FastForwardOneCycle()
+		}
+
+		experiment.advanceOneCycle()
+	}
+}
+
+//TODO: to be called based on config
+func (experiment *CPUExperiment) DoWarmup() {
+	for len(experiment.Kernel.Contexts) > 0 && experiment.canAdvanceOneCycle() {
+		for _, core := range experiment.Processor.Cores {
+			core.WarmupOneCycle()
+		}
+
+		experiment.advanceOneCycle()
+	}
 }
