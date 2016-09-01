@@ -4,7 +4,6 @@ import (
 	"time"
 	"github.com/mcai/acogo/simutil"
 	"os"
-	"reflect"
 	"github.com/mcai/acogo/cpu/uncore"
 	"github.com/mcai/acogo/noc"
 )
@@ -40,13 +39,6 @@ func NewCPUExperiment(cpuConfig *CPUConfig) *CPUExperiment {
 	var nocConfig = noc.NewNoCConfig(cpuConfig.OutputDirectory, -1, -1, -1, false)
 
 	experiment.MemoryHierarchy = uncore.NewNocMemoryHierarchy(experiment, uncoreConfig, nocConfig)
-
-	experiment.blockingEventDispatcher.AddListener(reflect.TypeOf((*StaticInstExecutedEvent)(nil)), func(event interface{}) {
-		//var staticInstExecutedEvent = event.(*StaticInstExecutedEvent)
-		//fmt.Printf("[thread#%d] %s\n", staticInstExecutedEvent.Context.ThreadId, staticInstExecutedEvent.StaticInst.Disassemble(staticInstExecutedEvent.Pc))
-		//fmt.Printf("#dynamicInsts: %d\n", experiment.Processor.Cores[0].Threads[0].NumDynamicInsts)
-		//fmt.Println(staticInstExecutedEvent.Context.Regs.Dump())
-	})
 
 	return experiment
 }

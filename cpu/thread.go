@@ -5,6 +5,7 @@ import "reflect"
 type Thread struct {
 	Core                  *Core
 	Num                   int32
+	Id                    int32
 	Context               *Context
 	NumDynamicInsts       int32
 	ExecutedMnemonicNames map[MnemonicName]int32
@@ -15,6 +16,7 @@ func NewThread(core *Core, num int32) *Thread {
 	var thread = &Thread{
 		Core:core,
 		Num:num,
+		Id:core.Num * core.Processor.Experiment.CPUConfig.NumThreadsPerCore + num,
 		ExecutedMnemonicNames:make(map[MnemonicName]int32),
 		ExecutedSyscallNames:make(map[string]int32),
 	}
