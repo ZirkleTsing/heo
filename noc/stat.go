@@ -8,7 +8,7 @@ import (
 func (experiment *NoCExperiment) DumpStats() {
 	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "TotalCycles",
-		Value: experiment.CycleAccurateEventQueue.CurrentCycle,
+		Value: experiment.CycleAccurateEventQueue().CurrentCycle,
 	})
 
 	experiment.Stats = append(experiment.Stats, simutil.Stat{
@@ -18,7 +18,7 @@ func (experiment *NoCExperiment) DumpStats() {
 
 	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "CyclesPerSecond",
-		Value: float64(experiment.CycleAccurateEventQueue.CurrentCycle) / experiment.EndTime.Sub(experiment.BeginTime).Seconds(),
+		Value: float64(experiment.CycleAccurateEventQueue().CurrentCycle) / experiment.EndTime.Sub(experiment.BeginTime).Seconds(),
 	})
 
 	experiment.Stats = append(experiment.Stats, simutil.Stat{
@@ -110,11 +110,11 @@ func (experiment *NoCExperiment) DumpStats() {
 		})
 	}
 
-	simutil.WriteJsonFile(experiment.Stats, experiment.Config.OutputDirectory, simutil.STATS_JSON_FILE_NAME)
+	simutil.WriteJsonFile(experiment.Stats, experiment.Network.Config.OutputDirectory, simutil.STATS_JSON_FILE_NAME)
 }
 
 func (experiment *NoCExperiment) LoadStats() {
-	simutil.LoadJsonFile(experiment.Config.OutputDirectory, simutil.STATS_JSON_FILE_NAME, &experiment.statMap)
+	simutil.LoadJsonFile(experiment.Network.Config.OutputDirectory, simutil.STATS_JSON_FILE_NAME, &experiment.statMap)
 }
 
 func (experiment *NoCExperiment) GetStatMap() map[string]interface{} {

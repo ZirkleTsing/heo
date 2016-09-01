@@ -6,13 +6,14 @@ import (
 )
 
 type NetworkDriver interface {
-	Config() *NoCConfig
 	CycleAccurateEventQueue() *simutil.CycleAccurateEventQueue
 	BlockingEventDispatcher() *simutil.BlockingEventDispatcher
 }
 
 type Network struct {
-	Experiment                   *NoCExperiment
+	Driver                       NetworkDriver
+	Config                       *NoCConfig
+
 	CurrentPacketId              int64
 	NumNodes                     int
 	Nodes                        []*Node
@@ -43,11 +44,12 @@ type Network struct {
 	MaxFlitPerStateDelay         map[FlitState]int
 }
 
-func NewNetwork(experiment *NoCExperiment) *Network {
+func NewNetwork(driver NetworkDriver, config *NoCConfig) *Network {
 	var network = &Network{
-		Experiment:experiment,
-		NumNodes:experiment.Config.NumNodes,
-		Width:int(math.Sqrt(float64(experiment.Config.NumNodes))),
+		Driver:driver,
+		Config:config,
+		NumNodes:config.NumNodes,
+		Width:int(math.Sqrt(float64(config.NumNodes))),
 		AcceptPacket:true,
 
 		numFlitPerStateDelaySamples:make(map[FlitState]int64),
@@ -60,40 +62,40 @@ func NewNetwork(experiment *NoCExperiment) *Network {
 		network.Nodes = append(network.Nodes, node)
 	}
 
-	switch dataPacketTraffic := experiment.Config.DataPacketTraffic; dataPacketTraffic {
+	switch dataPacketTraffic := config.DataPacketTraffic; dataPacketTraffic {
 	case TRAFFIC_UNIFORM:
-		network.TrafficGenerators = append(network.TrafficGenerators, NewUniformTrafficGenerator(network, experiment.Config.DataPacketInjectionRate, experiment.Config.MaxPackets, func(src int, dest int) Packet {
-			return NewDataPacket(network, src, dest, experiment.Config.DataPacketSize, true, func() {})
+		network.TrafficGenerators = append(network.TrafficGenerators, NewUniformTrafficGenerator(network, config.DataPacketInjectionRate, config.MaxPackets, func(src int, dest int) Packet {
+			return NewDataPacket(network, src, dest, config.DataPacketSize, true, func() {})
 		}))
 	case TRAFFIC_TRANSPOSE1:
-		network.TrafficGenerators = append(network.TrafficGenerators, NewTranspose1TrafficGenerator(network, experiment.Config.DataPacketInjectionRate, experiment.Config.MaxPackets, func(src int, dest int) Packet {
-			return NewDataPacket(network, src, dest, experiment.Config.DataPacketSize, true, func() {})
+		network.TrafficGenerators = append(network.TrafficGenerators, NewTranspose1TrafficGenerator(network, config.DataPacketInjectionRate, config.MaxPackets, func(src int, dest int) Packet {
+			return NewDataPacket(network, src, dest, config.DataPacketSize, true, func() {})
 		}))
 	case TRAFFIC_TRANSPOSE2:
-		network.TrafficGenerators = append(network.TrafficGenerators, NewTranspose2TrafficGenerator(network, experiment.Config.DataPacketInjectionRate, experiment.Config.MaxPackets, func(src int, dest int) Packet {
-			return NewDataPacket(network, src, dest, experiment.Config.DataPacketSize, true, func() {})
+		network.TrafficGenerators = append(network.TrafficGenerators, NewTranspose2TrafficGenerator(network, config.DataPacketInjectionRate, config.MaxPackets, func(src int, dest int) Packet {
+			return NewDataPacket(network, src, dest, config.DataPacketSize, true, func() {})
 		}))
 	}
 
-	switch selection := experiment.Config.Selection; selection {
+	switch selection := config.Selection; selection {
 	case SELECTION_ACO:
-		switch antPacketTraffic := experiment.Config.AntPacketTraffic; antPacketTraffic {
+		switch antPacketTraffic := config.AntPacketTraffic; antPacketTraffic {
 		case TRAFFIC_UNIFORM:
-			network.TrafficGenerators = append(network.TrafficGenerators, NewUniformTrafficGenerator(network, experiment.Config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
-				return NewAntPacket(network, src, dest, experiment.Config.AntPacketSize, func() {}, true)
+			network.TrafficGenerators = append(network.TrafficGenerators, NewUniformTrafficGenerator(network, config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
+				return NewAntPacket(network, src, dest, config.AntPacketSize, func() {}, true)
 			}))
 		case TRAFFIC_TRANSPOSE1:
-			network.TrafficGenerators = append(network.TrafficGenerators, NewTranspose1TrafficGenerator(network, experiment.Config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
-				return NewAntPacket(network, src, dest, experiment.Config.AntPacketSize, func() {}, true)
+			network.TrafficGenerators = append(network.TrafficGenerators, NewTranspose1TrafficGenerator(network, config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
+				return NewAntPacket(network, src, dest, config.AntPacketSize, func() {}, true)
 			}))
 		case TRAFFIC_TRANSPOSE2:
-			network.TrafficGenerators = append(network.TrafficGenerators, NewTranspose2TrafficGenerator(network, experiment.Config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
-				return NewAntPacket(network, src, dest, experiment.Config.AntPacketSize, func() {}, true)
+			network.TrafficGenerators = append(network.TrafficGenerators, NewTranspose2TrafficGenerator(network, config.AntPacketInjectionRate, int64(-1), func(src int, dest int) Packet {
+				return NewAntPacket(network, src, dest, config.AntPacketSize, func() {}, true)
 			}))
 		}
 	}
 
-	experiment.CycleAccurateEventQueue.AddPerCycleEvent(func() {
+	driver.CycleAccurateEventQueue().AddPerCycleEvent(func() {
 		for _, node := range network.Nodes {
 			node.Router.AdvanceOneCycle()
 		}
@@ -116,7 +118,7 @@ func (network *Network) GetY(id int) int {
 
 func (network *Network) Receive(packet Packet) bool {
 	if !network.Nodes[packet.GetSrc()].Router.InjectPacket(packet) {
-		network.Experiment.CycleAccurateEventQueue.Schedule(func() {
+		network.Driver.CycleAccurateEventQueue().Schedule(func() {
 			network.Receive(packet)
 		}, 1)
 		return false
@@ -180,7 +182,7 @@ func (network *Network) LogFlitPerStateDelay(state FlitState, delay int) {
 }
 
 func (network *Network) Throughput() float64 {
-	return float64(network.NumPacketsTransmitted) / float64(network.Experiment.CycleAccurateEventQueue.CurrentCycle) / float64(network.NumNodes)
+	return float64(network.NumPacketsTransmitted) / float64(network.Driver.CycleAccurateEventQueue().CurrentCycle) / float64(network.NumNodes)
 }
 
 func (network *Network) AveragePacketDelay() float64 {
@@ -200,7 +202,7 @@ func (network *Network) AveragePacketHops() float64 {
 }
 
 func (network *Network) PayloadThroughput() float64 {
-	return float64(network.NumPayloadPacketsTransmitted) / float64(network.Experiment.CycleAccurateEventQueue.CurrentCycle) / float64(network.NumNodes)
+	return float64(network.NumPayloadPacketsTransmitted) / float64(network.Driver.CycleAccurateEventQueue().CurrentCycle) / float64(network.NumNodes)
 }
 
 func (network *Network) AveragePayloadPacketDelay() float64 {

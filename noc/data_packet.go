@@ -21,7 +21,7 @@ func NewDataPacket(network *Network, src int, dest int, size int, hasPayload boo
 	var packet = &DataPacket{
 		Network:network,
 		Id:network.CurrentPacketId,
-		BeginCycle:network.Experiment.CycleAccurateEventQueue.CurrentCycle,
+		BeginCycle:network.Driver.CycleAccurateEventQueue().CurrentCycle,
 		EndCycle:-1,
 		Src:src,
 		Dest:dest,
@@ -32,9 +32,9 @@ func NewDataPacket(network *Network, src int, dest int, size int, hasPayload boo
 
 	network.CurrentPacketId++
 
-	var numFlits = int(math.Ceil(float64(packet.Size) / float64(network.Experiment.Config.LinkWidth)))
-	if numFlits > network.Experiment.Config.MaxInputBufferSize {
-		panic(fmt.Sprintf("Number of flits (%d) in a packet cannot be greater than max input buffer size (%d)", numFlits, network.Experiment.Config.MaxInputBufferSize))
+	var numFlits = int(math.Ceil(float64(packet.Size) / float64(network.Config.LinkWidth)))
+	if numFlits > network.Config.MaxInputBufferSize {
+		panic(fmt.Sprintf("Number of flits (%d) in a packet cannot be greater than max input buffer size (%d)", numFlits, network.Config.MaxInputBufferSize))
 	}
 
 	return packet
@@ -95,7 +95,7 @@ func (packet *DataPacket) GetHasPayload() bool {
 func (packet *DataPacket) HandleDestArrived(inputVirtualChannel *InputVirtualChannel) {
 	packet.Memorize(inputVirtualChannel.InputPort.Router.Node)
 
-	packet.EndCycle = inputVirtualChannel.InputPort.Router.Node.Network.Experiment.CycleAccurateEventQueue.CurrentCycle
+	packet.EndCycle = inputVirtualChannel.InputPort.Router.Node.Network.Driver.CycleAccurateEventQueue().CurrentCycle
 
 	inputVirtualChannel.InputPort.Router.Node.Network.LogPacketTransmitted(packet)
 
@@ -127,7 +127,7 @@ func (packet *DataPacket) Memorize(node *Node) {
 
 	packet.Memory = append(packet.Memory, &PacketMemoryEntry{
 		NodeId:node.Id,
-		Timestamp:packet.Network.Experiment.CycleAccurateEventQueue.CurrentCycle,
+		Timestamp:packet.Network.Driver.CycleAccurateEventQueue().CurrentCycle,
 	})
 }
 

@@ -41,7 +41,7 @@ func NewNode(network *Network, id int) *Node {
 
 	node.Router = NewRouter(node)
 
-	switch routing := network.Experiment.Config.Routing; routing {
+	switch routing := network.Config.Routing; routing {
 	case ROUTING_XY:
 		node.RoutingAlgorithm = NewXYRoutingAlgorithm(node)
 	case ROUTING_NEGATIVE_FIRST:
@@ -56,7 +56,7 @@ func NewNode(network *Network, id int) *Node {
 		panic(fmt.Sprintf("Not supported: %s", routing))
 	}
 
-	switch selection := network.Experiment.Config.Selection; selection {
+	switch selection := network.Config.Selection; selection {
 	case SELECTION_RANDOM:
 		node.SelectionAlgorithm = NewRandomSelectionAlgorithm(node)
 	case SELECTION_BUFFER_LEVEL:

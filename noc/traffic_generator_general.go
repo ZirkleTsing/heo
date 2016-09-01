@@ -32,7 +32,7 @@ func (generator *GeneralTrafficGenerator) AdvanceOneCycle(dest func(src int) int
 			var dest = dest(src)
 
 			if src != dest {
-				generator.Network.Experiment.CycleAccurateEventQueue.Schedule(func() {
+				generator.Network.Driver.CycleAccurateEventQueue().Schedule(func() {
 					generator.Network.Receive(generator.NewPacket(src, dest))
 				}, 1)
 			}

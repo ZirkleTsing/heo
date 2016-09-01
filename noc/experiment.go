@@ -7,52 +7,60 @@ import (
 )
 
 type NoCExperiment struct {
-	Config                  *NoCConfig
-	Stats                   simutil.Stats
-	statMap                 map[string]interface{}
+	cycleAccurateEventQueue *simutil.CycleAccurateEventQueue
+	blockingEventDispatcher *simutil.BlockingEventDispatcher
+
+	Network                 *Network
 
 	BeginTime, EndTime      time.Time
-	CycleAccurateEventQueue *simutil.CycleAccurateEventQueue
-	Network                 *Network
+
+	Stats                   simutil.Stats
+	statMap                 map[string]interface{}
 }
 
 func NewNoCExperiment(config *NoCConfig) *NoCExperiment {
 	var experiment = &NoCExperiment{
-		Config:config,
-		CycleAccurateEventQueue:simutil.NewCycleAccurateEventQueue(),
+		cycleAccurateEventQueue:simutil.NewCycleAccurateEventQueue(),
+		blockingEventDispatcher:simutil.NewBlockingEventDispatcher(),
 	}
 
-	var network = NewNetwork(experiment)
-
-	experiment.Network = network
+	experiment.Network = NewNetwork(experiment, config)
 
 	return experiment
 }
 
+func (experiment *NoCExperiment) CycleAccurateEventQueue() *simutil.CycleAccurateEventQueue {
+	return experiment.cycleAccurateEventQueue
+}
+
+func (experiment *NoCExperiment) BlockingEventDispatcher() *simutil.BlockingEventDispatcher {
+	return experiment.blockingEventDispatcher
+}
+
 func (experiment *NoCExperiment) Run(skipIfStatsFileExists bool) {
 	if skipIfStatsFileExists {
-		if _, err := os.Stat(experiment.Config.OutputDirectory + "/" + simutil.STATS_JSON_FILE_NAME); err == nil {
+		if _, err := os.Stat(experiment.Network.Config.OutputDirectory + "/" + simutil.STATS_JSON_FILE_NAME); err == nil {
 			return
 		}
 	}
 
 	experiment.BeginTime = time.Now()
 
-	for (experiment.Config.MaxCycles == -1 || experiment.CycleAccurateEventQueue.CurrentCycle < experiment.Config.MaxCycles) && (experiment.Config.MaxPackets == -1 || experiment.Network.NumPacketsReceived < experiment.Config.MaxPackets) {
-		experiment.CycleAccurateEventQueue.AdvanceOneCycle()
+	for (experiment.Network.Config.MaxCycles == -1 || experiment.CycleAccurateEventQueue().CurrentCycle < experiment.Network.Config.MaxCycles) && (experiment.Network.Config.MaxPackets == -1 || experiment.Network.NumPacketsReceived < experiment.Network.Config.MaxPackets) {
+		experiment.CycleAccurateEventQueue().AdvanceOneCycle()
 	}
 
-	if experiment.Config.DrainPackets {
+	if experiment.Network.Config.DrainPackets {
 		experiment.Network.AcceptPacket = false
 
 		for experiment.Network.NumPacketsReceived != experiment.Network.NumPacketsTransmitted {
-			experiment.CycleAccurateEventQueue.AdvanceOneCycle()
+			experiment.CycleAccurateEventQueue().AdvanceOneCycle()
 		}
 	}
 
 	experiment.EndTime = time.Now()
 
-	experiment.Config.Dump(experiment.Config.OutputDirectory)
+	experiment.Network.Config.Dump(experiment.Network.Config.OutputDirectory)
 
 	experiment.DumpStats()
 }
