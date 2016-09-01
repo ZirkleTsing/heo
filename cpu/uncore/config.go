@@ -2,6 +2,7 @@ package uncore
 
 import (
 	"github.com/mcai/acogo/cpu/uncore/uncoreutil"
+	"github.com/mcai/acogo/simutil"
 )
 
 type CacheReplacementPolicyType string
@@ -10,7 +11,12 @@ const (
 	CacheReplacementPolicyType_LRU = CacheReplacementPolicyType("LRU")
 )
 
-type MemoryHierarchyConfig struct {
+type UncoreConfig struct {
+	OutputDirectory   string
+
+	NumCores          int32
+	NumThreadsPerCore int32
+
 	TlbSize                  uint32
 	TlbAssoc                 uint32
 	TlbLineSize              uint32
@@ -45,8 +51,11 @@ type MemoryHierarchyConfig struct {
 	MemoryControllerLatency  uint32
 }
 
-func NewMemoryHierarchyConfig() *MemoryHierarchyConfig {
-	var config = &MemoryHierarchyConfig{
+func NewUncoreConfig() *UncoreConfig {
+	var uncoreConfig = &UncoreConfig{
+		NumCores:2,
+		NumThreadsPerCore:2,
+
 		TlbSize:32768,
 		TlbAssoc:4,
 		TlbLineSize:64,
@@ -79,5 +88,9 @@ func NewMemoryHierarchyConfig() *MemoryHierarchyConfig {
 		MemoryControllerLatency:200,
 	}
 
-	return config
+	return uncoreConfig
+}
+
+func (uncoreConfig *UncoreConfig) Dump(outputDirectory string) {
+	simutil.WriteJsonFile(uncoreConfig, outputDirectory, simutil.UNCORE_CONFIG_JSON_FILE_NAME)
 }

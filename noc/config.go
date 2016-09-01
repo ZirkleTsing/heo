@@ -124,6 +124,6 @@ func NewNoCConfig(outputDirectory string, numNodes int, maxCycles int64, maxPack
 	return nocConfig
 }
 
-func (experiment *NoCExperiment) DumpConfig() {
-	simutil.WriteJsonFile(experiment.Config, experiment.Config.OutputDirectory, simutil.CONFIG_JSON_FILE_NAME)
+func (nocConfig *NoCConfig) Dump(outputDirectory string) {
+	simutil.WriteJsonFile(nocConfig, outputDirectory, simutil.NOC_CONFIG_JSON_FILE_NAME)
 }

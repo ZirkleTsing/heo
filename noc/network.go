@@ -2,7 +2,14 @@ package noc
 
 import (
 	"math"
+	"github.com/mcai/acogo/simutil"
 )
+
+type NetworkDriver interface {
+	Config() *NoCConfig
+	CycleAccurateEventQueue() *simutil.CycleAccurateEventQueue
+	BlockingEventDispatcher() *simutil.BlockingEventDispatcher
+}
 
 type Network struct {
 	Experiment                   *NoCExperiment

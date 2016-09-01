@@ -21,11 +21,11 @@ func (experiment *CPUExperiment) DumpStats() {
 		Value: float64(experiment.CycleAccurateEventQueue().CurrentCycle) / experiment.EndTime.Sub(experiment.BeginTime).Seconds(),
 	})
 
-	simutil.WriteJsonFile(experiment.Stats, experiment.Config.OutputDirectory, simutil.STATS_JSON_FILE_NAME)
+	simutil.WriteJsonFile(experiment.Stats, experiment.CPUConfig.OutputDirectory, simutil.STATS_JSON_FILE_NAME)
 }
 
 func (experiment *CPUExperiment) LoadStats() {
-	simutil.LoadJsonFile(experiment.Config.OutputDirectory, simutil.STATS_JSON_FILE_NAME, &experiment.statMap)
+	simutil.LoadJsonFile(experiment.CPUConfig.OutputDirectory, simutil.STATS_JSON_FILE_NAME, &experiment.statMap)
 }
 
 func (experiment *CPUExperiment) GetStatMap() map[string]interface{} {

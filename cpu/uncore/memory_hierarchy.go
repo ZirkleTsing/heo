@@ -12,7 +12,7 @@ type MemoryHierarchyDriver interface {
 
 type MemoryHierarchy struct {
 	Driver                         MemoryHierarchyDriver
-	Config                         *MemoryHierarchyConfig
+	Config                         *UncoreConfig
 
 	CurrentMemoryHierarchyAccessId int32
 	CurrentCacheCoherenceFlowId    int32
@@ -30,7 +30,7 @@ type MemoryHierarchy struct {
 	P2PReorderBuffers              map[Controller](map[Controller]*P2PReorderBuffer)
 }
 
-func NewMemoryHierarchy(driver MemoryHierarchyDriver, config *MemoryHierarchyConfig, numCores int32, numThreadsPerCore int32) *MemoryHierarchy {
+func NewMemoryHierarchy(driver MemoryHierarchyDriver, config *UncoreConfig) *MemoryHierarchy {
 	var memoryHierarchy = &MemoryHierarchy{
 		Driver:driver,
 		Config:config,
@@ -41,7 +41,7 @@ func NewMemoryHierarchy(driver MemoryHierarchyDriver, config *MemoryHierarchyCon
 	memoryHierarchy.L2Controller = NewDirectoryController(memoryHierarchy, "l2")
 	memoryHierarchy.L2Controller.SetNext(memoryHierarchy.MemoryController)
 
-	for i := int32(0); i < numCores; i++ {
+	for i := int32(0); i < config.NumCores; i++ {
 		var l1IController = NewL1IController(memoryHierarchy, fmt.Sprintf("c%d/icache", i))
 		l1IController.SetNext(memoryHierarchy.L2Controller)
 		memoryHierarchy.L1IControllers = append(memoryHierarchy.L1IControllers, l1IController)
@@ -50,7 +50,7 @@ func NewMemoryHierarchy(driver MemoryHierarchyDriver, config *MemoryHierarchyCon
 		l1DController.SetNext(memoryHierarchy.L2Controller)
 		memoryHierarchy.L1DControllers = append(memoryHierarchy.L1DControllers, l1DController)
 
-		for j := int32(0); j < numThreadsPerCore; j++ {
+		for j := int32(0); j < config.NumThreadsPerCore; j++ {
 			memoryHierarchy.ITlbs = append(
 				memoryHierarchy.ITlbs,
 				NewTranslationLookasideBuffer(

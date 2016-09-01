@@ -9,7 +9,7 @@ import (
 )
 
 type CPUExperiment struct {
-	Config                  *CPUConfig
+	CPUConfig               *CPUConfig
 	Stats                   simutil.Stats
 	statMap                 map[string]interface{}
 
@@ -22,9 +22,9 @@ type CPUExperiment struct {
 	MemoryHierarchy         *uncore.MemoryHierarchy
 }
 
-func NewCPUExperiment(config *CPUConfig) *CPUExperiment {
+func NewCPUExperiment(cpuConfig *CPUConfig) *CPUExperiment {
 	var experiment = &CPUExperiment{
-		Config:config,
+		CPUConfig:cpuConfig,
 		cycleAccurateEventQueue:simutil.NewCycleAccurateEventQueue(),
 		blockingEventDispatcher:simutil.NewBlockingEventDispatcher(),
 	}
@@ -32,9 +32,11 @@ func NewCPUExperiment(config *CPUConfig) *CPUExperiment {
 	experiment.Kernel = NewKernel(experiment)
 	experiment.Processor = NewProcessor(experiment)
 
-	var memoryHierarchyConfig = uncore.NewMemoryHierarchyConfig() //TODO: to be passed here externally
+	var uncoreConfig = uncore.NewUncoreConfig()
+	uncoreConfig.NumCores = cpuConfig.NumCores
+	uncoreConfig.NumThreadsPerCore = cpuConfig.NumThreadsPerCore
 
-	experiment.MemoryHierarchy = uncore.NewMemoryHierarchy(experiment, memoryHierarchyConfig)
+	experiment.MemoryHierarchy = uncore.NewMemoryHierarchy(experiment, uncoreConfig)
 
 	experiment.blockingEventDispatcher.AddListener(reflect.TypeOf((*StaticInstExecutedEvent)(nil)), func(event interface{}) {
 		//var staticInstExecutedEvent = event.(*StaticInstExecutedEvent)
@@ -56,7 +58,7 @@ func (experiment *CPUExperiment) BlockingEventDispatcher() *simutil.BlockingEven
 
 func (experiment *CPUExperiment) Run(skipIfStatsFileExists bool) {
 	if skipIfStatsFileExists {
-		if _, err := os.Stat(experiment.Config.OutputDirectory + "/" + simutil.STATS_JSON_FILE_NAME); err == nil {
+		if _, err := os.Stat(experiment.CPUConfig.OutputDirectory + "/" + simutil.STATS_JSON_FILE_NAME); err == nil {
 			return
 		}
 	}
@@ -76,12 +78,12 @@ func (experiment *CPUExperiment) Run(skipIfStatsFileExists bool) {
 
 	experiment.EndTime = time.Now()
 
-	experiment.DumpConfig()
+	experiment.CPUConfig.Dump(experiment.CPUConfig.OutputDirectory)
 
 	experiment.DumpStats()
 }
 
 func (experiment *CPUExperiment) canAdvanceOneCycle() bool {
-	return experiment.Config.MaxDynamicInsts == -1 ||
-		experiment.Processor.Cores[0].Threads[0].NumDynamicInsts < experiment.Config.MaxDynamicInsts
+	return experiment.CPUConfig.MaxDynamicInsts == -1 ||
+		experiment.Processor.Cores[0].Threads[0].NumDynamicInsts < experiment.CPUConfig.MaxDynamicInsts
 }

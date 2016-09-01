@@ -52,7 +52,7 @@ func (experiment *NoCExperiment) Run(skipIfStatsFileExists bool) {
 
 	experiment.EndTime = time.Now()
 
-	experiment.DumpConfig()
+	experiment.Config.Dump(experiment.Config.OutputDirectory)
 
 	experiment.DumpStats()
 }

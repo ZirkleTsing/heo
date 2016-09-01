@@ -39,7 +39,7 @@ func NewKernel(experiment *CPUExperiment) *Kernel {
 		kernel.SignalActions = append(kernel.SignalActions, NewSignalAction())
 	}
 
-	for _, contextMapping := range experiment.Config.ContextMappings {
+	for _, contextMapping := range experiment.CPUConfig.ContextMappings {
 		var context = LoadContext(kernel, contextMapping)
 
 		if !kernel.Map(context, func(candidateThreadId int32) bool {
@@ -89,9 +89,9 @@ func (kernel *Kernel) Map(contextToMap *Context, predicate func(candidateThreadI
 		panic("Impossible")
 	}
 
-	for coreNum := int32(0); coreNum < kernel.Experiment.Config.NumCores; coreNum++ {
-		for threadNum := int32(0); threadNum < kernel.Experiment.Config.NumThreadsPerCore; threadNum++ {
-			var threadId = coreNum * kernel.Experiment.Config.NumThreadsPerCore + threadNum
+	for coreNum := int32(0); coreNum < kernel.Experiment.CPUConfig.NumCores; coreNum++ {
+		for threadNum := int32(0); threadNum < kernel.Experiment.CPUConfig.NumThreadsPerCore; threadNum++ {
+			var threadId = coreNum * kernel.Experiment.CPUConfig.NumThreadsPerCore + threadNum
 
 			var hasMapped = false
 
