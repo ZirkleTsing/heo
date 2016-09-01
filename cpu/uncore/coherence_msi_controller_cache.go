@@ -7,7 +7,7 @@ type CacheController struct {
 	Cache                     *EvictableCache
 	NumReadPorts              uint32
 	NumWritePorts             uint32
-	HitLatency                uint32
+	hitLatency                uint32
 	PendingAccesses           map[uint32]*MemoryHierarchyAccess
 	NumPendingAccessesPerType map[MemoryHierarchyAccessType]uint32
 	FsmFactory                *CacheControllerFiniteStateMachineFactory
@@ -17,7 +17,7 @@ func NewCacheController(memoryHierarchy *MemoryHierarchy, name string, deviceTyp
 	var cacheController = &CacheController{
 		NumReadPorts:numReadPorts,
 		NumWritePorts:numWritePorts,
-		HitLatency:hitLatency,
+		hitLatency:hitLatency,
 		PendingAccesses:make(map[uint32]*MemoryHierarchyAccess),
 		NumPendingAccessesPerType:make(map[MemoryHierarchyAccessType]uint32),
 	}
@@ -51,6 +51,10 @@ func (cacheController *CacheController) FindAccess(physicalTag uint32) *MemoryHi
 	} else {
 		return nil
 	}
+}
+
+func (cacheController *CacheController) HitLatency() uint32 {
+	return cacheController.hitLatency
 }
 
 func (cacheController *CacheController) CanAccess(accessType MemoryHierarchyAccessType, physicalTag uint32) bool {
@@ -101,7 +105,7 @@ func (cacheController *CacheController) ReceiveIfetch(access *MemoryHierarchyAcc
 		func() {
 			cacheController.OnLoad(access, access.PhysicalTag, onCompletedCallback)
 		},
-		int(cacheController.HitLatency),
+		int(cacheController.HitLatency()),
 	)
 }
 
@@ -110,7 +114,7 @@ func (cacheController *CacheController) ReceiveLoad(access *MemoryHierarchyAcces
 		func() {
 			cacheController.OnLoad(access, access.PhysicalTag, onCompletedCallback)
 		},
-		int(cacheController.HitLatency),
+		int(cacheController.HitLatency()),
 	)
 }
 
@@ -119,7 +123,7 @@ func (cacheController *CacheController) ReceiveStore(access *MemoryHierarchyAcce
 		func() {
 			cacheController.OnStore(access, access.PhysicalTag, onCompletedCallback)
 		},
-		int(cacheController.HitLatency),
+		int(cacheController.HitLatency()),
 	)
 }
 
@@ -283,4 +287,54 @@ func (cacheController *CacheController) onInvAck(message *InvAckMessage) {
 	var line = cacheController.Cache.Sets[cacheController.Cache.GetSet(message.Tag())].Lines[way]
 	var cacheControllerFsm = line.StateProvider.(*CacheControllerFiniteStateMachine)
 	cacheControllerFsm.OnEventInvAck(message, message.Tag(), message.Sender)
+}
+
+type L1IController struct {
+	*CacheController
+}
+
+func NewL1IController(memoryHierarchy *MemoryHierarchy, name string) *L1IController {
+	var l1IController = &L1IController{
+		CacheController: NewCacheController(
+			memoryHierarchy,
+			name,
+			MemoryDeviceType_L1I_CONTROLLER,
+			mem.NewGeometry(
+				memoryHierarchy.Config.L1ISize,
+				memoryHierarchy.Config.L1IAssoc,
+				memoryHierarchy.Config.L1ILineSize,
+			),
+			memoryHierarchy.Config.L1IReplacementPolicy,
+			memoryHierarchy.Config.L1INumReadPorts,
+			memoryHierarchy.Config.L1INumWritePorts,
+			memoryHierarchy.Config.L1IHitLatency,
+		),
+	}
+
+	return l1IController
+}
+
+type L1DController struct {
+	*CacheController
+}
+
+func NewL1DController(memoryHierarchy *MemoryHierarchy, name string) *L1DController {
+	var l1DController = &L1DController{
+		CacheController: NewCacheController(
+			memoryHierarchy,
+			name,
+			MemoryDeviceType_L1D_CONTROLLER,
+			mem.NewGeometry(
+				memoryHierarchy.Config.L1DSize,
+				memoryHierarchy.Config.L1DAssoc,
+				memoryHierarchy.Config.L1DLineSize,
+			),
+			memoryHierarchy.Config.L1DReplacementPolicy,
+			memoryHierarchy.Config.L1DNumReadPorts,
+			memoryHierarchy.Config.L1DNumWritePorts,
+			memoryHierarchy.Config.L1DHitLatency,
+		),
+	}
+
+	return l1DController
 }

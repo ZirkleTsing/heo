@@ -10,16 +10,20 @@ type DirectoryController struct {
 	FsmFactory               *DirectoryControllerFiniteStateMachineFactory
 }
 
-func NewDirectoryController(memoryHierarchy *MemoryHierarchy, name string, geometry *mem.Geometry, replacementPolicyType CacheReplacementPolicyType) *DirectoryController {
+func NewDirectoryController(memoryHierarchy *MemoryHierarchy, name string) *DirectoryController {
 	var directoryController = &DirectoryController{
 	}
 
 	directoryController.Cache = NewEvictableCache(
-		geometry,
+		mem.NewGeometry(
+			memoryHierarchy.Config.L2Size,
+			memoryHierarchy.Config.L2Assoc,
+			memoryHierarchy.Config.L2LineSize,
+		),
 		func(set uint32, way uint32) CacheLineStateProvider {
 			return NewDirectoryControllerFiniteStateMachine(set, way, directoryController)
 		},
-		replacementPolicyType,
+		memoryHierarchy.Config.L2ReplacementPolicy,
 	)
 
 	directoryController.BaseController = NewBaseController(

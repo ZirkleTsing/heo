@@ -4,6 +4,7 @@ type Controller interface {
 	MemoryDevice
 	Next() MemoryDevice
 	SetNext(next MemoryDevice)
+	HitLatency() uint32
 	ReceiveMessage(message CoherenceMessage)
 	TransferMessage(to Controller, size uint32, message CoherenceMessage)
 }
@@ -24,6 +25,10 @@ func NewBaseController(memoryHierarchy *MemoryHierarchy, name string, deviceType
 	}
 
 	return baseController
+}
+
+func (baseController *BaseController) HitLatency() uint32 {
+	panic("Impossible")
 }
 
 func (baseController *BaseController) ReceiveMessage(message CoherenceMessage) {
