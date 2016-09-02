@@ -38,7 +38,7 @@ func NewCPUExperiment(cpuConfig *CPUConfig) *CPUExperiment {
 
 	var nocConfig = noc.NewNoCConfig(cpuConfig.OutputDirectory, -1, -1, -1, false)
 
-	experiment.MemoryHierarchy = uncore.NewMemoryHierarchy(experiment, uncoreConfig, nocConfig)
+	experiment.MemoryHierarchy = uncore.NewBaseMemoryHierarchy(experiment, uncoreConfig, nocConfig)
 
 	experiment.Processor.UpdateContextToThreadAssignments()
 
