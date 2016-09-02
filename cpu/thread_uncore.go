@@ -4,8 +4,8 @@ import "github.com/mcai/acogo/cpu/uncore"
 
 type MemoryHierarchyThread struct {
 	*BaseThread
-	FetchStalled bool
-	LastFetchedCacheLine int32
+	FetchStalled            bool
+	LastFetchedCacheLine    int32
 	NextDynamicInstInWarmup *DynamicInst
 }
 
@@ -76,7 +76,7 @@ func (thread *MemoryHierarchyThread) WarmupOneCycle() {
 
 		if thread.NextDynamicInstInWarmup.StaticInst.Mnemonic.StaticInstType == StaticInstType_LOAD {
 			if thread.Core().CanLoad(thread, uint32(effectiveAddress)) {
-				thread.Core().Load(thread, uint32(effectiveAddress), pc, func(){
+				thread.Core().Load(thread, uint32(effectiveAddress), pc, func() {
 				})
 
 				thread.NextDynamicInstInWarmup = nil

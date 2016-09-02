@@ -469,13 +469,13 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 			directoryControllerFsm.DirectoryController.Transfer(
 				directoryControllerFsm.DirectoryController.Next(),
 				8,
-				func(){
+				func() {
 					directoryControllerFsm.DirectoryController.Next().(*MemoryController).ReceiveMemReadRequest(
 						directoryControllerFsm.DirectoryController,
 						event.Tag(),
-						func(){
+						func() {
 							directoryControllerFsm.DirectoryController.MemoryHierarchy().Driver().CycleAccurateEventQueue().Schedule(
-								func(){
+								func() {
 									directoryControllerFsm.DirectoryController.NumPendingMemoryAccesses--
 
 									var dataFromMemEvent = NewDataFromMemEvent(

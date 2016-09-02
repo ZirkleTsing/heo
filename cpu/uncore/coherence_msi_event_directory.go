@@ -191,11 +191,11 @@ func NewRecallAckEvent(generator *DirectoryController, producerFlow CacheCoheren
 
 type DirReplacementEvent struct {
 	*BaseDirectoryControllerEvent
-	CacheAccess *CacheAccess
-	Set               uint32
-	Way               uint32
+	CacheAccess         *CacheAccess
+	Set                 uint32
+	Way                 uint32
 	OnCompletedCallback func()
-	OnStalledCallback func()
+	OnStalledCallback   func()
 }
 
 func NewDirReplacementEvent(generator *DirectoryController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, cacheAccess *CacheAccess, set uint32, way uint32, onCompletedCallback func(), onStalledCallback func()) *DirReplacementEvent {

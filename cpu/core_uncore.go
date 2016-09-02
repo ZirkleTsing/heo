@@ -86,7 +86,7 @@ func (core *BaseCore) Ifetch(thread Thread, virtualAddress uint32, virtualPc uin
 
 		thread.Itlb().Access(
 			access,
-			func(){
+			func() {
 				counterPending.Decrement()
 
 				if counterPending.Value() == 0 {
@@ -97,7 +97,7 @@ func (core *BaseCore) Ifetch(thread Thread, virtualAddress uint32, virtualPc uin
 
 		core.L1IController().ReceiveIfetch(
 			access,
-			func(){
+			func() {
 				core.L1IController().EndAccess(physicalTag)
 			},
 		)
@@ -135,7 +135,7 @@ func (core *BaseCore) Load(thread Thread, virtualAddress uint32, virtualPc uint3
 
 		thread.Dtlb().Access(
 			access,
-			func(){
+			func() {
 				counterPending.Decrement()
 
 				if counterPending.Value() == 0 {
@@ -146,7 +146,7 @@ func (core *BaseCore) Load(thread Thread, virtualAddress uint32, virtualPc uint3
 
 		core.L1DController().ReceiveLoad(
 			access,
-			func(){
+			func() {
 				core.L1DController().EndAccess(physicalTag)
 			},
 		)
@@ -170,7 +170,7 @@ func (core *BaseCore) Store(thread Thread, virtualAddress uint32, virtualPc uint
 		int32(virtualPc),
 		physicalAddress,
 		physicalTag,
-		func(){
+		func() {
 			counterPending.Decrement()
 
 			if counterPending.Value() == 0 {
@@ -184,7 +184,7 @@ func (core *BaseCore) Store(thread Thread, virtualAddress uint32, virtualPc uint
 
 		thread.Dtlb().Access(
 			access,
-			func(){
+			func() {
 				counterPending.Decrement()
 
 				if counterPending.Value() == 0 {

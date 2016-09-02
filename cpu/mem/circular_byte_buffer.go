@@ -7,7 +7,7 @@ import (
 
 type CircularByteBuffer struct {
 	data  chan byte
-	Size uint32
+	Size  uint32
 	Count uint32
 }
 

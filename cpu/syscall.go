@@ -599,7 +599,8 @@ func (syscallEmulation *SyscallEmulation) mprotect_impl(context *Context) {
 	context.Regs.Gpr[regs.REGISTER_V0] = 0
 }
 
-func (syscallEmulation *SyscallEmulation) _llseek_impl(context *Context) { //TODO: correct?
+func (syscallEmulation *SyscallEmulation) _llseek_impl(context *Context) {
+	//TODO: correct?
 	var fd = context.Process.TranslateFileDescriptor(int32(context.Regs.Gpr[regs.REGISTER_A0]))
 	var offset = int64(context.Regs.Gpr[regs.REGISTER_A1])
 	var whence = int32(context.Regs.Gpr[regs.REGISTER_A2])

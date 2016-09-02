@@ -56,8 +56,8 @@ type BaseMemoryHierarchy struct {
 
 	p2PReorderBuffers              map[Controller](map[Controller]*P2PReorderBuffer)
 
-	Network          *noc.Network
-	DevicesToNodeIds map[interface{}]uint32
+	Network                        *noc.Network
+	DevicesToNodeIds               map[interface{}]uint32
 }
 
 func NewMemoryHierarchy(driver UncoreDriver, config *UncoreConfig, nocConfig *noc.NoCConfig) *BaseMemoryHierarchy {

@@ -12,10 +12,10 @@ const (
 )
 
 type UncoreConfig struct {
-	OutputDirectory   string
+	OutputDirectory          string
 
-	NumCores          int32
-	NumThreadsPerCore int32
+	NumCores                 int32
+	NumThreadsPerCore        int32
 
 	TlbSize                  uint32
 	TlbAssoc                 uint32
