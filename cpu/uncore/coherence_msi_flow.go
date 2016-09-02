@@ -33,20 +33,24 @@ type BaseCacheCoherenceFlow struct {
 
 func NewBaseCacheCoherenceFlow(generator Controller, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32) *BaseCacheCoherenceFlow {
 	var baseCacheCoherenceFlow = &BaseCacheCoherenceFlow{
-		id:generator.MemoryHierarchy().CurrentCacheCoherenceFlowId,
+		id:generator.MemoryHierarchy().CurrentCacheCoherenceFlowId(),
 		generator:generator,
 		producerFlow:producerFlow,
 		access:access,
 		tag:tag,
 	}
 
-	generator.MemoryHierarchy().CurrentCacheCoherenceFlowId++
+	generator.MemoryHierarchy().SetCurrentCacheCoherenceFlowId(
+		generator.MemoryHierarchy().CurrentCacheCoherenceFlowId() + 1,
+	)
 
-	baseCacheCoherenceFlow.beginCycle = generator.MemoryHierarchy().Driver.CycleAccurateEventQueue().CurrentCycle
+	baseCacheCoherenceFlow.beginCycle = generator.MemoryHierarchy().Driver().CycleAccurateEventQueue().CurrentCycle
 
 	if producerFlow == nil {
 		baseCacheCoherenceFlow.ancestorFlow = baseCacheCoherenceFlow
-		generator.MemoryHierarchy().PendingFlows = append(generator.MemoryHierarchy().PendingFlows, baseCacheCoherenceFlow)
+		generator.MemoryHierarchy().SetPendingFlows(
+			append(generator.MemoryHierarchy().PendingFlows(), baseCacheCoherenceFlow),
+		)
 	} else {
 		baseCacheCoherenceFlow.ancestorFlow = producerFlow.AncestorFlow()
 		producerFlow.SetChildFlows(append(producerFlow.ChildFlows(), baseCacheCoherenceFlow))
@@ -112,20 +116,20 @@ func (cacheCoherenceFlow *BaseCacheCoherenceFlow) Tag() uint32 {
 
 func (cacheCoherenceFlow *BaseCacheCoherenceFlow) Complete() {
 	cacheCoherenceFlow.completed = true
-	cacheCoherenceFlow.endCycle = cacheCoherenceFlow.generator.MemoryHierarchy().Driver.CycleAccurateEventQueue().CurrentCycle
+	cacheCoherenceFlow.endCycle = cacheCoherenceFlow.generator.MemoryHierarchy().Driver().CycleAccurateEventQueue().CurrentCycle
 	cacheCoherenceFlow.ancestorFlow.SetNumPendingDescendantFlows(
 		cacheCoherenceFlow.ancestorFlow.NumPendingDescendantFlows() - 1)
 
 	if cacheCoherenceFlow.ancestorFlow.NumPendingDescendantFlows() == 0 {
 		var pendingFlowsToReserve []CacheCoherenceFlow
 
-		for _, pendingFlow := range cacheCoherenceFlow.generator.MemoryHierarchy().PendingFlows {
+		for _, pendingFlow := range cacheCoherenceFlow.generator.MemoryHierarchy().PendingFlows() {
 			if pendingFlow != cacheCoherenceFlow.ancestorFlow {
 				pendingFlowsToReserve = append(pendingFlowsToReserve, pendingFlow)
 			}
 		}
 
-		cacheCoherenceFlow.generator.MemoryHierarchy().PendingFlows = pendingFlowsToReserve
+		cacheCoherenceFlow.generator.MemoryHierarchy().SetPendingFlows(pendingFlowsToReserve)
 	}
 }
 

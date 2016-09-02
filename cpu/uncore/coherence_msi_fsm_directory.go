@@ -432,7 +432,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 						directoryControllerFsm.DirectoryController,
 						event.Tag(),
 						func() {
-							directoryControllerFsm.DirectoryController.MemoryHierarchy().Driver.CycleAccurateEventQueue().Schedule(
+							directoryControllerFsm.DirectoryController.MemoryHierarchy().Driver().CycleAccurateEventQueue().Schedule(
 								func() {
 									directoryControllerFsm.DirectoryController.NumPendingMemoryAccesses--
 
@@ -474,7 +474,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 						directoryControllerFsm.DirectoryController,
 						event.Tag(),
 						func(){
-							directoryControllerFsm.DirectoryController.MemoryHierarchy().Driver.CycleAccurateEventQueue().Schedule(
+							directoryControllerFsm.DirectoryController.MemoryHierarchy().Driver().CycleAccurateEventQueue().Schedule(
 								func(){
 									directoryControllerFsm.DirectoryController.NumPendingMemoryAccesses--
 

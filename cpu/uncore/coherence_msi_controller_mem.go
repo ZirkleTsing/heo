@@ -6,7 +6,7 @@ type MemoryController struct {
 	NumWrites int32
 }
 
-func NewMemoryController(memoryHierarchy *MemoryHierarchy) *MemoryController {
+func NewMemoryController(memoryHierarchy MemoryHierarchy) *MemoryController {
 	var memoryController = &MemoryController{
 	}
 
@@ -20,15 +20,15 @@ func NewMemoryController(memoryHierarchy *MemoryHierarchy) *MemoryController {
 }
 
 func (memoryController *MemoryController) LineSize() uint32 {
-	return memoryController.MemoryHierarchy().Config.MemoryControllerLineSize
+	return memoryController.MemoryHierarchy().Config().MemoryControllerLineSize
 }
 
 func (memoryController *MemoryController) Latency() uint32 {
-	return memoryController.MemoryHierarchy().Config.MemoryControllerLatency
+	return memoryController.MemoryHierarchy().Config().MemoryControllerLatency
 }
 
 func (memoryController *MemoryController) access(address uint32, onCompletedCallback func()) {
-	memoryController.MemoryHierarchy().Driver.CycleAccurateEventQueue().Schedule(
+	memoryController.MemoryHierarchy().Driver().CycleAccurateEventQueue().Schedule(
 		onCompletedCallback,
 		int(memoryController.Latency()),
 	)

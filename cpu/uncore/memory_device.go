@@ -10,19 +10,19 @@ const (
 )
 
 type MemoryDevice interface {
-	MemoryHierarchy() *MemoryHierarchy
+	MemoryHierarchy() MemoryHierarchy
 	Name() string
 	DeviceType() MemoryDeviceType
 	Transfer(to MemoryDevice, size uint32, onCompletedCallback func())
 }
 
 type BaseMemoryDevice struct {
-	memoryHierarchy *MemoryHierarchy
+	memoryHierarchy MemoryHierarchy
 	name            string
 	deviceType      MemoryDeviceType
 }
 
-func NewBaseMemoryDevice(memoryHierarchy *MemoryHierarchy, name string, deviceType MemoryDeviceType) *BaseMemoryDevice {
+func NewBaseMemoryDevice(memoryHierarchy MemoryHierarchy, name string, deviceType MemoryDeviceType) *BaseMemoryDevice {
 	var baseMemoryDevice = &BaseMemoryDevice{
 		memoryHierarchy:memoryHierarchy,
 		name:name,
@@ -36,7 +36,7 @@ func (baseMemoryDevice *BaseMemoryDevice) Transfer(to MemoryDevice, size uint32,
 	baseMemoryDevice.memoryHierarchy.Transfer(baseMemoryDevice, to, size, onCompletedCallback)
 }
 
-func (baseMemoryDevice *BaseMemoryDevice) MemoryHierarchy() *MemoryHierarchy {
+func (baseMemoryDevice *BaseMemoryDevice) MemoryHierarchy() MemoryHierarchy {
 	return baseMemoryDevice.memoryHierarchy
 }
 

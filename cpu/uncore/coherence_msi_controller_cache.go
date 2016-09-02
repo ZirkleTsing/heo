@@ -13,7 +13,7 @@ type CacheController struct {
 	FsmFactory                *CacheControllerFiniteStateMachineFactory
 }
 
-func NewCacheController(memoryHierarchy *MemoryHierarchy, name string, deviceType MemoryDeviceType, geometry *mem.Geometry, replacementPolicyType CacheReplacementPolicyType, numReadPorts uint32, numWritePorts uint32, hitLatency uint32) *CacheController {
+func NewCacheController(memoryHierarchy MemoryHierarchy, name string, deviceType MemoryDeviceType, geometry *mem.Geometry, replacementPolicyType CacheReplacementPolicyType, numReadPorts uint32, numWritePorts uint32, hitLatency uint32) *CacheController {
 	var cacheController = &CacheController{
 		NumReadPorts:numReadPorts,
 		NumWritePorts:numWritePorts,
@@ -101,7 +101,7 @@ func (cacheController *CacheController) EndAccess(physicalTag uint32) {
 }
 
 func (cacheController *CacheController) ReceiveIfetch(access *MemoryHierarchyAccess, onCompletedCallback func()) {
-	cacheController.MemoryHierarchy().Driver.CycleAccurateEventQueue().Schedule(
+	cacheController.MemoryHierarchy().Driver().CycleAccurateEventQueue().Schedule(
 		func() {
 			cacheController.OnLoad(access, access.PhysicalTag, onCompletedCallback)
 		},
@@ -110,7 +110,7 @@ func (cacheController *CacheController) ReceiveIfetch(access *MemoryHierarchyAcc
 }
 
 func (cacheController *CacheController) ReceiveLoad(access *MemoryHierarchyAccess, onCompletedCallback func()) {
-	cacheController.MemoryHierarchy().Driver.CycleAccurateEventQueue().Schedule(
+	cacheController.MemoryHierarchy().Driver().CycleAccurateEventQueue().Schedule(
 		func() {
 			cacheController.OnLoad(access, access.PhysicalTag, onCompletedCallback)
 		},
@@ -119,7 +119,7 @@ func (cacheController *CacheController) ReceiveLoad(access *MemoryHierarchyAcces
 }
 
 func (cacheController *CacheController) ReceiveStore(access *MemoryHierarchyAccess, onCompletedCallback func()) {
-	cacheController.MemoryHierarchy().Driver.CycleAccurateEventQueue().Schedule(
+	cacheController.MemoryHierarchy().Driver().CycleAccurateEventQueue().Schedule(
 		func() {
 			cacheController.OnStore(access, access.PhysicalTag, onCompletedCallback)
 		},
@@ -176,12 +176,14 @@ func (cacheController *CacheController) access(producerFlow CacheCoherenceFlow, 
 					onReplacementCompletedCallback(set, cacheAccess.Way)
 				},
 				func() {
-					cacheController.MemoryHierarchy().Driver.CycleAccurateEventQueue().Schedule(
+					cacheController.MemoryHierarchy().Driver().CycleAccurateEventQueue().Schedule(
 						onReplacementStalledCallback,
 						1,
 					)
 				},
 			)
+		} else {
+			onReplacementCompletedCallback(set, cacheAccess.Way)
 		}
 	}
 }
@@ -293,21 +295,21 @@ type L1IController struct {
 	*CacheController
 }
 
-func NewL1IController(memoryHierarchy *MemoryHierarchy, name string) *L1IController {
+func NewL1IController(memoryHierarchy MemoryHierarchy, name string) *L1IController {
 	var l1IController = &L1IController{
 		CacheController: NewCacheController(
 			memoryHierarchy,
 			name,
 			MemoryDeviceType_L1I_CONTROLLER,
 			mem.NewGeometry(
-				memoryHierarchy.Config.L1ISize,
-				memoryHierarchy.Config.L1IAssoc,
-				memoryHierarchy.Config.L1ILineSize,
+				memoryHierarchy.Config().L1ISize,
+				memoryHierarchy.Config().L1IAssoc,
+				memoryHierarchy.Config().L1ILineSize,
 			),
-			memoryHierarchy.Config.L1IReplacementPolicy,
-			memoryHierarchy.Config.L1INumReadPorts,
-			memoryHierarchy.Config.L1INumWritePorts,
-			memoryHierarchy.Config.L1IHitLatency,
+			memoryHierarchy.Config().L1IReplacementPolicy,
+			memoryHierarchy.Config().L1INumReadPorts,
+			memoryHierarchy.Config().L1INumWritePorts,
+			memoryHierarchy.Config().L1IHitLatency,
 		),
 	}
 
@@ -318,21 +320,21 @@ type L1DController struct {
 	*CacheController
 }
 
-func NewL1DController(memoryHierarchy *MemoryHierarchy, name string) *L1DController {
+func NewL1DController(memoryHierarchy MemoryHierarchy, name string) *L1DController {
 	var l1DController = &L1DController{
 		CacheController: NewCacheController(
 			memoryHierarchy,
 			name,
 			MemoryDeviceType_L1D_CONTROLLER,
 			mem.NewGeometry(
-				memoryHierarchy.Config.L1DSize,
-				memoryHierarchy.Config.L1DAssoc,
-				memoryHierarchy.Config.L1DLineSize,
+				memoryHierarchy.Config().L1DSize,
+				memoryHierarchy.Config().L1DAssoc,
+				memoryHierarchy.Config().L1DLineSize,
 			),
-			memoryHierarchy.Config.L1DReplacementPolicy,
-			memoryHierarchy.Config.L1DNumReadPorts,
-			memoryHierarchy.Config.L1DNumWritePorts,
-			memoryHierarchy.Config.L1DHitLatency,
+			memoryHierarchy.Config().L1DReplacementPolicy,
+			memoryHierarchy.Config().L1DNumReadPorts,
+			memoryHierarchy.Config().L1DNumWritePorts,
+			memoryHierarchy.Config().L1DHitLatency,
 		),
 	}
 

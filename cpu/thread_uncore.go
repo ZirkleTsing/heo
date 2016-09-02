@@ -19,11 +19,11 @@ func NewMemoryHierarchyThread(core Core, num int32) *MemoryHierarchyThread {
 }
 
 func (thread *MemoryHierarchyThread) Itlb() *uncore.TranslationLookasideBuffer {
-	return thread.Core().Processor().Experiment.MemoryHierarchy.ITlbs[thread.Id()]
+	return thread.Core().Processor().Experiment.MemoryHierarchy.ITlbs()[thread.Id()]
 }
 
 func (thread *MemoryHierarchyThread) Dtlb() *uncore.TranslationLookasideBuffer {
-	return thread.Core().Processor().Experiment.MemoryHierarchy.DTlbs[thread.Id()]
+	return thread.Core().Processor().Experiment.MemoryHierarchy.DTlbs()[thread.Id()]
 }
 
 func (thread *MemoryHierarchyThread) WarmupOneCycle() {

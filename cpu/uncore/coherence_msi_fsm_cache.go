@@ -579,7 +579,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 			var event = params.(*LoadEvent)
 
 			cacheControllerFsm.Hit(event.Access(), event.Tag(), event.Set, event.Way)
-			cacheControllerFsm.CacheController.memoryHierarchy.Driver.CycleAccurateEventQueue().Schedule(
+			cacheControllerFsm.CacheController.memoryHierarchy.Driver().CycleAccurateEventQueue().Schedule(
 				event.OnCompletedCallback,
 				0,
 			)
@@ -639,7 +639,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 			var event = params.(*LoadEvent)
 
 			cacheControllerFsm.Hit(event.Access(), event.Tag(), event.Set, event.Way)
-			cacheControllerFsm.CacheController.MemoryHierarchy().Driver.CycleAccurateEventQueue().Schedule(
+			cacheControllerFsm.CacheController.MemoryHierarchy().Driver().CycleAccurateEventQueue().Schedule(
 				event.OnCompletedCallback,
 				0,
 			)
@@ -730,7 +730,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 			var event = params.(*LoadEvent)
 
 			cacheControllerFsm.Hit(event.Access(), event.Tag(), event.Set, event.Way)
-			cacheControllerFsm.CacheController.MemoryHierarchy().Driver.CycleAccurateEventQueue().Schedule(
+			cacheControllerFsm.CacheController.MemoryHierarchy().Driver().CycleAccurateEventQueue().Schedule(
 				event.OnCompletedCallback,
 				0,
 			)
@@ -802,7 +802,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 			var event = params.(*LoadEvent)
 
 			cacheControllerFsm.Hit(event.Access(), event.Tag(), event.Set, event.Way)
-			cacheControllerFsm.CacheController.MemoryHierarchy().Driver.CycleAccurateEventQueue().Schedule(
+			cacheControllerFsm.CacheController.MemoryHierarchy().Driver().CycleAccurateEventQueue().Schedule(
 				event.OnCompletedCallback,
 				0,
 			)
@@ -815,7 +815,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 			var event = params.(*StoreEvent)
 
 			cacheControllerFsm.Hit(event.Access(), event.Tag(), event.Set, event.Way)
-			cacheControllerFsm.CacheController.MemoryHierarchy().Driver.CycleAccurateEventQueue().Schedule(
+			cacheControllerFsm.CacheController.MemoryHierarchy().Driver().CycleAccurateEventQueue().Schedule(
 				event.OnCompletedCallback,
 				0,
 			)

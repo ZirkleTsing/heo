@@ -19,7 +19,7 @@ type CPUExperiment struct {
 
 	Kernel                  *Kernel
 	Processor               *Processor
-	MemoryHierarchy         *uncore.NoCMemoryHierarchy
+	MemoryHierarchy         uncore.MemoryHierarchy
 }
 
 func NewCPUExperiment(cpuConfig *CPUConfig) *CPUExperiment {
@@ -38,7 +38,7 @@ func NewCPUExperiment(cpuConfig *CPUConfig) *CPUExperiment {
 
 	var nocConfig = noc.NewNoCConfig(cpuConfig.OutputDirectory, -1, -1, -1, false)
 
-	experiment.MemoryHierarchy = uncore.NewNocMemoryHierarchy(experiment, uncoreConfig, nocConfig)
+	experiment.MemoryHierarchy = uncore.NewMemoryHierarchy(experiment, uncoreConfig, nocConfig)
 
 	experiment.Processor.UpdateContextToThreadAssignments()
 

@@ -3,6 +3,7 @@ package cpu
 import (
 	"github.com/mcai/acogo/cpu/uncore"
 	"github.com/mcai/acogo/simutil"
+	"fmt"
 )
 
 type MemoryHierarchyCore struct {
@@ -18,11 +19,11 @@ func NewMemoryHierarchyCore(processor *Processor, num int32) *MemoryHierarchyCor
 }
 
 func (core *BaseCore) L1IController() *uncore.L1IController {
-	return core.Processor().Experiment.MemoryHierarchy.L1IControllers[core.Num()]
+	return core.Processor().Experiment.MemoryHierarchy.L1IControllers()[core.Num()]
 }
 
 func (core *BaseCore) L1DController() *uncore.L1DController {
-	return core.Processor().Experiment.MemoryHierarchy.L1DControllers[core.Num()]
+	return core.Processor().Experiment.MemoryHierarchy.L1DControllers()[core.Num()]
 }
 
 func (baseCore *BaseCore) WarmupOneCycle() {
@@ -75,6 +76,7 @@ func (core *BaseCore) Ifetch(thread Thread, virtualAddress uint32, virtualPc uin
 
 			if counterPending.Value() == 0 {
 				onCompletedCallback()
+				fmt.Println("here")
 			}
 		},
 	)

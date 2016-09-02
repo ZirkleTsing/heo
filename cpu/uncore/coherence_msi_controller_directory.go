@@ -10,20 +10,20 @@ type DirectoryController struct {
 	FsmFactory               *DirectoryControllerFiniteStateMachineFactory
 }
 
-func NewDirectoryController(memoryHierarchy *MemoryHierarchy, name string) *DirectoryController {
+func NewDirectoryController(memoryHierarchy MemoryHierarchy, name string) *DirectoryController {
 	var directoryController = &DirectoryController{
 	}
 
 	directoryController.Cache = NewEvictableCache(
 		mem.NewGeometry(
-			memoryHierarchy.Config.L2Size,
-			memoryHierarchy.Config.L2Assoc,
-			memoryHierarchy.Config.L2LineSize,
+			memoryHierarchy.Config().L2Size,
+			memoryHierarchy.Config().L2Assoc,
+			memoryHierarchy.Config().L2LineSize,
 		),
 		func(set uint32, way uint32) CacheLineStateProvider {
 			return NewDirectoryControllerFiniteStateMachine(set, way, directoryController)
 		},
-		memoryHierarchy.Config.L2ReplacementPolicy,
+		memoryHierarchy.Config().L2ReplacementPolicy,
 	)
 
 	directoryController.BaseController = NewBaseController(
@@ -38,7 +38,7 @@ func NewDirectoryController(memoryHierarchy *MemoryHierarchy, name string) *Dire
 }
 
 func (directoryController *DirectoryController) HitLatency() uint32 {
-	return directoryController.MemoryHierarchy().Config.L2HitLatency
+	return directoryController.MemoryHierarchy().Config().L2HitLatency
 }
 
 func (directoryController *DirectoryController) SendPutAckToRequester(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
@@ -94,7 +94,7 @@ func (directoryController *DirectoryController) access(producerFlow CacheCoheren
 					onReplacementCompletedCallback(set, cacheAccess.Way)
 				},
 				func() {
-					directoryController.MemoryHierarchy().Driver.CycleAccurateEventQueue().Schedule(
+					directoryController.MemoryHierarchy().Driver().CycleAccurateEventQueue().Schedule(
 						onReplacementStalledCallback,
 						1,
 					)

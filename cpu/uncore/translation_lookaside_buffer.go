@@ -3,7 +3,7 @@ package uncore
 import "github.com/mcai/acogo/cpu/mem"
 
 type TranslationLookasideBuffer struct {
-	MemoryHierarchy *MemoryHierarchy
+	MemoryHierarchy MemoryHierarchy
 	Name            string
 	Cache           *EvictableCache
 	NumHits         int32
@@ -11,15 +11,15 @@ type TranslationLookasideBuffer struct {
 	NumEvictions    int32
 }
 
-func NewTranslationLookasideBuffer(memoryHierarchy *MemoryHierarchy, name string) *TranslationLookasideBuffer {
+func NewTranslationLookasideBuffer(memoryHierarchy MemoryHierarchy, name string) *TranslationLookasideBuffer {
 	var tlb = &TranslationLookasideBuffer{
 		MemoryHierarchy:memoryHierarchy,
 		Name:name,
 		Cache:NewEvictableCache(
 			mem.NewGeometry(
-				memoryHierarchy.Config.TlbSize,
-				memoryHierarchy.Config.TlbAssoc,
-				memoryHierarchy.Config.TlbLineSize,
+				memoryHierarchy.Config().TlbSize,
+				memoryHierarchy.Config().TlbAssoc,
+				memoryHierarchy.Config().TlbLineSize,
 			),
 			func(set uint32, way uint32) CacheLineStateProvider {
 				return NewBaseCacheLineStateProvider(false)
@@ -48,11 +48,11 @@ func (tlb *TranslationLookasideBuffer) OccupancyRatio() float32 {
 }
 
 func (tlb *TranslationLookasideBuffer) HitLatency() uint32 {
-	return tlb.MemoryHierarchy.Config.TlbHitLatency
+	return tlb.MemoryHierarchy.Config().TlbHitLatency
 }
 
 func (tlb *TranslationLookasideBuffer) MissLatency() uint32 {
-	return tlb.MemoryHierarchy.Config.TlbMissLatency
+	return tlb.MemoryHierarchy.Config().TlbMissLatency
 }
 
 func (tlb *TranslationLookasideBuffer) Access(access *MemoryHierarchyAccess, onCompletedCallback func()) {
@@ -85,5 +85,5 @@ func (tlb *TranslationLookasideBuffer) Access(access *MemoryHierarchyAccess, onC
 		delay = tlb.MissLatency()
 	}
 
-	tlb.MemoryHierarchy.Driver.CycleAccurateEventQueue().Schedule(onCompletedCallback, int(delay))
+	tlb.MemoryHierarchy.Driver().CycleAccurateEventQueue().Schedule(onCompletedCallback, int(delay))
 }

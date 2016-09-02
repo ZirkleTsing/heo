@@ -19,7 +19,7 @@ type BaseController struct {
 	NumEvictions           int32
 }
 
-func NewBaseController(memoryHierarchy *MemoryHierarchy, name string, deviceType MemoryDeviceType) *BaseController {
+func NewBaseController(memoryHierarchy MemoryHierarchy, name string, deviceType MemoryDeviceType) *BaseController {
 	var baseController = &BaseController{
 		BaseMemoryDevice:NewBaseMemoryDevice(memoryHierarchy, name, deviceType),
 	}
