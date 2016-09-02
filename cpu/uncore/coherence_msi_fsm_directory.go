@@ -657,7 +657,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 				directoryControllerFsm.Way,
 			)
 		},
-		DirectoryControllerState_IM_D,
+		DirectoryControllerState_M,
 	)
 
 	directoryControllerFsmFactory.InState(DirectoryControllerState_S).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(

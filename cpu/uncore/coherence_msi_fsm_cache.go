@@ -688,7 +688,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 
 			cacheControllerFsm.SendInvAckToRequester(event, event.Tag(), event.Requester)
 		},
-		CacheControllerState_SM_AD,
+		CacheControllerState_IM_AD,
 	).OnCondition(
 		CacheControllerEventType_RECALL,
 		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
@@ -697,22 +697,22 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 
 			cacheControllerFsm.SendRecallAckToDir(event, event.Tag(), 8)
 		},
-		CacheControllerState_SM_AD,
+		CacheControllerState_IM_AD,
 	).OnCondition(
 		CacheControllerEventType_DATA_FROM_DIR_ACKS_EQ_0,
 		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
 		},
-		CacheControllerState_SM_AD,
+		CacheControllerState_M,
 	).OnCondition(
 		CacheControllerEventType_DATA_FROM_DIR_ACKS_GT_0,
 		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
 		},
-		CacheControllerState_SM_AD,
+		CacheControllerState_SM_A,
 	).OnCondition(
 		CacheControllerEventType_DATA_FROM_OWNER,
 		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
 		},
-		CacheControllerState_SM_AD,
+		CacheControllerState_M,
 	).OnCondition(
 		CacheControllerEventType_INV_ACK,
 		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
@@ -783,7 +783,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 		CacheControllerEventType_LAST_INV_ACK,
 		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
 		},
-		CacheControllerState_SM_A,
+		CacheControllerState_M,
 	).OnCondition(
 		CacheControllerEventType_RECALL,
 		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
