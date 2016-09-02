@@ -1,6 +1,12 @@
 package uncore
 
+import (
+	"github.com/mcai/acogo/simutil"
+	"fmt"
+)
+
 type CacheCoherenceFlow interface {
+	simutil.Node
 	Id() int32
 	Generator() Controller
 	ProducerFlow() CacheCoherenceFlow
@@ -60,6 +66,20 @@ func NewBaseCacheCoherenceFlow(generator Controller, producerFlow CacheCoherence
 		baseCacheCoherenceFlow.ancestorFlow.NumPendingDescendantFlows() + 1)
 
 	return baseCacheCoherenceFlow
+}
+
+func (cacheCoherenceFlow *BaseCacheCoherenceFlow) Value() interface{} {
+	return fmt.Sprintf("%s%s", cacheCoherenceFlow, cacheCoherenceFlow.endCycle)
+}
+
+func (cacheCoherenceFlow *BaseCacheCoherenceFlow) Children() []simutil.Node {
+	var children []simutil.Node
+
+	for _, childFlow := range cacheCoherenceFlow.childFlows {
+		children = append(children, childFlow)
+	}
+
+	return children
 }
 
 func (cacheCoherenceFlow *BaseCacheCoherenceFlow) Id() int32 {

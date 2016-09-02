@@ -35,6 +35,8 @@ type MemoryHierarchy interface {
 
 	Transfer(from MemoryDevice, to MemoryDevice, size uint32, onCompletedCallback func())
 	TransferMessage(from Controller, to Controller, size uint32, message CoherenceMessage)
+
+	DumpPendingFlowTree()
 }
 
 type BaseMemoryHierarchy struct {
@@ -224,6 +226,15 @@ func (baseMemoryHierarchy *BaseMemoryHierarchy) TransferMessage(from Controller,
 	baseMemoryHierarchy.Transfer(from, to, size, func() {
 		p2pReorderBuffer.OnDestArrived(message)
 	})
+}
+
+func (baseMemoryHierarchy *BaseMemoryHierarchy) DumpPendingFlowTree() {
+	for _, pendingFlow := range baseMemoryHierarchy.pendingFlows {
+		simutil.PrintNode(pendingFlow)
+		fmt.Println()
+	}
+
+	fmt.Println()
 }
 
 type P2PReorderBuffer struct {

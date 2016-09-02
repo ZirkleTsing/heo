@@ -2,6 +2,7 @@ package simutil
 
 import (
 	"container/heap"
+	"fmt"
 )
 
 type CycleAccurateEvent struct {
