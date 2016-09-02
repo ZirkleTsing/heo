@@ -16,7 +16,7 @@ func _printNode(node Node, prefix string, tail bool) {
 		line = "├── "
 	}
 
-	fmt.Printf(fmt.Sprintf("%s%s%s", prefix, line, node.Value()))
+	fmt.Printf("%s%s%s\n", prefix, line, node.Value())
 
 	if len(node.Children()) > 0 {
 		for i := 0; i < len(node.Children()) - 1; i++ {

@@ -102,5 +102,9 @@ func (experiment *CPUExperiment) DoWarmup() {
 		}
 
 		experiment.advanceOneCycle()
+
+		if experiment.cycleAccurateEventQueue.CurrentCycle == 100000 {
+			experiment.MemoryHierarchy.DumpPendingFlowTree()
+		}
 	}
 }

@@ -3,6 +3,7 @@ package uncore
 import (
 	"github.com/mcai/acogo/simutil"
 	"fmt"
+	"reflect"
 )
 
 type CacheCoherenceFlow interface {
@@ -69,7 +70,13 @@ func NewBaseCacheCoherenceFlow(generator Controller, producerFlow CacheCoherence
 }
 
 func (cacheCoherenceFlow *BaseCacheCoherenceFlow) Value() interface{} {
-	return fmt.Sprintf("%s%s", cacheCoherenceFlow, cacheCoherenceFlow.endCycle)
+	//if cacheCoherenceFlow.Completed() {
+	//	return fmt.Sprintf("%s%s", cacheCoherenceFlow, cacheCoherenceFlow.endCycle)
+	//} else {
+	//	return fmt.Sprintf("%s", cacheCoherenceFlow)
+	//}
+
+	return fmt.Sprintf("%s", reflect.TypeOf(cacheCoherenceFlow).String())
 }
 
 func (cacheCoherenceFlow *BaseCacheCoherenceFlow) Children() []simutil.Node {
@@ -171,6 +178,16 @@ func NewLoadFlow(generator *CacheController, access *MemoryHierarchyAccess, tag 
 	return loadFlow
 }
 
+func (loadFlow *LoadFlow) String() string {
+	return fmt.Sprintf(
+		"[%d] %s: LoadFlow{id=%d, tag=0x%08x}",
+		loadFlow.BeginCycle(),
+		loadFlow.Generator(),
+		loadFlow.Id(),
+		loadFlow.Tag(),
+	)
+}
+
 type StoreFlow struct {
 	*BaseCacheCoherenceFlow
 	OnCompletedCallback func()
@@ -187,4 +204,14 @@ func NewStoreFlow(generator *CacheController, access *MemoryHierarchyAccess, tag
 	}
 
 	return storeFlow
+}
+
+func (storeFlow *StoreFlow) String() string {
+	return fmt.Sprintf(
+		"[%d] %s: StoreFlow{id=%d, tag=0x%08x}",
+		storeFlow.BeginCycle(),
+		storeFlow.Generator(),
+		storeFlow.Id(),
+		storeFlow.Tag(),
+	)
 }
