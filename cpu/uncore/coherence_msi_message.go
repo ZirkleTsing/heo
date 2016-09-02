@@ -64,6 +64,8 @@ func NewDataMessage(generator Controller, producerFlow CacheCoherenceFlow, acces
 		NumInvAcks:numInvAcks,
 	}
 
+	SetupCacheCoherenceFlowTree(dataMessage)
+
 	return dataMessage
 }
 
@@ -77,6 +79,8 @@ func NewFwdGetMMessage(generator Controller, producerFlow CacheCoherenceFlow, ac
 		BaseCoherenceMessage:NewBaseCoherenceMessage(generator, producerFlow, CoherenceMessageType_FWD_GETM, access, tag),
 		Requester:requester,
 	}
+
+	SetupCacheCoherenceFlowTree(fwdGetMMessage)
 
 	return fwdGetMMessage
 }
@@ -92,6 +96,8 @@ func NewFwdGetSMessage(generator Controller, producerFlow CacheCoherenceFlow, ac
 		Requester:requester,
 	}
 
+	SetupCacheCoherenceFlowTree(fwdGetSMessage)
+
 	return fwdGetSMessage
 }
 
@@ -105,6 +111,8 @@ func NewGetMMessage(generator Controller, producerFlow CacheCoherenceFlow, acces
 		BaseCoherenceMessage:NewBaseCoherenceMessage(generator, producerFlow, CoherenceMessageType_GETM, access, tag),
 		Requester:requester,
 	}
+
+	SetupCacheCoherenceFlowTree(getMMessage)
 
 	return getMMessage
 }
@@ -120,6 +128,8 @@ func NewGetSMessage(generator Controller, producerFlow CacheCoherenceFlow, acces
 		Requester:requester,
 	}
 
+	SetupCacheCoherenceFlowTree(getSMessage)
+
 	return getSMessage
 }
 
@@ -133,6 +143,8 @@ func NewInvAckMessage(generator Controller, producerFlow CacheCoherenceFlow, acc
 		BaseCoherenceMessage:NewBaseCoherenceMessage(generator, producerFlow, CoherenceMessageType_INV_ACK, access, tag),
 		Sender:sender,
 	}
+
+	SetupCacheCoherenceFlowTree(invAckMessage)
 
 	return invAckMessage
 }
@@ -148,6 +160,8 @@ func NewInvMessage(generator Controller, producerFlow CacheCoherenceFlow, access
 		Requester:requester,
 	}
 
+	SetupCacheCoherenceFlowTree(invMessage)
+
 	return invMessage
 }
 
@@ -159,6 +173,8 @@ func NewPutAckMessage(generator Controller, producerFlow CacheCoherenceFlow, acc
 	var putAckMessage = &PutAckMessage{
 		BaseCoherenceMessage:NewBaseCoherenceMessage(generator, producerFlow, CoherenceMessageType_PUT_ACK, access, tag),
 	}
+
+	SetupCacheCoherenceFlowTree(putAckMessage)
 
 	return putAckMessage
 }
@@ -174,6 +190,8 @@ func NewPutMAndDataMessage(generator Controller, producerFlow CacheCoherenceFlow
 		Requester:requester,
 	}
 
+	SetupCacheCoherenceFlowTree(putMAndDataMessage)
+
 	return putMAndDataMessage
 }
 
@@ -187,6 +205,8 @@ func NewPutSMessage(generator Controller, producerFlow CacheCoherenceFlow, acces
 		BaseCoherenceMessage:NewBaseCoherenceMessage(generator, producerFlow, CoherenceMessageType_PUTS, access, tag),
 		Requester:requester,
 	}
+
+	SetupCacheCoherenceFlowTree(putSMessage)
 
 	return putSMessage
 }
@@ -202,6 +222,8 @@ func NewRecallAckMessage(generator Controller, producerFlow CacheCoherenceFlow, 
 		Sender:sender,
 	}
 
+	SetupCacheCoherenceFlowTree(recallAckMessage)
+
 	return recallAckMessage
 }
 
@@ -213,6 +235,8 @@ func NewRecallMessage(generator Controller, producerFlow CacheCoherenceFlow, acc
 	var recallMessage = &RecallMessage{
 		BaseCoherenceMessage:NewBaseCoherenceMessage(generator, producerFlow, CoherenceMessageType_RECALL, access, tag),
 	}
+
+	SetupCacheCoherenceFlowTree(recallMessage)
 
 	return recallMessage
 }

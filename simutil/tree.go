@@ -2,12 +2,7 @@ package simutil
 
 import "fmt"
 
-type Node interface {
-	Value() interface{}
-	Children() []Node
-}
-
-func _printNode(node Node, prefix string, tail bool) {
+func _printNode(node interface{}, prefix string, tail bool, value func(node interface{}) interface{}, children func(node interface{}) []interface{}) {
 	var line string
 
 	if tail {
@@ -16,11 +11,11 @@ func _printNode(node Node, prefix string, tail bool) {
 		line = "├── "
 	}
 
-	fmt.Printf("%s%s%s\n", prefix, line, node.Value())
+	fmt.Printf("%s%s%s\n", prefix, line, value(node))
 
-	if len(node.Children()) > 0 {
-		for i := 0; i < len(node.Children()) - 1; i++ {
-			var childNode = node.Children()[i]
+	if len(children(node)) > 0 {
+		for i := 0; i < len(children(node)) - 1; i++ {
+			var childNode = children(node)[i]
 
 			if tail {
 				line = "    "
@@ -28,10 +23,10 @@ func _printNode(node Node, prefix string, tail bool) {
 				line = "│   "
 			}
 
-			_printNode(childNode, fmt.Sprintf("%s%s", prefix, line), false)
+			_printNode(childNode, fmt.Sprintf("%s%s", prefix, line), false, value, children)
 		}
-		if len(node.Children()) >= 1 {
-			var lastNode = node.Children()[len(node.Children()) - 1]
+		if len(children(node)) >= 1 {
+			var lastNode = children(node)[len(children(node)) - 1]
 
 			if tail {
 				line = "    "
@@ -39,11 +34,11 @@ func _printNode(node Node, prefix string, tail bool) {
 				line = "│   "
 			}
 
-			_printNode(lastNode, fmt.Sprintf("%s%s", prefix, line), true)
+			_printNode(lastNode, fmt.Sprintf("%s%s", prefix, line), true, value, children)
 		}
 	}
 }
 
-func PrintNode(node Node) {
-	_printNode(node, "", true)
+func PrintNode(node interface{}, value func(node interface{}) interface{}, children func(node interface{}) []interface{}) {
+	_printNode(node, "", true, value, children)
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/mcai/acogo/noc"
 	"math"
+	"reflect"
 )
 
 type UncoreDriver interface {
@@ -230,7 +231,29 @@ func (baseMemoryHierarchy *BaseMemoryHierarchy) TransferMessage(from Controller,
 
 func (baseMemoryHierarchy *BaseMemoryHierarchy) DumpPendingFlowTree() {
 	for _, pendingFlow := range baseMemoryHierarchy.pendingFlows {
-		simutil.PrintNode(pendingFlow)
+		simutil.PrintNode(
+			pendingFlow,
+			func(node interface{}) interface{}{
+				var cacheCoherenceFlow = node.(CacheCoherenceFlow)
+
+				if cacheCoherenceFlow.Completed() {
+					return fmt.Sprintf("%s -> completed at %d", reflect.TypeOf(cacheCoherenceFlow), cacheCoherenceFlow.EndCycle())
+				} else {
+					return fmt.Sprintf("%s", reflect.TypeOf(cacheCoherenceFlow))
+				}
+			},
+			func(node interface{}) []interface{}{
+				var cacheCoherenceFlow = node.(CacheCoherenceFlow)
+
+				var children []interface{}
+
+				for _, childFlow := range cacheCoherenceFlow.ChildFlows() {
+					children = append(children, childFlow)
+				}
+
+				return children
+			},
+		)
 		fmt.Println()
 	}
 

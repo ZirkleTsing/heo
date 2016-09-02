@@ -1,17 +1,15 @@
 package uncore
 
 import (
-	"github.com/mcai/acogo/simutil"
 	"fmt"
-	"reflect"
 )
 
 type CacheCoherenceFlow interface {
-	simutil.Node
 	Id() int32
 	Generator() Controller
 	ProducerFlow() CacheCoherenceFlow
 	AncestorFlow() CacheCoherenceFlow
+	SetAncestorFlow(ancestorFlow CacheCoherenceFlow)
 	ChildFlows() []CacheCoherenceFlow
 	SetChildFlows(childFlows []CacheCoherenceFlow)
 	NumPendingDescendantFlows() int32
@@ -53,40 +51,7 @@ func NewBaseCacheCoherenceFlow(generator Controller, producerFlow CacheCoherence
 
 	baseCacheCoherenceFlow.beginCycle = generator.MemoryHierarchy().Driver().CycleAccurateEventQueue().CurrentCycle
 
-	if producerFlow == nil {
-		baseCacheCoherenceFlow.ancestorFlow = baseCacheCoherenceFlow
-		generator.MemoryHierarchy().SetPendingFlows(
-			append(generator.MemoryHierarchy().PendingFlows(), baseCacheCoherenceFlow),
-		)
-	} else {
-		baseCacheCoherenceFlow.ancestorFlow = producerFlow.AncestorFlow()
-		producerFlow.SetChildFlows(append(producerFlow.ChildFlows(), baseCacheCoherenceFlow))
-	}
-
-	baseCacheCoherenceFlow.ancestorFlow.SetNumPendingDescendantFlows(
-		baseCacheCoherenceFlow.ancestorFlow.NumPendingDescendantFlows() + 1)
-
 	return baseCacheCoherenceFlow
-}
-
-func (cacheCoherenceFlow *BaseCacheCoherenceFlow) Value() interface{} {
-	//if cacheCoherenceFlow.Completed() {
-	//	return fmt.Sprintf("%s%s", cacheCoherenceFlow, cacheCoherenceFlow.endCycle)
-	//} else {
-	//	return fmt.Sprintf("%s", cacheCoherenceFlow)
-	//}
-
-	return fmt.Sprintf("%s", reflect.TypeOf(cacheCoherenceFlow).String())
-}
-
-func (cacheCoherenceFlow *BaseCacheCoherenceFlow) Children() []simutil.Node {
-	var children []simutil.Node
-
-	for _, childFlow := range cacheCoherenceFlow.childFlows {
-		children = append(children, childFlow)
-	}
-
-	return children
 }
 
 func (cacheCoherenceFlow *BaseCacheCoherenceFlow) Id() int32 {
@@ -103,6 +68,10 @@ func (cacheCoherenceFlow *BaseCacheCoherenceFlow) ProducerFlow() CacheCoherenceF
 
 func (cacheCoherenceFlow *BaseCacheCoherenceFlow) AncestorFlow() CacheCoherenceFlow {
 	return cacheCoherenceFlow.ancestorFlow
+}
+
+func (cacheCoherenceFlow *BaseCacheCoherenceFlow) SetAncestorFlow(ancestorFlow CacheCoherenceFlow) {
+	cacheCoherenceFlow.ancestorFlow = ancestorFlow
 }
 
 func (cacheCoherenceFlow *BaseCacheCoherenceFlow) ChildFlows() []CacheCoherenceFlow {
@@ -175,6 +144,8 @@ func NewLoadFlow(generator *CacheController, access *MemoryHierarchyAccess, tag 
 		loadFlow.Complete()
 	}
 
+	SetupCacheCoherenceFlowTree(loadFlow)
+
 	return loadFlow
 }
 
@@ -202,6 +173,8 @@ func NewStoreFlow(generator *CacheController, access *MemoryHierarchyAccess, tag
 		onCompletedCallback()
 		storeFlow.Complete()
 	}
+
+	SetupCacheCoherenceFlowTree(storeFlow)
 
 	return storeFlow
 }

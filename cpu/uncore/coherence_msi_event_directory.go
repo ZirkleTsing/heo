@@ -50,6 +50,8 @@ func NewDataEvent(generator *DirectoryController, producerFlow CacheCoherenceFlo
 		Sender:sender,
 	}
 
+	SetupCacheCoherenceFlowTree(dataEvent)
+
 	return dataEvent
 }
 
@@ -63,6 +65,8 @@ func NewDataFromMemEvent(generator *DirectoryController, producerFlow CacheCoher
 		BaseDirectoryControllerEvent:NewBaseDirectoryControllerEvent(generator, producerFlow, DirectoryControllerEventType_DATA_FROM_MEM, access, tag),
 		Requester:requester,
 	}
+
+	SetupCacheCoherenceFlowTree(dataFromMemEvent)
 
 	return dataFromMemEvent
 }
@@ -84,6 +88,8 @@ func NewGetMEvent(generator *DirectoryController, producerFlow CacheCoherenceFlo
 		OnStalledCallback:onStalledCallback,
 	}
 
+	SetupCacheCoherenceFlowTree(getMEvent)
+
 	return getMEvent
 }
 
@@ -104,6 +110,8 @@ func NewGetSEvent(generator *DirectoryController, producerFlow CacheCoherenceFlo
 		OnStalledCallback:onStalledCallback,
 	}
 
+	SetupCacheCoherenceFlowTree(getSEvent)
+
 	return getSEvent
 }
 
@@ -115,6 +123,8 @@ func NewLastRecallAckEvent(generator *DirectoryController, producerFlow CacheCoh
 	var lastRecallAckEvent = &LastRecallAckEvent{
 		BaseDirectoryControllerEvent:NewBaseDirectoryControllerEvent(generator, producerFlow, DirectoryControllerEventType_LAST_RECALL_ACK, access, tag),
 	}
+
+	SetupCacheCoherenceFlowTree(lastRecallAckEvent)
 
 	return lastRecallAckEvent
 }
@@ -130,6 +140,8 @@ func NewPutMAndDataFromNonOwnerEvent(generator *DirectoryController, producerFlo
 		Requester:requester,
 	}
 
+	SetupCacheCoherenceFlowTree(putMAndDataFromNonOwnerEvent)
+
 	return putMAndDataFromNonOwnerEvent
 }
 
@@ -143,6 +155,8 @@ func NewPutMAndDataFromOwnerEvent(generator *DirectoryController, producerFlow C
 		BaseDirectoryControllerEvent:NewBaseDirectoryControllerEvent(generator, producerFlow, DirectoryControllerEventType_PUTM_AND_DATA_FROM_OWNER, access, tag),
 		Requester:requester,
 	}
+
+	SetupCacheCoherenceFlowTree(putMAndDataFromOwnerEvent)
 
 	return putMAndDataFromOwnerEvent
 }
@@ -158,6 +172,8 @@ func NewPutSLastEvent(generator *DirectoryController, producerFlow CacheCoherenc
 		Requester:requester,
 	}
 
+	SetupCacheCoherenceFlowTree(putSLastEvent)
+
 	return putSLastEvent
 }
 
@@ -172,6 +188,8 @@ func NewPutSNotLastEvent(generator *DirectoryController, producerFlow CacheCoher
 		Requester:requester,
 	}
 
+	SetupCacheCoherenceFlowTree(putSNotLastEvent)
+
 	return putSNotLastEvent
 }
 
@@ -185,6 +203,8 @@ func NewRecallAckEvent(generator *DirectoryController, producerFlow CacheCoheren
 		BaseDirectoryControllerEvent:NewBaseDirectoryControllerEvent(generator, producerFlow, DirectoryControllerEventType_RECALL_ACK, access, tag),
 		Sender:sender,
 	}
+
+	SetupCacheCoherenceFlowTree(recallAckEvent)
 
 	return recallAckEvent
 }
@@ -207,6 +227,8 @@ func NewDirReplacementEvent(generator *DirectoryController, producerFlow CacheCo
 		OnCompletedCallback:onCompletedCallback,
 		OnStalledCallback:onStalledCallback,
 	}
+
+	SetupCacheCoherenceFlowTree(dirReplacementEvent)
 
 	return dirReplacementEvent
 }

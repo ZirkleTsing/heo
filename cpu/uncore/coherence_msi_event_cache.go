@@ -52,6 +52,8 @@ func NewDataFromDirAcksEq0Event(generator *CacheController, producerFlow CacheCo
 		Sender:sender,
 	}
 
+	SetupCacheCoherenceFlowTree(dataFromDirAcksEq0Event)
+
 	return dataFromDirAcksEq0Event
 }
 
@@ -65,6 +67,8 @@ func NewDataFromDirAcksGt0Event(generator *CacheController, producerFlow CacheCo
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_DATA_FROM_DIR_ACKS_GT_0, access, tag),
 		Sender:sender,
 	}
+
+	SetupCacheCoherenceFlowTree(dataFromDirAcksGt0Event)
 
 	return dataFromDirAcksGt0Event
 }
@@ -80,6 +84,8 @@ func NewDataFromOwnerEvent(generator *CacheController, producerFlow CacheCoheren
 		Sender:sender,
 	}
 
+	SetupCacheCoherenceFlowTree(dataFromOwnerEvent)
+
 	return dataFromOwnerEvent
 }
 
@@ -93,6 +99,8 @@ func NewFwdGetMEvent(generator *CacheController, producerFlow CacheCoherenceFlow
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_FWD_GETM, access, tag),
 		Requester:requester,
 	}
+
+	SetupCacheCoherenceFlowTree(fwdGetMEvent)
 
 	return fwdGetMEvent
 }
@@ -108,6 +116,8 @@ func NewFwdGetSEvent(generator *CacheController, producerFlow CacheCoherenceFlow
 		Requester:requester,
 	}
 
+	SetupCacheCoherenceFlowTree(fwdGetSEvent)
+
 	return fwdGetSEvent
 }
 
@@ -121,6 +131,8 @@ func NewInvAckEvent(generator *CacheController, producerFlow CacheCoherenceFlow,
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_INV_ACK, access, tag),
 		Sender:sender,
 	}
+
+	SetupCacheCoherenceFlowTree(invAckEvent)
 
 	return invAckEvent
 }
@@ -136,6 +148,8 @@ func NewInvEvent(generator *CacheController, producerFlow CacheCoherenceFlow, ac
 		Requester:requester,
 	}
 
+	SetupCacheCoherenceFlowTree(invEvent)
+
 	return invEvent
 }
 
@@ -147,6 +161,8 @@ func NewLastInvAckEvent(generator *CacheController, producerFlow CacheCoherenceF
 	var lastInvAckEvent = &LastInvAckEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_LAST_INV_ACK, access, tag),
 	}
+
+	SetupCacheCoherenceFlowTree(lastInvAckEvent)
 
 	return lastInvAckEvent
 }
@@ -168,6 +184,8 @@ func NewLoadEvent(generator *CacheController, producerFlow CacheCoherenceFlow, a
 		OnStalledCallback:onStalledCallback,
 	}
 
+	SetupCacheCoherenceFlowTree(loadEvent)
+
 	return loadEvent
 }
 
@@ -180,6 +198,8 @@ func NewPutAckEvent(generator *CacheController, producerFlow CacheCoherenceFlow,
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_PUT_ACK, access, tag),
 	}
 
+	SetupCacheCoherenceFlowTree(putAckEvent)
+
 	return putAckEvent
 }
 
@@ -191,6 +211,8 @@ func NewRecallEvent(generator *CacheController, producerFlow CacheCoherenceFlow,
 	var recallEvent = &RecallEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_RECALL, access, tag),
 	}
+
+	SetupCacheCoherenceFlowTree(recallEvent)
 
 	return recallEvent
 }
@@ -214,6 +236,8 @@ func NewReplacementEvent(generator *CacheController, producerFlow CacheCoherence
 		OnStalledCallback:onStalledCallback,
 	}
 
+	SetupCacheCoherenceFlowTree(replacementEvent)
+
 	return replacementEvent
 }
 
@@ -233,6 +257,8 @@ func NewStoreEvent(generator *CacheController, producerFlow CacheCoherenceFlow, 
 		OnCompletedCallback:onCompletedCallback,
 		OnStalledCallback:onStalledCallback,
 	}
+
+	SetupCacheCoherenceFlowTree(storeEvent)
 
 	return storeEvent
 }
