@@ -3,7 +3,6 @@ package cpu
 import (
 	"github.com/mcai/acogo/cpu/uncore"
 	"github.com/mcai/acogo/simutil"
-	"fmt"
 )
 
 type MemoryHierarchyCore struct {
@@ -76,7 +75,6 @@ func (core *BaseCore) Ifetch(thread Thread, virtualAddress uint32, virtualPc uin
 
 			if counterPending.Value() == 0 {
 				onCompletedCallback()
-				fmt.Println("here")
 			}
 		},
 	)

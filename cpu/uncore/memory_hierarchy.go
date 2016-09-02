@@ -54,7 +54,7 @@ type BaseMemoryHierarchy struct {
 	iTlbs                          []*TranslationLookasideBuffer
 	dTlbs                          []*TranslationLookasideBuffer
 
-	p2PReorderBuffers              map[Controller](map[Controller]*P2PReorderBuffer)
+	p2pReorderBuffers              map[Controller](map[Controller]*P2PReorderBuffer)
 
 	Network                        *noc.Network
 	DevicesToNodeIds               map[interface{}]uint32
@@ -100,7 +100,7 @@ func NewBaseMemoryHierarchy(driver UncoreDriver, config *UncoreConfig, nocConfig
 		}
 	}
 
-	baseMemoryHierarchy.p2PReorderBuffers = make(map[Controller](map[Controller]*P2PReorderBuffer))
+	baseMemoryHierarchy.p2pReorderBuffers = make(map[Controller](map[Controller]*P2PReorderBuffer))
 
 	var numNodes = uint32(0)
 
@@ -193,29 +193,31 @@ func (baseMemoryHierarchy *BaseMemoryHierarchy) DTlbs() []*TranslationLookasideB
 }
 
 func (baseMemoryHierarchy *BaseMemoryHierarchy) Transfer(from MemoryDevice, to MemoryDevice, size uint32, onCompletedCallback func()) {
-	var src = baseMemoryHierarchy.DevicesToNodeIds[from]
-	var dest = baseMemoryHierarchy.DevicesToNodeIds[to]
+	//var src = baseMemoryHierarchy.DevicesToNodeIds[from]
+	//var dest = baseMemoryHierarchy.DevicesToNodeIds[to]
+	//
+	//var packet = noc.NewDataPacket(baseMemoryHierarchy.Network, int(src), int(dest), int(size), true, onCompletedCallback)
+	//
+	//baseMemoryHierarchy.Driver().CycleAccurateEventQueue().Schedule(
+	//	func() {
+	//		baseMemoryHierarchy.Network.Receive(packet)
+	//	},
+	//	1,
+	//)
 
-	var packet = noc.NewDataPacket(baseMemoryHierarchy.Network, int(src), int(dest), int(size), true, onCompletedCallback)
-
-	baseMemoryHierarchy.Driver().CycleAccurateEventQueue().Schedule(
-		func() {
-			baseMemoryHierarchy.Network.Receive(packet)
-		},
-		1,
-	)
+	onCompletedCallback() //TODO
 }
 
 func (baseMemoryHierarchy *BaseMemoryHierarchy) TransferMessage(from Controller, to Controller, size uint32, message CoherenceMessage) {
-	if _, ok := baseMemoryHierarchy.p2PReorderBuffers[from]; !ok {
-		baseMemoryHierarchy.p2PReorderBuffers[from] = make(map[Controller]*P2PReorderBuffer)
+	if _, ok := baseMemoryHierarchy.p2pReorderBuffers[from]; !ok {
+		baseMemoryHierarchy.p2pReorderBuffers[from] = make(map[Controller]*P2PReorderBuffer)
 	}
 
-	if _, ok := baseMemoryHierarchy.p2PReorderBuffers[from][to]; !ok {
-		baseMemoryHierarchy.p2PReorderBuffers[from][to] = NewP2PReorderBuffer(from, to)
+	if _, ok := baseMemoryHierarchy.p2pReorderBuffers[from][to]; !ok {
+		baseMemoryHierarchy.p2pReorderBuffers[from][to] = NewP2PReorderBuffer(from, to)
 	}
 
-	var p2pReorderBuffer = baseMemoryHierarchy.p2PReorderBuffers[from][to]
+	var p2pReorderBuffer = baseMemoryHierarchy.p2pReorderBuffers[from][to]
 
 	p2pReorderBuffer.Messages = append(p2pReorderBuffer.Messages, message)
 

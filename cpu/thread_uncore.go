@@ -64,12 +64,12 @@ func (thread *MemoryHierarchyThread) WarmupOneCycle() {
 				thread.Core().Ifetch(thread, pc, pc, func() {
 					thread.FetchStalled = false
 				})
-			}
 
-			thread.FetchStalled = true
-			thread.LastFetchedCacheLine = int32(cacheLineToFetch)
-		} else {
-			return
+				thread.FetchStalled = true
+				thread.LastFetchedCacheLine = int32(cacheLineToFetch)
+			} else {
+				return
+			}
 		}
 
 		var effectiveAddress = thread.NextDynamicInstInWarmup.EffectiveAddress
