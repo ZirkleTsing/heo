@@ -237,9 +237,9 @@ func (baseMemoryHierarchy *BaseMemoryHierarchy) DumpPendingFlowTree() {
 				var cacheCoherenceFlow = node.(CacheCoherenceFlow)
 
 				if cacheCoherenceFlow.Completed() {
-					return fmt.Sprintf("%s -> completed at %d", reflect.TypeOf(cacheCoherenceFlow), cacheCoherenceFlow.EndCycle())
+					return fmt.Sprintf("%s -> created at %d, completed at %d", reflect.TypeOf(cacheCoherenceFlow), cacheCoherenceFlow.BeginCycle(), cacheCoherenceFlow.EndCycle())
 				} else {
-					return fmt.Sprintf("%s", reflect.TypeOf(cacheCoherenceFlow))
+					return fmt.Sprintf("%s -> created at %d", reflect.TypeOf(cacheCoherenceFlow), cacheCoherenceFlow.BeginCycle())
 				}
 			},
 			func(node interface{}) []interface{}{
