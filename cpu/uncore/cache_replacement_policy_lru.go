@@ -2,13 +2,18 @@ package uncore
 
 type LRUPolicy struct {
 	*BaseCacheReplacementPolicy
-	lruStack *SimpleCache
+	lruStack *Cache
 }
 
 func NewLRUPolicy(cache *EvictableCache) *LRUPolicy {
 	var lruPolicy = &LRUPolicy{
 		BaseCacheReplacementPolicy: NewBaseCacheReplacementPolicy(cache),
-		lruStack:NewSimpleCacheFromCache(cache.Cache),
+		lruStack:NewCache(
+			cache.Geometry,
+			func(set uint32, way uint32) CacheLineStateProvider {
+				return NewBaseCacheLineStateProvider(way)
+			},
+		),
 	}
 
 	return lruPolicy
@@ -37,7 +42,7 @@ func (lruPolicy *LRUPolicy) SetLRU(set uint32, way uint32) {
 
 func (lruPolicy *LRUPolicy) GetStackPositionOfWay(set uint32, way uint32) uint32 {
 	for i, lruStackEntry := range lruPolicy.lruStack.Sets[set].Lines {
-		if lruStackEntry.Value.(uint32) == way {
+		if lruStackEntry.State().(uint32) == way {
 			return uint32(i)
 		}
 	}
@@ -46,7 +51,7 @@ func (lruPolicy *LRUPolicy) GetStackPositionOfWay(set uint32, way uint32) uint32
 }
 
 func (lruPolicy *LRUPolicy) GetWayInStackPosition(set uint32, stackPosition uint32) uint32 {
-	return lruPolicy.lruStack.Sets[set].Lines[stackPosition].Value.(uint32)
+	return lruPolicy.lruStack.Sets[set].Lines[stackPosition].State().(uint32)
 }
 
 func (lruPolicy *LRUPolicy) GetMRU(set uint32) uint32 {

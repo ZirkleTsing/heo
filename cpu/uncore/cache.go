@@ -22,13 +22,13 @@ type BaseCacheLineStateProvider struct {
 	state        interface{}
 }
 
-func NewBaseCacheLineStateProvider(initialState bool) *BaseCacheLineStateProvider {
-	var boolCacheLineStateProvider = &BaseCacheLineStateProvider{
+func NewBaseCacheLineStateProvider(initialState interface{}) *BaseCacheLineStateProvider {
+	var baseCacheLineStateProvider = &BaseCacheLineStateProvider{
 		initialState:initialState,
 		state:initialState,
 	}
 
-	return boolCacheLineStateProvider
+	return baseCacheLineStateProvider
 }
 
 func (baseCacheLineStateProvider *BaseCacheLineStateProvider) InitialState() interface{} {

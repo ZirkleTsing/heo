@@ -62,7 +62,9 @@ func (experiment *CPUExperiment) Run(skipIfStatsFileExists bool) {
 
 	experiment.BeginTime = time.Now()
 
-	experiment.DoFastForward()
+	//TODO: to be called based on config
+	//experiment.DoFastForward()
+	experiment.DoWarmup()
 
 	experiment.EndTime = time.Now()
 
@@ -93,7 +95,6 @@ func (experiment *CPUExperiment) DoFastForward() {
 	}
 }
 
-//TODO: to be called based on config
 func (experiment *CPUExperiment) DoWarmup() {
 	for len(experiment.Kernel.Contexts) > 0 && experiment.canAdvanceOneCycle() {
 		for _, core := range experiment.Processor.Cores {
