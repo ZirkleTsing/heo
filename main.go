@@ -2,8 +2,6 @@ package main
 
 import (
 	"github.com/mcai/acogo/cpu"
-	"fmt"
-	"reflect"
 )
 
 func main() {
@@ -18,12 +16,12 @@ func main() {
 
 	var experiment = cpu.NewCPUExperiment(config)
 
-	experiment.BlockingEventDispatcher().AddListener(reflect.TypeOf((*cpu.StaticInstExecutedEvent)(nil)), func(event interface{}) {
-		var staticInstExecutedEvent = event.(*cpu.StaticInstExecutedEvent)
-		fmt.Printf("[thread#%d] %s\n", staticInstExecutedEvent.Context.ThreadId, staticInstExecutedEvent.StaticInst.Disassemble(staticInstExecutedEvent.Pc))
-		//fmt.Printf("#dynamicInsts: %d\n", experiment.Processor.Cores[0].Threads[0].NumDynamicInsts)
-		//fmt.Println(staticInstExecutedEvent.Context.Regs.Dump())
-	})
+	//experiment.BlockingEventDispatcher().AddListener(reflect.TypeOf((*cpu.StaticInstExecutedEvent)(nil)), func(event interface{}) {
+	//	var staticInstExecutedEvent = event.(*cpu.StaticInstExecutedEvent)
+	//	fmt.Printf("[thread#%d] %s\n", staticInstExecutedEvent.Context.ThreadId, staticInstExecutedEvent.StaticInst.Disassemble(staticInstExecutedEvent.Pc))
+	//	fmt.Printf("#dynamicInsts: %d\n", experiment.Processor.Cores[0].Threads()[0].NumDynamicInsts)
+	//	fmt.Println(staticInstExecutedEvent.Context.Regs.Dump())
+	//})
 
 	experiment.Run(false)
 }
