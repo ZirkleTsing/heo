@@ -1,22 +1,5 @@
 package cpu
 
-type StaticInstType string
-
-const (
-	StaticInstType_INTEGER_COMPUTATION = StaticInstType("INTEGER_COMPUTATION")
-	StaticInstType_FLOAT_COMPUTATION = StaticInstType("FLOAT_COMPUTATION")
-	StaticInstType_CONDITIONAL = StaticInstType("CONDITIONAL")
-	StaticInstType_UNCONDITIONAL = StaticInstType("UNCONDITIONAL")
-	StaticInstType_LOAD = StaticInstType("LOAD")
-	StaticInstType_STORE = StaticInstType("STORE")
-	StaticInstType_FUNCTION_CALL = StaticInstType("FUNCTION_CALL")
-	StaticInstType_FUNCTION_RETURN = StaticInstType("FUNCTION_RETURN")
-	StaticInstType_TRAP = StaticInstType("TRAP")
-	StaticInstType_NOP = StaticInstType("NOP")
-	StaticInstType_UNIMPLEMENTED = StaticInstType("UNIMPLEMENTED")
-	StaticInstType_UNKNOWN = StaticInstType("UNKNOWN")
-)
-
 type StaticInstFlag string
 
 const (
@@ -34,6 +17,19 @@ const (
 	StaticInstFlag_DISPLACED_ADDRESSING = StaticInstFlag("DISPLACED_ADDRESSING")
 	StaticInstFlag_TRAP = StaticInstFlag("TRAP")
 	StaticInstFlag_NOP = StaticInstFlag("NOP")
-	StaticInstFlag_UNIMPLEMENTED = StaticInstFlag("UNIMPLEMENTED")
-	StaticInstFlag_UNKNOWN = StaticInstFlag("UNKNOWN")
+)
+
+type StaticInstType string
+
+const (
+	StaticInstType_INTEGER_COMPUTATION = StaticInstType("INTEGER_COMPUTATION")
+	StaticInstType_FLOAT_COMPUTATION = StaticInstType("FLOAT_COMPUTATION")
+	StaticInstType_CONDITIONAL = StaticInstType("CONDITIONAL")
+	StaticInstType_UNCONDITIONAL = StaticInstType("UNCONDITIONAL")
+	StaticInstType_LOAD = StaticInstType("LOAD")
+	StaticInstType_STORE = StaticInstType("STORE")
+	StaticInstType_FUNCTION_CALL = StaticInstType("FUNCTION_CALL")
+	StaticInstType_FUNCTION_RETURN = StaticInstType("FUNCTION_RETURN")
+	StaticInstType_TRAP = StaticInstType("TRAP")
+	StaticInstType_NOP = StaticInstType("NOP")
 )

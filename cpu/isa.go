@@ -174,10 +174,6 @@ func srlv(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rt()] >> s
 }
 
-func sub(context *Context, machInst MachInst) {
-	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] - context.Regs.Gpr[machInst.Rt()]
-}
-
 func subu(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rd()] = context.Regs.Gpr[machInst.Rs()] - context.Regs.Gpr[machInst.Rt()]
 }
@@ -277,16 +273,6 @@ func cvt_d_w(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
-func cvtLD(context *Context, machInst MachInst) {
-	var temp = math.Float64bits(context.Regs.Fpr.Float64(machInst.Fs()))
-	context.Regs.Fpr.SetUint64(machInst.Fd(), temp)
-}
-
-func cvtLS(context *Context, machInst MachInst) {
-	var temp = math.Float64bits(float64(context.Regs.Fpr.Float32(machInst.Fs())))
-	context.Regs.Fpr.SetUint64(machInst.Fd(), temp)
-}
-
 func cvt_s_d(context *Context, machInst MachInst) {
 	var temp = float32(context.Regs.Fpr.Float64(machInst.Fs()))
 	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
@@ -330,42 +316,6 @@ func mov_d(context *Context, machInst MachInst) {
 func mov_s(context *Context, machInst MachInst) {
 	var temp = context.Regs.Fpr.Float32(machInst.Fs())
 	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
-}
-
-func movf(context *Context, machInst MachInst) {
-	panic("Unimplemented")
-}
-
-func _movf(context *Context, machInst MachInst) {
-	panic("Unimplemented")
-}
-
-func movn(context *Context, machInst MachInst) {
-	panic("Unimplemented")
-}
-
-func _movn(context *Context, machInst MachInst) {
-	panic("Unimplemented")
-}
-
-func _movt(context *Context, machInst MachInst) {
-	panic("Unimplemented")
-}
-
-func movz(context *Context, machInst MachInst) {
-	panic("Unimplemented")
-}
-
-func _movz(context *Context, machInst MachInst) {
-	panic("Unimplemented")
-}
-
-func mul(context *Context, machInst MachInst) {
-	panic("Unimplemented")
-}
-
-func trunc_w(context *Context, machInst MachInst) {
-	panic("Unimplemented")
 }
 
 func mul_d(context *Context, machInst MachInst) {
@@ -467,28 +417,16 @@ func bc1f(context *Context, machInst MachInst) {
 	}
 }
 
-func bc1fl(context *Context, machInst MachInst) {
-	panic("Unimplemented")
-}
-
 func bc1t(context *Context, machInst MachInst) {
 	if fPCC(context, machInst.BranchCc()) != 0 {
 		relBranch(context, machInst.Imm() << 2)
 	}
 }
 
-func bc1tl(context *Context, machInst MachInst) {
-	panic("Unimplemented")
-}
-
 func beq(context *Context, machInst MachInst) {
 	if context.Regs.Gpr[machInst.Rs()] == context.Regs.Gpr[machInst.Rt()] {
 		relBranch(context, machInst.Imm() << 2)
 	}
-}
-
-func beql(context *Context, machInst MachInst) {
-	panic("Unimplemented")
 }
 
 func bgez(context *Context, machInst MachInst) {
@@ -504,22 +442,10 @@ func bgezal(context *Context, machInst MachInst) {
 	}
 }
 
-func bgezall(context *Context, machInst MachInst) {
-	panic("Unimplemented")
-}
-
-func bgezl(context *Context, machInst MachInst) {
-	panic("Unimplemented")
-}
-
 func bgtz(context *Context, machInst MachInst) {
 	if context.Regs.Sgpr(machInst.Rs()) > 0 {
 		relBranch(context, machInst.Imm() << 2)
 	}
-}
-
-func bgtzl(context *Context, machInst MachInst) {
-	panic("Unimplemented")
 }
 
 func blez(context *Context, machInst MachInst) {
@@ -528,26 +454,10 @@ func blez(context *Context, machInst MachInst) {
 	}
 }
 
-func blezl(context *Context, machInst MachInst) {
-	panic("Unimplemented")
-}
-
 func bltz(context *Context, machInst MachInst) {
 	if context.Regs.Sgpr(machInst.Rs()) < 0 {
 		relBranch(context, machInst.Imm() << 2)
 	}
-}
-
-func bltzal(context *Context, machInst MachInst) {
-	panic("Unimplemented")
-}
-
-func bltzall(context *Context, machInst MachInst) {
-	panic("Unimplemented")
-}
-
-func bltzl(context *Context, machInst MachInst) {
-	panic("Unimplemented")
 }
 
 func bne(context *Context, machInst MachInst) {
@@ -556,54 +466,50 @@ func bne(context *Context, machInst MachInst) {
 	}
 }
 
-func bnel(context *Context, machInst MachInst) {
-	panic("Unimplemented")
-}
-
 func lb(context *Context, machInst MachInst) {
-	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = GetEffectiveAddress(context, machInst)
 	var temp = context.Process.Memory.ReadByteAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = cpuutil.Sext32(uint32(temp), 8)
 }
 
 func lbu(context *Context, machInst MachInst) {
-	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = GetEffectiveAddress(context, machInst)
 	var temp = context.Process.Memory.ReadByteAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = uint32(temp)
 }
 
 func ldc1(context *Context, machInst MachInst) {
-	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = GetEffectiveAddress(context, machInst)
 	var temp = context.Process.Memory.ReadDoubleWordAt(addr)
 	context.Regs.Fpr.SetFloat64(machInst.Ft(), math.Float64frombits(temp))
 }
 
 func lh(context *Context, machInst MachInst) {
-	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = GetEffectiveAddress(context, machInst)
 	var temp = context.Process.Memory.ReadHalfWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = cpuutil.Sext32(uint32(temp), 16)
 }
 
 func lhu(context *Context, machInst MachInst) {
-	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = GetEffectiveAddress(context, machInst)
 	var temp = context.Process.Memory.ReadHalfWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = uint32(temp)
 }
 
 func ll(context *Context, machInst MachInst) {
-	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = GetEffectiveAddress(context, machInst)
 	var temp = context.Process.Memory.ReadWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = temp
 }
 
 func lw(context *Context, machInst MachInst) {
-	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = GetEffectiveAddress(context, machInst)
 	var temp = context.Process.Memory.ReadWordAt(addr)
 	context.Regs.Gpr[machInst.Rt()] = temp
 }
 
 func lwc1(context *Context, machInst MachInst) {
-	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = GetEffectiveAddress(context, machInst)
 	var temp = context.Process.Memory.ReadWordAt(addr)
 	context.Regs.Fpr.SetFloat32(machInst.Ft(), math.Float32frombits(temp))
 }
@@ -611,7 +517,7 @@ func lwc1(context *Context, machInst MachInst) {
 func lwl(context *Context, machInst MachInst) {
 	var dst = make([]byte, 4)
 
-	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = GetEffectiveAddress(context, machInst)
 
 	var size = 4 - (addr & 3)
 
@@ -627,7 +533,7 @@ func lwl(context *Context, machInst MachInst) {
 func lwr(context *Context, machInst MachInst) {
 	var dst = make([]byte, 4)
 
-	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = GetEffectiveAddress(context, machInst)
 
 	var size = 1 + (addr & 3)
 
@@ -641,14 +547,14 @@ func lwr(context *Context, machInst MachInst) {
 }
 
 func sb(context *Context, machInst MachInst) {
-	var temp byte = byte(context.Regs.Gpr[machInst.Rt()])
-	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var temp = byte(context.Regs.Gpr[machInst.Rt()])
+	var addr = GetEffectiveAddress(context, machInst)
 	context.Process.Memory.WriteByteAt(addr, temp)
 }
 
 func sc(context *Context, machInst MachInst) {
 	var temp = context.Regs.Gpr[machInst.Rt()]
-	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = GetEffectiveAddress(context, machInst)
 	context.Process.Memory.WriteWordAt(addr, temp)
 	context.Regs.Gpr[machInst.Rt()] = 1
 }
@@ -656,33 +562,33 @@ func sc(context *Context, machInst MachInst) {
 func sdc1(context *Context, machInst MachInst) {
 	var dbl = context.Regs.Fpr.Float64(machInst.Ft())
 	var temp = math.Float64bits(dbl)
-	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = GetEffectiveAddress(context, machInst)
 	context.Process.Memory.WriteDoubleWordAt(addr, temp)
 }
 
 func sh(context *Context, machInst MachInst) {
 	var temp = uint16(context.Regs.Gpr[machInst.Rt()])
-	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = GetEffectiveAddress(context, machInst)
 	context.Process.Memory.WriteHalfWordAt(addr, temp)
 }
 
 func sw(context *Context, machInst MachInst) {
 	var temp = context.Regs.Gpr[machInst.Rt()]
-	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = GetEffectiveAddress(context, machInst)
 	context.Process.Memory.WriteWordAt(addr, temp)
 }
 
 func swc1(context *Context, machInst MachInst) {
 	var f = context.Regs.Fpr.Float32(machInst.Ft())
 	var temp = math.Float32bits(f)
-	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = GetEffectiveAddress(context, machInst)
 	context.Process.Memory.WriteWordAt(addr, temp)
 }
 
 func swl(context *Context, machInst MachInst) {
 	var dst = make([]byte, 4)
 
-	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = GetEffectiveAddress(context, machInst)
 
 	var size = 4 - (addr & 3)
 
@@ -699,7 +605,7 @@ func swl(context *Context, machInst MachInst) {
 func swr(context *Context, machInst MachInst) {
 	var dst = make([]byte, 4)
 
-	var addr = uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
+	var addr = GetEffectiveAddress(context, machInst)
 
 	var size = 1 + (addr & 3)
 
@@ -748,6 +654,6 @@ func _syscall(context *Context, machInst MachInst) {
 func nop(context *Context, machInst MachInst) {
 }
 
-func unknown(context *Context, machInst MachInst) {
-	panic("Unimplemented")
+func GetEffectiveAddress(context *Context, machInst MachInst) uint32 {
+	return uint32(int32(context.Regs.Gpr[machInst.Rs()]) + machInst.Imm())
 }

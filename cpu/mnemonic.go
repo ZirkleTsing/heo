@@ -8,7 +8,6 @@ const (
 	Mnemonic_ADDI = "addi"
 	Mnemonic_ADDIU = "addiu"
 	Mnemonic_ADDU = "addu"
-	Mnemonic_SUB = "sub"
 	Mnemonic_SUBU = "subu"
 	Mnemonic_AND = "and"
 	Mnemonic_ANDI = "andi"
@@ -36,21 +35,12 @@ const (
 	Mnemonic_B = "b"
 	Mnemonic_BAL = "bal"
 	Mnemonic_BEQ = "beq"
-	Mnemonic_BEQL = "beql"
 	Mnemonic_BGEZ = "bgez"
-	Mnemonic_BGEZL = "bgezl"
 	Mnemonic_BGEZAL = "bgezal"
-	Mnemonic_BGEZALL = "bgezall"
 	Mnemonic_BGTZ = "bgtz"
-	Mnemonic_BGTZL = "bgtzl"
 	Mnemonic_BLEZ = "blez"
-	Mnemonic_BLEZL = "blezl"
 	Mnemonic_BLTZ = "bltz"
-	Mnemonic_BLTZL = "bltzl"
-	Mnemonic_BLTZAL = "bltzal"
-	Mnemonic_BLTZALL = "bltzall"
 	Mnemonic_BNE = "bne"
-	Mnemonic_BNEL = "bnel"
 	Mnemonic_J = "j"
 	Mnemonic_JAL = "jal"
 	Mnemonic_JALR = "jalr"
@@ -74,7 +64,6 @@ const (
 	Mnemonic_SWC1 = "swc1"
 	Mnemonic_MFHI = "mfhi"
 	Mnemonic_MFLO = "mflo"
-	Mnemonic_MTHI = "mthi"
 	Mnemonic_MTLO = "mtlo"
 	Mnemonic_CFC1 = "cfc1"
 	Mnemonic_CTC1 = "ctc1"
@@ -104,26 +93,12 @@ const (
 	Mnemonic_CVT_S_L = "cvt_s_l"
 	Mnemonic_CVT_D_W = "cvt_d_w"
 	Mnemonic_CVT_S_W = "cvt_s_w"
-	Mnemonic_CVT_L_D = "cvt_l_d"
 	Mnemonic_CVT_W_D = "cvt_w_d"
 	Mnemonic_CVT_S_D = "cvt_s_d"
-	Mnemonic_CVT_L_S = "cvt_l_s"
 	Mnemonic_CVT_W_S = "cvt_w_s"
 	Mnemonic_CVT_D_S = "cvt_d_s"
-	Mnemonic_BC1FL = "bc1fl"
-	Mnemonic_BC1TL = "bc1tl"
 	Mnemonic_BC1F = "bc1f"
 	Mnemonic_BC1T = "bc1t"
-	Mnemonic_MOVF = "movf"
-	Mnemonic__MOVF = "_movf"
-	Mnemonic_MOVN = "movn"
-	Mnemonic__MOVN = "_movn"
-	Mnemonic__MOVT = "_movt"
-	Mnemonic_MOVZ = "movz"
-	Mnemonic__MOVZ = "_movz"
-	Mnemonic_MUL = "mul"
-	Mnemonic_TRUNC_W = "trunc_w"
-	Mnemonic_UNKNOWN = "unknown"
 )
 
 type MnemonicName string
@@ -164,8 +139,29 @@ type Mnemonic struct {
 	Mask               uint32
 	ExtraBitField      *BitField
 	ExtraBitFieldValue uint32
-	Flags              []StaticInstFlag
+	StaticInstType     StaticInstType
+	StaticInstFlags    []StaticInstFlag
 	Execute            func(context *Context, machInst MachInst)
+}
+
+func NewMnemonic(name MnemonicName, decodeMethod *DecodeMethod, decodeCondition *DecodeCondition, staticInstType StaticInstType, staticInstFlags []StaticInstFlag, execute func(context *Context, machInst MachInst)) *Mnemonic {
+	var mnemonic = &Mnemonic{
+		Name:name,
+		DecodeMethod:decodeMethod,
+		DecodeCondition:decodeCondition,
+		Bits:decodeMethod.Bits,
+		Mask:decodeMethod.Mask,
+		StaticInstType:staticInstType,
+		StaticInstFlags:staticInstFlags,
+		Execute:execute,
+	}
+
+	if decodeCondition != nil {
+		mnemonic.ExtraBitField = decodeCondition.BitField
+		mnemonic.ExtraBitFieldValue = decodeCondition.Value
+	}
+
+	return mnemonic
 }
 
 const (
@@ -173,13 +169,4 @@ const (
 	FMT_DOUBLE = 17
 	FMT_WORD = 20
 	FMT_LONG = 21
-	FMT_PS = 22
-)
-
-const (
-	FMT3_SINGLE = 0
-	FMT3_DOUBLE = 1
-	FMT3_WORD = 4
-	FMT3_LONG = 5
-	FMT3_PS = 6
 )
