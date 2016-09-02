@@ -21,6 +21,7 @@ const (
 )
 
 type Process struct {
+	Kernel                 *Kernel
 	Id                     int32
 	ContextMapping         *ContextMapping
 	Environments           []string
@@ -41,6 +42,7 @@ type Process struct {
 
 func NewProcess(kernel *Kernel, contextMapping *ContextMapping) *Process {
 	var process = &Process{
+		Kernel:kernel,
 		Id:kernel.CurrentProcessId,
 		ContextMapping:contextMapping,
 		StdInFileDescriptor:0,
@@ -157,7 +159,7 @@ func (process *Process) CloseProgram() {
 }
 
 func (process *Process) decode(machInst MachInst) *StaticInst {
-	for _, mnemonic := range Mnemonics {
+	for _, mnemonic := range process.Kernel.Experiment.Processor.Mnemonics {
 		if (uint32(machInst) & mnemonic.Mask) == mnemonic.Bits && (mnemonic.ExtraBitField == nil || machInst.ValueOf(mnemonic.ExtraBitField) == mnemonic.ExtraBitFieldValue) {
 			return NewStaticInst(mnemonic, machInst)
 		}

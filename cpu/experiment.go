@@ -29,8 +29,8 @@ func NewCPUExperiment(cpuConfig *CPUConfig) *CPUExperiment {
 		blockingEventDispatcher:simutil.NewBlockingEventDispatcher(),
 	}
 
-	experiment.Kernel = NewKernel(experiment)
 	experiment.Processor = NewProcessor(experiment)
+	experiment.Kernel = NewKernel(experiment)
 
 	var uncoreConfig = uncore.NewUncoreConfig()
 	uncoreConfig.NumCores = cpuConfig.NumCores
@@ -39,6 +39,8 @@ func NewCPUExperiment(cpuConfig *CPUConfig) *CPUExperiment {
 	var nocConfig = noc.NewNoCConfig(cpuConfig.OutputDirectory, -1, -1, -1, false)
 
 	experiment.MemoryHierarchy = uncore.NewNocMemoryHierarchy(experiment, uncoreConfig, nocConfig)
+
+	experiment.Processor.UpdateContextToThreadAssignments()
 
 	return experiment
 }

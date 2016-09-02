@@ -190,7 +190,7 @@ func xori(context *Context, machInst MachInst) {
 	context.Regs.Gpr[machInst.Rt()] = context.Regs.Gpr[machInst.Rs()] ^ machInst.Uimm()
 }
 
-func absD(context *Context, machInst MachInst) {
+func abs_d(context *Context, machInst MachInst) {
 	var temp float64
 
 	var fs = context.Regs.Fpr.Float64(machInst.Fs())
@@ -204,7 +204,7 @@ func absD(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
-func absS(context *Context, machInst MachInst) {
+func abs_s(context *Context, machInst MachInst) {
 	var temp float32
 
 	var fs = context.Regs.Fpr.Float32(machInst.Fs())
@@ -218,17 +218,17 @@ func absS(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
-func addD(context *Context, machInst MachInst) {
+func add_d(context *Context, machInst MachInst) {
 	var temp = context.Regs.Fpr.Float64(machInst.Fs()) + context.Regs.Fpr.Float64(machInst.Ft())
 	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
-func addS(context *Context, machInst MachInst) {
+func add_s(context *Context, machInst MachInst) {
 	var temp = context.Regs.Fpr.Float32(machInst.Fs()) + context.Regs.Fpr.Float32(machInst.Ft())
 	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
-func cCondD(context *Context, machInst MachInst) {
+func c_cond_d(context *Context, machInst MachInst) {
 	var op1 = context.Regs.Fpr.Float64(machInst.Fs())
 	var op2 = context.Regs.Fpr.Float64(machInst.Ft())
 
@@ -240,7 +240,7 @@ func cCondD(context *Context, machInst MachInst) {
 	cCond(context, machInst, less, equal, unordered)
 }
 
-func cCondS(context *Context, machInst MachInst) {
+func c_cond_s(context *Context, machInst MachInst) {
 	var op1 = context.Regs.Fpr.Float32(machInst.Fs())
 	var op2 = context.Regs.Fpr.Float32(machInst.Ft())
 
@@ -262,17 +262,17 @@ func cCond(context *Context, machInst MachInst, less bool, equal bool, unordered
 	SetFPCC(context, cc, condition)
 }
 
-func cvtDL(context *Context, machInst MachInst) {
+func cvt_d_l(context *Context, machInst MachInst) {
 	var temp = math.Float64frombits(context.Regs.Fpr.Uint64(machInst.Fs()))
 	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
-func cvtDS(context *Context, machInst MachInst) {
+func cvt_d_s(context *Context, machInst MachInst) {
 	var temp = float64(context.Regs.Fpr.Float32(machInst.Fs()))
 	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
-func cvtDW(context *Context, machInst MachInst) {
+func cvt_d_w(context *Context, machInst MachInst) {
 	var temp = math.Float64frombits(uint64(context.Regs.Fpr.Uint32(machInst.Fs())))
 	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
@@ -287,47 +287,47 @@ func cvtLS(context *Context, machInst MachInst) {
 	context.Regs.Fpr.SetUint64(machInst.Fd(), temp)
 }
 
-func cvtSD(context *Context, machInst MachInst) {
+func cvt_s_d(context *Context, machInst MachInst) {
 	var temp = float32(context.Regs.Fpr.Float64(machInst.Fs()))
 	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
-func cvtSL(context *Context, machInst MachInst) {
+func cvt_s_l(context *Context, machInst MachInst) {
 	var temp = math.Float32frombits(uint32(context.Regs.Fpr.Uint64(machInst.Fs())))
 	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
-func cvtSW(context *Context, machInst MachInst) {
+func cvt_s_w(context *Context, machInst MachInst) {
 	var temp = math.Float32frombits(context.Regs.Fpr.Uint32(machInst.Fs()))
 	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
-func cvtWD(context *Context, machInst MachInst) {
+func cvt_w_d(context *Context, machInst MachInst) {
 	var temp = math.Float32bits(float32(context.Regs.Fpr.Float64(machInst.Fs())))
 	context.Regs.Fpr.SetUint32(machInst.Fd(), temp)
 }
 
-func cvtWS(context *Context, machInst MachInst) {
+func cvt_w_s(context *Context, machInst MachInst) {
 	var temp = math.Float32bits(context.Regs.Fpr.Float32(machInst.Fs()))
 	context.Regs.Fpr.SetUint32(machInst.Fd(), temp)
 }
 
-func divD(context *Context, machInst MachInst) {
+func div_d(context *Context, machInst MachInst) {
 	var temp = context.Regs.Fpr.Float64(machInst.Fs()) / context.Regs.Fpr.Float64(machInst.Ft())
 	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
-func divS(context *Context, machInst MachInst) {
+func div_s(context *Context, machInst MachInst) {
 	var temp = context.Regs.Fpr.Float32(machInst.Fs()) / context.Regs.Fpr.Float32(machInst.Ft())
 	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
-func movD(context *Context, machInst MachInst) {
+func mov_d(context *Context, machInst MachInst) {
 	var temp = context.Regs.Fpr.Float64(machInst.Fs())
 	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
-func movS(context *Context, machInst MachInst) {
+func mov_s(context *Context, machInst MachInst) {
 	var temp = context.Regs.Fpr.Float32(machInst.Fs())
 	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
@@ -364,46 +364,46 @@ func mul(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func truncW(context *Context, machInst MachInst) {
+func trunc_w(context *Context, machInst MachInst) {
 	panic("Unimplemented")
 }
 
-func mulD(context *Context, machInst MachInst) {
+func mul_d(context *Context, machInst MachInst) {
 	var temp = context.Regs.Fpr.Float64(machInst.Fs()) * context.Regs.Fpr.Float64(machInst.Ft())
 	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
-func mulS(context *Context, machInst MachInst) {
+func mul_s(context *Context, machInst MachInst) {
 	var temp = context.Regs.Fpr.Float32(machInst.Fs()) * context.Regs.Fpr.Float32(machInst.Ft())
 	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
-func negD(context *Context, machInst MachInst) {
+func neg_d(context *Context, machInst MachInst) {
 	var temp = -context.Regs.Fpr.Float64(machInst.Fs())
 	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
-func negS(context *Context, machInst MachInst) {
+func neg_s(context *Context, machInst MachInst) {
 	var temp = -context.Regs.Fpr.Float32(machInst.Fs())
 	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
-func sqrtD(context *Context, machInst MachInst) {
+func sqrt_d(context *Context, machInst MachInst) {
 	var temp = math.Sqrt(context.Regs.Fpr.Float64(machInst.Fs()))
 	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
-func sqrtS(context *Context, machInst MachInst) {
+func sqrt_s(context *Context, machInst MachInst) {
 	var temp = float32(math.Sqrt(float64(context.Regs.Fpr.Float32(machInst.Fs()))))
 	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
 
-func subD(context *Context, machInst MachInst) {
+func sub_d(context *Context, machInst MachInst) {
 	var temp = context.Regs.Fpr.Float64(machInst.Fs()) - context.Regs.Fpr.Float64(machInst.Ft())
 	context.Regs.Fpr.SetFloat64(machInst.Fd(), temp)
 }
 
-func subS(context *Context, machInst MachInst) {
+func sub_s(context *Context, machInst MachInst) {
 	var temp = context.Regs.Fpr.Float32(machInst.Fs()) - context.Regs.Fpr.Float32(machInst.Ft())
 	context.Regs.Fpr.SetFloat32(machInst.Fd(), temp)
 }
