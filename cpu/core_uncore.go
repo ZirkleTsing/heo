@@ -25,12 +25,6 @@ func (core *BaseCore) L1DController() *uncore.L1DController {
 	return core.Processor().Experiment.MemoryHierarchy.L1DControllers()[core.Num()]
 }
 
-func (baseCore *BaseCore) WarmupOneCycle() {
-	for _, thread := range baseCore.Threads() {
-		thread.WarmupOneCycle()
-	}
-}
-
 func (core *BaseCore) CanIfetch(thread Thread, virtualAddress uint32) bool {
 	var physicalTag = core.L1IController().Cache.GetTag(
 		thread.Context().Process.Memory.GetPhysicalAddress(virtualAddress),
@@ -200,4 +194,10 @@ func (core *BaseCore) Store(thread Thread, virtualAddress uint32, virtualPc uint
 	}
 
 	//TODO
+}
+
+func (baseCore *BaseCore) WarmupOneCycle() {
+	for _, thread := range baseCore.Threads() {
+		thread.WarmupOneCycle()
+	}
 }

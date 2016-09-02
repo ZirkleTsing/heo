@@ -12,8 +12,6 @@ type Core interface {
 	L1IController() *uncore.L1IController
 	L1DController() *uncore.L1DController
 
-	WarmupOneCycle()
-
 	CanIfetch(thread Thread, virtualAddress uint32) bool
 	CanLoad(thread Thread, virtualAddress uint32) bool
 	CanStore(thread Thread, virtualAddress uint32) bool
@@ -21,6 +19,8 @@ type Core interface {
 	Ifetch(thread Thread, virtualAddress uint32, virtualPc uint32, onCompletedCallback func())
 	Load(thread Thread, virtualAddress uint32, virtualPc uint32, onCompletedCallback func())
 	Store(thread Thread, virtualAddress uint32, virtualPc uint32, onCompletedCallback func())
+
+	WarmupOneCycle()
 }
 
 type BaseCore struct {

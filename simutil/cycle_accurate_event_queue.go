@@ -16,6 +16,8 @@ type CycleAccurateEventQueue struct {
 	PerCycleEvents []func()
 	CurrentCycle   int64
 	currentEventId int64
+
+	lastEventDispatchedCycle int64
 }
 
 func (q CycleAccurateEventQueue) Len() int {
@@ -79,10 +81,15 @@ func (q *CycleAccurateEventQueue) AdvanceOneCycle() {
 		}
 
 		event.Action()
+		q.lastEventDispatchedCycle = q.CurrentCycle
 	}
 
 	for _, e := range q.PerCycleEvents {
 		e()
+	}
+
+	if q.CurrentCycle - q.lastEventDispatchedCycle > 1000000 {
+		panic("No events dispatched for 1000000 cycles")
 	}
 
 	q.CurrentCycle++
