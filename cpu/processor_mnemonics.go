@@ -22,9 +22,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_BC1F,
 		NewDecodeMethod(0x45000000, 0xffe30000),
 		nil,
-		StaticInstType_CONDITIONAL,
+		StaticInstType_COND,
 		[]StaticInstFlag{
-			StaticInstFlag_CONDITIONAL,
+			StaticInstFlag_COND,
 		},
 		bc1f,
 	)
@@ -33,9 +33,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_BC1T,
 		NewDecodeMethod(0x45010000, 0xffe30000),
 		nil,
-		StaticInstType_CONDITIONAL,
+		StaticInstType_COND,
 		[]StaticInstFlag{
-			StaticInstFlag_CONDITIONAL,
+			StaticInstFlag_COND,
 		},
 		bc1t,
 	)
@@ -44,9 +44,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_MFC1,
 		NewDecodeMethod(0x44000000, 0xffe007ff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		mfc1,
 	)
@@ -55,9 +55,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_MTC1,
 		NewDecodeMethod(0x44800000, 0xffe007ff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		mtc1,
 	)
@@ -66,9 +66,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_CFC1,
 		NewDecodeMethod(0x44400000, 0xffe007ff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		cfc1,
 	)
@@ -77,9 +77,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_CTC1,
 		NewDecodeMethod(0x44c00000, 0xffe007ff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		ctc1,
 	)
@@ -88,9 +88,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_ABS_S,
 		NewDecodeMethod(0x44000005, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_SINGLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		abs_s,
 	)
@@ -99,9 +99,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_ABS_D,
 		NewDecodeMethod(0x44000005, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		abs_d,
 	)
@@ -110,9 +110,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_ADD,
 		NewDecodeMethod(0x00000020, 0xfc0007ff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		add,
 	)
@@ -121,9 +121,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_ADD_S,
 		NewDecodeMethod(0x44000000, 0xfc00003f),
 		NewDecodeCondition(FMT, FMT_SINGLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		add_s,
 	)
@@ -132,9 +132,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_ADD_D,
 		NewDecodeMethod(0x44000000, 0xfc00003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		add_d,
 	)
@@ -143,10 +143,10 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_ADDI,
 		NewDecodeMethod(0x20000000, 0xfc000000),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
-			StaticInstFlag_IMMEDIATE,
+			StaticInstFlag_INT_COMP,
+			StaticInstFlag_IMM,
 		},
 		addi,
 	)
@@ -155,10 +155,10 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_ADDIU,
 		NewDecodeMethod(0x24000000, 0xfc000000),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
-			StaticInstFlag_IMMEDIATE,
+			StaticInstFlag_INT_COMP,
+			StaticInstFlag_IMM,
 		},
 		addiu,
 	)
@@ -167,9 +167,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_ADDU,
 		NewDecodeMethod(0x00000021, 0xfc0007ff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		addu,
 	)
@@ -178,9 +178,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_AND,
 		NewDecodeMethod(0x00000024, 0xfc0007ff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		and,
 	)
@@ -189,10 +189,10 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_ANDI,
 		NewDecodeMethod(0x30000000, 0xfc000000),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
-			StaticInstFlag_IMMEDIATE,
+			StaticInstFlag_INT_COMP,
+			StaticInstFlag_IMM,
 		},
 		andi,
 	)
@@ -201,10 +201,10 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_B,
 		NewDecodeMethod(0x10000000, 0xffff0000),
 		nil,
-		StaticInstType_UNCONDITIONAL,
+		StaticInstType_UNCOND,
 		[]StaticInstFlag{
-			StaticInstFlag_UNCONDITIONAL,
-			StaticInstFlag_DIRECT_JUMP,
+			StaticInstFlag_UNCOND,
+			StaticInstFlag_DIRECT_JMP,
 		},
 		b,
 	)
@@ -213,10 +213,10 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_BAL,
 		NewDecodeMethod(0x04110000, 0xffff0000),
 		nil,
-		StaticInstType_UNCONDITIONAL,
+		StaticInstType_UNCOND,
 		[]StaticInstFlag{
-			StaticInstFlag_UNCONDITIONAL,
-			StaticInstFlag_DIRECT_JUMP,
+			StaticInstFlag_UNCOND,
+			StaticInstFlag_DIRECT_JMP,
 		},
 		bal,
 	)
@@ -225,10 +225,10 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_BEQ,
 		NewDecodeMethod(0x10000000, 0xfc000000),
 		nil,
-		StaticInstType_CONDITIONAL,
+		StaticInstType_COND,
 		[]StaticInstFlag{
-			StaticInstFlag_CONDITIONAL,
-			StaticInstFlag_DIRECT_JUMP,
+			StaticInstFlag_COND,
+			StaticInstFlag_DIRECT_JMP,
 		},
 		beq,
 	)
@@ -237,10 +237,10 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_BGEZ,
 		NewDecodeMethod(0x04010000, 0xfc1f0000),
 		nil,
-		StaticInstType_CONDITIONAL,
+		StaticInstType_COND,
 		[]StaticInstFlag{
-			StaticInstFlag_CONDITIONAL,
-			StaticInstFlag_DIRECT_JUMP,
+			StaticInstFlag_COND,
+			StaticInstFlag_DIRECT_JMP,
 		},
 		bgez,
 	)
@@ -249,11 +249,11 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_BGEZAL,
 		NewDecodeMethod(0x04110000, 0xfc1f0000),
 		nil,
-		StaticInstType_FUNCTION_CALL,
+		StaticInstType_FUNC_CALL,
 		[]StaticInstFlag{
-			StaticInstFlag_CONDITIONAL,
-			StaticInstFlag_DIRECT_JUMP,
-			StaticInstFlag_FUNCTION_CALL,
+			StaticInstFlag_COND,
+			StaticInstFlag_DIRECT_JMP,
+			StaticInstFlag_FUNC_CALL,
 		},
 		bgezal,
 	)
@@ -262,10 +262,10 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_BGTZ,
 		NewDecodeMethod(0x1c000000, 0xfc1f0000),
 		nil,
-		StaticInstType_CONDITIONAL,
+		StaticInstType_COND,
 		[]StaticInstFlag{
-			StaticInstFlag_CONDITIONAL,
-			StaticInstFlag_DIRECT_JUMP,
+			StaticInstFlag_COND,
+			StaticInstFlag_DIRECT_JMP,
 		},
 		bgtz,
 	)
@@ -274,10 +274,10 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_BLEZ,
 		NewDecodeMethod(0x18000000, 0xfc1f0000),
 		nil,
-		StaticInstType_CONDITIONAL,
+		StaticInstType_COND,
 		[]StaticInstFlag{
-			StaticInstFlag_CONDITIONAL,
-			StaticInstFlag_DIRECT_JUMP,
+			StaticInstFlag_COND,
+			StaticInstFlag_DIRECT_JMP,
 		},
 		blez,
 	)
@@ -286,10 +286,10 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_BLTZ,
 		NewDecodeMethod(0x04000000, 0xfc1f0000),
 		nil,
-		StaticInstType_CONDITIONAL,
+		StaticInstType_COND,
 		[]StaticInstFlag{
-			StaticInstFlag_CONDITIONAL,
-			StaticInstFlag_DIRECT_JUMP,
+			StaticInstFlag_COND,
+			StaticInstFlag_DIRECT_JMP,
 		},
 		bltz,
 	)
@@ -298,10 +298,10 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_BNE,
 		NewDecodeMethod(0x14000000, 0xfc000000),
 		nil,
-		StaticInstType_CONDITIONAL,
+		StaticInstType_COND,
 		[]StaticInstFlag{
-			StaticInstFlag_CONDITIONAL,
-			StaticInstFlag_DIRECT_JUMP,
+			StaticInstFlag_COND,
+			StaticInstFlag_DIRECT_JMP,
 		},
 		bne,
 	)
@@ -321,9 +321,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_C_COND_D,
 		NewDecodeMethod(0x44000030, 0xfc0000f0),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		c_cond_d,
 	)
@@ -332,9 +332,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_C_COND_S,
 		NewDecodeMethod(0x44000030, 0xfc0000f0),
 		NewDecodeCondition(FMT, FMT_SINGLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		c_cond_s,
 	)
@@ -343,9 +343,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_CVT_D_S,
 		NewDecodeMethod(0x44000021, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_SINGLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		cvt_d_s,
 	)
@@ -354,9 +354,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_CVT_D_W,
 		NewDecodeMethod(0x44000021, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_WORD),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		cvt_d_w,
 	)
@@ -365,9 +365,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_CVT_D_L,
 		NewDecodeMethod(0x44000021, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_LONG),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		cvt_d_l,
 	)
@@ -376,9 +376,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_CVT_S_D,
 		NewDecodeMethod(0x44000020, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		cvt_s_d,
 	)
@@ -387,9 +387,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_CVT_S_W,
 		NewDecodeMethod(0x44000020, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_WORD),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		cvt_s_w,
 	)
@@ -398,9 +398,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_CVT_S_L,
 		NewDecodeMethod(0x44000020, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_LONG),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		cvt_s_l,
 	)
@@ -409,9 +409,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_CVT_W_S,
 		NewDecodeMethod(0x44000024, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_SINGLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		cvt_w_s,
 	)
@@ -420,9 +420,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_CVT_W_D,
 		NewDecodeMethod(0x44000024, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		cvt_w_d,
 	)
@@ -431,9 +431,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_DIV,
 		NewDecodeMethod(0x0000001a, 0xfc00ffff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		div,
 	)
@@ -442,9 +442,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_DIV_S,
 		NewDecodeMethod(0x44000003, 0xfc00003f),
 		NewDecodeCondition(FMT, FMT_SINGLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		div_s,
 	)
@@ -453,9 +453,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_DIV_D,
 		NewDecodeMethod(0x44000003, 0xfc00003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		div_d,
 	)
@@ -464,9 +464,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_DIVU,
 		NewDecodeMethod(0x0000001b, 0xfc00003f),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		divu,
 	)
@@ -475,10 +475,10 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_J,
 		NewDecodeMethod(0x08000000, 0xfc000000),
 		nil,
-		StaticInstType_UNCONDITIONAL,
+		StaticInstType_UNCOND,
 		[]StaticInstFlag{
-			StaticInstFlag_UNCONDITIONAL,
-			StaticInstFlag_DIRECT_JUMP,
+			StaticInstFlag_UNCOND,
+			StaticInstFlag_DIRECT_JMP,
 		},
 		j,
 	)
@@ -487,11 +487,11 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_JAL,
 		NewDecodeMethod(0x0c000000, 0xfc000000),
 		nil,
-		StaticInstType_FUNCTION_CALL,
+		StaticInstType_FUNC_CALL,
 		[]StaticInstFlag{
-			StaticInstFlag_UNCONDITIONAL,
-			StaticInstFlag_DIRECT_JUMP,
-			StaticInstFlag_FUNCTION_CALL,
+			StaticInstFlag_UNCOND,
+			StaticInstFlag_DIRECT_JMP,
+			StaticInstFlag_FUNC_CALL,
 		},
 		jal,
 	)
@@ -500,11 +500,11 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_JALR,
 		NewDecodeMethod(0x00000009, 0xfc00003f),
 		nil,
-		StaticInstType_FUNCTION_CALL,
+		StaticInstType_FUNC_CALL,
 		[]StaticInstFlag{
-			StaticInstFlag_UNCONDITIONAL,
-			StaticInstFlag_INDIRECT_JUMP,
-			StaticInstFlag_FUNCTION_CALL,
+			StaticInstFlag_UNCOND,
+			StaticInstFlag_INDIRECT_JMP,
+			StaticInstFlag_FUNC_CALL,
 		},
 		jalr,
 	)
@@ -513,11 +513,11 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_JR,
 		NewDecodeMethod(0x00000008, 0xfc00003f),
 		nil,
-		StaticInstType_FUNCTION_RETURN,
+		StaticInstType_FUNC_RET,
 		[]StaticInstFlag{
-			StaticInstFlag_UNCONDITIONAL,
-			StaticInstFlag_INDIRECT_JUMP,
-			StaticInstFlag_FUNCTION_RETURN,
+			StaticInstFlag_UNCOND,
+			StaticInstFlag_INDIRECT_JMP,
+			StaticInstFlag_FUNC_RET,
 		},
 		jr,
 	)
@@ -526,9 +526,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_LB,
 		NewDecodeMethod(0x80000000, 0xfc000000),
 		nil,
-		StaticInstType_LOAD,
+		StaticInstType_LD,
 		[]StaticInstFlag{
-			StaticInstFlag_LOAD,
+			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
 		lb,
@@ -538,9 +538,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_LBU,
 		NewDecodeMethod(0x90000000, 0xfc000000),
 		nil,
-		StaticInstType_LOAD,
+		StaticInstType_LD,
 		[]StaticInstFlag{
-			StaticInstFlag_LOAD,
+			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
 		lbu,
@@ -550,9 +550,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_LDC1,
 		NewDecodeMethod(0xd4000000, 0xfc000000),
 		nil,
-		StaticInstType_LOAD,
+		StaticInstType_LD,
 		[]StaticInstFlag{
-			StaticInstFlag_LOAD,
+			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
 		ldc1,
@@ -562,9 +562,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_LH,
 		NewDecodeMethod(0x84000000, 0xfc000000),
 		nil,
-		StaticInstType_LOAD,
+		StaticInstType_LD,
 		[]StaticInstFlag{
-			StaticInstFlag_LOAD,
+			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
 		lh,
@@ -574,9 +574,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_LHU,
 		NewDecodeMethod(0x94000000, 0xfc000000),
 		nil,
-		StaticInstType_LOAD,
+		StaticInstType_LD,
 		[]StaticInstFlag{
-			StaticInstFlag_LOAD,
+			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
 		lhu,
@@ -586,9 +586,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_LL,
 		NewDecodeMethod(0xc0000000, 0xfc000000),
 		nil,
-		StaticInstType_LOAD,
+		StaticInstType_LD,
 		[]StaticInstFlag{
-			StaticInstFlag_LOAD,
+			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
 		ll,
@@ -598,9 +598,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_LUI,
 		NewDecodeMethod(0x3c000000, 0xffe00000),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		lui,
 	)
@@ -609,9 +609,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_LW,
 		NewDecodeMethod(0x8c000000, 0xfc000000),
 		nil,
-		StaticInstType_LOAD,
+		StaticInstType_LD,
 		[]StaticInstFlag{
-			StaticInstFlag_LOAD,
+			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
 		lw,
@@ -621,9 +621,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_LWC1,
 		NewDecodeMethod(0xc4000000, 0xfc000000),
 		nil,
-		StaticInstType_LOAD,
+		StaticInstType_LD,
 		[]StaticInstFlag{
-			StaticInstFlag_LOAD,
+			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
 		lwc1,
@@ -633,9 +633,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_LWL,
 		NewDecodeMethod(0x88000000, 0xfc000000),
 		nil,
-		StaticInstType_LOAD,
+		StaticInstType_LD,
 		[]StaticInstFlag{
-			StaticInstFlag_LOAD,
+			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
 		lwl,
@@ -645,9 +645,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_LWR,
 		NewDecodeMethod(0x98000000, 0xfc000000),
 		nil,
-		StaticInstType_LOAD,
+		StaticInstType_LD,
 		[]StaticInstFlag{
-			StaticInstFlag_LOAD,
+			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
 		lwr,
@@ -657,9 +657,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_MADD,
 		NewDecodeMethod(0x70000000, 0xfc00ffff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		madd,
 	)
@@ -668,9 +668,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_MFHI,
 		NewDecodeMethod(0x00000010, 0xffff07ff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		mfhi,
 	)
@@ -679,9 +679,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_MFLO,
 		NewDecodeMethod(0x00000012, 0xffff07ff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		mflo,
 	)
@@ -690,9 +690,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_MOV_S,
 		NewDecodeMethod(0x44000006, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_SINGLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		mov_s,
 	)
@@ -701,9 +701,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_MOV_D,
 		NewDecodeMethod(0x44000006, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		mov_d,
 	)
@@ -712,9 +712,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_MSUB,
 		NewDecodeMethod(0x70000004, 0xfc00ffff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		msub,
 	)
@@ -723,9 +723,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_MTLO,
 		NewDecodeMethod(0x00000013, 0xfc1fffff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		mtlo,
 	)
@@ -734,9 +734,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_MUL_S,
 		NewDecodeMethod(0x44000002, 0xfc00003f),
 		NewDecodeCondition(FMT, FMT_SINGLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		mul_s,
 	)
@@ -745,9 +745,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_MUL_D,
 		NewDecodeMethod(0x44000002, 0xfc00003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		mul_d,
 	)
@@ -756,9 +756,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_MULT,
 		NewDecodeMethod(0x00000018, 0xfc00003f),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		mult,
 	)
@@ -767,9 +767,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_MULTU,
 		NewDecodeMethod(0x00000019, 0xfc00003f),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		multu,
 	)
@@ -778,9 +778,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_NEG_S,
 		NewDecodeMethod(0x44000007, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_SINGLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		neg_s,
 	)
@@ -789,9 +789,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_NEG_D,
 		NewDecodeMethod(0x44000007, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		neg_d,
 	)
@@ -800,9 +800,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_NOR,
 		NewDecodeMethod(0x00000027, 0xfc00003f),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		nor,
 	)
@@ -811,9 +811,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_OR,
 		NewDecodeMethod(0x00000025, 0xfc0007ff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		or,
 	)
@@ -822,10 +822,10 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_ORI,
 		NewDecodeMethod(0x34000000, 0xfc000000),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
-			StaticInstFlag_IMMEDIATE,
+			StaticInstFlag_INT_COMP,
+			StaticInstFlag_IMM,
 		},
 		ori,
 	)
@@ -834,9 +834,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SB,
 		NewDecodeMethod(0xa0000000, 0xfc000000),
 		nil,
-		StaticInstType_STORE,
+		StaticInstType_ST,
 		[]StaticInstFlag{
-			StaticInstFlag_STORE,
+			StaticInstFlag_ST,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
 		sb,
@@ -846,9 +846,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SC,
 		NewDecodeMethod(0xe0000000, 0xfc000000),
 		nil,
-		StaticInstType_STORE,
+		StaticInstType_ST,
 		[]StaticInstFlag{
-			StaticInstFlag_STORE,
+			StaticInstFlag_ST,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
 		sc,
@@ -858,9 +858,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SDC1,
 		NewDecodeMethod(0xf4000000, 0xfc000000),
 		nil,
-		StaticInstType_STORE,
+		StaticInstType_ST,
 		[]StaticInstFlag{
-			StaticInstFlag_STORE,
+			StaticInstFlag_ST,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
 		sdc1,
@@ -870,9 +870,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SH,
 		NewDecodeMethod(0xa4000000, 0xfc000000),
 		nil,
-		StaticInstType_STORE,
+		StaticInstType_ST,
 		[]StaticInstFlag{
-			StaticInstFlag_STORE,
+			StaticInstFlag_ST,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
 		sh,
@@ -882,9 +882,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SLL,
 		NewDecodeMethod(0x00000000, 0xffe0003f),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		sll,
 	)
@@ -893,9 +893,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SLLV,
 		NewDecodeMethod(0x00000004, 0xfc0007ff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		sllv,
 	)
@@ -904,9 +904,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SLT,
 		NewDecodeMethod(0x0000002a, 0xfc00003f),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		slt,
 	)
@@ -915,10 +915,10 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SLTI,
 		NewDecodeMethod(0x28000000, 0xfc000000),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
-			StaticInstFlag_IMMEDIATE,
+			StaticInstFlag_INT_COMP,
+			StaticInstFlag_IMM,
 		},
 		slti,
 	)
@@ -927,10 +927,10 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SLTIU,
 		NewDecodeMethod(0x2c000000, 0xfc000000),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
-			StaticInstFlag_IMMEDIATE,
+			StaticInstFlag_INT_COMP,
+			StaticInstFlag_IMM,
 		},
 		sltiu,
 	)
@@ -939,9 +939,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SLTU,
 		NewDecodeMethod(0x0000002b, 0xfc0007ff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		sltu,
 	)
@@ -950,9 +950,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SQRT_S,
 		NewDecodeMethod(0x44000004, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_SINGLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		sqrt_s,
 	)
@@ -961,9 +961,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SQRT_D,
 		NewDecodeMethod(0x44000004, 0xfc1f003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		sqrt_d,
 	)
@@ -972,9 +972,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SRA,
 		NewDecodeMethod(0x00000003, 0xffe0003f),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		sra,
 	)
@@ -983,9 +983,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SRAV,
 		NewDecodeMethod(0x00000007, 0xfc0007ff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		srav,
 	)
@@ -994,9 +994,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SRL,
 		NewDecodeMethod(0x00000002, 0xffe0003f),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		srl,
 	)
@@ -1005,9 +1005,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SRLV,
 		NewDecodeMethod(0x00000006, 0xfc0007ff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		srlv,
 	)
@@ -1016,9 +1016,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SUB_S,
 		NewDecodeMethod(0x44000001, 0xfc00003f),
 		NewDecodeCondition(FMT, FMT_SINGLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		sub_s,
 	)
@@ -1027,9 +1027,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SUB_D,
 		NewDecodeMethod(0x44000001, 0xfc00003f),
 		NewDecodeCondition(FMT, FMT_DOUBLE),
-		StaticInstType_FLOAT_COMPUTATION,
+		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_FLOAT_COMPUTATION,
+			StaticInstFlag_FP_COMP,
 		},
 		sub_d,
 	)
@@ -1038,9 +1038,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SUBU,
 		NewDecodeMethod(0x00000023, 0xfc0007ff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		subu,
 	)
@@ -1049,9 +1049,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SW,
 		NewDecodeMethod(0xac000000, 0xfc000000),
 		nil,
-		StaticInstType_STORE,
+		StaticInstType_ST,
 		[]StaticInstFlag{
-			StaticInstFlag_STORE,
+			StaticInstFlag_ST,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
 		sw,
@@ -1061,9 +1061,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SWC1,
 		NewDecodeMethod(0xe4000000, 0xfc000000),
 		nil,
-		StaticInstType_STORE,
+		StaticInstType_ST,
 		[]StaticInstFlag{
-			StaticInstFlag_STORE,
+			StaticInstFlag_ST,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
 		swc1,
@@ -1073,9 +1073,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SWL,
 		NewDecodeMethod(0xa8000000, 0xfc000000),
 		nil,
-		StaticInstType_STORE,
+		StaticInstType_ST,
 		[]StaticInstFlag{
-			StaticInstFlag_STORE,
+			StaticInstFlag_ST,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
 		swl,
@@ -1085,9 +1085,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_SWR,
 		NewDecodeMethod(0xb8000000, 0xfc000000),
 		nil,
-		StaticInstType_STORE,
+		StaticInstType_ST,
 		[]StaticInstFlag{
-			StaticInstFlag_STORE,
+			StaticInstFlag_ST,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
 		swr,
@@ -1108,9 +1108,9 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_XOR,
 		NewDecodeMethod(0x00000026, 0xfc0007ff),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
+			StaticInstFlag_INT_COMP,
 		},
 		xor,
 	)
@@ -1119,10 +1119,10 @@ func (processor *Processor) addMnemonics() {
 		Mnemonic_XORI,
 		NewDecodeMethod(0x38000000, 0xfc000000),
 		nil,
-		StaticInstType_INTEGER_COMPUTATION,
+		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
-			StaticInstFlag_INTEGER_COMPUTATION,
-			StaticInstFlag_IMMEDIATE,
+			StaticInstFlag_INT_COMP,
+			StaticInstFlag_IMM,
 		},
 		xori,
 	)

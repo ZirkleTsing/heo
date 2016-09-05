@@ -74,14 +74,14 @@ func (thread *MemoryHierarchyThread) WarmupOneCycle() {
 
 		var effectiveAddress = thread.NextDynamicInstInWarmup.EffectiveAddress
 
-		if thread.NextDynamicInstInWarmup.StaticInst.Mnemonic.StaticInstType == StaticInstType_LOAD {
+		if thread.NextDynamicInstInWarmup.StaticInst.Mnemonic.StaticInstType == StaticInstType_LD {
 			if thread.Core().CanLoad(thread, uint32(effectiveAddress)) {
 				thread.Core().Load(thread, uint32(effectiveAddress), pc, func() {
 				})
 
 				thread.NextDynamicInstInWarmup = nil
 			}
-		} else if thread.NextDynamicInstInWarmup.StaticInst.Mnemonic.StaticInstType == StaticInstType_STORE {
+		} else if thread.NextDynamicInstInWarmup.StaticInst.Mnemonic.StaticInstType == StaticInstType_ST {
 			if thread.Core().CanStore(thread, uint32(effectiveAddress)) {
 				thread.Core().Store(thread, uint32(effectiveAddress), pc, func() {
 				})

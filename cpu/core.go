@@ -7,7 +7,17 @@ type Core interface {
 	Threads() []Thread
 	AddThread(thread Thread)
 	Num() int32
+
 	FastForwardOneCycle()
+
+	FUPool() *FUPool
+	WaitingInstructionQueue() []GeneralReorderBufferEntry
+	ReadyInstructionQueue() []GeneralReorderBufferEntry
+	ReadyLoadQueue() []GeneralReorderBufferEntry
+	WaitingStoreQueue() []GeneralReorderBufferEntry
+	ReadyStoreQueue() []GeneralReorderBufferEntry
+	OoOEventQueue() []GeneralReorderBufferEntry
+	SetOoOEventQueue(oooEventQueue []GeneralReorderBufferEntry)
 
 	L1IController() *uncore.L1IController
 	L1DController() *uncore.L1DController
@@ -24,9 +34,9 @@ type Core interface {
 }
 
 type BaseCore struct {
-	processor *Processor
-	threads   []Thread
-	num       int32
+	processor               *Processor
+	threads                 []Thread
+	num                     int32
 }
 
 func NewBaseCore(processor *Processor, num int32) *BaseCore {

@@ -12,7 +12,7 @@ func main() {
 
 	config.NumCores = 2
 	config.NumThreadsPerCore = 2
-	config.MaxDynamicInsts = -1
+	config.MaxDynamicInsts = 100000
 
 	var experiment = cpu.NewCPUExperiment(config)
 

@@ -14,8 +14,8 @@ func NewDynamicInst(thread Thread, pc uint32, staticInst *StaticInst) *DynamicIn
 		StaticInst:staticInst,
 	}
 
-	if staticInst.Mnemonic.StaticInstType == StaticInstType_LOAD ||
-		staticInst.Mnemonic.StaticInstType == StaticInstType_STORE {
+	if staticInst.Mnemonic.StaticInstType == StaticInstType_LD ||
+		staticInst.Mnemonic.StaticInstType == StaticInstType_ST {
 		dynamicInst.EffectiveAddress = int32(GetEffectiveAddress(thread.Context(), staticInst.MachInst))
 	} else {
 		dynamicInst.EffectiveAddress = -1

@@ -16,7 +16,7 @@ func NewProcessor(experiment *CPUExperiment) *Processor {
 	processor.addMnemonics()
 
 	for i := int32(0); i < experiment.CPUConfig.NumCores; i++ {
-		var core = NewMemoryHierarchyCore(processor, i)
+		var core = NewOoOCore(processor, i)
 
 		for j := int32(0); j < experiment.CPUConfig.NumThreadsPerCore; j++ {
 			var thread = NewMemoryHierarchyThread(core, j)
