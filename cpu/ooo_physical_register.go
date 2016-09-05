@@ -27,7 +27,23 @@ func NewPhysicalRegister(physicalRegisterFile *PhysicalRegisterFile) *PhysicalRe
 	return physicalRegister
 }
 
+func (physicalRegister *PhysicalRegister) Reserve(dependency uint32) {
+	if physicalRegister.State != PhysicalRegisterState_AVAILABLE {
+		panic("Impossible")
+	}
+
+	physicalRegister.Dependency = int32(dependency)
+
+	physicalRegister.State = PhysicalRegisterState_ARCHITECTURAL_REGISTER
+
+	physicalRegister.PhysicalRegisterFile.NumFreePhysicalRegisters--
+}
+
 func (physicalRegister *PhysicalRegister) Allocate(dependency uint32) {
+	if physicalRegister.State != PhysicalRegisterState_AVAILABLE {
+		panic("Impossible")
+	}
+
 	physicalRegister.Dependency = int32(dependency)
 
 	physicalRegister.State = PhysicalRegisterState_RENAME_BUFFER_INVALID
@@ -36,6 +52,10 @@ func (physicalRegister *PhysicalRegister) Allocate(dependency uint32) {
 }
 
 func (physicalRegister *PhysicalRegister) Writeback() {
+	if physicalRegister.State != PhysicalRegisterState_RENAME_BUFFER_INVALID {
+		panic("Impossible")
+	}
+
 	physicalRegister.State = PhysicalRegisterState_RENAME_BUFFER_VALID
 
 	for _, effectiveAddressComputationOperandDependent := range physicalRegister.EffectiveAddressComputationOperandDependents {
@@ -56,10 +76,19 @@ func (physicalRegister *PhysicalRegister) Writeback() {
 }
 
 func (physicalRegister *PhysicalRegister) Commit() {
+	if physicalRegister.State != PhysicalRegisterState_RENAME_BUFFER_VALID {
+		panic("Impossible")
+	}
+
 	physicalRegister.State = PhysicalRegisterState_ARCHITECTURAL_REGISTER
 }
 
 func (physicalRegister *PhysicalRegister) Recover() {
+	if physicalRegister.State != PhysicalRegisterState_RENAME_BUFFER_INVALID &&
+		physicalRegister.State != PhysicalRegisterState_RENAME_BUFFER_VALID {
+		panic("Impossible")
+	}
+
 	physicalRegister.Dependency = -1
 
 	physicalRegister.State = PhysicalRegisterState_AVAILABLE
@@ -68,6 +97,10 @@ func (physicalRegister *PhysicalRegister) Recover() {
 }
 
 func (physicalRegister *PhysicalRegister) Reclaim() {
+	if physicalRegister.State != PhysicalRegisterState_ARCHITECTURAL_REGISTER {
+		panic("Impossible")
+	}
+
 	physicalRegister.Dependency = -1
 
 	physicalRegister.State = PhysicalRegisterState_AVAILABLE
@@ -81,24 +114,21 @@ func (physicalRegister *PhysicalRegister) Ready() bool {
 }
 
 type PhysicalRegisterFile struct {
-	Name                     string
 	PhysicalRegisters        []*PhysicalRegister
 	NumFreePhysicalRegisters uint32
 }
 
-func NewPhysicalRegisterFile(name string, capacity uint32) *PhysicalRegisterFile {
+func NewPhysicalRegisterFile(size uint32) *PhysicalRegisterFile {
 	var physicalRegisterFile = &PhysicalRegisterFile{
-		Name:name,
+		NumFreePhysicalRegisters:size,
 	}
 
-	for i := uint32(0); i < capacity; i++ {
+	for i := uint32(0); i < size; i++ {
 		physicalRegisterFile.PhysicalRegisters = append(
 			physicalRegisterFile.PhysicalRegisters,
 			NewPhysicalRegister(physicalRegisterFile),
 		)
 	}
-
-	physicalRegisterFile.NumFreePhysicalRegisters = capacity
 
 	return physicalRegisterFile
 }

@@ -19,7 +19,7 @@ func NewProcessor(experiment *CPUExperiment) *Processor {
 		var core = NewOoOCore(processor, i)
 
 		for j := int32(0); j < experiment.CPUConfig.NumThreadsPerCore; j++ {
-			var thread = NewMemoryHierarchyThread(core, j)
+			var thread = NewOoOThread(core, j)
 			core.AddThread(thread)
 		}
 

@@ -1,22 +1,26 @@
 package cpu
 
 type PipelineBuffer struct {
-	Capacity uint32
-	Entries  []interface{}
+	Size    uint32
+	Entries []interface{}
 }
 
-func NewPipelineBuffer(capacity uint32) *PipelineBuffer {
+func NewPipelineBuffer(size uint32) *PipelineBuffer {
 	var pipelineBuffer = &PipelineBuffer{
-		Capacity:capacity,
+		Size:size,
 	}
 
 	return pipelineBuffer
 }
 
+func (pipelineBuffer *PipelineBuffer) Count() uint32 {
+	return uint32(len(pipelineBuffer.Entries))
+}
+
 func (pipelineBuffer *PipelineBuffer) Full() bool {
-	return uint32(len(pipelineBuffer.Entries)) >= pipelineBuffer.Capacity
+	return pipelineBuffer.Count() >= pipelineBuffer.Size
 }
 
 func (pipelineBuffer *PipelineBuffer) Empty() bool {
-	return len(pipelineBuffer.Entries) == 0
+	return pipelineBuffer.Count() == 0
 }

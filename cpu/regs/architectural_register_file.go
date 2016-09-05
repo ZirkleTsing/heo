@@ -17,7 +17,7 @@ var GPR_NAMES = []string{
 const (
 	NUM_INT_REGISTERS = 32
 
-	NUM_FLOAT_REGISTERS = 32
+	NUM_FP_REGISTERS = 32
 
 	NUM_MISC_REGISTERS = 3
 
@@ -85,11 +85,11 @@ const (
 
 	REGISTER_RA = 31
 
-	REGISTER_MISC_LO = 0
+	REGISTER_LO = 0
 
-	REGISTER_MISC_HI = 1
+	REGISTER_HI = 1
 
-	REGISTER_MISC_FCSR = 2
+	REGISTER_FCSR = 2
 )
 
 type ArchitecturalRegisterFile struct {
