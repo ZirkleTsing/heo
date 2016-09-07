@@ -20,66 +20,66 @@ type BaseController struct {
 }
 
 func NewBaseController(memoryHierarchy MemoryHierarchy, name string, deviceType MemoryDeviceType) *BaseController {
-	var baseController = &BaseController{
+	var controller = &BaseController{
 		BaseMemoryDevice:NewBaseMemoryDevice(memoryHierarchy, name, deviceType),
 	}
 
-	return baseController
+	return controller
 }
 
-func (baseController *BaseController) HitLatency() uint32 {
+func (controller *BaseController) HitLatency() uint32 {
 	panic("Impossible")
 }
 
-func (baseController *BaseController) ReceiveMessage(message CoherenceMessage) {
+func (controller *BaseController) ReceiveMessage(message CoherenceMessage) {
 	panic("Impossible")
 }
 
-func (baseController *BaseController) TransferMessage(to Controller, size uint32, message CoherenceMessage) {
-	baseController.MemoryHierarchy().TransferMessage(baseController, to, size, message)
+func (controller *BaseController) TransferMessage(to Controller, size uint32, message CoherenceMessage) {
+	controller.MemoryHierarchy().TransferMessage(controller, to, size, message)
 }
 
-func (baseController *BaseController) UpdateStats(write bool, hitInCache bool) {
+func (controller *BaseController) UpdateStats(write bool, hitInCache bool) {
 	if write {
 		if hitInCache {
-			baseController.NumDownwardWriteHits++
+			controller.NumDownwardWriteHits++
 		} else {
-			baseController.NumDownwardWriteMisses++
+			controller.NumDownwardWriteMisses++
 		}
 	} else {
 		if hitInCache {
-			baseController.NumDownwardReadHits++
+			controller.NumDownwardReadHits++
 		} else {
-			baseController.NumDownwardReadMisses++
+			controller.NumDownwardReadMisses++
 		}
 	}
 }
 
-func (baseController *BaseController) NumDownwardHits() int32 {
-	return baseController.NumDownwardReadHits + baseController.NumDownwardWriteHits
+func (controller *BaseController) NumDownwardHits() int32 {
+	return controller.NumDownwardReadHits + controller.NumDownwardWriteHits
 }
 
-func (baseController *BaseController) NumDownwardMisses() int32 {
-	return baseController.NumDownwardReadMisses + baseController.NumDownwardWriteMisses
+func (controller *BaseController) NumDownwardMisses() int32 {
+	return controller.NumDownwardReadMisses + controller.NumDownwardWriteMisses
 }
 
-func (baseController *BaseController) NumDownwardAccesses() int32 {
-	return baseController.NumDownwardHits() + baseController.NumDownwardMisses()
+func (controller *BaseController) NumDownwardAccesses() int32 {
+	return controller.NumDownwardHits() + controller.NumDownwardMisses()
 }
 
-func (baseController *BaseController) HitRatio() float32 {
-	if baseController.NumDownwardAccesses() == 0 {
+func (controller *BaseController) HitRatio() float32 {
+	if controller.NumDownwardAccesses() == 0 {
 		return 0
 	} else {
-		return float32(baseController.NumDownwardHits()) / float32(baseController.NumDownwardAccesses())
+		return float32(controller.NumDownwardHits()) / float32(controller.NumDownwardAccesses())
 	}
 }
 
-func (baseController *BaseController) Next() MemoryDevice {
-	return baseController.next
+func (controller *BaseController) Next() MemoryDevice {
+	return controller.next
 }
 
-func (baseController *BaseController) SetNext(next MemoryDevice) {
-	baseController.next = next
+func (controller *BaseController) SetNext(next MemoryDevice) {
+	controller.next = next
 }
 

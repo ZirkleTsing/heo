@@ -64,64 +64,64 @@ type BaseMemoryHierarchy struct {
 }
 
 func NewBaseMemoryHierarchy(driver UncoreDriver, config *UncoreConfig, nocConfig *noc.NoCConfig) *BaseMemoryHierarchy {
-	var baseMemoryHierarchy = &BaseMemoryHierarchy{
+	var memoryHierarchy = &BaseMemoryHierarchy{
 		driver:driver,
 		config:config,
 		DevicesToNodeIds:make(map[interface{}]uint32),
 	}
 
-	baseMemoryHierarchy.memoryController = NewMemoryController(baseMemoryHierarchy)
+	memoryHierarchy.memoryController = NewMemoryController(memoryHierarchy)
 
-	baseMemoryHierarchy.l2Controller = NewDirectoryController(baseMemoryHierarchy, "l2")
-	baseMemoryHierarchy.l2Controller.SetNext(baseMemoryHierarchy.memoryController)
+	memoryHierarchy.l2Controller = NewDirectoryController(memoryHierarchy, "l2")
+	memoryHierarchy.l2Controller.SetNext(memoryHierarchy.memoryController)
 
 	for i := int32(0); i < config.NumCores; i++ {
-		var l1IController = NewL1IController(baseMemoryHierarchy, fmt.Sprintf("c%d/icache", i))
-		l1IController.SetNext(baseMemoryHierarchy.l2Controller)
-		baseMemoryHierarchy.l1IControllers = append(baseMemoryHierarchy.l1IControllers, l1IController)
+		var l1IController = NewL1IController(memoryHierarchy, fmt.Sprintf("c%d/icache", i))
+		l1IController.SetNext(memoryHierarchy.l2Controller)
+		memoryHierarchy.l1IControllers = append(memoryHierarchy.l1IControllers, l1IController)
 
-		var l1DController = NewL1DController(baseMemoryHierarchy, fmt.Sprintf("c%d/dcache", i))
-		l1DController.SetNext(baseMemoryHierarchy.l2Controller)
-		baseMemoryHierarchy.l1DControllers = append(baseMemoryHierarchy.l1DControllers, l1DController)
+		var l1DController = NewL1DController(memoryHierarchy, fmt.Sprintf("c%d/dcache", i))
+		l1DController.SetNext(memoryHierarchy.l2Controller)
+		memoryHierarchy.l1DControllers = append(memoryHierarchy.l1DControllers, l1DController)
 
 		for j := int32(0); j < config.NumThreadsPerCore; j++ {
-			baseMemoryHierarchy.iTlbs = append(
-				baseMemoryHierarchy.iTlbs,
+			memoryHierarchy.iTlbs = append(
+				memoryHierarchy.iTlbs,
 				NewTranslationLookasideBuffer(
-					baseMemoryHierarchy,
+					memoryHierarchy,
 					fmt.Sprintf("c%dt%d/itlb", i, j),
 				),
 			)
 
-			baseMemoryHierarchy.dTlbs = append(
-				baseMemoryHierarchy.dTlbs,
+			memoryHierarchy.dTlbs = append(
+				memoryHierarchy.dTlbs,
 				NewTranslationLookasideBuffer(
-					baseMemoryHierarchy,
+					memoryHierarchy,
 					fmt.Sprintf("c%dt%d/dtlb", i, j),
 				),
 			)
 		}
 	}
 
-	baseMemoryHierarchy.p2pReorderBuffers = make(map[Controller](map[Controller]*P2PReorderBuffer))
+	memoryHierarchy.p2pReorderBuffers = make(map[Controller](map[Controller]*P2PReorderBuffer))
 
 	var numNodes = uint32(0)
 
-	for i, l1IController := range baseMemoryHierarchy.L1IControllers() {
-		baseMemoryHierarchy.DevicesToNodeIds[l1IController] = numNodes
+	for i, l1IController := range memoryHierarchy.L1IControllers() {
+		memoryHierarchy.DevicesToNodeIds[l1IController] = numNodes
 
-		var l1DController = baseMemoryHierarchy.L1DControllers()[i]
+		var l1DController = memoryHierarchy.L1DControllers()[i]
 
-		baseMemoryHierarchy.DevicesToNodeIds[l1DController] = numNodes
+		memoryHierarchy.DevicesToNodeIds[l1DController] = numNodes
 
 		numNodes++
 	}
 
-	baseMemoryHierarchy.DevicesToNodeIds[baseMemoryHierarchy.L2Controller()] = numNodes
+	memoryHierarchy.DevicesToNodeIds[memoryHierarchy.L2Controller()] = numNodes
 
 	numNodes++
 
-	baseMemoryHierarchy.DevicesToNodeIds[baseMemoryHierarchy.MemoryController()] = numNodes
+	memoryHierarchy.DevicesToNodeIds[memoryHierarchy.MemoryController()] = numNodes
 
 	numNodes++
 
@@ -132,78 +132,78 @@ func NewBaseMemoryHierarchy(driver UncoreDriver, config *UncoreConfig, nocConfig
 	}
 
 	nocConfig.NumNodes = int(numNodes)
-	nocConfig.MaxInputBufferSize = int(baseMemoryHierarchy.l2Controller.Cache.LineSize() + 8)
+	nocConfig.MaxInputBufferSize = int(memoryHierarchy.l2Controller.Cache.LineSize() + 8)
 
-	baseMemoryHierarchy.Network = noc.NewNetwork(driver.(noc.NetworkDriver), nocConfig)
+	memoryHierarchy.Network = noc.NewNetwork(driver.(noc.NetworkDriver), nocConfig)
 
-	return baseMemoryHierarchy
+	return memoryHierarchy
 }
 
-func (baseMemoryHierarchy *BaseMemoryHierarchy) Driver() UncoreDriver {
-	return baseMemoryHierarchy.driver
+func (memoryHierarchy *BaseMemoryHierarchy) Driver() UncoreDriver {
+	return memoryHierarchy.driver
 }
 
-func (baseMemoryHierarchy *BaseMemoryHierarchy) Config() *UncoreConfig {
-	return baseMemoryHierarchy.config
+func (memoryHierarchy *BaseMemoryHierarchy) Config() *UncoreConfig {
+	return memoryHierarchy.config
 }
 
-func (baseMemoryHierarchy *BaseMemoryHierarchy) CurrentMemoryHierarchyAccessId() int32 {
-	return baseMemoryHierarchy.currentMemoryHierarchyAccessId
+func (memoryHierarchy *BaseMemoryHierarchy) CurrentMemoryHierarchyAccessId() int32 {
+	return memoryHierarchy.currentMemoryHierarchyAccessId
 }
 
-func (baseMemoryHierarchy *BaseMemoryHierarchy) SetCurrentMemoryHierarchyAccessId(currentMemoryHierarchyAccessId int32) {
-	baseMemoryHierarchy.currentMemoryHierarchyAccessId = currentMemoryHierarchyAccessId
+func (memoryHierarchy *BaseMemoryHierarchy) SetCurrentMemoryHierarchyAccessId(currentMemoryHierarchyAccessId int32) {
+	memoryHierarchy.currentMemoryHierarchyAccessId = currentMemoryHierarchyAccessId
 }
 
-func (baseMemoryHierarchy *BaseMemoryHierarchy) CurrentCacheCoherenceFlowId() int32 {
-	return baseMemoryHierarchy.currentCacheCoherenceFlowId
+func (memoryHierarchy *BaseMemoryHierarchy) CurrentCacheCoherenceFlowId() int32 {
+	return memoryHierarchy.currentCacheCoherenceFlowId
 }
 
-func (baseMemoryHierarchy *BaseMemoryHierarchy) SetCurrentCacheCoherenceFlowId(currentCacheCoherenceFlowId int32) {
-	baseMemoryHierarchy.currentCacheCoherenceFlowId = currentCacheCoherenceFlowId
+func (memoryHierarchy *BaseMemoryHierarchy) SetCurrentCacheCoherenceFlowId(currentCacheCoherenceFlowId int32) {
+	memoryHierarchy.currentCacheCoherenceFlowId = currentCacheCoherenceFlowId
 }
 
-func (baseMemoryHierarchy *BaseMemoryHierarchy) PendingFlows() []CacheCoherenceFlow {
-	return baseMemoryHierarchy.pendingFlows
+func (memoryHierarchy *BaseMemoryHierarchy) PendingFlows() []CacheCoherenceFlow {
+	return memoryHierarchy.pendingFlows
 }
 
-func (baseMemoryHierarchy *BaseMemoryHierarchy) SetPendingFlows(pendingFlows []CacheCoherenceFlow) {
-	baseMemoryHierarchy.pendingFlows = pendingFlows
+func (memoryHierarchy *BaseMemoryHierarchy) SetPendingFlows(pendingFlows []CacheCoherenceFlow) {
+	memoryHierarchy.pendingFlows = pendingFlows
 }
 
-func (baseMemoryHierarchy *BaseMemoryHierarchy) MemoryController() *MemoryController {
-	return baseMemoryHierarchy.memoryController
+func (memoryHierarchy *BaseMemoryHierarchy) MemoryController() *MemoryController {
+	return memoryHierarchy.memoryController
 }
 
-func (baseMemoryHierarchy *BaseMemoryHierarchy) L2Controller() *DirectoryController {
-	return baseMemoryHierarchy.l2Controller
+func (memoryHierarchy *BaseMemoryHierarchy) L2Controller() *DirectoryController {
+	return memoryHierarchy.l2Controller
 }
 
-func (baseMemoryHierarchy *BaseMemoryHierarchy) L1IControllers() []*L1IController {
-	return baseMemoryHierarchy.l1IControllers
+func (memoryHierarchy *BaseMemoryHierarchy) L1IControllers() []*L1IController {
+	return memoryHierarchy.l1IControllers
 }
 
-func (baseMemoryHierarchy *BaseMemoryHierarchy) L1DControllers() []*L1DController {
-	return baseMemoryHierarchy.l1DControllers
+func (memoryHierarchy *BaseMemoryHierarchy) L1DControllers() []*L1DController {
+	return memoryHierarchy.l1DControllers
 }
 
-func (baseMemoryHierarchy *BaseMemoryHierarchy) ITlbs() []*TranslationLookasideBuffer {
-	return baseMemoryHierarchy.iTlbs
+func (memoryHierarchy *BaseMemoryHierarchy) ITlbs() []*TranslationLookasideBuffer {
+	return memoryHierarchy.iTlbs
 }
 
-func (baseMemoryHierarchy *BaseMemoryHierarchy) DTlbs() []*TranslationLookasideBuffer {
-	return baseMemoryHierarchy.dTlbs
+func (memoryHierarchy *BaseMemoryHierarchy) DTlbs() []*TranslationLookasideBuffer {
+	return memoryHierarchy.dTlbs
 }
 
-func (baseMemoryHierarchy *BaseMemoryHierarchy) Transfer(from MemoryDevice, to MemoryDevice, size uint32, onCompletedCallback func()) {
-	//var src = baseMemoryHierarchy.DevicesToNodeIds[from]
-	//var dest = baseMemoryHierarchy.DevicesToNodeIds[to]
+func (memoryHierarchy *BaseMemoryHierarchy) Transfer(from MemoryDevice, to MemoryDevice, size uint32, onCompletedCallback func()) {
+	//var src = memoryHierarchy.DevicesToNodeIds[from]
+	//var dest = memoryHierarchy.DevicesToNodeIds[to]
 	//
-	//var packet = noc.NewDataPacket(baseMemoryHierarchy.Network, int(src), int(dest), int(size), true, onCompletedCallback)
+	//var packet = noc.NewDataPacket(memoryHierarchy.Network, int(src), int(dest), int(size), true, onCompletedCallback)
 	//
-	//baseMemoryHierarchy.Driver().CycleAccurateEventQueue().Schedule(
+	//memoryHierarchy.Driver().CycleAccurateEventQueue().Schedule(
 	//	func() {
-	//		baseMemoryHierarchy.Network.Receive(packet)
+	//		memoryHierarchy.Network.Receive(packet)
 	//	},
 	//	1,
 	//)
@@ -211,26 +211,26 @@ func (baseMemoryHierarchy *BaseMemoryHierarchy) Transfer(from MemoryDevice, to M
 	onCompletedCallback() //TODO
 }
 
-func (baseMemoryHierarchy *BaseMemoryHierarchy) TransferMessage(from Controller, to Controller, size uint32, message CoherenceMessage) {
-	if _, ok := baseMemoryHierarchy.p2pReorderBuffers[from]; !ok {
-		baseMemoryHierarchy.p2pReorderBuffers[from] = make(map[Controller]*P2PReorderBuffer)
+func (memoryHierarchy *BaseMemoryHierarchy) TransferMessage(from Controller, to Controller, size uint32, message CoherenceMessage) {
+	if _, ok := memoryHierarchy.p2pReorderBuffers[from]; !ok {
+		memoryHierarchy.p2pReorderBuffers[from] = make(map[Controller]*P2PReorderBuffer)
 	}
 
-	if _, ok := baseMemoryHierarchy.p2pReorderBuffers[from][to]; !ok {
-		baseMemoryHierarchy.p2pReorderBuffers[from][to] = NewP2PReorderBuffer(from, to)
+	if _, ok := memoryHierarchy.p2pReorderBuffers[from][to]; !ok {
+		memoryHierarchy.p2pReorderBuffers[from][to] = NewP2PReorderBuffer(from, to)
 	}
 
-	var p2pReorderBuffer = baseMemoryHierarchy.p2pReorderBuffers[from][to]
+	var p2pReorderBuffer = memoryHierarchy.p2pReorderBuffers[from][to]
 
 	p2pReorderBuffer.Messages = append(p2pReorderBuffer.Messages, message)
 
-	baseMemoryHierarchy.Transfer(from, to, size, func() {
+	memoryHierarchy.Transfer(from, to, size, func() {
 		p2pReorderBuffer.OnDestArrived(message)
 	})
 }
 
-func (baseMemoryHierarchy *BaseMemoryHierarchy) DumpPendingFlowTree() {
-	for _, pendingFlow := range baseMemoryHierarchy.pendingFlows {
+func (memoryHierarchy *BaseMemoryHierarchy) DumpPendingFlowTree() {
+	for _, pendingFlow := range memoryHierarchy.pendingFlows {
 		simutil.PrintNode(
 			pendingFlow,
 			func(node interface{}) interface{}{
@@ -268,36 +268,36 @@ type P2PReorderBuffer struct {
 }
 
 func NewP2PReorderBuffer(from Controller, to Controller) *P2PReorderBuffer {
-	var p2pReorderBuffer = &P2PReorderBuffer{
+	var buffer = &P2PReorderBuffer{
 		From:from,
 		To:to,
 		LastCompletedMessageId:-1,
 	}
 
-	return p2pReorderBuffer
+	return buffer
 }
 
-func (p2pReorderBuffer *P2PReorderBuffer) OnDestArrived(message CoherenceMessage) {
+func (buffer *P2PReorderBuffer) OnDestArrived(message CoherenceMessage) {
 	message.SetDestArrived(true)
 
-	for len(p2pReorderBuffer.Messages) > 0 {
-		var message = p2pReorderBuffer.Messages[0]
+	for len(buffer.Messages) > 0 {
+		var message = buffer.Messages[0]
 
 		if !message.DestArrived() {
 			break
 		}
 
-		p2pReorderBuffer.Messages = p2pReorderBuffer.Messages[1:]
+		buffer.Messages = buffer.Messages[1:]
 
-		p2pReorderBuffer.To.MemoryHierarchy().Driver().CycleAccurateEventQueue().Schedule(
+		buffer.To.MemoryHierarchy().Driver().CycleAccurateEventQueue().Schedule(
 			func() {
 				message.Complete()
 
-				p2pReorderBuffer.LastCompletedMessageId = message.Id()
+				buffer.LastCompletedMessageId = message.Id()
 
-				p2pReorderBuffer.To.ReceiveMessage(message)
+				buffer.To.ReceiveMessage(message)
 			},
-			int(p2pReorderBuffer.To.HitLatency()),
+			int(buffer.To.HitLatency()),
 		)
 	}
 }

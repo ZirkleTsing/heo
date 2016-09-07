@@ -40,32 +40,32 @@ type BaseCore struct {
 }
 
 func NewBaseCore(processor *Processor, num int32) *BaseCore {
-	var baseCore = &BaseCore{
+	var core = &BaseCore{
 		processor:processor,
 		num:num,
 	}
 
-	return baseCore
+	return core
 }
 
-func (baseCore *BaseCore) Processor() *Processor {
-	return baseCore.processor
+func (core *BaseCore) Processor() *Processor {
+	return core.processor
 }
 
-func (baseCore *BaseCore) Threads() []Thread {
-	return baseCore.threads
+func (core *BaseCore) Threads() []Thread {
+	return core.threads
 }
 
-func (baseCore *BaseCore) AddThread(thread Thread) {
-	baseCore.threads = append(baseCore.threads, thread)
+func (core *BaseCore) AddThread(thread Thread) {
+	core.threads = append(core.threads, thread)
 }
 
-func (baseCore *BaseCore) Num() int32 {
-	return baseCore.num
+func (core *BaseCore) Num() int32 {
+	return core.num
 }
 
-func (baseCore *BaseCore) FastForwardOneCycle() {
-	for _, thread := range baseCore.Threads() {
+func (core *BaseCore) FastForwardOneCycle() {
+	for _, thread := range core.Threads() {
 		thread.FastForwardOneCycle()
 	}
 }

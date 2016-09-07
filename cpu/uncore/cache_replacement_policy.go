@@ -12,26 +12,26 @@ type BaseCacheReplacementPolicy struct {
 }
 
 func NewBaseCacheReplacementPolicy(cache *EvictableCache) *BaseCacheReplacementPolicy {
-	var baseCacheReplacementPolicy = &BaseCacheReplacementPolicy{
+	var replacementPolicy = &BaseCacheReplacementPolicy{
 		cache:cache,
 	}
 
-	return baseCacheReplacementPolicy
+	return replacementPolicy
 }
 
-func (baseCacheReplacementPolicy *BaseCacheReplacementPolicy) Cache() *EvictableCache {
-	return baseCacheReplacementPolicy.cache
+func (replacementPolicy *BaseCacheReplacementPolicy) Cache() *EvictableCache {
+	return replacementPolicy.cache
 }
 
-func NewMiss(cacheReplacementPolicy CacheReplacementPolicy, access *MemoryHierarchyAccess, set uint32, address uint32) *CacheAccess {
-	var tag = cacheReplacementPolicy.Cache().GetTag(address)
+func NewMiss(replacementPolicy CacheReplacementPolicy, access *MemoryHierarchyAccess, set uint32, address uint32) *CacheAccess {
+	var tag = replacementPolicy.Cache().GetTag(address)
 
-	for way := uint32(0); way < cacheReplacementPolicy.Cache().Assoc(); way++ {
-		var line = cacheReplacementPolicy.Cache().Sets[set].Lines[way]
+	for way := uint32(0); way < replacementPolicy.Cache().Assoc(); way++ {
+		var line = replacementPolicy.Cache().Sets[set].Lines[way]
 		if !line.Valid() {
-			return NewCacheAccess(cacheReplacementPolicy.Cache(), access, set, way, tag)
+			return NewCacheAccess(replacementPolicy.Cache(), access, set, way, tag)
 		}
 	}
 
-	return cacheReplacementPolicy.HandleReplacement(access, set, tag)
+	return replacementPolicy.HandleReplacement(access, set, tag)
 }

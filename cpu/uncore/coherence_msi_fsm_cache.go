@@ -17,295 +17,295 @@ type CacheControllerFiniteStateMachine struct {
 }
 
 func NewCacheControllerFiniteStateMachine(set uint32, way uint32, cacheController *CacheController) *CacheControllerFiniteStateMachine {
-	var cacheControllerFsm = &CacheControllerFiniteStateMachine{
+	var fsm = &CacheControllerFiniteStateMachine{
 		BaseFiniteStateMachine: simutil.NewBaseFiniteStateMachine(CacheControllerState_I),
 		Set:set,
 		Way:way,
 		CacheController:cacheController,
 	}
 
-	cacheControllerFsm.BlockingEventDispatcher.AddListener(reflect.TypeOf((*simutil.ExitStateEvent)(nil)), func(event interface{}) {
-		cacheControllerFsm.PreviousState = cacheControllerFsm.State().(CacheControllerState)
+	fsm.BlockingEventDispatcher.AddListener(reflect.TypeOf((*simutil.ExitStateEvent)(nil)), func(event interface{}) {
+		fsm.PreviousState = fsm.State().(CacheControllerState)
 	})
 
-	return cacheControllerFsm
+	return fsm
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) Line() *CacheLine {
-	return cacheControllerFsm.CacheController.Cache.Sets[cacheControllerFsm.Set].Lines[cacheControllerFsm.Way]
+func (fsm *CacheControllerFiniteStateMachine) Line() *CacheLine {
+	return fsm.CacheController.Cache.Sets[fsm.Set].Lines[fsm.Way]
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) fireTransition(event CacheControllerEvent) {
+func (fsm *CacheControllerFiniteStateMachine) fireTransition(event CacheControllerEvent) {
 	event.Complete()
-	cacheControllerFsm.CacheController.FsmFactory.FireTransition(cacheControllerFsm, event.EventType(), event)
+	fsm.CacheController.FsmFactory.FireTransition(fsm, event.EventType(), event)
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) OnEventLoad(producerFlow *LoadFlow, tag uint32, onCompletedCallback func(), onStalledCallback func()) {
-	var loadEvent = NewLoadEvent(cacheControllerFsm.CacheController, producerFlow, producerFlow.Access(), tag, cacheControllerFsm.Set, cacheControllerFsm.Way, onCompletedCallback, onStalledCallback)
-	cacheControllerFsm.fireTransition(loadEvent)
+func (fsm *CacheControllerFiniteStateMachine) OnEventLoad(producerFlow *LoadFlow, tag uint32, onCompletedCallback func(), onStalledCallback func()) {
+	var event = NewLoadEvent(fsm.CacheController, producerFlow, producerFlow.Access(), tag, fsm.Set, fsm.Way, onCompletedCallback, onStalledCallback)
+	fsm.fireTransition(event)
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) OnEventStore(producerFlow *StoreFlow, tag uint32, onCompletedCallback func(), onStalledCallback func()) {
-	var storeEvent = NewStoreEvent(cacheControllerFsm.CacheController, producerFlow, producerFlow.Access(), tag, cacheControllerFsm.Set, cacheControllerFsm.Way, onCompletedCallback, onStalledCallback)
-	cacheControllerFsm.fireTransition(storeEvent)
+func (fsm *CacheControllerFiniteStateMachine) OnEventStore(producerFlow *StoreFlow, tag uint32, onCompletedCallback func(), onStalledCallback func()) {
+	var event = NewStoreEvent(fsm.CacheController, producerFlow, producerFlow.Access(), tag, fsm.Set, fsm.Way, onCompletedCallback, onStalledCallback)
+	fsm.fireTransition(event)
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) OnEventReplacement(producerFlow CacheCoherenceFlow, tag uint32, cacheAccess *CacheAccess, onCompletedCallback func(), onStalledCallback func()) {
-	var replacementEvent = NewReplacementEvent(cacheControllerFsm.CacheController, producerFlow, producerFlow.Access(), tag, cacheAccess, cacheControllerFsm.Set, cacheControllerFsm.Way, onCompletedCallback, onStalledCallback)
-	cacheControllerFsm.fireTransition(replacementEvent)
+func (fsm *CacheControllerFiniteStateMachine) OnEventReplacement(producerFlow CacheCoherenceFlow, tag uint32, cacheAccess *CacheAccess, onCompletedCallback func(), onStalledCallback func()) {
+	var event = NewReplacementEvent(fsm.CacheController, producerFlow, producerFlow.Access(), tag, cacheAccess, fsm.Set, fsm.Way, onCompletedCallback, onStalledCallback)
+	fsm.fireTransition(event)
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) OnEventFwdGetS(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
-	var fwdGetSEvent = NewFwdGetSEvent(cacheControllerFsm.CacheController, producerFlow, producerFlow.Access(), tag, requester)
-	cacheControllerFsm.fireTransition(fwdGetSEvent)
+func (fsm *CacheControllerFiniteStateMachine) OnEventFwdGetS(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
+	var event = NewFwdGetSEvent(fsm.CacheController, producerFlow, producerFlow.Access(), tag, requester)
+	fsm.fireTransition(event)
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) OnEventFwdGetM(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
-	var fwdGetMEvent = NewFwdGetMEvent(cacheControllerFsm.CacheController, producerFlow, producerFlow.Access(), tag, requester)
-	cacheControllerFsm.fireTransition(fwdGetMEvent)
+func (fsm *CacheControllerFiniteStateMachine) OnEventFwdGetM(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
+	var event = NewFwdGetMEvent(fsm.CacheController, producerFlow, producerFlow.Access(), tag, requester)
+	fsm.fireTransition(event)
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) OnEventInv(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
-	var invEvent = NewInvEvent(cacheControllerFsm.CacheController, producerFlow, producerFlow.Access(), tag, requester)
-	cacheControllerFsm.fireTransition(invEvent)
+func (fsm *CacheControllerFiniteStateMachine) OnEventInv(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
+	var event = NewInvEvent(fsm.CacheController, producerFlow, producerFlow.Access(), tag, requester)
+	fsm.fireTransition(event)
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) OnEventRecall(producerFlow CacheCoherenceFlow, tag uint32) {
-	var recallEvent = NewRecallEvent(cacheControllerFsm.CacheController, producerFlow, producerFlow.Access(), tag)
-	cacheControllerFsm.fireTransition(recallEvent)
+func (fsm *CacheControllerFiniteStateMachine) OnEventRecall(producerFlow CacheCoherenceFlow, tag uint32) {
+	var event = NewRecallEvent(fsm.CacheController, producerFlow, producerFlow.Access(), tag)
+	fsm.fireTransition(event)
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) OnEventPutAck(producerFlow CacheCoherenceFlow, tag uint32) {
-	var putAckEvent = NewPutAckEvent(cacheControllerFsm.CacheController, producerFlow, producerFlow.Access(), tag)
-	cacheControllerFsm.fireTransition(putAckEvent)
+func (fsm *CacheControllerFiniteStateMachine) OnEventPutAck(producerFlow CacheCoherenceFlow, tag uint32) {
+	var event = NewPutAckEvent(fsm.CacheController, producerFlow, producerFlow.Access(), tag)
+	fsm.fireTransition(event)
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) OnEventData(producerFlow CacheCoherenceFlow, tag uint32, sender Controller, numInvAcks int32) {
-	cacheControllerFsm.NumInvAcks += numInvAcks
+func (fsm *CacheControllerFiniteStateMachine) OnEventData(producerFlow CacheCoherenceFlow, tag uint32, sender Controller, numInvAcks int32) {
+	fsm.NumInvAcks += numInvAcks
 
 	switch sender.(type) {
 	case *DirectoryController:
 		if numInvAcks == 0 {
-			var dataFromDirAcksEq0Event = NewDataFromDirAcksEq0Event(
-				cacheControllerFsm.CacheController,
+			var event = NewDataFromDirAcksEq0Event(
+				fsm.CacheController,
 				producerFlow,
 				producerFlow.Access(),
 				tag,
 				sender,
 			)
 
-			cacheControllerFsm.fireTransition(dataFromDirAcksEq0Event)
+			fsm.fireTransition(event)
 
 		} else {
-			var dataFromDirAcksGt0Event = NewDataFromDirAcksGt0Event(
-				cacheControllerFsm.CacheController,
+			var event = NewDataFromDirAcksGt0Event(
+				fsm.CacheController,
 				producerFlow,
 				producerFlow.Access(),
 				tag,
 				sender,
 			)
 
-			cacheControllerFsm.fireTransition(dataFromDirAcksGt0Event)
+			fsm.fireTransition(event)
 
-			if cacheControllerFsm.NumInvAcks == 0 {
-				cacheControllerFsm.OnEventLastInvAck(producerFlow, tag)
+			if fsm.NumInvAcks == 0 {
+				fsm.OnEventLastInvAck(producerFlow, tag)
 			}
 		}
 	default:
-		var dataFromOwnerEvent = NewDataFromOwnerEvent(
-			cacheControllerFsm.CacheController,
+		var event = NewDataFromOwnerEvent(
+			fsm.CacheController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
 			sender,
 		)
 
-		cacheControllerFsm.fireTransition(dataFromOwnerEvent)
+		fsm.fireTransition(event)
 	}
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) OnEventInvAck(producerFlow CacheCoherenceFlow, tag uint32, sender *CacheController) {
-	var invAckEvent = NewInvAckEvent(
-		cacheControllerFsm.CacheController,
+func (fsm *CacheControllerFiniteStateMachine) OnEventInvAck(producerFlow CacheCoherenceFlow, tag uint32, sender *CacheController) {
+	var event = NewInvAckEvent(
+		fsm.CacheController,
 		producerFlow,
 		producerFlow.Access(),
 		tag,
 		sender,
 	)
 
-	cacheControllerFsm.fireTransition(invAckEvent)
+	fsm.fireTransition(event)
 
-	if cacheControllerFsm.NumInvAcks == 0 {
-		cacheControllerFsm.OnEventLastInvAck(producerFlow, tag)
+	if fsm.NumInvAcks == 0 {
+		fsm.OnEventLastInvAck(producerFlow, tag)
 	}
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) OnEventLastInvAck(producerFlow CacheCoherenceFlow, tag uint32) {
-	var lastInvAckEvent = NewLastInvAckEvent(
-		cacheControllerFsm.CacheController,
+func (fsm *CacheControllerFiniteStateMachine) OnEventLastInvAck(producerFlow CacheCoherenceFlow, tag uint32) {
+	var event = NewLastInvAckEvent(
+		fsm.CacheController,
 		producerFlow,
 		producerFlow.Access(),
 		tag,
 	)
 
-	cacheControllerFsm.fireTransition(lastInvAckEvent)
+	fsm.fireTransition(event)
 
-	cacheControllerFsm.NumInvAcks = 0
+	fsm.NumInvAcks = 0
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) SendGetSToDir(producerFlow CacheCoherenceFlow, tag uint32) {
-	cacheControllerFsm.CacheController.TransferMessage(
-		cacheControllerFsm.CacheController.Next().(*DirectoryController),
+func (fsm *CacheControllerFiniteStateMachine) SendGetSToDir(producerFlow CacheCoherenceFlow, tag uint32) {
+	fsm.CacheController.TransferMessage(
+		fsm.CacheController.Next().(*DirectoryController),
 		8,
 		NewGetSMessage(
-			cacheControllerFsm.CacheController,
+			fsm.CacheController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
-			cacheControllerFsm.CacheController,
+			fsm.CacheController,
 		),
 	)
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) SendGetMToDir(producerFlow CacheCoherenceFlow, tag uint32) {
-	cacheControllerFsm.CacheController.TransferMessage(
-		cacheControllerFsm.CacheController.Next().(*DirectoryController),
+func (fsm *CacheControllerFiniteStateMachine) SendGetMToDir(producerFlow CacheCoherenceFlow, tag uint32) {
+	fsm.CacheController.TransferMessage(
+		fsm.CacheController.Next().(*DirectoryController),
 		8,
 		NewGetMMessage(
-			cacheControllerFsm.CacheController,
+			fsm.CacheController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
-			cacheControllerFsm.CacheController,
+			fsm.CacheController,
 		),
 	)
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) SendPutSToDir(producerFlow CacheCoherenceFlow, tag uint32) {
-	cacheControllerFsm.CacheController.TransferMessage(
-		cacheControllerFsm.CacheController.Next().(*DirectoryController),
+func (fsm *CacheControllerFiniteStateMachine) SendPutSToDir(producerFlow CacheCoherenceFlow, tag uint32) {
+	fsm.CacheController.TransferMessage(
+		fsm.CacheController.Next().(*DirectoryController),
 		8,
 		NewPutSMessage(
-			cacheControllerFsm.CacheController,
+			fsm.CacheController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
-			cacheControllerFsm.CacheController,
+			fsm.CacheController,
 		),
 	)
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) SendPutMAndDataToDir(producerFlow CacheCoherenceFlow, tag uint32) {
-	cacheControllerFsm.CacheController.TransferMessage(
-		cacheControllerFsm.CacheController.Next().(*DirectoryController),
-		cacheControllerFsm.CacheController.Cache.LineSize() + 8,
+func (fsm *CacheControllerFiniteStateMachine) SendPutMAndDataToDir(producerFlow CacheCoherenceFlow, tag uint32) {
+	fsm.CacheController.TransferMessage(
+		fsm.CacheController.Next().(*DirectoryController),
+		fsm.CacheController.Cache.LineSize() + 8,
 		NewPutMAndDataMessage(
-			cacheControllerFsm.CacheController,
+			fsm.CacheController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
-			cacheControllerFsm.CacheController,
+			fsm.CacheController,
 		),
 	)
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) SendDataToRequesterAndDir(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
-	cacheControllerFsm.CacheController.TransferMessage(
+func (fsm *CacheControllerFiniteStateMachine) SendDataToRequesterAndDir(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
+	fsm.CacheController.TransferMessage(
 		requester,
 		10,
 		NewDataMessage(
-			cacheControllerFsm.CacheController,
+			fsm.CacheController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
-			cacheControllerFsm.CacheController,
+			fsm.CacheController,
 			0,
 		),
 	)
 
-	cacheControllerFsm.CacheController.TransferMessage(
-		cacheControllerFsm.CacheController.Next().(*DirectoryController),
-		cacheControllerFsm.CacheController.Cache.LineSize() + 8,
+	fsm.CacheController.TransferMessage(
+		fsm.CacheController.Next().(*DirectoryController),
+		fsm.CacheController.Cache.LineSize() + 8,
 		NewDataMessage(
-			cacheControllerFsm.CacheController,
+			fsm.CacheController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
-			cacheControllerFsm.CacheController,
+			fsm.CacheController,
 			0,
 		),
 	)
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) SendDataToRequester(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
-	cacheControllerFsm.CacheController.TransferMessage(
+func (fsm *CacheControllerFiniteStateMachine) SendDataToRequester(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
+	fsm.CacheController.TransferMessage(
 		requester,
-		cacheControllerFsm.CacheController.Cache.LineSize() + 8,
+		fsm.CacheController.Cache.LineSize() + 8,
 		NewDataMessage(
-			cacheControllerFsm.CacheController,
+			fsm.CacheController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
-			cacheControllerFsm.CacheController,
+			fsm.CacheController,
 			0,
 		),
 	)
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) SendInvAckToRequester(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
-	cacheControllerFsm.CacheController.TransferMessage(
+func (fsm *CacheControllerFiniteStateMachine) SendInvAckToRequester(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
+	fsm.CacheController.TransferMessage(
 		requester,
 		8,
 		NewInvAckMessage(
-			cacheControllerFsm.CacheController,
+			fsm.CacheController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
-			cacheControllerFsm.CacheController,
+			fsm.CacheController,
 		),
 	)
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) SendRecallAckToDir(producerFlow CacheCoherenceFlow, tag uint32, size uint32) {
-	cacheControllerFsm.CacheController.TransferMessage(
-		cacheControllerFsm.CacheController.Next().(*DirectoryController),
+func (fsm *CacheControllerFiniteStateMachine) SendRecallAckToDir(producerFlow CacheCoherenceFlow, tag uint32, size uint32) {
+	fsm.CacheController.TransferMessage(
+		fsm.CacheController.Next().(*DirectoryController),
 		size,
 		NewRecallAckMessage(
-			cacheControllerFsm.CacheController,
+			fsm.CacheController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
-			cacheControllerFsm.CacheController,
+			fsm.CacheController,
 		),
 	)
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) FireServiceNonblockingRequestEvent(access *MemoryHierarchyAccess, tag uint32, hitInCache bool) {
+func (fsm *CacheControllerFiniteStateMachine) FireServiceNonblockingRequestEvent(access *MemoryHierarchyAccess, tag uint32, hitInCache bool) {
 	//TODO
-	cacheControllerFsm.CacheController.UpdateStats(access.AccessType.IsWrite(), hitInCache)
+	fsm.CacheController.UpdateStats(access.AccessType.IsWrite(), hitInCache)
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) FireReplacementEvent(access *MemoryHierarchyAccess, tag uint32) {
-	//TODO
-}
-
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) FireNonblockingRequestHitToTransientTagEvent(access *MemoryHierarchyAccess, tag uint32) {
+func (fsm *CacheControllerFiniteStateMachine) FireReplacementEvent(access *MemoryHierarchyAccess, tag uint32) {
 	//TODO
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) Hit(access *MemoryHierarchyAccess, tag uint32, set uint32, way uint32) {
-	cacheControllerFsm.FireServiceNonblockingRequestEvent(access, tag, true)
-	cacheControllerFsm.CacheController.Cache.ReplacementPolicy.HandlePromotionOnHit(access, set, way)
-	cacheControllerFsm.Line().Access = access
+func (fsm *CacheControllerFiniteStateMachine) FireNonblockingRequestHitToTransientTagEvent(access *MemoryHierarchyAccess, tag uint32) {
+	//TODO
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) Stall(action func()) {
-	cacheControllerFsm.StalledEvents = append(cacheControllerFsm.StalledEvents, action)
+func (fsm *CacheControllerFiniteStateMachine) Hit(access *MemoryHierarchyAccess, tag uint32, set uint32, way uint32) {
+	fsm.FireServiceNonblockingRequestEvent(access, tag, true)
+	fsm.CacheController.Cache.ReplacementPolicy.HandlePromotionOnHit(access, set, way)
+	fsm.Line().Access = access
 }
 
-func (cacheControllerFsm *CacheControllerFiniteStateMachine) StallEvent(event CacheControllerEvent) {
-	cacheControllerFsm.Stall(func() {
-		cacheControllerFsm.fireTransition(event)
+func (fsm *CacheControllerFiniteStateMachine) Stall(action func()) {
+	fsm.StalledEvents = append(fsm.StalledEvents, action)
+}
+
+func (fsm *CacheControllerFiniteStateMachine) StallEvent(event CacheControllerEvent) {
+	fsm.Stall(func() {
+		fsm.fireTransition(event)
 	})
 }
 

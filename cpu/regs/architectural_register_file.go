@@ -105,57 +105,57 @@ type ArchitecturalRegisterFile struct {
 }
 
 func NewArchitecturalRegisterFile(littleEndian bool) *ArchitecturalRegisterFile {
-	var architecturalRegisterFile = &ArchitecturalRegisterFile{
+	var regs = &ArchitecturalRegisterFile{
 		LittleEndian:littleEndian,
 		Gpr:make([]uint32, 32),
 		Fpr:NewFloatingPointRegisters(littleEndian),
 	}
 
-	return architecturalRegisterFile
+	return regs
 }
 
-func (architecturalRegisterFile *ArchitecturalRegisterFile) Clone() *ArchitecturalRegisterFile {
-	var newArchitecturalRegisterFile = NewArchitecturalRegisterFile(architecturalRegisterFile.LittleEndian)
+func (regs *ArchitecturalRegisterFile) Clone() *ArchitecturalRegisterFile {
+	var newArchitecturalRegisterFile = NewArchitecturalRegisterFile(regs.LittleEndian)
 
-	newArchitecturalRegisterFile.Pc = architecturalRegisterFile.Pc
-	newArchitecturalRegisterFile.Npc = architecturalRegisterFile.Npc
-	newArchitecturalRegisterFile.Nnpc = architecturalRegisterFile.Nnpc
+	newArchitecturalRegisterFile.Pc = regs.Pc
+	newArchitecturalRegisterFile.Npc = regs.Npc
+	newArchitecturalRegisterFile.Nnpc = regs.Nnpc
 
-	copy(newArchitecturalRegisterFile.Gpr, architecturalRegisterFile.Gpr)
+	copy(newArchitecturalRegisterFile.Gpr, regs.Gpr)
 
-	newArchitecturalRegisterFile.Fpr = NewFloatingPointRegisters(architecturalRegisterFile.LittleEndian)
-	copy(newArchitecturalRegisterFile.Fpr.data, architecturalRegisterFile.Fpr.data)
+	newArchitecturalRegisterFile.Fpr = NewFloatingPointRegisters(regs.LittleEndian)
+	copy(newArchitecturalRegisterFile.Fpr.data, regs.Fpr.data)
 
-	newArchitecturalRegisterFile.Hi = architecturalRegisterFile.Hi
-	newArchitecturalRegisterFile.Lo = architecturalRegisterFile.Lo
-	newArchitecturalRegisterFile.Fcsr = architecturalRegisterFile.Fcsr
+	newArchitecturalRegisterFile.Hi = regs.Hi
+	newArchitecturalRegisterFile.Lo = regs.Lo
+	newArchitecturalRegisterFile.Fcsr = regs.Fcsr
 
 	return newArchitecturalRegisterFile
 }
 
-func (architecturalRegisterFile *ArchitecturalRegisterFile) Sgpr(i uint32) int32 {
-	return int32(architecturalRegisterFile.Gpr[i])
+func (regs *ArchitecturalRegisterFile) Sgpr(i uint32) int32 {
+	return int32(regs.Gpr[i])
 }
 
-func (architecturalRegisterFile *ArchitecturalRegisterFile) SetSgpr(i uint32, v int32) {
-	architecturalRegisterFile.Gpr[i] = uint32(v)
+func (regs *ArchitecturalRegisterFile) SetSgpr(i uint32, v int32) {
+	regs.Gpr[i] = uint32(v)
 }
 
-func (architecturalRegisterFile *ArchitecturalRegisterFile) Dump() string {
+func (regs *ArchitecturalRegisterFile) Dump() string {
 	var buf bytes.Buffer
 
 	for i := 0; i < 32; i++ {
-		buf.WriteString(fmt.Sprintf("%s = 0x%08x, \n", GPR_NAMES[i], architecturalRegisterFile.Gpr[i]))
+		buf.WriteString(fmt.Sprintf("%s = 0x%08x, \n", GPR_NAMES[i], regs.Gpr[i]))
 	}
 
 	buf.WriteString(
 		fmt.Sprintf("pc = 0x%08x, npc = 0x%08x, nnpc = 0x%08x, hi = 0x%08x, lo = 0x%08x, fcsr = 0x%08x",
-			architecturalRegisterFile.Pc,
-			architecturalRegisterFile.Npc,
-			architecturalRegisterFile.Nnpc,
-			architecturalRegisterFile.Hi,
-			architecturalRegisterFile.Lo,
-			architecturalRegisterFile.Fcsr))
+			regs.Pc,
+			regs.Npc,
+			regs.Nnpc,
+			regs.Hi,
+			regs.Lo,
+			regs.Fcsr))
 
 	return buf.String()
 }
@@ -167,96 +167,96 @@ type FloatingPointRegisters struct {
 }
 
 func NewFloatingPointRegisters(littleEndian bool) *FloatingPointRegisters {
-	var floatingPointRegisters = &FloatingPointRegisters{
+	var fprs = &FloatingPointRegisters{
 		LittleEndian:littleEndian,
 		data:make([]byte, 4 * 32),
 	}
 
 	if littleEndian {
-		floatingPointRegisters.ByteOrder = binary.LittleEndian
+		fprs.ByteOrder = binary.LittleEndian
 	} else {
-		floatingPointRegisters.ByteOrder = binary.BigEndian
+		fprs.ByteOrder = binary.BigEndian
 	}
 
-	return floatingPointRegisters
+	return fprs
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) Uint32(index uint32) uint32 {
+func (fprs *FloatingPointRegisters) Uint32(index uint32) uint32 {
 	var size = uint32(4)
 
 	var buffer = make([]byte, size)
 
-	copy(buffer, floatingPointRegisters.data[index * size:index * size + size])
+	copy(buffer, fprs.data[index * size:index * size + size])
 
-	return floatingPointRegisters.ByteOrder.Uint32(buffer)
+	return fprs.ByteOrder.Uint32(buffer)
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) SetUint32(index uint32, value uint32) {
+func (fprs *FloatingPointRegisters) SetUint32(index uint32, value uint32) {
 	var size = uint32(4)
 
 	var buffer = make([]byte, size)
 
-	floatingPointRegisters.ByteOrder.PutUint32(buffer, value)
+	fprs.ByteOrder.PutUint32(buffer, value)
 
-	copy(floatingPointRegisters.data[index * size:index * size + size], buffer)
+	copy(fprs.data[index * size:index * size + size], buffer)
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) Float32(index uint32) float32 {
+func (fprs *FloatingPointRegisters) Float32(index uint32) float32 {
 	var size = uint32(4)
 
 	var buffer = make([]byte, size)
 
-	copy(buffer, floatingPointRegisters.data[index * size:index * size + size])
+	copy(buffer, fprs.data[index * size:index * size + size])
 
-	return math.Float32frombits(floatingPointRegisters.ByteOrder.Uint32(buffer))
+	return math.Float32frombits(fprs.ByteOrder.Uint32(buffer))
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) SetFloat32(index uint32, value float32) {
+func (fprs *FloatingPointRegisters) SetFloat32(index uint32, value float32) {
 	var size = uint32(4)
 
 	var buffer = make([]byte, size)
 
-	floatingPointRegisters.ByteOrder.PutUint32(buffer, math.Float32bits(value))
+	fprs.ByteOrder.PutUint32(buffer, math.Float32bits(value))
 
-	copy(floatingPointRegisters.data[index * size:index * size + size], buffer)
+	copy(fprs.data[index * size:index * size + size], buffer)
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) Uint64(index uint32) uint64 {
+func (fprs *FloatingPointRegisters) Uint64(index uint32) uint64 {
 	var size = uint32(8)
 
 	var buffer = make([]byte, size)
 
-	copy(buffer, floatingPointRegisters.data[index * size:index * size + size])
+	copy(buffer, fprs.data[index * size:index * size + size])
 
-	return floatingPointRegisters.ByteOrder.Uint64(buffer)
+	return fprs.ByteOrder.Uint64(buffer)
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) SetUint64(index uint32, value uint64) {
+func (fprs *FloatingPointRegisters) SetUint64(index uint32, value uint64) {
 	var size = uint32(8)
 
 	var buffer = make([]byte, size)
 
-	floatingPointRegisters.ByteOrder.PutUint64(buffer, value)
+	fprs.ByteOrder.PutUint64(buffer, value)
 
-	copy(floatingPointRegisters.data[index * size:index * size + size], buffer)
+	copy(fprs.data[index * size:index * size + size], buffer)
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) Float64(index uint32) float64 {
+func (fprs *FloatingPointRegisters) Float64(index uint32) float64 {
 	var size = uint32(8)
 
 	var buffer = make([]byte, size)
 
-	copy(buffer, floatingPointRegisters.data[index * size:index * size + size])
+	copy(buffer, fprs.data[index * size:index * size + size])
 
-	return math.Float64frombits(floatingPointRegisters.ByteOrder.Uint64(buffer))
+	return math.Float64frombits(fprs.ByteOrder.Uint64(buffer))
 }
 
-func (floatingPointRegisters *FloatingPointRegisters) SetFloat64(index uint32, value float64) {
+func (fprs *FloatingPointRegisters) SetFloat64(index uint32, value float64) {
 	var size = uint32(8)
 
 	var buffer = make([]byte, size)
 
-	floatingPointRegisters.ByteOrder.PutUint64(buffer, math.Float64bits(value))
+	fprs.ByteOrder.PutUint64(buffer, math.Float64bits(value))
 
-	copy(floatingPointRegisters.data[index * size:index * size + size], buffer)
+	copy(fprs.data[index * size:index * size + size], buffer)
 }

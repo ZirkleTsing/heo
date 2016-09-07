@@ -24,9 +24,9 @@ type CPUExperiment struct {
 	OoO                     *OoO
 }
 
-func NewCPUExperiment(cpuConfig *CPUConfig) *CPUExperiment {
+func NewCPUExperiment(config *CPUConfig) *CPUExperiment {
 	var experiment = &CPUExperiment{
-		CPUConfig:cpuConfig,
+		CPUConfig:config,
 		cycleAccurateEventQueue:simutil.NewCycleAccurateEventQueue(),
 		blockingEventDispatcher:simutil.NewBlockingEventDispatcher(),
 	}
@@ -35,10 +35,10 @@ func NewCPUExperiment(cpuConfig *CPUConfig) *CPUExperiment {
 	experiment.Kernel = NewKernel(experiment)
 
 	var uncoreConfig = uncore.NewUncoreConfig()
-	uncoreConfig.NumCores = cpuConfig.NumCores
-	uncoreConfig.NumThreadsPerCore = cpuConfig.NumThreadsPerCore
+	uncoreConfig.NumCores = config.NumCores
+	uncoreConfig.NumThreadsPerCore = config.NumThreadsPerCore
 
-	var nocConfig = noc.NewNoCConfig(cpuConfig.OutputDirectory, -1, -1, -1, false)
+	var nocConfig = noc.NewNoCConfig(config.OutputDirectory, -1, -1, -1, false)
 
 	experiment.MemoryHierarchy = uncore.NewBaseMemoryHierarchy(experiment, uncoreConfig, nocConfig)
 

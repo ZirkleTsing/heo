@@ -37,7 +37,7 @@ type BaseCacheCoherenceFlow struct {
 }
 
 func NewBaseCacheCoherenceFlow(generator Controller, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32) *BaseCacheCoherenceFlow {
-	var baseCacheCoherenceFlow = &BaseCacheCoherenceFlow{
+	var flow = &BaseCacheCoherenceFlow{
 		id:generator.MemoryHierarchy().CurrentCacheCoherenceFlowId(),
 		generator:generator,
 		producerFlow:producerFlow,
@@ -49,83 +49,83 @@ func NewBaseCacheCoherenceFlow(generator Controller, producerFlow CacheCoherence
 		generator.MemoryHierarchy().CurrentCacheCoherenceFlowId() + 1,
 	)
 
-	baseCacheCoherenceFlow.beginCycle = generator.MemoryHierarchy().Driver().CycleAccurateEventQueue().CurrentCycle
+	flow.beginCycle = generator.MemoryHierarchy().Driver().CycleAccurateEventQueue().CurrentCycle
 
-	return baseCacheCoherenceFlow
+	return flow
 }
 
-func (cacheCoherenceFlow *BaseCacheCoherenceFlow) Id() int32 {
-	return cacheCoherenceFlow.id
+func (flow *BaseCacheCoherenceFlow) Id() int32 {
+	return flow.id
 }
 
-func (cacheCoherenceFlow *BaseCacheCoherenceFlow) Generator() Controller {
-	return cacheCoherenceFlow.generator
+func (flow *BaseCacheCoherenceFlow) Generator() Controller {
+	return flow.generator
 }
 
-func (cacheCoherenceFlow *BaseCacheCoherenceFlow) ProducerFlow() CacheCoherenceFlow {
-	return cacheCoherenceFlow.producerFlow
+func (flow *BaseCacheCoherenceFlow) ProducerFlow() CacheCoherenceFlow {
+	return flow.producerFlow
 }
 
-func (cacheCoherenceFlow *BaseCacheCoherenceFlow) AncestorFlow() CacheCoherenceFlow {
-	return cacheCoherenceFlow.ancestorFlow
+func (flow *BaseCacheCoherenceFlow) AncestorFlow() CacheCoherenceFlow {
+	return flow.ancestorFlow
 }
 
-func (cacheCoherenceFlow *BaseCacheCoherenceFlow) SetAncestorFlow(ancestorFlow CacheCoherenceFlow) {
-	cacheCoherenceFlow.ancestorFlow = ancestorFlow
+func (flow *BaseCacheCoherenceFlow) SetAncestorFlow(ancestorFlow CacheCoherenceFlow) {
+	flow.ancestorFlow = ancestorFlow
 }
 
-func (cacheCoherenceFlow *BaseCacheCoherenceFlow) ChildFlows() []CacheCoherenceFlow {
-	return cacheCoherenceFlow.childFlows
+func (flow *BaseCacheCoherenceFlow) ChildFlows() []CacheCoherenceFlow {
+	return flow.childFlows
 }
 
-func (cacheCoherenceFlow *BaseCacheCoherenceFlow) SetChildFlows(childFlows []CacheCoherenceFlow) {
-	cacheCoherenceFlow.childFlows = childFlows
+func (flow *BaseCacheCoherenceFlow) SetChildFlows(childFlows []CacheCoherenceFlow) {
+	flow.childFlows = childFlows
 }
 
-func (cacheCoherenceFlow *BaseCacheCoherenceFlow) NumPendingDescendantFlows() int32 {
-	return cacheCoherenceFlow.numPendingDescendantFlows
+func (flow *BaseCacheCoherenceFlow) NumPendingDescendantFlows() int32 {
+	return flow.numPendingDescendantFlows
 }
 
-func (cacheCoherenceFlow *BaseCacheCoherenceFlow) SetNumPendingDescendantFlows(numPendingDescendantFlows int32) {
-	cacheCoherenceFlow.numPendingDescendantFlows = numPendingDescendantFlows
+func (flow *BaseCacheCoherenceFlow) SetNumPendingDescendantFlows(numPendingDescendantFlows int32) {
+	flow.numPendingDescendantFlows = numPendingDescendantFlows
 }
 
-func (cacheCoherenceFlow *BaseCacheCoherenceFlow) BeginCycle() int64 {
-	return cacheCoherenceFlow.beginCycle
+func (flow *BaseCacheCoherenceFlow) BeginCycle() int64 {
+	return flow.beginCycle
 }
 
-func (cacheCoherenceFlow *BaseCacheCoherenceFlow) EndCycle() int64 {
-	return cacheCoherenceFlow.endCycle
+func (flow *BaseCacheCoherenceFlow) EndCycle() int64 {
+	return flow.endCycle
 }
 
-func (cacheCoherenceFlow *BaseCacheCoherenceFlow) Completed() bool {
-	return cacheCoherenceFlow.completed
+func (flow *BaseCacheCoherenceFlow) Completed() bool {
+	return flow.completed
 }
 
-func (cacheCoherenceFlow *BaseCacheCoherenceFlow) Access() *MemoryHierarchyAccess {
-	return cacheCoherenceFlow.access
+func (flow *BaseCacheCoherenceFlow) Access() *MemoryHierarchyAccess {
+	return flow.access
 }
 
-func (cacheCoherenceFlow *BaseCacheCoherenceFlow) Tag() uint32 {
-	return cacheCoherenceFlow.tag
+func (flow *BaseCacheCoherenceFlow) Tag() uint32 {
+	return flow.tag
 }
 
-func (cacheCoherenceFlow *BaseCacheCoherenceFlow) Complete() {
-	cacheCoherenceFlow.completed = true
-	cacheCoherenceFlow.endCycle = cacheCoherenceFlow.generator.MemoryHierarchy().Driver().CycleAccurateEventQueue().CurrentCycle
-	cacheCoherenceFlow.ancestorFlow.SetNumPendingDescendantFlows(
-		cacheCoherenceFlow.ancestorFlow.NumPendingDescendantFlows() - 1)
+func (flow *BaseCacheCoherenceFlow) Complete() {
+	flow.completed = true
+	flow.endCycle = flow.generator.MemoryHierarchy().Driver().CycleAccurateEventQueue().CurrentCycle
+	flow.ancestorFlow.SetNumPendingDescendantFlows(
+		flow.ancestorFlow.NumPendingDescendantFlows() - 1)
 
-	if cacheCoherenceFlow.ancestorFlow.NumPendingDescendantFlows() == 0 {
+	if flow.ancestorFlow.NumPendingDescendantFlows() == 0 {
 		var pendingFlowsToReserve []CacheCoherenceFlow
 
-		for _, pendingFlow := range cacheCoherenceFlow.generator.MemoryHierarchy().PendingFlows() {
-			if pendingFlow != cacheCoherenceFlow.ancestorFlow {
+		for _, pendingFlow := range flow.generator.MemoryHierarchy().PendingFlows() {
+			if pendingFlow != flow.ancestorFlow {
 				pendingFlowsToReserve = append(pendingFlowsToReserve, pendingFlow)
 			}
 		}
 
-		cacheCoherenceFlow.generator.MemoryHierarchy().SetPendingFlows(pendingFlowsToReserve)
+		flow.generator.MemoryHierarchy().SetPendingFlows(pendingFlowsToReserve)
 	}
 }
 
@@ -135,27 +135,27 @@ type LoadFlow struct {
 }
 
 func NewLoadFlow(generator *CacheController, access *MemoryHierarchyAccess, tag uint32, onCompletedCallback func()) *LoadFlow {
-	var loadFlow = &LoadFlow{
+	var flow = &LoadFlow{
 		BaseCacheCoherenceFlow:NewBaseCacheCoherenceFlow(generator, nil, access, tag),
 	}
 
-	loadFlow.OnCompletedCallback = func() {
+	flow.OnCompletedCallback = func() {
 		onCompletedCallback()
-		loadFlow.Complete()
+		flow.Complete()
 	}
 
-	SetupCacheCoherenceFlowTree(loadFlow)
+	SetupCacheCoherenceFlowTree(flow)
 
-	return loadFlow
+	return flow
 }
 
-func (loadFlow *LoadFlow) String() string {
+func (flow *LoadFlow) String() string {
 	return fmt.Sprintf(
 		"[%d] %s: LoadFlow{id=%d, tag=0x%08x}",
-		loadFlow.BeginCycle(),
-		loadFlow.Generator(),
-		loadFlow.Id(),
-		loadFlow.Tag(),
+		flow.BeginCycle(),
+		flow.Generator(),
+		flow.Id(),
+		flow.Tag(),
 	)
 }
 
@@ -165,26 +165,26 @@ type StoreFlow struct {
 }
 
 func NewStoreFlow(generator *CacheController, access *MemoryHierarchyAccess, tag uint32, onCompletedCallback func()) *StoreFlow {
-	var storeFlow = &StoreFlow{
+	var flow = &StoreFlow{
 		BaseCacheCoherenceFlow:NewBaseCacheCoherenceFlow(generator, nil, access, tag),
 	}
 
-	storeFlow.OnCompletedCallback = func() {
+	flow.OnCompletedCallback = func() {
 		onCompletedCallback()
-		storeFlow.Complete()
+		flow.Complete()
 	}
 
-	SetupCacheCoherenceFlowTree(storeFlow)
+	SetupCacheCoherenceFlowTree(flow)
 
-	return storeFlow
+	return flow
 }
 
-func (storeFlow *StoreFlow) String() string {
+func (flow *StoreFlow) String() string {
 	return fmt.Sprintf(
 		"[%d] %s: StoreFlow{id=%d, tag=0x%08x}",
-		storeFlow.BeginCycle(),
-		storeFlow.Generator(),
-		storeFlow.Id(),
-		storeFlow.Tag(),
+		flow.BeginCycle(),
+		flow.Generator(),
+		flow.Id(),
+		flow.Tag(),
 	)
 }

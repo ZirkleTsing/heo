@@ -9,13 +9,13 @@ const (
 	MemoryHierarchyAccessType_UNKNOWN = MemoryHierarchyAccessType(3)
 )
 
-func (memoryHierarchyAccessType MemoryHierarchyAccessType) IsRead() bool {
-	return memoryHierarchyAccessType == MemoryHierarchyAccessType_IFETCH ||
-		memoryHierarchyAccessType == MemoryHierarchyAccessType_LOAD
+func (accessType MemoryHierarchyAccessType) IsRead() bool {
+	return accessType == MemoryHierarchyAccessType_IFETCH ||
+		accessType == MemoryHierarchyAccessType_LOAD
 }
 
-func (memoryHierarchyAccessType MemoryHierarchyAccessType) IsWrite() bool {
-	return memoryHierarchyAccessType == MemoryHierarchyAccessType_STORE
+func (accessType MemoryHierarchyAccessType) IsWrite() bool {
+	return accessType == MemoryHierarchyAccessType_STORE
 }
 
 type MemoryHierarchyAccess struct {
@@ -37,7 +37,7 @@ type MemoryHierarchyAccess struct {
 }
 
 func NewMemoryHierarchyAccess(memoryHierarchy MemoryHierarchy, accessType MemoryHierarchyAccessType, threadId int32, virtualPc int32, physicalAddress uint32, physicalTag uint32, onCompletedCallback func()) *MemoryHierarchyAccess {
-	var memoryHierarchyAccess = &MemoryHierarchyAccess{
+	var access = &MemoryHierarchyAccess{
 		MemoryHierarchy:memoryHierarchy,
 		Id:memoryHierarchy.CurrentMemoryHierarchyAccessId(),
 		AccessType:accessType,
@@ -53,15 +53,15 @@ func NewMemoryHierarchyAccess(memoryHierarchy MemoryHierarchy, accessType Memory
 		memoryHierarchy.CurrentMemoryHierarchyAccessId() + 1,
 	)
 
-	return memoryHierarchyAccess
+	return access
 }
 
-func (memoryHierarchyAccess *MemoryHierarchyAccess) NumCycles() uint32 {
-	return uint32(memoryHierarchyAccess.EndCycle - memoryHierarchyAccess.BeginCycle)
+func (access *MemoryHierarchyAccess) NumCycles() uint32 {
+	return uint32(access.EndCycle - access.BeginCycle)
 }
 
-func (memoryHierarchyAccess *MemoryHierarchyAccess) Complete() {
-	memoryHierarchyAccess.EndCycle = memoryHierarchyAccess.MemoryHierarchy.Driver().CycleAccurateEventQueue().CurrentCycle
-	memoryHierarchyAccess.OnCompletedCallback()
-	memoryHierarchyAccess.OnCompletedCallback = nil
+func (access *MemoryHierarchyAccess) Complete() {
+	access.EndCycle = access.MemoryHierarchy.Driver().CycleAccurateEventQueue().CurrentCycle
+	access.OnCompletedCallback()
+	access.OnCompletedCallback = nil
 }

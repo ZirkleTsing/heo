@@ -1,16 +1,16 @@
 package uncore
 
-func SetupCacheCoherenceFlowTree(cacheCoherenceFlow CacheCoherenceFlow) {
-	if cacheCoherenceFlow.ProducerFlow() == nil {
-		cacheCoherenceFlow.SetAncestorFlow(cacheCoherenceFlow)
-		cacheCoherenceFlow.Generator().MemoryHierarchy().SetPendingFlows(
-			append(cacheCoherenceFlow.Generator().MemoryHierarchy().PendingFlows(), cacheCoherenceFlow),
+func SetupCacheCoherenceFlowTree(flow CacheCoherenceFlow) {
+	if flow.ProducerFlow() == nil {
+		flow.SetAncestorFlow(flow)
+		flow.Generator().MemoryHierarchy().SetPendingFlows(
+			append(flow.Generator().MemoryHierarchy().PendingFlows(), flow),
 		)
 	} else {
-		cacheCoherenceFlow.SetAncestorFlow(cacheCoherenceFlow.ProducerFlow().AncestorFlow())
-		cacheCoherenceFlow.ProducerFlow().SetChildFlows(append(cacheCoherenceFlow.ProducerFlow().ChildFlows(), cacheCoherenceFlow))
+		flow.SetAncestorFlow(flow.ProducerFlow().AncestorFlow())
+		flow.ProducerFlow().SetChildFlows(append(flow.ProducerFlow().ChildFlows(), flow))
 	}
 
-	cacheCoherenceFlow.AncestorFlow().SetNumPendingDescendantFlows(
-		cacheCoherenceFlow.AncestorFlow().NumPendingDescendantFlows() + 1)
+	flow.AncestorFlow().SetNumPendingDescendantFlows(
+		flow.AncestorFlow().NumPendingDescendantFlows() + 1)
 }

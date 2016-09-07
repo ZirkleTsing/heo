@@ -6,21 +6,21 @@ type PipelineBuffer struct {
 }
 
 func NewPipelineBuffer(size uint32) *PipelineBuffer {
-	var pipelineBuffer = &PipelineBuffer{
+	var buffer = &PipelineBuffer{
 		Size:size,
 	}
 
-	return pipelineBuffer
+	return buffer
 }
 
-func (pipelineBuffer *PipelineBuffer) Count() uint32 {
-	return uint32(len(pipelineBuffer.Entries))
+func (buffer *PipelineBuffer) Count() uint32 {
+	return uint32(len(buffer.Entries))
 }
 
-func (pipelineBuffer *PipelineBuffer) Full() bool {
-	return pipelineBuffer.Count() >= pipelineBuffer.Size
+func (buffer *PipelineBuffer) Full() bool {
+	return buffer.Count() >= buffer.Size
 }
 
-func (pipelineBuffer *PipelineBuffer) Empty() bool {
-	return pipelineBuffer.Count() == 0
+func (buffer *PipelineBuffer) Empty() bool {
+	return buffer.Count() == 0
 }

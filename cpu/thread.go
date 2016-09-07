@@ -31,7 +31,7 @@ type BaseThread struct {
 }
 
 func NewBaseThread(core Core, num int32) *BaseThread {
-	var baseThread = &BaseThread{
+	var thread = &BaseThread{
 		core:core,
 		num:num,
 		id:core.Num() * core.Processor().Experiment.CPUConfig.NumThreadsPerCore + num,
@@ -42,72 +42,72 @@ func NewBaseThread(core Core, num int32) *BaseThread {
 	core.Processor().Experiment.BlockingEventDispatcher().AddListener(reflect.TypeOf((*StaticInstExecutedEvent)(nil)), func(event interface{}) {
 		var staticInstExecutedEvent = event.(*StaticInstExecutedEvent)
 
-		if staticInstExecutedEvent.Context == baseThread.Context() {
+		if staticInstExecutedEvent.Context == thread.Context() {
 			var mnemonicName = staticInstExecutedEvent.StaticInst.Mnemonic.Name
 
-			if _, ok := baseThread.ExecutedMnemonicNames[mnemonicName]; !ok {
-				baseThread.ExecutedMnemonicNames[mnemonicName] = 0
+			if _, ok := thread.ExecutedMnemonicNames[mnemonicName]; !ok {
+				thread.ExecutedMnemonicNames[mnemonicName] = 0
 			}
 
-			baseThread.ExecutedMnemonicNames[mnemonicName]++
+			thread.ExecutedMnemonicNames[mnemonicName]++
 		}
 	})
 
 	core.Processor().Experiment.BlockingEventDispatcher().AddListener(reflect.TypeOf((*SyscallExecutedEvent)(nil)), func(event interface{}) {
 		var syscallExecutedEvent = event.(*SyscallExecutedEvent)
 
-		if syscallExecutedEvent.Context == baseThread.Context() {
+		if syscallExecutedEvent.Context == thread.Context() {
 			var syscallName = syscallExecutedEvent.SyscallName
 
-			if _, ok := baseThread.ExecutedSyscallNames[syscallName]; !ok {
-				baseThread.ExecutedSyscallNames[syscallName] = 0
+			if _, ok := thread.ExecutedSyscallNames[syscallName]; !ok {
+				thread.ExecutedSyscallNames[syscallName] = 0
 			}
 
-			baseThread.ExecutedSyscallNames[syscallName]++
+			thread.ExecutedSyscallNames[syscallName]++
 		}
 	})
 
-	return baseThread
+	return thread
 }
 
-func (baseThread *BaseThread) Core() Core {
-	return baseThread.core
+func (thread *BaseThread) Core() Core {
+	return thread.core
 }
 
-func (baseThread *BaseThread) Num() int32 {
-	return baseThread.num
+func (thread *BaseThread) Num() int32 {
+	return thread.num
 }
 
-func (baseThread *BaseThread) Id() int32 {
-	return baseThread.id
+func (thread *BaseThread) Id() int32 {
+	return thread.id
 }
 
-func (baseThread *BaseThread) Context() *Context {
-	return baseThread.context
+func (thread *BaseThread) Context() *Context {
+	return thread.context
 }
 
-func (baseThread *BaseThread) SetContext(context *Context) {
-	baseThread.context = context
+func (thread *BaseThread) SetContext(context *Context) {
+	thread.context = context
 }
 
-func (baseThread *BaseThread) NumDynamicInsts() int32 {
-	return baseThread.numDynamicInsts
+func (thread *BaseThread) NumDynamicInsts() int32 {
+	return thread.numDynamicInsts
 }
 
-func (baseThread *BaseThread) FastForwardOneCycle() {
-	if baseThread.Context() != nil && baseThread.Context().State == ContextState_RUNNING {
+func (thread *BaseThread) FastForwardOneCycle() {
+	if thread.Context() != nil && thread.Context().State == ContextState_RUNNING {
 		var staticInst *StaticInst
 
 		for {
-			staticInst = baseThread.Context().DecodeNextStaticInst()
-			staticInst.Execute(baseThread.Context())
+			staticInst = thread.Context().DecodeNextStaticInst()
+			staticInst.Execute(thread.Context())
 
 			if staticInst.Mnemonic.Name != Mnemonic_NOP {
-				baseThread.numDynamicInsts++
+				thread.numDynamicInsts++
 			}
 
-			if !(baseThread.Context() != nil &&
-				baseThread.Context().State == ContextState_RUNNING &&
+			if !(thread.Context() != nil &&
+				thread.Context().State == ContextState_RUNNING &&
 				staticInst.Mnemonic.Name == Mnemonic_NOP) {
 				break
 			}

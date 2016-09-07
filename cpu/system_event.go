@@ -16,27 +16,27 @@ type TimeCriterion struct {
 }
 
 func NewTimeCriterion() *TimeCriterion {
-	var timeCriterion = &TimeCriterion{
+	var criterion = &TimeCriterion{
 	}
 
-	return timeCriterion
+	return criterion
 }
 
-func (timeCriterion *TimeCriterion) NeedProcess(context *Context) bool {
-	return timeCriterion.When <= native.Clock(context.Kernel.CurrentCycle)
+func (criterion *TimeCriterion) NeedProcess(context *Context) bool {
+	return criterion.When <= native.Clock(context.Kernel.CurrentCycle)
 }
 
 type SignalCriterion struct {
 }
 
 func NewSignalCriterion() *SignalCriterion {
-	var signalCriterion = &SignalCriterion{
+	var criterion = &SignalCriterion{
 	}
 
-	return signalCriterion
+	return criterion
 }
 
-func (signalCriterion *SignalCriterion) NeedProcess(context *Context) bool {
+func (criterion *SignalCriterion) NeedProcess(context *Context) bool {
 	for signal := uint32(1); signal <= MAX_SIGNAL; signal++ {
 		if context.Kernel.MustProcessSignal(context, signal) {
 			return true
@@ -52,20 +52,20 @@ type WaitForProcessIdCriterion struct {
 }
 
 func NewWaitForProcessIdCriterion(context *Context, processId int32) *WaitForProcessIdCriterion {
-	var waitForProcessIdCriterion = &WaitForProcessIdCriterion{
+	var criterion = &WaitForProcessIdCriterion{
 		ProcessId:processId,
 	}
 
 	context.Kernel.Experiment.BlockingEventDispatcher().AddListener(reflect.TypeOf((*ContextKilledEvent)(nil)), func(event interface{}) {
-		waitForProcessIdCriterion.HasProcessKilled = true
+		criterion.HasProcessKilled = true
 	})
 
-	return waitForProcessIdCriterion
+	return criterion
 }
 
-func (waitForProcessIdCriterion *WaitForProcessIdCriterion) NeedProcess(context *Context) bool {
-	return (waitForProcessIdCriterion.ProcessId == -1 && waitForProcessIdCriterion.HasProcessKilled) ||
-		(waitForProcessIdCriterion.ProcessId > 0 && context.Kernel.GetContextFromProcessId(waitForProcessIdCriterion.ProcessId) == nil)
+func (criterion *WaitForProcessIdCriterion) NeedProcess(context *Context) bool {
+	return (criterion.ProcessId == -1 && criterion.HasProcessKilled) ||
+		(criterion.ProcessId > 0 && context.Kernel.GetContextFromProcessId(criterion.ProcessId) == nil)
 }
 
 type WaitForFileDescriptorCriterion struct {
@@ -76,14 +76,14 @@ type WaitForFileDescriptorCriterion struct {
 }
 
 func NewWaitForFileDescriptorCriterion() *WaitForFileDescriptorCriterion {
-	var waitForFileDescriptorCriterion = &WaitForFileDescriptorCriterion{
+	var criterion = &WaitForFileDescriptorCriterion{
 	}
 
-	return waitForFileDescriptorCriterion
+	return criterion
 }
 
-func (waitForFileDescriptorCriterion *WaitForFileDescriptorCriterion) NeedProcess(context *Context) bool {
-	return !waitForFileDescriptorCriterion.Buffer.IsEmpty()
+func (criterion *WaitForFileDescriptorCriterion) NeedProcess(context *Context) bool {
+	return !criterion.Buffer.IsEmpty()
 }
 
 const (
@@ -109,20 +109,20 @@ type BaseSystemEvent struct {
 }
 
 func NewBaseSystemEvent(context *Context, eventType SystemEventType) *BaseSystemEvent {
-	var baseSystemEvent = &BaseSystemEvent{
+	var event = &BaseSystemEvent{
 		context:context,
 		eventType:eventType,
 	}
 
-	return baseSystemEvent
+	return event
 }
 
-func (baseSystemEvent *BaseSystemEvent) Context() *Context {
-	return baseSystemEvent.context
+func (event *BaseSystemEvent) Context() *Context {
+	return event.context
 }
 
-func (baseSystemEvent *BaseSystemEvent) EventType() SystemEventType {
-	return baseSystemEvent.eventType
+func (event *BaseSystemEvent) EventType() SystemEventType {
+	return event.eventType
 }
 
 type PollEvent struct {
@@ -132,30 +132,30 @@ type PollEvent struct {
 }
 
 func NewPollEvent(context *Context) *PollEvent {
-	var pollEvent = &PollEvent{
+	var event = &PollEvent{
 		BaseSystemEvent:NewBaseSystemEvent(context, SystemEventType_POLL),
 		TimeCriterion:NewTimeCriterion(),
 		WaitForFileDescriptorCriterion: NewWaitForFileDescriptorCriterion(),
 	}
 
-	return pollEvent
+	return event
 }
 
-func (pollEvent *PollEvent) NeedProcess() bool {
-	return pollEvent.TimeCriterion.NeedProcess(pollEvent.context) ||
-		pollEvent.WaitForFileDescriptorCriterion.NeedProcess(pollEvent.context)
+func (event *PollEvent) NeedProcess() bool {
+	return event.TimeCriterion.NeedProcess(event.context) ||
+		event.WaitForFileDescriptorCriterion.NeedProcess(event.context)
 }
 
-func (pollEvent *PollEvent) Process() {
-	if !pollEvent.WaitForFileDescriptorCriterion.Buffer.IsEmpty() {
-		pollEvent.Context().Process.Memory().WriteHalfWordAt(pollEvent.WaitForFileDescriptorCriterion.Pufds + 6, 1)
-		pollEvent.Context().Regs().Gpr[regs.REGISTER_V0] = 1
+func (event *PollEvent) Process() {
+	if !event.WaitForFileDescriptorCriterion.Buffer.IsEmpty() {
+		event.Context().Process.Memory().WriteHalfWordAt(event.WaitForFileDescriptorCriterion.Pufds + 6, 1)
+		event.Context().Regs().Gpr[regs.REGISTER_V0] = 1
 	} else {
-		pollEvent.Context().Regs().Gpr[regs.REGISTER_V0] = 0
+		event.Context().Regs().Gpr[regs.REGISTER_V0] = 0
 	}
 
-	pollEvent.Context().Regs().Gpr[regs.REGISTER_A3] = 0
-	pollEvent.context.Resume()
+	event.Context().Regs().Gpr[regs.REGISTER_A3] = 0
+	event.context.Resume()
 }
 
 type ReadEvent struct {
@@ -164,29 +164,29 @@ type ReadEvent struct {
 }
 
 func NewReadEvent(context *Context) *ReadEvent {
-	var readEvent = &ReadEvent{
+	var event = &ReadEvent{
 		BaseSystemEvent: NewBaseSystemEvent(context, SystemEventType_READ),
 		WaitForFileDescriptorCriterion:NewWaitForFileDescriptorCriterion(),
 	}
 
-	return readEvent
+	return event
 }
 
-func (readEvent *ReadEvent) NeedProcess() bool {
-	return readEvent.WaitForFileDescriptorCriterion.NeedProcess(readEvent.context)
+func (event *ReadEvent) NeedProcess() bool {
+	return event.WaitForFileDescriptorCriterion.NeedProcess(event.context)
 }
 
-func (readEvent *ReadEvent) Process() {
-	readEvent.Context().Resume()
+func (event *ReadEvent) Process() {
+	event.Context().Resume()
 
-	var buf = readEvent.WaitForFileDescriptorCriterion.Buffer.Read(readEvent.WaitForFileDescriptorCriterion.Size)
+	var buf = event.WaitForFileDescriptorCriterion.Buffer.Read(event.WaitForFileDescriptorCriterion.Size)
 
 	var numRead = uint32(len(buf))
 
-	readEvent.Context().Regs().Gpr[regs.REGISTER_V0] = numRead
-	readEvent.Context().Regs().Gpr[regs.REGISTER_A3] = 0
+	event.Context().Regs().Gpr[regs.REGISTER_V0] = numRead
+	event.Context().Regs().Gpr[regs.REGISTER_A3] = 0
 
-	readEvent.Context().Process.Memory().WriteBlockAt(readEvent.WaitForFileDescriptorCriterion.Address, numRead, buf)
+	event.Context().Process.Memory().WriteBlockAt(event.WaitForFileDescriptorCriterion.Address, numRead, buf)
 }
 
 type ResumeEvent struct {
@@ -195,20 +195,20 @@ type ResumeEvent struct {
 }
 
 func NewResumeEvent(context *Context) *ResumeEvent {
-	var resumeEvent = &ResumeEvent{
+	var event = &ResumeEvent{
 		BaseSystemEvent: NewBaseSystemEvent(context, SystemEventType_RESUME),
 		TimeCriterion:NewTimeCriterion(),
 	}
 
-	return resumeEvent
+	return event
 }
 
-func (resumeEvent *ResumeEvent) NeedProcess() bool {
-	return resumeEvent.TimeCriterion.NeedProcess(resumeEvent.context)
+func (event *ResumeEvent) NeedProcess() bool {
+	return event.TimeCriterion.NeedProcess(event.context)
 }
 
-func (resumeEvent *ResumeEvent) Process() {
-	resumeEvent.Context().Resume()
+func (event *ResumeEvent) Process() {
+	event.Context().Resume()
 }
 
 type SignalSuspendEvent struct {
@@ -217,24 +217,24 @@ type SignalSuspendEvent struct {
 }
 
 func NewSignalSuspendEvent(context *Context) *SignalSuspendEvent {
-	var signalSuspendEvent = &SignalSuspendEvent{
+	var event = &SignalSuspendEvent{
 		BaseSystemEvent: NewBaseSystemEvent(context, SystemEventType_SIGNAL_SUSPEND),
 		SignalCriterion:NewSignalCriterion(),
 	}
 
-	return signalSuspendEvent
+	return event
 }
 
-func (signalSuspendEvent *SignalSuspendEvent) NeedProcess() bool {
-	return signalSuspendEvent.SignalCriterion.NeedProcess(signalSuspendEvent.context)
+func (event *SignalSuspendEvent) NeedProcess() bool {
+	return event.SignalCriterion.NeedProcess(event.context)
 }
 
-func (signalSuspendEvent *SignalSuspendEvent) Process() {
-	signalSuspendEvent.Context().Resume()
+func (event *SignalSuspendEvent) Process() {
+	event.Context().Resume()
 
-	signalSuspendEvent.Context().Kernel.ProcessSignals()
+	event.Context().Kernel.ProcessSignals()
 
-	signalSuspendEvent.Context().SignalMasks.Blocked = signalSuspendEvent.Context().SignalMasks.Backup.Clone()
+	event.Context().SignalMasks.Blocked = event.Context().SignalMasks.Backup.Clone()
 }
 
 type WaitEvent struct {
@@ -244,25 +244,25 @@ type WaitEvent struct {
 }
 
 func NewWaitEvent(context *Context, processId int32) *WaitEvent {
-	var waitEvent = &WaitEvent{
+	var event = &WaitEvent{
 		BaseSystemEvent: NewBaseSystemEvent(context, SystemEventType_WAIT),
 		WaitForProcessIdCriterion: NewWaitForProcessIdCriterion(context, processId),
 		SignalCriterion: NewSignalCriterion(),
 	}
 
-	return waitEvent
+	return event
 }
 
-func (waitEvent *WaitEvent) NeedProcess() bool {
-	return waitEvent.WaitForProcessIdCriterion.NeedProcess(waitEvent.context) ||
-		waitEvent.SignalCriterion.NeedProcess(waitEvent.context)
+func (event *WaitEvent) NeedProcess() bool {
+	return event.WaitForProcessIdCriterion.NeedProcess(event.context) ||
+		event.SignalCriterion.NeedProcess(event.context)
 }
 
-func (waitEvent *WaitEvent) Process() {
-	waitEvent.Context().Resume()
+func (event *WaitEvent) Process() {
+	event.Context().Resume()
 
-	waitEvent.Context().Regs().Gpr[regs.REGISTER_V0] = uint32(waitEvent.WaitForProcessIdCriterion.ProcessId)
-	waitEvent.Context().Regs().Gpr[regs.REGISTER_A3] = 0
+	event.Context().Regs().Gpr[regs.REGISTER_V0] = uint32(event.WaitForProcessIdCriterion.ProcessId)
+	event.Context().Regs().Gpr[regs.REGISTER_A3] = 0
 }
 
 

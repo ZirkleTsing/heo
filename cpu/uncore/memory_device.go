@@ -23,27 +23,27 @@ type BaseMemoryDevice struct {
 }
 
 func NewBaseMemoryDevice(memoryHierarchy MemoryHierarchy, name string, deviceType MemoryDeviceType) *BaseMemoryDevice {
-	var baseMemoryDevice = &BaseMemoryDevice{
+	var memoryDevice = &BaseMemoryDevice{
 		memoryHierarchy:memoryHierarchy,
 		name:name,
 		deviceType:deviceType,
 	}
 
-	return baseMemoryDevice
+	return memoryDevice
 }
 
-func (baseMemoryDevice *BaseMemoryDevice) Transfer(to MemoryDevice, size uint32, onCompletedCallback func()) {
-	baseMemoryDevice.memoryHierarchy.Transfer(baseMemoryDevice, to, size, onCompletedCallback)
+func (memoryDevice *BaseMemoryDevice) Transfer(to MemoryDevice, size uint32, onCompletedCallback func()) {
+	memoryDevice.memoryHierarchy.Transfer(memoryDevice, to, size, onCompletedCallback)
 }
 
-func (baseMemoryDevice *BaseMemoryDevice) MemoryHierarchy() MemoryHierarchy {
-	return baseMemoryDevice.memoryHierarchy
+func (memoryDevice *BaseMemoryDevice) MemoryHierarchy() MemoryHierarchy {
+	return memoryDevice.memoryHierarchy
 }
 
-func (baseMemoryDevice *BaseMemoryDevice) Name() string {
-	return baseMemoryDevice.name
+func (memoryDevice *BaseMemoryDevice) Name() string {
+	return memoryDevice.name
 }
 
-func (baseMemoryDevice *BaseMemoryDevice) DeviceType() MemoryDeviceType {
-	return baseMemoryDevice.deviceType
+func (memoryDevice *BaseMemoryDevice) DeviceType() MemoryDeviceType {
+	return memoryDevice.deviceType
 }

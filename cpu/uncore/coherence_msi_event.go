@@ -9,9 +9,9 @@ type BaseControllerEvent struct {
 }
 
 func NewBaseControllerEvent(generator Controller, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32) *BaseControllerEvent {
-	var baseControllerEvent = &BaseControllerEvent{
+	var event = &BaseControllerEvent{
 		BaseCacheCoherenceFlow:NewBaseCacheCoherenceFlow(generator, producerFlow, access, tag),
 	}
 
-	return baseControllerEvent
+	return event
 }

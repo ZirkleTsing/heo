@@ -29,7 +29,7 @@ type CPUConfig struct {
 }
 
 func NewCPUConfig(outputDirectory string) *CPUConfig {
-	var cpuConfig = &CPUConfig{
+	var config = &CPUConfig{
 		OutputDirectory:outputDirectory,
 
 		MaxDynamicInsts:-1,
@@ -53,9 +53,9 @@ func NewCPUConfig(outputDirectory string) *CPUConfig {
 		ReturnAddressStackSize:8,
 	}
 
-	return cpuConfig
+	return config
 }
 
-func (cpuConfig *CPUConfig) Dump(outputDirectory string) {
-	simutil.WriteJsonFile(cpuConfig, outputDirectory, simutil.CPU_CONFIG_JSON_FILE_NAME)
+func (config *CPUConfig) Dump(outputDirectory string) {
+	simutil.WriteJsonFile(config, outputDirectory, simutil.CPU_CONFIG_JSON_FILE_NAME)
 }

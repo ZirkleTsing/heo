@@ -31,24 +31,24 @@ type BaseCoherenceMessage struct {
 }
 
 func NewBaseCoherenceMessage(generator Controller, producerFlow CacheCoherenceFlow, messageType CoherenceMessageType, access *MemoryHierarchyAccess, tag uint32) *BaseCoherenceMessage {
-	var coherenceMessage = &BaseCoherenceMessage{
+	var message = &BaseCoherenceMessage{
 		BaseCacheCoherenceFlow:NewBaseCacheCoherenceFlow(generator, producerFlow, access, tag),
 		messageType:messageType,
 	}
 
-	return coherenceMessage
+	return message
 }
 
-func (baseCoherenceMessage *BaseCoherenceMessage) MessageType() CoherenceMessageType {
-	return baseCoherenceMessage.messageType
+func (message *BaseCoherenceMessage) MessageType() CoherenceMessageType {
+	return message.messageType
 }
 
-func (baseCoherenceMessage *BaseCoherenceMessage) DestArrived() bool {
-	return baseCoherenceMessage.destArrived
+func (message *BaseCoherenceMessage) DestArrived() bool {
+	return message.destArrived
 }
 
-func (baseCoherenceMessage *BaseCoherenceMessage) SetDestArrived(destArrived bool) {
-	baseCoherenceMessage.destArrived = destArrived
+func (message *BaseCoherenceMessage) SetDestArrived(destArrived bool) {
+	message.destArrived = destArrived
 }
 
 type DataMessage struct {
@@ -58,15 +58,15 @@ type DataMessage struct {
 }
 
 func NewDataMessage(generator Controller, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, sender Controller, numInvAcks int32) *DataMessage {
-	var dataMessage = &DataMessage{
+	var message = &DataMessage{
 		BaseCoherenceMessage:NewBaseCoherenceMessage(generator, producerFlow, CoherenceMessageType_DATA, access, tag),
 		Sender:sender,
 		NumInvAcks:numInvAcks,
 	}
 
-	SetupCacheCoherenceFlowTree(dataMessage)
+	SetupCacheCoherenceFlowTree(message)
 
-	return dataMessage
+	return message
 }
 
 type FwdGetMMessage struct {
@@ -75,14 +75,14 @@ type FwdGetMMessage struct {
 }
 
 func NewFwdGetMMessage(generator Controller, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, requester *CacheController) *FwdGetMMessage {
-	var fwdGetMMessage = &FwdGetMMessage{
+	var message = &FwdGetMMessage{
 		BaseCoherenceMessage:NewBaseCoherenceMessage(generator, producerFlow, CoherenceMessageType_FWD_GETM, access, tag),
 		Requester:requester,
 	}
 
-	SetupCacheCoherenceFlowTree(fwdGetMMessage)
+	SetupCacheCoherenceFlowTree(message)
 
-	return fwdGetMMessage
+	return message
 }
 
 type FwdGetSMessage struct {
@@ -91,14 +91,14 @@ type FwdGetSMessage struct {
 }
 
 func NewFwdGetSMessage(generator Controller, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, requester *CacheController) *FwdGetSMessage {
-	var fwdGetSMessage = &FwdGetSMessage{
+	var message = &FwdGetSMessage{
 		BaseCoherenceMessage:NewBaseCoherenceMessage(generator, producerFlow, CoherenceMessageType_FWD_GETS, access, tag),
 		Requester:requester,
 	}
 
-	SetupCacheCoherenceFlowTree(fwdGetSMessage)
+	SetupCacheCoherenceFlowTree(message)
 
-	return fwdGetSMessage
+	return message
 }
 
 type GetMMessage struct {
@@ -107,14 +107,14 @@ type GetMMessage struct {
 }
 
 func NewGetMMessage(generator Controller, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, requester *CacheController) *GetMMessage {
-	var getMMessage = &GetMMessage{
+	var message = &GetMMessage{
 		BaseCoherenceMessage:NewBaseCoherenceMessage(generator, producerFlow, CoherenceMessageType_GETM, access, tag),
 		Requester:requester,
 	}
 
-	SetupCacheCoherenceFlowTree(getMMessage)
+	SetupCacheCoherenceFlowTree(message)
 
-	return getMMessage
+	return message
 }
 
 type GetSMessage struct {
@@ -123,14 +123,14 @@ type GetSMessage struct {
 }
 
 func NewGetSMessage(generator Controller, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, requester *CacheController) *GetSMessage {
-	var getSMessage = &GetSMessage{
+	var message = &GetSMessage{
 		BaseCoherenceMessage:NewBaseCoherenceMessage(generator, producerFlow, CoherenceMessageType_GETS, access, tag),
 		Requester:requester,
 	}
 
-	SetupCacheCoherenceFlowTree(getSMessage)
+	SetupCacheCoherenceFlowTree(message)
 
-	return getSMessage
+	return message
 }
 
 type InvAckMessage struct {
@@ -139,14 +139,14 @@ type InvAckMessage struct {
 }
 
 func NewInvAckMessage(generator Controller, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, sender *CacheController) *InvAckMessage {
-	var invAckMessage = &InvAckMessage{
+	var message = &InvAckMessage{
 		BaseCoherenceMessage:NewBaseCoherenceMessage(generator, producerFlow, CoherenceMessageType_INV_ACK, access, tag),
 		Sender:sender,
 	}
 
-	SetupCacheCoherenceFlowTree(invAckMessage)
+	SetupCacheCoherenceFlowTree(message)
 
-	return invAckMessage
+	return message
 }
 
 type InvMessage struct {
@@ -155,14 +155,14 @@ type InvMessage struct {
 }
 
 func NewInvMessage(generator Controller, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, requester *CacheController) *InvMessage {
-	var invMessage = &InvMessage{
+	var message = &InvMessage{
 		BaseCoherenceMessage:NewBaseCoherenceMessage(generator, producerFlow, CoherenceMessageType_INV, access, tag),
 		Requester:requester,
 	}
 
-	SetupCacheCoherenceFlowTree(invMessage)
+	SetupCacheCoherenceFlowTree(message)
 
-	return invMessage
+	return message
 }
 
 type PutAckMessage struct {
@@ -170,13 +170,13 @@ type PutAckMessage struct {
 }
 
 func NewPutAckMessage(generator Controller, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32) *PutAckMessage {
-	var putAckMessage = &PutAckMessage{
+	var message = &PutAckMessage{
 		BaseCoherenceMessage:NewBaseCoherenceMessage(generator, producerFlow, CoherenceMessageType_PUT_ACK, access, tag),
 	}
 
-	SetupCacheCoherenceFlowTree(putAckMessage)
+	SetupCacheCoherenceFlowTree(message)
 
-	return putAckMessage
+	return message
 }
 
 type PutMAndDataMessage struct {
@@ -185,14 +185,14 @@ type PutMAndDataMessage struct {
 }
 
 func NewPutMAndDataMessage(generator Controller, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, requester *CacheController) *PutMAndDataMessage {
-	var putMAndDataMessage = &PutMAndDataMessage{
+	var message = &PutMAndDataMessage{
 		BaseCoherenceMessage:NewBaseCoherenceMessage(generator, producerFlow, CoherenceMessageType_PUTM_AND_DATA, access, tag),
 		Requester:requester,
 	}
 
-	SetupCacheCoherenceFlowTree(putMAndDataMessage)
+	SetupCacheCoherenceFlowTree(message)
 
-	return putMAndDataMessage
+	return message
 }
 
 type PutSMessage struct {
@@ -201,14 +201,14 @@ type PutSMessage struct {
 }
 
 func NewPutSMessage(generator Controller, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, requester *CacheController) *PutSMessage {
-	var putSMessage = &PutSMessage{
+	var message = &PutSMessage{
 		BaseCoherenceMessage:NewBaseCoherenceMessage(generator, producerFlow, CoherenceMessageType_PUTS, access, tag),
 		Requester:requester,
 	}
 
-	SetupCacheCoherenceFlowTree(putSMessage)
+	SetupCacheCoherenceFlowTree(message)
 
-	return putSMessage
+	return message
 }
 
 type RecallAckMessage struct {
@@ -217,14 +217,14 @@ type RecallAckMessage struct {
 }
 
 func NewRecallAckMessage(generator Controller, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, sender *CacheController) *RecallAckMessage {
-	var recallAckMessage = &RecallAckMessage{
+	var message = &RecallAckMessage{
 		BaseCoherenceMessage:NewBaseCoherenceMessage(generator, producerFlow, CoherenceMessageType_RECALL_ACK, access, tag),
 		Sender:sender,
 	}
 
-	SetupCacheCoherenceFlowTree(recallAckMessage)
+	SetupCacheCoherenceFlowTree(message)
 
-	return recallAckMessage
+	return message
 }
 
 type RecallMessage struct {
@@ -232,11 +232,11 @@ type RecallMessage struct {
 }
 
 func NewRecallMessage(generator Controller, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32) *RecallMessage {
-	var recallMessage = &RecallMessage{
+	var message = &RecallMessage{
 		BaseCoherenceMessage:NewBaseCoherenceMessage(generator, producerFlow, CoherenceMessageType_RECALL, access, tag),
 	}
 
-	SetupCacheCoherenceFlowTree(recallMessage)
+	SetupCacheCoherenceFlowTree(message)
 
-	return recallMessage
+	return message
 }

@@ -32,7 +32,7 @@ type DirectoryControllerFiniteStateMachine struct {
 }
 
 func NewDirectoryControllerFiniteStateMachine(set uint32, way uint32, directoryController *DirectoryController) *DirectoryControllerFiniteStateMachine {
-	var directoryControllerFsm = &DirectoryControllerFiniteStateMachine{
+	var fsm = &DirectoryControllerFiniteStateMachine{
 		BaseFiniteStateMachine:simutil.NewBaseFiniteStateMachine(DirectoryControllerState_I),
 		DirectoryController:directoryController,
 		DirectoryEntry:NewDirectoryEntry(),
@@ -42,144 +42,144 @@ func NewDirectoryControllerFiniteStateMachine(set uint32, way uint32, directoryC
 		VictimTag:INVALID_TAG,
 	}
 
-	directoryControllerFsm.BlockingEventDispatcher.AddListener(
+	fsm.BlockingEventDispatcher.AddListener(
 		reflect.TypeOf((*simutil.ExitStateEvent)(nil)),
 		func(event interface{}) {
-			directoryControllerFsm.PreviousState = directoryControllerFsm.State().(DirectoryControllerState)
+			fsm.PreviousState = fsm.State().(DirectoryControllerState)
 		},
 	)
 
-	return directoryControllerFsm
+	return fsm
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) Line() *CacheLine {
-	return directoryControllerFsm.DirectoryController.Cache.Sets[directoryControllerFsm.Set].Lines[directoryControllerFsm.Way]
+func (fsm *DirectoryControllerFiniteStateMachine) Line() *CacheLine {
+	return fsm.DirectoryController.Cache.Sets[fsm.Set].Lines[fsm.Way]
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) fireTransition(event DirectoryControllerEvent) {
+func (fsm *DirectoryControllerFiniteStateMachine) fireTransition(event DirectoryControllerEvent) {
 	event.Complete()
-	directoryControllerFsm.DirectoryController.FsmFactory.FireTransition(directoryControllerFsm, event.EventType(), event)
+	fsm.DirectoryController.FsmFactory.FireTransition(fsm, event.EventType(), event)
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) OnEventGetS(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController, onStalledCallback func()) {
-	var getSEvent = NewGetSEvent(
-		directoryControllerFsm.DirectoryController,
+func (fsm *DirectoryControllerFiniteStateMachine) OnEventGetS(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController, onStalledCallback func()) {
+	var event = NewGetSEvent(
+		fsm.DirectoryController,
 		producerFlow,
 		producerFlow.Access(),
 		tag,
 		requester,
-		directoryControllerFsm.Set,
-		directoryControllerFsm.Way,
+		fsm.Set,
+		fsm.Way,
 		onStalledCallback,
 	)
 
-	directoryControllerFsm.fireTransition(getSEvent)
+	fsm.fireTransition(event)
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) OnEventGetM(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController, onStalledCallback func()) {
-	var getMEvent = NewGetMEvent(
-		directoryControllerFsm.DirectoryController,
+func (fsm *DirectoryControllerFiniteStateMachine) OnEventGetM(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController, onStalledCallback func()) {
+	var event = NewGetMEvent(
+		fsm.DirectoryController,
 		producerFlow,
 		producerFlow.Access(),
 		tag,
 		requester,
-		directoryControllerFsm.Set,
-		directoryControllerFsm.Way,
+		fsm.Set,
+		fsm.Way,
 		onStalledCallback,
 	)
 
-	directoryControllerFsm.fireTransition(getMEvent)
+	fsm.fireTransition(event)
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) OnEventReplacement(producerFlow CacheCoherenceFlow, tag uint32, cacheAccess *CacheAccess, requester *CacheController, onCompletedCallback func(), onStalledCallback func()) {
-	var replacementEvent = NewDirReplacementEvent(
-		directoryControllerFsm.DirectoryController,
+func (fsm *DirectoryControllerFiniteStateMachine) OnEventReplacement(producerFlow CacheCoherenceFlow, tag uint32, cacheAccess *CacheAccess, requester *CacheController, onCompletedCallback func(), onStalledCallback func()) {
+	var event = NewDirReplacementEvent(
+		fsm.DirectoryController,
 		producerFlow,
 		producerFlow.Access(),
 		tag,
 		cacheAccess,
-		directoryControllerFsm.Set,
-		directoryControllerFsm.Way,
+		fsm.Set,
+		fsm.Way,
 		onCompletedCallback,
 		onStalledCallback,
 	)
 
-	directoryControllerFsm.fireTransition(replacementEvent)
+	fsm.fireTransition(event)
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) OnEventRecallAck(producerFlow CacheCoherenceFlow, tag uint32, sender *CacheController) {
-	var recallAckEvent = NewRecallAckEvent(
-		directoryControllerFsm.DirectoryController,
+func (fsm *DirectoryControllerFiniteStateMachine) OnEventRecallAck(producerFlow CacheCoherenceFlow, tag uint32, sender *CacheController) {
+	var event = NewRecallAckEvent(
+		fsm.DirectoryController,
 		producerFlow,
 		producerFlow.Access(),
 		tag,
 		sender,
 	)
 
-	directoryControllerFsm.fireTransition(recallAckEvent)
+	fsm.fireTransition(event)
 
-	if directoryControllerFsm.NumRecallAcks == 0 {
-		var lastRecallAckEvent = NewLastRecallAckEvent(
-			directoryControllerFsm.DirectoryController,
+	if fsm.NumRecallAcks == 0 {
+		var event = NewLastRecallAckEvent(
+			fsm.DirectoryController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
 		)
 
-		directoryControllerFsm.fireTransition(lastRecallAckEvent)
+		fsm.fireTransition(event)
 	}
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) OnEventPutS(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
-	if len(directoryControllerFsm.DirectoryEntry.Sharers) > 1 {
-		var putSNotLastEvent = NewPutSNotLastEvent(
-			directoryControllerFsm.DirectoryController,
+func (fsm *DirectoryControllerFiniteStateMachine) OnEventPutS(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
+	if len(fsm.DirectoryEntry.Sharers) > 1 {
+		var event = NewPutSNotLastEvent(
+			fsm.DirectoryController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
 			requester,
 		)
 
-		directoryControllerFsm.fireTransition(putSNotLastEvent)
+		fsm.fireTransition(event)
 	} else {
-		var putSLastEvent = NewPutSLastEvent(
-			directoryControllerFsm.DirectoryController,
+		var event = NewPutSLastEvent(
+			fsm.DirectoryController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
 			requester,
 		)
 
-		directoryControllerFsm.fireTransition(putSLastEvent)
+		fsm.fireTransition(event)
 	}
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) OnEventPutMAndData(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
-	if requester == directoryControllerFsm.DirectoryEntry.Owner {
-		var putMAndDataFromOwnerEvent = NewPutMAndDataFromOwnerEvent(
-			directoryControllerFsm.DirectoryController,
+func (fsm *DirectoryControllerFiniteStateMachine) OnEventPutMAndData(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
+	if requester == fsm.DirectoryEntry.Owner {
+		var event = NewPutMAndDataFromOwnerEvent(
+			fsm.DirectoryController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
 			requester,
 		)
 
-		directoryControllerFsm.fireTransition(putMAndDataFromOwnerEvent)
+		fsm.fireTransition(event)
 	} else {
-		var putMAndDataFromNonOwnerEvent = NewPutMAndDataFromNonOwnerEvent(
-			directoryControllerFsm.DirectoryController,
+		var event = NewPutMAndDataFromNonOwnerEvent(
+			fsm.DirectoryController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
 			requester,
 		)
 
-		directoryControllerFsm.fireTransition(putMAndDataFromNonOwnerEvent)
+		fsm.fireTransition(event)
 	}
 }
 
 func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) OnEventData(producerFlow CacheCoherenceFlow, tag uint32, sender *CacheController) {
-	var dataEvent = NewDataEvent(
+	var event = NewDataEvent(
 		directoryControllerFsm.DirectoryController,
 		producerFlow,
 		producerFlow.Access(),
@@ -187,46 +187,46 @@ func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) OnEventData
 		sender,
 	)
 
-	directoryControllerFsm.fireTransition(dataEvent)
+	directoryControllerFsm.fireTransition(event)
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendDataToRequester(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController, numInvAcks int32) {
-	directoryControllerFsm.DirectoryController.TransferMessage(
+func (fsm *DirectoryControllerFiniteStateMachine) SendDataToRequester(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController, numInvAcks int32) {
+	fsm.DirectoryController.TransferMessage(
 		requester,
-		directoryControllerFsm.DirectoryController.Cache.LineSize() + 8,
+		fsm.DirectoryController.Cache.LineSize() + 8,
 		NewDataMessage(
-			directoryControllerFsm.DirectoryController,
+			fsm.DirectoryController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
-			directoryControllerFsm.DirectoryController,
+			fsm.DirectoryController,
 			numInvAcks,
 		),
 	)
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendPutAckToRequester(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
-	directoryControllerFsm.DirectoryController.SendPutAckToRequester(
+func (fsm *DirectoryControllerFiniteStateMachine) SendPutAckToRequester(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
+	fsm.DirectoryController.SendPutAckToRequester(
 		producerFlow,
 		tag,
 		requester,
 	)
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) CopyDataToMem(tag uint32) {
-	directoryControllerFsm.DirectoryController.Next().(*MemoryController).ReceiveMemWriteRequest(
-		directoryControllerFsm.DirectoryController,
+func (fsm *DirectoryControllerFiniteStateMachine) CopyDataToMem(tag uint32) {
+	fsm.DirectoryController.Next().(*MemoryController).ReceiveMemWriteRequest(
+		fsm.DirectoryController,
 		tag,
 		func() {},
 	)
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendFwdGetSToOwner(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
-	directoryControllerFsm.DirectoryController.TransferMessage(
-		directoryControllerFsm.DirectoryEntry.Owner,
+func (fsm *DirectoryControllerFiniteStateMachine) SendFwdGetSToOwner(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
+	fsm.DirectoryController.TransferMessage(
+		fsm.DirectoryEntry.Owner,
 		8,
 		NewFwdGetSMessage(
-			directoryControllerFsm.DirectoryController,
+			fsm.DirectoryController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
@@ -235,12 +235,12 @@ func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendFwdGetS
 	)
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendFwdGetMToOwner(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
-	directoryControllerFsm.DirectoryController.TransferMessage(
-		directoryControllerFsm.DirectoryEntry.Owner,
+func (fsm *DirectoryControllerFiniteStateMachine) SendFwdGetMToOwner(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
+	fsm.DirectoryController.TransferMessage(
+		fsm.DirectoryEntry.Owner,
 		8,
 		NewFwdGetMMessage(
-			directoryControllerFsm.DirectoryController,
+			fsm.DirectoryController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
@@ -249,14 +249,14 @@ func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendFwdGetM
 	)
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendInvToSharers(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
-	for _, sharer := range directoryControllerFsm.DirectoryEntry.Sharers {
+func (fsm *DirectoryControllerFiniteStateMachine) SendInvToSharers(producerFlow CacheCoherenceFlow, tag uint32, requester *CacheController) {
+	for _, sharer := range fsm.DirectoryEntry.Sharers {
 		if requester != sharer {
-			directoryControllerFsm.DirectoryController.TransferMessage(
+			fsm.DirectoryController.TransferMessage(
 				sharer,
 				8,
 				NewInvMessage(
-					directoryControllerFsm.DirectoryController,
+					fsm.DirectoryController,
 					producerFlow,
 					producerFlow.Access(),
 					tag,
@@ -267,18 +267,18 @@ func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendInvToSh
 	}
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendRecallToOwner(producerFlow CacheCoherenceFlow, tag uint32) {
-	var owner = directoryControllerFsm.DirectoryEntry.Owner
+func (fsm *DirectoryControllerFiniteStateMachine) SendRecallToOwner(producerFlow CacheCoherenceFlow, tag uint32) {
+	var owner = fsm.DirectoryEntry.Owner
 
 	if owner.Cache.FindWay(tag) == INVALID_WAY {
 		panic("Impossible")
 	}
 
-	directoryControllerFsm.DirectoryController.TransferMessage(
+	fsm.DirectoryController.TransferMessage(
 		owner,
 		8,
 		NewRecallMessage(
-			directoryControllerFsm.DirectoryController,
+			fsm.DirectoryController,
 			producerFlow,
 			producerFlow.Access(),
 			tag,
@@ -286,17 +286,17 @@ func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendRecallT
 	)
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendRecallToSharers(producerFlow CacheCoherenceFlow, tag uint32) {
-	for _, sharer := range directoryControllerFsm.DirectoryEntry.Sharers {
+func (fsm *DirectoryControllerFiniteStateMachine) SendRecallToSharers(producerFlow CacheCoherenceFlow, tag uint32) {
+	for _, sharer := range fsm.DirectoryEntry.Sharers {
 		if sharer.Cache.FindWay(tag) == INVALID_WAY {
 			panic("Impossible")
 		}
 
-		directoryControllerFsm.DirectoryController.TransferMessage(
+		fsm.DirectoryController.TransferMessage(
 			sharer,
 			8,
 			NewRecallMessage(
-				directoryControllerFsm.DirectoryController,
+				fsm.DirectoryController,
 				producerFlow,
 				producerFlow.Access(),
 				tag,
@@ -305,79 +305,79 @@ func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SendRecallT
 	}
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) AddRequesterAndOwnerToSharers(requester *CacheController) {
-	directoryControllerFsm.DirectoryEntry.Sharers = append(
-		directoryControllerFsm.DirectoryEntry.Sharers,
+func (fsm *DirectoryControllerFiniteStateMachine) AddRequesterAndOwnerToSharers(requester *CacheController) {
+	fsm.DirectoryEntry.Sharers = append(
+		fsm.DirectoryEntry.Sharers,
 		requester,
-		directoryControllerFsm.DirectoryEntry.Owner,
+		fsm.DirectoryEntry.Owner,
 	)
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) AddRequesterToSharers(requester *CacheController) {
-	directoryControllerFsm.DirectoryEntry.Sharers = append(
-		directoryControllerFsm.DirectoryEntry.Sharers,
+func (fsm *DirectoryControllerFiniteStateMachine) AddRequesterToSharers(requester *CacheController) {
+	fsm.DirectoryEntry.Sharers = append(
+		fsm.DirectoryEntry.Sharers,
 		requester,
 	)
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) RemoveRequesterFromSharers(requester *CacheController) {
+func (fsm *DirectoryControllerFiniteStateMachine) RemoveRequesterFromSharers(requester *CacheController) {
 	var sharersToPreserve []*CacheController
 
-	for _, sharer := range directoryControllerFsm.DirectoryEntry.Sharers {
+	for _, sharer := range fsm.DirectoryEntry.Sharers {
 		if requester != sharer {
 			sharersToPreserve = append(sharersToPreserve, sharer)
 		}
 	}
 
-	directoryControllerFsm.DirectoryEntry.Sharers = sharersToPreserve
+	fsm.DirectoryEntry.Sharers = sharersToPreserve
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) SetOwnerToRequester(requester *CacheController) {
-	directoryControllerFsm.DirectoryEntry.Owner = requester
+func (fsm *DirectoryControllerFiniteStateMachine) SetOwnerToRequester(requester *CacheController) {
+	fsm.DirectoryEntry.Owner = requester
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) ClearSharers() {
-	directoryControllerFsm.DirectoryEntry.Sharers = []*CacheController{}
+func (fsm *DirectoryControllerFiniteStateMachine) ClearSharers() {
+	fsm.DirectoryEntry.Sharers = []*CacheController{}
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) ClearOwner() {
-	directoryControllerFsm.DirectoryEntry.Owner = nil
+func (fsm *DirectoryControllerFiniteStateMachine) ClearOwner() {
+	fsm.DirectoryEntry.Owner = nil
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) FireServiceNonblockingRequestEvent(access *MemoryHierarchyAccess, tag uint32, hitInCache bool) {
+func (fsm *DirectoryControllerFiniteStateMachine) FireServiceNonblockingRequestEvent(access *MemoryHierarchyAccess, tag uint32, hitInCache bool) {
 	//TODO
-	directoryControllerFsm.DirectoryController.UpdateStats(access.AccessType.IsRead(), hitInCache)
+	fsm.DirectoryController.UpdateStats(access.AccessType.IsRead(), hitInCache)
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) FireCacheLineInsertEvent(access *MemoryHierarchyAccess, tag uint32, victimTag uint32) {
-	//TODO
-}
-
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) FireReplacementEvent(access *MemoryHierarchyAccess, tag uint32) {
+func (fsm *DirectoryControllerFiniteStateMachine) FireCacheLineInsertEvent(access *MemoryHierarchyAccess, tag uint32, victimTag uint32) {
 	//TODO
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) FirePutSOrPutMAndDataFromOwnerEvent(access *MemoryHierarchyAccess, tag uint32) {
+func (fsm *DirectoryControllerFiniteStateMachine) FireReplacementEvent(access *MemoryHierarchyAccess, tag uint32) {
 	//TODO
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) FireNonblockingRequestHitToTransientTagEvent(access *MemoryHierarchyAccess, tag uint32) {
+func (fsm *DirectoryControllerFiniteStateMachine) FirePutSOrPutMAndDataFromOwnerEvent(access *MemoryHierarchyAccess, tag uint32) {
 	//TODO
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) Hit(access *MemoryHierarchyAccess, tag uint32, set uint32, way uint32) {
-	directoryControllerFsm.FireServiceNonblockingRequestEvent(access, tag, true)
-	directoryControllerFsm.DirectoryController.Cache.ReplacementPolicy.HandlePromotionOnHit(access, set, way)
-	directoryControllerFsm.Line().Access = access
+func (fsm *DirectoryControllerFiniteStateMachine) FireNonblockingRequestHitToTransientTagEvent(access *MemoryHierarchyAccess, tag uint32) {
+	//TODO
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) Stall(action func()) {
-	directoryControllerFsm.StalledEvents = append(directoryControllerFsm.StalledEvents, action)
+func (fsm *DirectoryControllerFiniteStateMachine) Hit(access *MemoryHierarchyAccess, tag uint32, set uint32, way uint32) {
+	fsm.FireServiceNonblockingRequestEvent(access, tag, true)
+	fsm.DirectoryController.Cache.ReplacementPolicy.HandlePromotionOnHit(access, set, way)
+	fsm.Line().Access = access
 }
 
-func (directoryControllerFsm *DirectoryControllerFiniteStateMachine) StallEvent(event DirectoryControllerEvent) {
-	directoryControllerFsm.Stall(func() {
-		directoryControllerFsm.fireTransition(event)
+func (fsm *DirectoryControllerFiniteStateMachine) Stall(action func()) {
+	fsm.StalledEvents = append(fsm.StalledEvents, action)
+}
+
+func (fsm *DirectoryControllerFiniteStateMachine) StallEvent(event DirectoryControllerEvent) {
+	fsm.Stall(func() {
+		fsm.fireTransition(event)
 	})
 }
 
@@ -386,7 +386,7 @@ type DirectoryControllerFiniteStateMachineFactory struct {
 }
 
 func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFiniteStateMachineFactory {
-	var directoryControllerFsmFactory = &DirectoryControllerFiniteStateMachineFactory{
+	var fsmFactory = &DirectoryControllerFiniteStateMachineFactory{
 		FiniteStateMachineFactory:simutil.NewFiniteStateMachineFactory(),
 	}
 
@@ -416,7 +416,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 		}
 	}
 
-	directoryControllerFsmFactory.InState(DirectoryControllerState_I).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
+	fsmFactory.InState(DirectoryControllerState_I).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
 		DirectoryControllerEventType_GETS,
 		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
 			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
@@ -502,7 +502,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 		DirectoryControllerState_IM_D,
 	)
 
-	directoryControllerFsmFactory.InState(DirectoryControllerState_IS_D).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
+	fsmFactory.InState(DirectoryControllerState_IS_D).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
 		DirectoryControllerEventType_GETS,
 		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
 			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
@@ -584,7 +584,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 		DirectoryControllerState_S,
 	)
 
-	directoryControllerFsmFactory.InState(DirectoryControllerState_IM_D).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
+	fsmFactory.InState(DirectoryControllerState_IM_D).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
 		DirectoryControllerEventType_GETS,
 		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
 			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
@@ -660,7 +660,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 		DirectoryControllerState_M,
 	)
 
-	directoryControllerFsmFactory.InState(DirectoryControllerState_S).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
+	fsmFactory.InState(DirectoryControllerState_S).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
 		DirectoryControllerEventType_GETS,
 		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
 			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
@@ -744,7 +744,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 		DirectoryControllerState_S,
 	)
 
-	directoryControllerFsmFactory.InState(DirectoryControllerState_M).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
+	fsmFactory.InState(DirectoryControllerState_M).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
 		DirectoryControllerEventType_GETS,
 		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
 			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
@@ -826,7 +826,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 		DirectoryControllerState_M,
 	)
 
-	directoryControllerFsmFactory.InState(DirectoryControllerState_S_D).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
+	fsmFactory.InState(DirectoryControllerState_S_D).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
 		DirectoryControllerEventType_GETS,
 		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
 			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
@@ -894,7 +894,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 		DirectoryControllerState_S,
 	)
 
-	directoryControllerFsmFactory.InState(DirectoryControllerState_MI_A).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
+	fsmFactory.InState(DirectoryControllerState_MI_A).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
 		DirectoryControllerEventType_GETS,
 		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
 			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
@@ -969,7 +969,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 		DirectoryControllerState_MI_A,
 	)
 
-	directoryControllerFsmFactory.InState(DirectoryControllerState_SI_A).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
+	fsmFactory.InState(DirectoryControllerState_SI_A).SetOnCompletedCallback(actionWhenStateChanged).OnCondition(
 		DirectoryControllerEventType_GETS,
 		func(fsm simutil.FiniteStateMachine, condition interface{}, params interface{}) {
 			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
@@ -1042,6 +1042,6 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 		DirectoryControllerState_SI_A,
 	)
 
-	return directoryControllerFsmFactory
+	return fsmFactory
 }
 

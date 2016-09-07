@@ -16,14 +16,14 @@ const (
 	CacheControllerState_II_A = CacheControllerState("II_A")
 )
 
-func (cacheControllerState CacheControllerState) Stable() bool {
-	return cacheControllerState == CacheControllerState_I ||
-		cacheControllerState == CacheControllerState_S ||
-		cacheControllerState == CacheControllerState_M
+func (state CacheControllerState) Stable() bool {
+	return state == CacheControllerState_I ||
+		state == CacheControllerState_S ||
+		state == CacheControllerState_M
 }
 
-func (cacheControllerState CacheControllerState) Transient() bool {
-	return !cacheControllerState.Stable()
+func (state CacheControllerState) Transient() bool {
+	return !state.Stable()
 }
 
 type DirectoryControllerState string
@@ -39,12 +39,12 @@ const (
 	DirectoryControllerState_SI_A = DirectoryControllerState("SI_A")
 )
 
-func (directoryControllerState DirectoryControllerState) Stable() bool {
-	return directoryControllerState == DirectoryControllerState_I ||
-		directoryControllerState == DirectoryControllerState_S ||
-		directoryControllerState == DirectoryControllerState_M
+func (state DirectoryControllerState) Stable() bool {
+	return state == DirectoryControllerState_I ||
+		state == DirectoryControllerState_S ||
+		state == DirectoryControllerState_M
 }
 
-func (directoryControllerState DirectoryControllerState) Transient() bool {
-	return !directoryControllerState.Stable()
+func (state DirectoryControllerState) Transient() bool {
+	return !state.Stable()
 }

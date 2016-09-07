@@ -23,24 +23,24 @@ type BaseCacheLineStateProvider struct {
 }
 
 func NewBaseCacheLineStateProvider(initialState interface{}) *BaseCacheLineStateProvider {
-	var baseCacheLineStateProvider = &BaseCacheLineStateProvider{
+	var stateProvider = &BaseCacheLineStateProvider{
 		initialState:initialState,
 		state:initialState,
 	}
 
-	return baseCacheLineStateProvider
+	return stateProvider
 }
 
-func (baseCacheLineStateProvider *BaseCacheLineStateProvider) InitialState() interface{} {
-	return baseCacheLineStateProvider.initialState
+func (stateProvider *BaseCacheLineStateProvider) InitialState() interface{} {
+	return stateProvider.initialState
 }
 
-func (baseCacheLineStateProvider *BaseCacheLineStateProvider) State() interface{} {
-	return baseCacheLineStateProvider.state
+func (stateProvider *BaseCacheLineStateProvider) State() interface{} {
+	return stateProvider.state
 }
 
-func (baseCacheLineStateProvider *BaseCacheLineStateProvider) SetState(state interface{}) {
-	baseCacheLineStateProvider.state = state
+func (stateProvider *BaseCacheLineStateProvider) SetState(state interface{}) {
+	stateProvider.state = state
 }
 
 type CacheLine struct {

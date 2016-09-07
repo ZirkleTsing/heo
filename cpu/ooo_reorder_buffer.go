@@ -60,7 +60,7 @@ type BaseReorderBufferEntry struct {
 }
 
 func NewBaseReorderBufferEntry(thread Thread, dynamicInst *DynamicInst, npc uint32, nnpc uint32, predictedNnpc uint32, returnAddressStackRecoverIndex uint32, branchPredictorUpdate *BranchPredictorUpdate, speculative bool) *BaseReorderBufferEntry {
-	var baseReorderBufferEntry = &BaseReorderBufferEntry{
+	var reorderBufferEntry = &BaseReorderBufferEntry{
 		id:thread.Core().Processor().Experiment.OoO.CurrentReorderBufferEntryId,
 		thread:thread,
 		dynamicInst:dynamicInst,
@@ -76,107 +76,107 @@ func NewBaseReorderBufferEntry(thread Thread, dynamicInst *DynamicInst, npc uint
 
 	thread.Core().Processor().Experiment.OoO.CurrentReorderBufferEntryId++
 
-	return baseReorderBufferEntry
+	return reorderBufferEntry
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) Id() int32 {
-	return baseReorderBufferEntry.id
+func (reorderBufferEntry *BaseReorderBufferEntry) Id() int32 {
+	return reorderBufferEntry.id
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) Thread() Thread {
-	return baseReorderBufferEntry.thread
+func (reorderBufferEntry *BaseReorderBufferEntry) Thread() Thread {
+	return reorderBufferEntry.thread
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) DynamicInst() *DynamicInst {
-	return baseReorderBufferEntry.dynamicInst
+func (reorderBufferEntry *BaseReorderBufferEntry) DynamicInst() *DynamicInst {
+	return reorderBufferEntry.dynamicInst
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) Npc() uint32 {
-	return baseReorderBufferEntry.npc
+func (reorderBufferEntry *BaseReorderBufferEntry) Npc() uint32 {
+	return reorderBufferEntry.npc
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) Nnpc() uint32 {
-	return baseReorderBufferEntry.nnpc
+func (reorderBufferEntry *BaseReorderBufferEntry) Nnpc() uint32 {
+	return reorderBufferEntry.nnpc
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) PredictedNnpc() uint32 {
-	return baseReorderBufferEntry.predictedNnpc
+func (reorderBufferEntry *BaseReorderBufferEntry) PredictedNnpc() uint32 {
+	return reorderBufferEntry.predictedNnpc
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) ReturnAddressStackRecoverIndex() uint32 {
-	return baseReorderBufferEntry.returnAddressStackRecoverIndex
+func (reorderBufferEntry *BaseReorderBufferEntry) ReturnAddressStackRecoverIndex() uint32 {
+	return reorderBufferEntry.returnAddressStackRecoverIndex
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) BranchPredictorUpdate() *BranchPredictorUpdate {
-	return baseReorderBufferEntry.branchPredictorUpdate
+func (reorderBufferEntry *BaseReorderBufferEntry) BranchPredictorUpdate() *BranchPredictorUpdate {
+	return reorderBufferEntry.branchPredictorUpdate
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) Speculative() bool {
-	return baseReorderBufferEntry.speculative
+func (reorderBufferEntry *BaseReorderBufferEntry) Speculative() bool {
+	return reorderBufferEntry.speculative
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) OldPhysicalRegisters() map[uint32]*PhysicalRegister {
-	return baseReorderBufferEntry.oldPhysicalRegisters
+func (reorderBufferEntry *BaseReorderBufferEntry) OldPhysicalRegisters() map[uint32]*PhysicalRegister {
+	return reorderBufferEntry.oldPhysicalRegisters
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) TargetPhysicalRegisters() map[uint32]*PhysicalRegister {
-	return baseReorderBufferEntry.targetPhysicalRegisters
+func (reorderBufferEntry *BaseReorderBufferEntry) TargetPhysicalRegisters() map[uint32]*PhysicalRegister {
+	return reorderBufferEntry.targetPhysicalRegisters
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) SetTargetPhysicalRegisters(targetPhysicalRegisters map[uint32]*PhysicalRegister) {
-	baseReorderBufferEntry.targetPhysicalRegisters = targetPhysicalRegisters
+func (reorderBufferEntry *BaseReorderBufferEntry) SetTargetPhysicalRegisters(targetPhysicalRegisters map[uint32]*PhysicalRegister) {
+	reorderBufferEntry.targetPhysicalRegisters = targetPhysicalRegisters
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) SourcePhysicalRegisters() map[uint32]*PhysicalRegister {
-	return baseReorderBufferEntry.sourcePhysicalRegisters
+func (reorderBufferEntry *BaseReorderBufferEntry) SourcePhysicalRegisters() map[uint32]*PhysicalRegister {
+	return reorderBufferEntry.sourcePhysicalRegisters
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) SetSourcePhysicalRegisters(sourcePhysicalRegisters map[uint32]*PhysicalRegister) {
-	baseReorderBufferEntry.sourcePhysicalRegisters = sourcePhysicalRegisters
+func (reorderBufferEntry *BaseReorderBufferEntry) SetSourcePhysicalRegisters(sourcePhysicalRegisters map[uint32]*PhysicalRegister) {
+	reorderBufferEntry.sourcePhysicalRegisters = sourcePhysicalRegisters
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) Dispatched() bool {
-	return baseReorderBufferEntry.dispatched
+func (reorderBufferEntry *BaseReorderBufferEntry) Dispatched() bool {
+	return reorderBufferEntry.dispatched
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) SetDispatched(dispatched bool) {
-	baseReorderBufferEntry.dispatched = dispatched
+func (reorderBufferEntry *BaseReorderBufferEntry) SetDispatched(dispatched bool) {
+	reorderBufferEntry.dispatched = dispatched
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) Issued() bool {
-	return baseReorderBufferEntry.issued
+func (reorderBufferEntry *BaseReorderBufferEntry) Issued() bool {
+	return reorderBufferEntry.issued
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) SetIssued(issued bool) {
-	baseReorderBufferEntry.issued = issued
+func (reorderBufferEntry *BaseReorderBufferEntry) SetIssued(issued bool) {
+	reorderBufferEntry.issued = issued
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) Completed() bool {
-	return baseReorderBufferEntry.completed
+func (reorderBufferEntry *BaseReorderBufferEntry) Completed() bool {
+	return reorderBufferEntry.completed
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) SetCompleted(completed bool) {
-	baseReorderBufferEntry.completed = completed
+func (reorderBufferEntry *BaseReorderBufferEntry) SetCompleted(completed bool) {
+	reorderBufferEntry.completed = completed
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) Squashed() bool {
-	return baseReorderBufferEntry.squashed
+func (reorderBufferEntry *BaseReorderBufferEntry) Squashed() bool {
+	return reorderBufferEntry.squashed
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) SetSquashed(squashed bool) {
-	baseReorderBufferEntry.squashed = squashed
+func (reorderBufferEntry *BaseReorderBufferEntry) SetSquashed(squashed bool) {
+	reorderBufferEntry.squashed = squashed
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) NumNotReadyOperands() uint32 {
-	return baseReorderBufferEntry.numNotReadyOperands
+func (reorderBufferEntry *BaseReorderBufferEntry) NumNotReadyOperands() uint32 {
+	return reorderBufferEntry.numNotReadyOperands
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) SetNumNotReadyOperands(numNotReadyOperands uint32) {
-	baseReorderBufferEntry.numNotReadyOperands = numNotReadyOperands
+func (reorderBufferEntry *BaseReorderBufferEntry) SetNumNotReadyOperands(numNotReadyOperands uint32) {
+	reorderBufferEntry.numNotReadyOperands = numNotReadyOperands
 }
 
-func (baseReorderBufferEntry *BaseReorderBufferEntry) doWriteback() {
-	for dependency, targetPhysicalRegister := range baseReorderBufferEntry.targetPhysicalRegisters {
+func (reorderBufferEntry *BaseReorderBufferEntry) doWriteback() {
+	for dependency, targetPhysicalRegister := range reorderBufferEntry.targetPhysicalRegisters {
 		if dependency != 0 {
 			targetPhysicalRegister.Writeback()
 		}

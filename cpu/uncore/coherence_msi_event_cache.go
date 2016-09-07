@@ -29,16 +29,16 @@ type BaseCacheControllerEvent struct {
 }
 
 func NewBaseCacheControllerEvent(generator *CacheController, producerFlow CacheCoherenceFlow, eventType CacheControllerEventType, access *MemoryHierarchyAccess, tag uint32) *BaseCacheControllerEvent {
-	var baseCacheControllerEvent = &BaseCacheControllerEvent{
+	var event = &BaseCacheControllerEvent{
 		BaseControllerEvent:NewBaseControllerEvent(generator, producerFlow, access, tag),
 		eventType:eventType,
 	}
 
-	return baseCacheControllerEvent
+	return event
 }
 
-func (baseCacheControllerEvent *BaseCacheControllerEvent) EventType() CacheControllerEventType {
-	return baseCacheControllerEvent.eventType
+func (event *BaseCacheControllerEvent) EventType() CacheControllerEventType {
+	return event.eventType
 }
 
 type DataFromDirAcksEq0Event struct {
@@ -47,14 +47,14 @@ type DataFromDirAcksEq0Event struct {
 }
 
 func NewDataFromDirAcksEq0Event(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, sender Controller) *DataFromDirAcksEq0Event {
-	var dataFromDirAcksEq0Event = &DataFromDirAcksEq0Event{
+	var event = &DataFromDirAcksEq0Event{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_DATA_FROM_DIR_ACKS_EQ_0, access, tag),
 		Sender:sender,
 	}
 
-	SetupCacheCoherenceFlowTree(dataFromDirAcksEq0Event)
+	SetupCacheCoherenceFlowTree(event)
 
-	return dataFromDirAcksEq0Event
+	return event
 }
 
 type DataFromDirAcksGt0Event struct {
@@ -63,14 +63,14 @@ type DataFromDirAcksGt0Event struct {
 }
 
 func NewDataFromDirAcksGt0Event(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, sender Controller) *DataFromDirAcksGt0Event {
-	var dataFromDirAcksGt0Event = &DataFromDirAcksGt0Event{
+	var event = &DataFromDirAcksGt0Event{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_DATA_FROM_DIR_ACKS_GT_0, access, tag),
 		Sender:sender,
 	}
 
-	SetupCacheCoherenceFlowTree(dataFromDirAcksGt0Event)
+	SetupCacheCoherenceFlowTree(event)
 
-	return dataFromDirAcksGt0Event
+	return event
 }
 
 type DataFromOwnerEvent struct {
@@ -79,14 +79,14 @@ type DataFromOwnerEvent struct {
 }
 
 func NewDataFromOwnerEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, sender Controller) *DataFromOwnerEvent {
-	var dataFromOwnerEvent = &DataFromOwnerEvent{
+	var event = &DataFromOwnerEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_DATA_FROM_OWNER, access, tag),
 		Sender:sender,
 	}
 
-	SetupCacheCoherenceFlowTree(dataFromOwnerEvent)
+	SetupCacheCoherenceFlowTree(event)
 
-	return dataFromOwnerEvent
+	return event
 }
 
 type FwdGetMEvent struct {
@@ -95,14 +95,14 @@ type FwdGetMEvent struct {
 }
 
 func NewFwdGetMEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, requester *CacheController) *FwdGetMEvent {
-	var fwdGetMEvent = &FwdGetMEvent{
+	var event = &FwdGetMEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_FWD_GETM, access, tag),
 		Requester:requester,
 	}
 
-	SetupCacheCoherenceFlowTree(fwdGetMEvent)
+	SetupCacheCoherenceFlowTree(event)
 
-	return fwdGetMEvent
+	return event
 }
 
 type FwdGetSEvent struct {
@@ -111,14 +111,14 @@ type FwdGetSEvent struct {
 }
 
 func NewFwdGetSEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, requester *CacheController) *FwdGetSEvent {
-	var fwdGetSEvent = &FwdGetSEvent{
+	var event = &FwdGetSEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_FWD_GETS, access, tag),
 		Requester:requester,
 	}
 
-	SetupCacheCoherenceFlowTree(fwdGetSEvent)
+	SetupCacheCoherenceFlowTree(event)
 
-	return fwdGetSEvent
+	return event
 }
 
 type InvAckEvent struct {
@@ -127,14 +127,14 @@ type InvAckEvent struct {
 }
 
 func NewInvAckEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, sender *CacheController) *InvAckEvent {
-	var invAckEvent = &InvAckEvent{
+	var event = &InvAckEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_INV_ACK, access, tag),
 		Sender:sender,
 	}
 
-	SetupCacheCoherenceFlowTree(invAckEvent)
+	SetupCacheCoherenceFlowTree(event)
 
-	return invAckEvent
+	return event
 }
 
 type InvEvent struct {
@@ -143,14 +143,14 @@ type InvEvent struct {
 }
 
 func NewInvEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, requester *CacheController) *InvEvent {
-	var invEvent = &InvEvent{
+	var event = &InvEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_INV, access, tag),
 		Requester:requester,
 	}
 
-	SetupCacheCoherenceFlowTree(invEvent)
+	SetupCacheCoherenceFlowTree(event)
 
-	return invEvent
+	return event
 }
 
 type LastInvAckEvent struct {
@@ -158,13 +158,13 @@ type LastInvAckEvent struct {
 }
 
 func NewLastInvAckEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32) *LastInvAckEvent {
-	var lastInvAckEvent = &LastInvAckEvent{
+	var event = &LastInvAckEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_LAST_INV_ACK, access, tag),
 	}
 
-	SetupCacheCoherenceFlowTree(lastInvAckEvent)
+	SetupCacheCoherenceFlowTree(event)
 
-	return lastInvAckEvent
+	return event
 }
 
 type LoadEvent struct {
@@ -176,7 +176,7 @@ type LoadEvent struct {
 }
 
 func NewLoadEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, set uint32, way uint32, onCompletedCallback func(), onStalledCallback func()) *LoadEvent {
-	var loadEvent = &LoadEvent{
+	var event = &LoadEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_LOAD, access, tag),
 		Set:set,
 		Way:way,
@@ -184,9 +184,9 @@ func NewLoadEvent(generator *CacheController, producerFlow CacheCoherenceFlow, a
 		OnStalledCallback:onStalledCallback,
 	}
 
-	SetupCacheCoherenceFlowTree(loadEvent)
+	SetupCacheCoherenceFlowTree(event)
 
-	return loadEvent
+	return event
 }
 
 type PutAckEvent struct {
@@ -194,13 +194,13 @@ type PutAckEvent struct {
 }
 
 func NewPutAckEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32) *PutAckEvent {
-	var putAckEvent = &PutAckEvent{
+	var event = &PutAckEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_PUT_ACK, access, tag),
 	}
 
-	SetupCacheCoherenceFlowTree(putAckEvent)
+	SetupCacheCoherenceFlowTree(event)
 
-	return putAckEvent
+	return event
 }
 
 type RecallEvent struct {
@@ -208,13 +208,13 @@ type RecallEvent struct {
 }
 
 func NewRecallEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32) *RecallEvent {
-	var recallEvent = &RecallEvent{
+	var event = &RecallEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_RECALL, access, tag),
 	}
 
-	SetupCacheCoherenceFlowTree(recallEvent)
+	SetupCacheCoherenceFlowTree(event)
 
-	return recallEvent
+	return event
 }
 
 type ReplacementEvent struct {
@@ -227,7 +227,7 @@ type ReplacementEvent struct {
 }
 
 func NewReplacementEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, cacheAccess *CacheAccess, set uint32, way uint32, onCompletedCallback func(), onStalledCallback func()) *ReplacementEvent {
-	var replacementEvent = &ReplacementEvent{
+	var event = &ReplacementEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_REPLACEMENT, access, tag),
 		CacheAccess:cacheAccess,
 		Set:set,
@@ -236,9 +236,9 @@ func NewReplacementEvent(generator *CacheController, producerFlow CacheCoherence
 		OnStalledCallback:onStalledCallback,
 	}
 
-	SetupCacheCoherenceFlowTree(replacementEvent)
+	SetupCacheCoherenceFlowTree(event)
 
-	return replacementEvent
+	return event
 }
 
 type StoreEvent struct {
@@ -250,7 +250,7 @@ type StoreEvent struct {
 }
 
 func NewStoreEvent(generator *CacheController, producerFlow CacheCoherenceFlow, access *MemoryHierarchyAccess, tag uint32, set uint32, way uint32, onCompletedCallback func(), onStalledCallback func()) *StoreEvent {
-	var storeEvent = &StoreEvent{
+	var event = &StoreEvent{
 		BaseCacheControllerEvent:NewBaseCacheControllerEvent(generator, producerFlow, CacheControllerEventType_STORE, access, tag),
 		Set:set,
 		Way:way,
@@ -258,7 +258,7 @@ func NewStoreEvent(generator *CacheController, producerFlow CacheCoherenceFlow, 
 		OnStalledCallback:onStalledCallback,
 	}
 
-	SetupCacheCoherenceFlowTree(storeEvent)
+	SetupCacheCoherenceFlowTree(event)
 
-	return storeEvent
+	return event
 }
