@@ -36,7 +36,7 @@ func (thread *MemoryHierarchyThread) WarmupOneCycle() {
 
 				thread.NextDynamicInstInWarmup = NewDynamicInst(
 					thread,
-					thread.Context().Regs.Pc,
+					thread.Context().Regs().Pc,
 					staticInst,
 				)
 

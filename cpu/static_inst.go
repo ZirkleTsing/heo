@@ -15,7 +15,7 @@ func NewStaticInst(mnemonic *Mnemonic, machInst MachInst) *StaticInst {
 }
 
 func (staticInst *StaticInst) Execute(context *Context) {
-	var oldPc = context.Regs.Pc
+	var oldPc = context.Regs().Pc
 
 	staticInst.Mnemonic.Execute(context, staticInst.MachInst)
 

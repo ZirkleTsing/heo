@@ -6,7 +6,6 @@ import (
 )
 
 type MemoryPage struct {
-	Memory          *PagedMemory
 	Id              uint32
 	PhysicalAddress uint32
 	Buffer          []byte
@@ -14,18 +13,26 @@ type MemoryPage struct {
 
 func NewMemoryPage(memory *PagedMemory, id uint32) *MemoryPage {
 	var page = &MemoryPage{
-		Memory:memory,
 		Id:id,
-		PhysicalAddress:id << memory.GetPageSizeInLog2(),
-		Buffer:make([]byte, memory.GetPageSize()),
+		PhysicalAddress:id << memory.PageSizeInLog2(),
+		Buffer:make([]byte, memory.PageSize()),
 	}
 
 	return page
 }
 
-func (page *MemoryPage) Access(virtualAddress uint32, buffer *[]byte, offset uint32, size uint32, write bool) {
-	var displacement = page.Memory.GetDisplacement(virtualAddress)
+func (page *MemoryPage) Clone() *MemoryPage {
+	var newPage = &MemoryPage{
+		Id:page.Id,
+		PhysicalAddress:page.PhysicalAddress,
+	}
 
+	copy(newPage.Buffer, page.Buffer)
+
+	return newPage
+}
+
+func (page *MemoryPage) Access(displacement uint32, buffer *[]byte, offset uint32, size uint32, write bool) {
 	if write {
 		copy(page.Buffer[displacement:displacement + size], (*buffer)[offset:offset + size])
 	} else {
@@ -57,6 +64,18 @@ func NewPagedMemory(littleEndian bool) *PagedMemory {
 	}
 
 	return memory
+}
+
+func (memory *PagedMemory) Clone() *PagedMemory {
+	var newMemory = NewPagedMemory(memory.LittleEndian)
+
+	newMemory.NumPages = memory.NumPages
+
+	for index, page := range memory.Pages {
+		newMemory.Pages[index] = page.Clone()
+	}
+
+	return newMemory
 }
 
 func (memory *PagedMemory) ReadByteAt(virtualAddress uint32) byte {
@@ -156,7 +175,7 @@ func (memory *PagedMemory) Map(virtualAddress uint32, size uint32) uint32 {
 	tagStart = memory.GetTag(virtualAddress)
 	tagEnd = tagStart
 
-	var pageSize = memory.GetPageSize()
+	var pageSize = memory.PageSize()
 
 	for pageCount := (memory.GetTag(virtualAddress + size - 1) - tagStart) / pageSize + 1; ; {
 		if tagEnd == 0 {
@@ -192,7 +211,7 @@ func (memory *PagedMemory) Unmap(virtualAddress uint32, size uint32) {
 	var tagStart = memory.GetTag(virtualAddress)
 	var tagEnd = memory.GetTag(virtualAddress + size - 1)
 
-	var pageSize = memory.GetPageSize()
+	var pageSize = memory.PageSize()
 
 	for tag := tagStart; tag <= tagEnd; tag += pageSize {
 		memory.removePage(tag)
@@ -212,7 +231,7 @@ func (memory *PagedMemory) Remap(oldAddr uint32, oldSize uint32, newSize uint32)
 func (memory *PagedMemory) access(virtualAddress uint32, size uint32, buffer *[]byte, write bool, createNewPageIfNecessary bool) {
 	var offset = uint32(0)
 
-	var pageSize = memory.GetPageSize()
+	var pageSize = memory.PageSize()
 
 	for size > 0 {
 		var chunkSize = uint32(math.Min(float64(size), float64(pageSize - memory.GetDisplacement(virtualAddress))))
@@ -232,7 +251,9 @@ func (memory *PagedMemory) accessPageBoundary(virtualAddress uint32, size uint32
 	}
 
 	if page != nil {
-		page.Access(virtualAddress, buffer, offset, size, write)
+		var displacement = memory.GetDisplacement(virtualAddress)
+
+		page.Access(displacement, buffer, offset, size, write)
 	}
 }
 
@@ -280,10 +301,10 @@ func (memory *PagedMemory) GetIndex(virtualAddress uint32) uint32 {
 	return memory.Geometry.GetLineId(virtualAddress)
 }
 
-func (memory *PagedMemory) GetPageSizeInLog2() uint32 {
+func (memory *PagedMemory) PageSizeInLog2() uint32 {
 	return memory.Geometry.LineSizeInLog2
 }
 
-func (memory *PagedMemory) GetPageSize() uint32 {
+func (memory *PagedMemory) PageSize() uint32 {
 	return memory.Geometry.LineSize
 }

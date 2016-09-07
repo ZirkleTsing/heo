@@ -148,13 +148,13 @@ func (pollEvent *PollEvent) NeedProcess() bool {
 
 func (pollEvent *PollEvent) Process() {
 	if !pollEvent.WaitForFileDescriptorCriterion.Buffer.IsEmpty() {
-		pollEvent.Context().Process.Memory.WriteHalfWordAt(pollEvent.WaitForFileDescriptorCriterion.Pufds + 6, 1)
-		pollEvent.Context().Regs.Gpr[regs.REGISTER_V0] = 1
+		pollEvent.Context().Process.Memory().WriteHalfWordAt(pollEvent.WaitForFileDescriptorCriterion.Pufds + 6, 1)
+		pollEvent.Context().Regs().Gpr[regs.REGISTER_V0] = 1
 	} else {
-		pollEvent.Context().Regs.Gpr[regs.REGISTER_V0] = 0
+		pollEvent.Context().Regs().Gpr[regs.REGISTER_V0] = 0
 	}
 
-	pollEvent.Context().Regs.Gpr[regs.REGISTER_A3] = 0
+	pollEvent.Context().Regs().Gpr[regs.REGISTER_A3] = 0
 	pollEvent.context.Resume()
 }
 
@@ -183,10 +183,10 @@ func (readEvent *ReadEvent) Process() {
 
 	var numRead = uint32(len(buf))
 
-	readEvent.Context().Regs.Gpr[regs.REGISTER_V0] = numRead
-	readEvent.Context().Regs.Gpr[regs.REGISTER_A3] = 0
+	readEvent.Context().Regs().Gpr[regs.REGISTER_V0] = numRead
+	readEvent.Context().Regs().Gpr[regs.REGISTER_A3] = 0
 
-	readEvent.Context().Process.Memory.WriteBlockAt(readEvent.WaitForFileDescriptorCriterion.Address, numRead, buf)
+	readEvent.Context().Process.Memory().WriteBlockAt(readEvent.WaitForFileDescriptorCriterion.Address, numRead, buf)
 }
 
 type ResumeEvent struct {
@@ -261,8 +261,8 @@ func (waitEvent *WaitEvent) NeedProcess() bool {
 func (waitEvent *WaitEvent) Process() {
 	waitEvent.Context().Resume()
 
-	waitEvent.Context().Regs.Gpr[regs.REGISTER_V0] = uint32(waitEvent.WaitForProcessIdCriterion.ProcessId)
-	waitEvent.Context().Regs.Gpr[regs.REGISTER_A3] = 0
+	waitEvent.Context().Regs().Gpr[regs.REGISTER_V0] = uint32(waitEvent.WaitForProcessIdCriterion.ProcessId)
+	waitEvent.Context().Regs().Gpr[regs.REGISTER_A3] = 0
 }
 
 

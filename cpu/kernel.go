@@ -179,19 +179,19 @@ func (kernel *Kernel) RunSignalHandler(context *Context, signal uint32) {
 
 	context.SignalMasks.Pending.Clear(signal)
 
-	var oldRegs = context.Regs.Clone()
+	var oldRegs = context.Regs().Clone()
 
-	context.Regs.Gpr[regs.REGISTER_A0] = signal
-	context.Regs.Gpr[regs.REGISTER_T9] = kernel.SignalActions[signal - 1].Handler
-	context.Regs.Gpr[regs.REGISTER_RA] = 0xffffffff
-	context.Regs.Npc = kernel.SignalActions[signal - 1].Handler
-	context.Regs.Nnpc = context.Regs.Npc + 4
+	context.Regs().Gpr[regs.REGISTER_A0] = signal
+	context.Regs().Gpr[regs.REGISTER_T9] = kernel.SignalActions[signal - 1].Handler
+	context.Regs().Gpr[regs.REGISTER_RA] = 0xffffffff
+	context.Regs().Npc = kernel.SignalActions[signal - 1].Handler
+	context.Regs().Nnpc = context.Regs().Npc + 4
 
-	for context.State == ContextState_RUNNING && context.Regs.Npc != 0xffffffff {
+	for context.State == ContextState_RUNNING && context.Regs().Npc != 0xffffffff {
 		context.DecodeNextStaticInst().Execute(context)
 	}
 
-	context.Regs = oldRegs
+	context.SetRegs(oldRegs)
 }
 
 func (kernel *Kernel) MustProcessSignal(context *Context, signal uint32) bool {

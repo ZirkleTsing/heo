@@ -17,17 +17,27 @@ type ContextState uint32
 type Context struct {
 	Id               int32
 	State            ContextState
+
 	SignalMasks      *SignalMasks
 	SignalFinish     uint32
-	Regs             *regs.ArchitecturalRegisterFile
+
+	regs             *regs.ArchitecturalRegisterFile
+	speculativeRegs  *regs.ArchitecturalRegisterFile
+
+	Speculative      bool
+
 	Kernel           *Kernel
+
 	ThreadId         int32
+
 	UserId           int32
 	EffectiveUserId  int32
 	GroupId          int32
 	EffectiveGroupId int32
 	ProcessId        int32
+
 	Process          *Process
+
 	Parent           *Context
 }
 
@@ -35,7 +45,7 @@ func NewContext(kernel *Kernel, process *Process, parent *Context, regs *regs.Ar
 	var context = &Context{
 		Kernel:kernel,
 		Parent:parent,
-		Regs:regs,
+		regs:regs,
 		SignalFinish:signalFinish,
 		Id: kernel.CurrentContextId,
 		ThreadId:-1,
@@ -72,13 +82,41 @@ func LoadContext(kernel *Kernel, contextMapping *ContextMapping) *Context {
 	return NewContext(kernel, process, nil, r, 0)
 }
 
-func (context *Context) DecodeNextStaticInst() *StaticInst {
-	context.Regs.Pc = context.Regs.Npc
-	context.Regs.Npc = context.Regs.Nnpc
-	context.Regs.Nnpc = context.Regs.Nnpc + 4
-	context.Regs.Gpr[regs.REGISTER_ZERO] = 0
+func (context *Context) Regs() *regs.ArchitecturalRegisterFile {
+	if context.Speculative {
+		return context.speculativeRegs
+	} else {
+		return context.regs
+	}
+}
 
-	return context.Decode(context.Regs.Pc)
+func (context *Context) SetRegs(regs *regs.ArchitecturalRegisterFile) {
+	context.regs = regs
+}
+
+func (context *Context) EnterSpeculativeState() {
+	context.Process.EnterSpeculativeState()
+
+	context.speculativeRegs = context.regs.Clone()
+
+	context.Speculative = true
+}
+
+func (context *Context) ExitSpeculativeState() {
+	context.Process.ExitSpeculativeState()
+
+	context.speculativeRegs = nil
+
+	context.Speculative = false
+}
+
+func (context *Context) DecodeNextStaticInst() *StaticInst {
+	context.Regs().Pc = context.Regs().Npc
+	context.Regs().Npc = context.Regs().Nnpc
+	context.Regs().Nnpc = context.Regs().Nnpc + 4
+	context.Regs().Gpr[regs.REGISTER_ZERO] = 0
+
+	return context.Decode(context.Regs().Pc)
 }
 
 func (context *Context) Decode(mappedPc uint32) *StaticInst {

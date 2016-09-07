@@ -13,43 +13,133 @@ type OoOCore struct {
 }
 
 func NewOoOCore(processor *Processor, num int32) *OoOCore {
-	var oooCore = &OoOCore{
+	var core = &OoOCore{
 		MemoryHierarchyCore: NewMemoryHierarchyCore(processor, num),
 	}
 
-	oooCore.fuPool = NewFUPool(oooCore)
+	core.fuPool = NewFUPool(core)
 
-	return oooCore
+	return core
 }
 
-func (oooCore *OoOCore) FUPool() *FUPool {
-	return oooCore.fuPool
+func (core *OoOCore) FUPool() *FUPool {
+	return core.fuPool
 }
 
-func (oooCore *OoOCore) WaitingInstructionQueue() []GeneralReorderBufferEntry {
-	return oooCore.waitingInstructionQueue
+func (core *OoOCore) WaitingInstructionQueue() []GeneralReorderBufferEntry {
+	return core.waitingInstructionQueue
 }
 
-func (oooCore *OoOCore) ReadyInstructionQueue() []GeneralReorderBufferEntry {
-	return oooCore.readyInstructionQueue
+func (core *OoOCore) ReadyInstructionQueue() []GeneralReorderBufferEntry {
+	return core.readyInstructionQueue
 }
 
-func (oooCore *OoOCore) ReadyLoadQueue() []GeneralReorderBufferEntry {
-	return oooCore.readyLoadQueue
+func (core *OoOCore) ReadyLoadQueue() []GeneralReorderBufferEntry {
+	return core.readyLoadQueue
 }
 
-func (oooCore *OoOCore) WaitingStoreQueue() []GeneralReorderBufferEntry {
-	return oooCore.waitingStoreQueue
+func (core *OoOCore) WaitingStoreQueue() []GeneralReorderBufferEntry {
+	return core.waitingStoreQueue
 }
 
-func (oooCore *OoOCore) ReadyStoreQueue() []GeneralReorderBufferEntry {
-	return oooCore.readyStoreQueue
+func (core *OoOCore) ReadyStoreQueue() []GeneralReorderBufferEntry {
+	return core.readyStoreQueue
 }
 
-func (oooCore *OoOCore) OoOEventQueue() []GeneralReorderBufferEntry {
-	return oooCore.oooEventQueue
+func (core *OoOCore) OoOEventQueue() []GeneralReorderBufferEntry {
+	return core.oooEventQueue
 }
 
-func (oooCore *OoOCore) SetOoOEventQueue(oooEventQueue []GeneralReorderBufferEntry) {
-	oooCore.oooEventQueue = oooEventQueue
+func (core *OoOCore) SetOoOEventQueue(oooEventQueue []GeneralReorderBufferEntry) {
+	core.oooEventQueue = oooEventQueue
+}
+
+func (core *OoOCore) DoMeasurementOneCycle() {
+
+}
+
+func (core *OoOCore) Fetch() {
+	//TODO
+}
+
+func (core *OoOCore) RegisterRename() {
+	//TODO
+}
+
+func (core *OoOCore) Dispatch() {
+	//TODO
+}
+
+func (core *OoOCore) Wakeup() {
+	//TODO
+}
+
+func (core *OoOCore) Issue() {
+	//TODO
+}
+
+func (core *OoOCore) Writeback() {
+	//TODO
+}
+
+func (core *OoOCore) RefreshLoadStoreQueue() {
+	//TODO
+}
+
+func (core *OoOCore) Commit() {
+	//TODO
+}
+
+func (core *OoOCore) RemoveFromQueues(entryToRemove GeneralReorderBufferEntry) {
+	var waitingInstructionQueueToReserve []GeneralReorderBufferEntry
+	var readyInstructionQueueToReserve   []GeneralReorderBufferEntry
+	var readyLoadQueueToReserve          []GeneralReorderBufferEntry
+	var waitingStoreQueueToReserve       []GeneralReorderBufferEntry
+	var readyStoreQueueToReserve         []GeneralReorderBufferEntry
+	var oooEventQueueToReserve           []GeneralReorderBufferEntry
+
+	for _, entry := range core.waitingInstructionQueue {
+		if entry != entryToRemove {
+			waitingInstructionQueueToReserve = append(waitingInstructionQueueToReserve, entry)
+		}
+	}
+
+	for _, entry := range core.readyInstructionQueue {
+		if entry != entryToRemove {
+			readyInstructionQueueToReserve = append(readyInstructionQueueToReserve, entry)
+		}
+	}
+
+	for _, entry := range core.readyLoadQueue {
+		if entry != entryToRemove {
+			readyLoadQueueToReserve = append(readyLoadQueueToReserve, entry)
+		}
+	}
+
+	for _, entry := range core.waitingStoreQueue {
+		if entry != entryToRemove {
+			waitingStoreQueueToReserve = append(waitingStoreQueueToReserve, entry)
+		}
+	}
+
+	for _, entry := range core.readyStoreQueue {
+		if entry != entryToRemove {
+			readyStoreQueueToReserve = append(readyStoreQueueToReserve, entry)
+		}
+	}
+
+	for _, entry := range core.oooEventQueue {
+		if entry != entryToRemove {
+			oooEventQueueToReserve = append(oooEventQueueToReserve, entry)
+		}
+	}
+
+	core.waitingInstructionQueue = waitingInstructionQueueToReserve
+	core.readyInstructionQueue = readyInstructionQueueToReserve
+	core.readyLoadQueue = readyLoadQueueToReserve
+	core.waitingStoreQueue = waitingStoreQueueToReserve
+	core.readyStoreQueue = readyStoreQueueToReserve
+	core.oooEventQueue = oooEventQueueToReserve
+
+	entryToRemove.SetSquashed(true)
 }

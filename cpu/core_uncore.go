@@ -27,7 +27,7 @@ func (core *BaseCore) L1DController() *uncore.L1DController {
 
 func (core *BaseCore) CanIfetch(thread Thread, virtualAddress uint32) bool {
 	var physicalTag = core.L1IController().Cache.GetTag(
-		thread.Context().Process.Memory.GetPhysicalAddress(virtualAddress),
+		thread.Context().Process.Memory().GetPhysicalAddress(virtualAddress),
 	)
 
 	return core.L1IController().CanAccess(uncore.MemoryHierarchyAccessType_IFETCH, physicalTag)
@@ -35,7 +35,7 @@ func (core *BaseCore) CanIfetch(thread Thread, virtualAddress uint32) bool {
 
 func (core *BaseCore) CanLoad(thread Thread, virtualAddress uint32) bool {
 	var physicalTag = core.L1DController().Cache.GetTag(
-		thread.Context().Process.Memory.GetPhysicalAddress(virtualAddress),
+		thread.Context().Process.Memory().GetPhysicalAddress(virtualAddress),
 	)
 
 	return core.L1DController().CanAccess(uncore.MemoryHierarchyAccessType_LOAD, physicalTag)
@@ -43,14 +43,14 @@ func (core *BaseCore) CanLoad(thread Thread, virtualAddress uint32) bool {
 
 func (core *BaseCore) CanStore(thread Thread, virtualAddress uint32) bool {
 	var physicalTag = core.L1DController().Cache.GetTag(
-		thread.Context().Process.Memory.GetPhysicalAddress(virtualAddress),
+		thread.Context().Process.Memory().GetPhysicalAddress(virtualAddress),
 	)
 
 	return core.L1DController().CanAccess(uncore.MemoryHierarchyAccessType_STORE, physicalTag)
 }
 
 func (core *BaseCore) Ifetch(thread Thread, virtualAddress uint32, virtualPc uint32, onCompletedCallback func()) {
-	var physicalAddress = thread.Context().Process.Memory.GetPhysicalAddress(virtualAddress)
+	var physicalAddress = thread.Context().Process.Memory().GetPhysicalAddress(virtualAddress)
 	var physicalTag = core.L1IController().Cache.GetTag(physicalAddress)
 
 	var counterPending = simutil.NewCounter(uint32(0))
@@ -99,7 +99,7 @@ func (core *BaseCore) Ifetch(thread Thread, virtualAddress uint32, virtualPc uin
 }
 
 func (core *BaseCore) Load(thread Thread, virtualAddress uint32, virtualPc uint32, onCompletedCallback func()) {
-	var physicalAddress = thread.Context().Process.Memory.GetPhysicalAddress(virtualAddress)
+	var physicalAddress = thread.Context().Process.Memory().GetPhysicalAddress(virtualAddress)
 	var physicalTag = core.L1DController().Cache.GetTag(physicalAddress)
 
 	var counterPending = simutil.NewCounter(uint32(0))
@@ -148,7 +148,7 @@ func (core *BaseCore) Load(thread Thread, virtualAddress uint32, virtualPc uint3
 }
 
 func (core *BaseCore) Store(thread Thread, virtualAddress uint32, virtualPc uint32, onCompletedCallback func()) {
-	var physicalAddress = thread.Context().Process.Memory.GetPhysicalAddress(virtualAddress)
+	var physicalAddress = thread.Context().Process.Memory().GetPhysicalAddress(virtualAddress)
 	var physicalTag = core.L1DController().Cache.GetTag(physicalAddress)
 
 	var counterPending = simutil.NewCounter(uint32(0))
