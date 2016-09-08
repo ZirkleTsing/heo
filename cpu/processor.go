@@ -47,7 +47,11 @@ func (processor *Processor) UpdateContextToThreadAssignments() {
 
 			contextsToReserve = append(contextsToReserve, context)
 		} else if context.State == ContextState_FINISHED {
-			processor.kill(context)
+			var thread = processor.ContextToThreadMappings[context].(*OoOThread)
+
+			if thread != nil && thread.IsLastDecodedDynamicInstCommitted() && thread.ReorderBuffer.Empty() {
+				processor.kill(context)
+			}
 		} else {
 			contextsToReserve = append(contextsToReserve, context)
 		}

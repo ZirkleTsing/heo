@@ -109,14 +109,11 @@ func (fuDescriptor *FUDescriptor) Full() bool {
 }
 
 type FUPool struct {
-	Core                               Core
+	Core                 Core
 
-	Descriptors                        map[FUType]*FUDescriptor
+	Descriptors          map[FUType]*FUDescriptor
 
-	FUOperationToFUTypes               map[FUOperationType]FUType
-
-	NumStallsOnNoFreeFU                map[FUType]int32
-	NumStallsOnAcquireFailedOnNoFreeFU map[FUOperationType]int32
+	FUOperationToFUTypes map[FUOperationType]FUType
 }
 
 func NewFUPool(core Core) *FUPool {
@@ -125,8 +122,6 @@ func NewFUPool(core Core) *FUPool {
 
 		Descriptors:make(map[FUType]*FUDescriptor),
 		FUOperationToFUTypes: make(map[FUOperationType]FUType),
-		NumStallsOnNoFreeFU: make(map[FUType]int32),
-		NumStallsOnAcquireFailedOnNoFreeFU: make(map[FUOperationType]int32),
 	}
 
 	fuPool.AddFUDescriptor(
@@ -171,14 +166,6 @@ func NewFUPool(core Core) *FUPool {
 		FUOperationType_WRITE_PORT, 1, 1,
 	)
 
-	for _, fuType := range FUTypes {
-		fuPool.NumStallsOnNoFreeFU[fuType] = 0
-	}
-
-	for _, fuOperationType := range FUOperationTypes {
-		fuPool.NumStallsOnAcquireFailedOnNoFreeFU[fuOperationType] = 0
-	}
-
 	return fuPool
 }
 
@@ -186,4 +173,42 @@ func (fuPool *FUPool) AddFUDescriptor(fuType FUType, quantity uint32) *FUDescrip
 	var descriptor = NewFUDescriptor(fuPool, fuType, quantity)
 	fuPool.Descriptors[fuType] = descriptor
 	return descriptor
+}
+
+func (fuPool *FUPool) Acquire(reorderBufferEntry *ReorderBufferEntry, onCompletedCallback func()) bool {
+	var fuOperationType = reorderBufferEntry.DynamicInst().StaticInst.Mnemonic.FUOperationType
+	var fuType = fuPool.FUOperationToFUTypes[fuOperationType]
+	var fuOperation = fuPool.Descriptors[fuType].Operations[fuOperationType]
+
+	var fuDescriptor = fuPool.Descriptors[fuType]
+
+	if fuDescriptor.Full() {
+		return false
+	}
+
+	fuPool.Core.Processor().Experiment.CycleAccurateEventQueue().Schedule(
+		func() {
+			fuDescriptor.NumFree++
+		},
+		int(fuOperation.IssueLatency),
+	)
+
+	fuPool.Core.Processor().Experiment.CycleAccurateEventQueue().Schedule(
+		func() {
+			if !reorderBufferEntry.Squashed() {
+				onCompletedCallback()
+			}
+		},
+		int(fuOperation.OperationLatency),
+	)
+
+	fuDescriptor.NumFree--
+
+	return true
+}
+
+func (fuPool *FUPool) ReleaseAll() {
+	for _, descriptor := range fuPool.Descriptors {
+		descriptor.ReleaseAll()
+	}
 }

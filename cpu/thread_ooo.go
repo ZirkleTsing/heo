@@ -5,23 +5,26 @@ import "github.com/mcai/acogo/cpu/regs"
 type OoOThread struct {
 	*MemoryHierarchyThread
 
-	BranchPredictor                 *BranchPredictor
+	BranchPredictor                        *BranchPredictor
 
-	IntPhysicalRegs                 *PhysicalRegisterFile
-	FpPhysicalRegs                  *PhysicalRegisterFile
-	MiscPhysicalRegs                *PhysicalRegisterFile
+	IntPhysicalRegs                        *PhysicalRegisterFile
+	FpPhysicalRegs                         *PhysicalRegisterFile
+	MiscPhysicalRegs                       *PhysicalRegisterFile
 
-	RenameTable                     map[*RegisterDependency]*PhysicalRegister
+	RenameTable                            map[*RegisterDependency]*PhysicalRegister
 
-	DecodeBuffer                    *PipelineBuffer
-	ReorderBuffer                   *PipelineBuffer
-	LoadStoreQueue                  *PipelineBuffer
+	DecodeBuffer                           *PipelineBuffer
+	ReorderBuffer                          *PipelineBuffer
+	LoadStoreQueue                         *PipelineBuffer
 
-	FetchNpc                        uint32
-	FetchNnpc                       uint32
+	FetchNpc                               uint32
+	FetchNnpc                              uint32
 
-	LastDecodedDynamicInst          *DynamicInst
-	LastDecodedDynamicInstCommitted bool
+	lastDecodedDynamicInst                 *DynamicInst
+	lastDecodedDynamicInstCommitted        bool
+
+	LastCommitCycle                        int64
+	NoDynamicInstCommittedCounterThreshold uint32
 }
 
 func NewOoOThread(core Core, num int32) *OoOThread {
@@ -73,6 +76,8 @@ func NewOoOThread(core Core, num int32) *OoOThread {
 func (thread *OoOThread) UpdateFetchNpcAndNnpcFromRegs() {
 	thread.FetchNpc = thread.Context().Regs().Npc
 	thread.FetchNnpc = thread.Context().Regs().Nnpc
+
+	thread.LastCommitCycle = thread.Core().Processor().Experiment.CycleAccurateEventQueue().CurrentCycle
 }
 
 func (thread *OoOThread) CanFetch() bool {
@@ -143,8 +148,8 @@ func (thread *OoOThread) Fetch() {
 		thread.FetchNpc = thread.FetchNnpc
 
 		if !thread.Context().Speculative && thread.Context().State != ContextState_RUNNING {
-			thread.LastDecodedDynamicInst = dynamicInst
-			thread.LastDecodedDynamicInstCommitted = false
+			thread.lastDecodedDynamicInst = dynamicInst
+			thread.lastDecodedDynamicInstCommitted = false
 		}
 
 		if thread.FetchNpc + 4 % thread.Core().L1IController().Cache.LineSize() == 0 {
@@ -395,6 +400,136 @@ func (thread *OoOThread) RefreshLoadStoreQueue() {
 			}
 		}
 	}
+}
+
+func (thread *OoOThread) Commit() {
+	var commitTimeout = int64(1000000)
+
+	if thread.Core().Processor().Experiment.CycleAccurateEventQueue().CurrentCycle - thread.LastCommitCycle > commitTimeout {
+		if thread.NoDynamicInstCommittedCounterThreshold > 5 {
+			thread.Core().Processor().Experiment.MemoryHierarchy.DumpPendingFlowTree()
+		} else {
+			thread.LastCommitCycle = thread.Core().Processor().Experiment.CycleAccurateEventQueue().CurrentCycle
+			thread.NoDynamicInstCommittedCounterThreshold++
+		}
+	}
+
+	var numCommitted = uint32(0)
+
+	for !thread.ReorderBuffer.Empty() && numCommitted < thread.Core().Processor().Experiment.CPUConfig.CommitWidth {
+		var reorderBufferEntry = thread.ReorderBuffer.Entries[0].(*ReorderBufferEntry)
+
+		if !reorderBufferEntry.Completed() {
+			break
+		}
+
+		if reorderBufferEntry.Speculative() {
+			thread.BranchPredictor.ReturnAddressStack.Recover(reorderBufferEntry.ReturnAddressStackRecoverTop())
+
+			thread.Context().ExitSpeculativeState()
+
+			thread.FetchNpc = thread.Context().Regs().Npc
+			thread.FetchNnpc = thread.Context().Regs().Nnpc
+
+			thread.Squash()
+			break
+		}
+
+		if reorderBufferEntry.EffectiveAddressComputation {
+			var loadStoreQueueEntry = reorderBufferEntry.LoadStoreBufferEntry
+
+			if !loadStoreQueueEntry.Completed() {
+				break
+			}
+
+			thread.Core().RemoveFromQueues(loadStoreQueueEntry)
+
+			thread.removeFromLoadStoreQueue(loadStoreQueueEntry)
+		}
+
+		for _, outputDependency := range reorderBufferEntry.DynamicInst().StaticInst.OutputDependencies {
+			if outputDependency.ToInt() != 0 {
+				reorderBufferEntry.OldPhysicalRegisters()[outputDependency].Reclaim()
+				reorderBufferEntry.TargetPhysicalRegisters()[outputDependency].Commit()
+			}
+		}
+
+		if reorderBufferEntry.DynamicInst().StaticInst.Mnemonic.StaticInstType.IsControl() {
+			thread.BranchPredictor.Update(
+				reorderBufferEntry.DynamicInst().Pc,
+				reorderBufferEntry.Nnpc(),
+				reorderBufferEntry.Nnpc() != reorderBufferEntry.Npc() + 4,
+				reorderBufferEntry.PredictedNnpc() == reorderBufferEntry.Nnpc(),
+				reorderBufferEntry.DynamicInst().StaticInst.Mnemonic,
+				reorderBufferEntry.BranchPredictorUpdate(),
+			)
+		}
+
+		thread.Core().RemoveFromQueues(reorderBufferEntry)
+
+		if thread.Context().State == ContextState_FINISHED && reorderBufferEntry.DynamicInst() == thread.lastDecodedDynamicInst {
+			thread.lastDecodedDynamicInstCommitted = true
+		}
+
+		thread.ReorderBuffer.Entries = thread.ReorderBuffer.Entries[1:]
+
+		thread.numDynamicInsts++
+
+		thread.LastCommitCycle = thread.Core().Processor().Experiment.CycleAccurateEventQueue().CurrentCycle
+
+		numCommitted++
+	}
+}
+
+func (thread *OoOThread) removeFromLoadStoreQueue(entryToRemove *LoadStoreQueueEntry) {
+	var loadStoreQueueEntriesToReserve []interface{}
+
+	for _, entry := range thread.LoadStoreQueue.Entries {
+		if entry != entryToRemove {
+			loadStoreQueueEntriesToReserve = append(loadStoreQueueEntriesToReserve, entry)
+		}
+	}
+
+	thread.LoadStoreQueue.Entries = loadStoreQueueEntriesToReserve
+}
+
+func (thread *OoOThread) Squash() {
+	for !thread.ReorderBuffer.Empty() {
+		var reorderBufferEntry = thread.ReorderBuffer.Entries[len(thread.ReorderBuffer.Entries) - 1].(*ReorderBufferEntry)
+
+		if reorderBufferEntry.EffectiveAddressComputation {
+			var loadStoreQueueEntry = reorderBufferEntry.LoadStoreBufferEntry
+
+			thread.Core().RemoveFromQueues(loadStoreQueueEntry)
+
+			thread.removeFromLoadStoreQueue(loadStoreQueueEntry)
+		}
+
+		thread.Core().RemoveFromQueues(reorderBufferEntry)
+
+		for _, outputDependency := range reorderBufferEntry.DynamicInst().StaticInst.OutputDependencies {
+			if outputDependency.ToInt() != 0 {
+				reorderBufferEntry.TargetPhysicalRegisters()[outputDependency].Recover()
+				thread.RenameTable[outputDependency] = reorderBufferEntry.OldPhysicalRegisters()[outputDependency]
+			}
+		}
+
+		reorderBufferEntry.SetTargetPhysicalRegisters(make(map[*RegisterDependency]*PhysicalRegister))
+
+		thread.ReorderBuffer.Entries = thread.ReorderBuffer.Entries[:len(thread.ReorderBuffer.Entries) - 1]
+	}
+
+	if !thread.ReorderBuffer.Empty() || !thread.LoadStoreQueue.Empty() {
+		panic("Impossible")
+	}
+
+	thread.Core().FUPool().ReleaseAll()
+
+	thread.DecodeBuffer.Entries = []interface{}{}
+}
+
+func (thread *OoOThread) IsLastDecodedDynamicInstCommitted() bool {
+	return thread.lastDecodedDynamicInst == nil || thread.lastDecodedDynamicInstCommitted
 }
 
 func (thread *OoOThread) GetPhysicalRegisterFile(dependencyType RegisterDependencyType) *PhysicalRegisterFile {

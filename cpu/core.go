@@ -42,6 +42,8 @@ type Core interface {
 	Store(thread Thread, virtualAddress uint32, virtualPc uint32, onCompletedCallback func())
 
 	WarmupOneCycle()
+
+	RemoveFromQueues(entryToRemove GeneralReorderBufferEntry)
 }
 
 type BaseCore struct {

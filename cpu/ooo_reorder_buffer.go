@@ -9,7 +9,7 @@ type GeneralReorderBufferEntry interface {
 	Nnpc() uint32
 	PredictedNnpc() uint32
 
-	ReturnAddressStackRecoverIndex() uint32
+	ReturnAddressStackRecoverTop() uint32
 	BranchPredictorUpdate() *BranchPredictorUpdate
 	Speculative() bool
 
@@ -37,31 +37,31 @@ type GeneralReorderBufferEntry interface {
 }
 
 type BaseReorderBufferEntry struct {
-	id                             int32
-	thread                         Thread
-	dynamicInst                    *DynamicInst
+	id                           int32
+	thread                       Thread
+	dynamicInst                  *DynamicInst
 
-	npc                            uint32
-	nnpc                           uint32
-	predictedNnpc                  uint32
+	npc                          uint32
+	nnpc                         uint32
+	predictedNnpc                uint32
 
-	returnAddressStackRecoverIndex uint32
-	branchPredictorUpdate          *BranchPredictorUpdate
-	speculative                    bool
+	returnAddressStackRecoverTop uint32
+	branchPredictorUpdate        *BranchPredictorUpdate
+	speculative                  bool
 
-	oldPhysicalRegisters           map[*RegisterDependency]*PhysicalRegister
-	targetPhysicalRegisters        map[*RegisterDependency]*PhysicalRegister
-	sourcePhysicalRegisters        map[*RegisterDependency]*PhysicalRegister
+	oldPhysicalRegisters         map[*RegisterDependency]*PhysicalRegister
+	targetPhysicalRegisters      map[*RegisterDependency]*PhysicalRegister
+	sourcePhysicalRegisters      map[*RegisterDependency]*PhysicalRegister
 
-	dispatched                     bool
-	issued                         bool
-	completed                      bool
-	squashed                       bool
+	dispatched                   bool
+	issued                       bool
+	completed                    bool
+	squashed                     bool
 
-	numNotReadyOperands            uint32
+	numNotReadyOperands          uint32
 }
 
-func NewBaseReorderBufferEntry(thread Thread, dynamicInst *DynamicInst, npc uint32, nnpc uint32, predictedNnpc uint32, returnAddressStackRecoverIndex uint32, branchPredictorUpdate *BranchPredictorUpdate, speculative bool) *BaseReorderBufferEntry {
+func NewBaseReorderBufferEntry(thread Thread, dynamicInst *DynamicInst, npc uint32, nnpc uint32, predictedNnpc uint32, returnAddressStackRecoverTop uint32, branchPredictorUpdate *BranchPredictorUpdate, speculative bool) *BaseReorderBufferEntry {
 	var reorderBufferEntry = &BaseReorderBufferEntry{
 		id:thread.Core().Processor().Experiment.OoO.CurrentReorderBufferEntryId,
 		thread:thread,
@@ -71,7 +71,7 @@ func NewBaseReorderBufferEntry(thread Thread, dynamicInst *DynamicInst, npc uint
 		nnpc:nnpc,
 		predictedNnpc:predictedNnpc,
 
-		returnAddressStackRecoverIndex:returnAddressStackRecoverIndex,
+		returnAddressStackRecoverTop:returnAddressStackRecoverTop,
 		branchPredictorUpdate:branchPredictorUpdate,
 		speculative:speculative,
 
@@ -109,8 +109,8 @@ func (reorderBufferEntry *BaseReorderBufferEntry) PredictedNnpc() uint32 {
 	return reorderBufferEntry.predictedNnpc
 }
 
-func (reorderBufferEntry *BaseReorderBufferEntry) ReturnAddressStackRecoverIndex() uint32 {
-	return reorderBufferEntry.returnAddressStackRecoverIndex
+func (reorderBufferEntry *BaseReorderBufferEntry) ReturnAddressStackRecoverTop() uint32 {
+	return reorderBufferEntry.returnAddressStackRecoverTop
 }
 
 func (reorderBufferEntry *BaseReorderBufferEntry) BranchPredictorUpdate() *BranchPredictorUpdate {

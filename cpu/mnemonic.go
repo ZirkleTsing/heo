@@ -143,6 +143,8 @@ type Mnemonic struct {
 	ExtraBitField      *BitField
 	ExtraBitFieldValue uint32
 
+	FUOperationType    FUOperationType
+
 	StaticInstType     StaticInstType
 	StaticInstFlags    []StaticInstFlag
 
@@ -152,7 +154,7 @@ type Mnemonic struct {
 	Execute            func(context *Context, machInst MachInst)
 }
 
-func NewMnemonic(name MnemonicName, decodeMethod *DecodeMethod, decodeCondition *DecodeCondition, staticInstType StaticInstType, staticInstFlags []StaticInstFlag, inputDependencies []StaticInstDependency, outputDependencies []StaticInstDependency, execute func(context *Context, machInst MachInst)) *Mnemonic {
+func NewMnemonic(name MnemonicName, decodeMethod *DecodeMethod, decodeCondition *DecodeCondition, fuOperationType FUOperationType, staticInstType StaticInstType, staticInstFlags []StaticInstFlag, inputDependencies []StaticInstDependency, outputDependencies []StaticInstDependency, execute func(context *Context, machInst MachInst)) *Mnemonic {
 	var mnemonic = &Mnemonic{
 		Name:name,
 
@@ -161,6 +163,8 @@ func NewMnemonic(name MnemonicName, decodeMethod *DecodeMethod, decodeCondition 
 
 		Bits:decodeMethod.Bits,
 		Mask:decodeMethod.Mask,
+
+		FUOperationType:fuOperationType,
 
 		StaticInstType:staticInstType,
 		StaticInstFlags:staticInstFlags,
