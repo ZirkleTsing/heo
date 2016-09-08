@@ -30,20 +30,40 @@ func (core *OoOCore) WaitingInstructionQueue() []GeneralReorderBufferEntry {
 	return core.waitingInstructionQueue
 }
 
+func (core *OoOCore) SetWaitingInstructionQueue(waitingInstructionQueue []GeneralReorderBufferEntry) {
+	core.waitingInstructionQueue = waitingInstructionQueue
+}
+
 func (core *OoOCore) ReadyInstructionQueue() []GeneralReorderBufferEntry {
 	return core.readyInstructionQueue
+}
+
+func (core *OoOCore) SetReadyInstructionQueue(readyInstructionQueue []GeneralReorderBufferEntry) {
+	core.readyInstructionQueue = readyInstructionQueue
 }
 
 func (core *OoOCore) ReadyLoadQueue() []GeneralReorderBufferEntry {
 	return core.readyLoadQueue
 }
 
+func (core *OoOCore) SetReadyLoadQueue(readyLoadQueue []GeneralReorderBufferEntry) {
+	core.readyLoadQueue = readyLoadQueue
+}
+
 func (core *OoOCore) WaitingStoreQueue() []GeneralReorderBufferEntry {
 	return core.waitingStoreQueue
 }
 
+func (core *OoOCore) SetWaitingStoreQueue(waitingStoreQueue []GeneralReorderBufferEntry) {
+	core.waitingStoreQueue = waitingStoreQueue
+}
+
 func (core *OoOCore) ReadyStoreQueue() []GeneralReorderBufferEntry {
 	return core.readyStoreQueue
+}
+
+func (core *OoOCore) SetReadyStoreQueue(readyStoreQueue []GeneralReorderBufferEntry) {
+	core.readyStoreQueue = readyStoreQueue
 }
 
 func (core *OoOCore) OoOEventQueue() []GeneralReorderBufferEntry {

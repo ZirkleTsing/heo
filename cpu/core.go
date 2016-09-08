@@ -11,11 +11,22 @@ type Core interface {
 	FastForwardOneCycle()
 
 	FUPool() *FUPool
+
 	WaitingInstructionQueue() []GeneralReorderBufferEntry
+	SetWaitingInstructionQueue(waitingInstructionQueue []GeneralReorderBufferEntry)
+
 	ReadyInstructionQueue() []GeneralReorderBufferEntry
+	SetReadyInstructionQueue(readyInstructionQueue []GeneralReorderBufferEntry)
+
 	ReadyLoadQueue() []GeneralReorderBufferEntry
+	SetReadyLoadQueue(readyLoadQueue []GeneralReorderBufferEntry)
+
 	WaitingStoreQueue() []GeneralReorderBufferEntry
+	SetWaitingStoreQueue(waitingStoreQueue []GeneralReorderBufferEntry)
+
 	ReadyStoreQueue() []GeneralReorderBufferEntry
+	SetReadyStoreQueue(readyStoreQueue []GeneralReorderBufferEntry)
+
 	OoOEventQueue() []GeneralReorderBufferEntry
 	SetOoOEventQueue(oooEventQueue []GeneralReorderBufferEntry)
 

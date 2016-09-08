@@ -1,14 +1,36 @@
 package cpu
 
 type StaticInst struct {
-	Mnemonic *Mnemonic
-	MachInst MachInst
+	Mnemonic                       *Mnemonic
+	MachInst                       MachInst
+
+	InputDependencies              []*RegisterDependency
+	OutputDependencies             []*RegisterDependency
+
+	NumPhysicalRegistersToAllocate map[RegisterDependencyType]uint32
 }
 
 func NewStaticInst(mnemonic *Mnemonic, machInst MachInst) *StaticInst {
 	var staticInst = &StaticInst{
 		Mnemonic:mnemonic,
 		MachInst:machInst,
+
+		InputDependencies:mnemonic.GetInputDependencies(machInst),
+		OutputDependencies:mnemonic.GetOutputDependencies(machInst),
+
+		NumPhysicalRegistersToAllocate:make(map[RegisterDependencyType]uint32),
+	}
+
+	for _, outputDependency := range staticInst.OutputDependencies {
+		if outputDependency.ToInt() != 0 {
+			var outputDependencyType = outputDependency.DependencyType
+
+			if _, ok := staticInst.NumPhysicalRegistersToAllocate[outputDependencyType]; !ok {
+				staticInst.NumPhysicalRegistersToAllocate[outputDependencyType] = 0
+			}
+
+			staticInst.NumPhysicalRegistersToAllocate[outputDependencyType]++
+		}
 	}
 
 	return staticInst

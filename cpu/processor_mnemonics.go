@@ -1,7 +1,7 @@
 package cpu
 
-func (processor *Processor) addMnemonic(name MnemonicName, decodeMethod *DecodeMethod, decodeCondition *DecodeCondition, staticInstType StaticInstType, staticInstFlags []StaticInstFlag, execute func(context *Context, machInst MachInst)) {
-	var mnemonic = NewMnemonic(name, decodeMethod, decodeCondition, staticInstType, staticInstFlags, execute)
+func (processor *Processor) addMnemonic(name MnemonicName, decodeMethod *DecodeMethod, decodeCondition *DecodeCondition, staticInstType StaticInstType, staticInstFlags []StaticInstFlag, inputDependencies []StaticInstDependency, outputDependencies []StaticInstDependency, execute func(context *Context, machInst MachInst)) {
+	var mnemonic = NewMnemonic(name, decodeMethod, decodeCondition, staticInstType, staticInstFlags, inputDependencies, outputDependencies, execute)
 
 	processor.Mnemonics = append(processor.Mnemonics, mnemonic)
 }
@@ -15,6 +15,8 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_NOP,
 		},
+		[]StaticInstDependency{},
+		[]StaticInstDependency{},
 		nop,
 	)
 
@@ -26,6 +28,10 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_COND,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_FCSR,
+		},
+		[]StaticInstDependency{},
 		bc1f,
 	)
 
@@ -37,6 +43,10 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_COND,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_FCSR,
+		},
+		[]StaticInstDependency{},
 		bc1t,
 	)
 
@@ -47,6 +57,12 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
 		},
 		mfc1,
 	)
@@ -59,6 +75,12 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+		},
 		mtc1,
 	)
 
@@ -69,6 +91,12 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_FCSR,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
 		},
 		cfc1,
 	)
@@ -81,6 +109,12 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_FCSR,
+		},
 		ctc1,
 	)
 
@@ -91,6 +125,12 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
 		},
 		abs_s,
 	)
@@ -103,6 +143,12 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
+		},
 		abs_d,
 	)
 
@@ -113,6 +159,13 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
 		},
 		add,
 	)
@@ -125,6 +178,13 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+			StaticInstDependency_FT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
+		},
 		add_s,
 	)
 
@@ -135,6 +195,13 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+			StaticInstDependency_FT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
 		},
 		add_d,
 	)
@@ -148,6 +215,12 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_INT_COMP,
 			StaticInstFlag_IMM,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
+		},
 		addi,
 	)
 
@@ -160,6 +233,12 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_INT_COMP,
 			StaticInstFlag_IMM,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
+		},
 		addiu,
 	)
 
@@ -171,6 +250,13 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
+		},
 		addu,
 	)
 
@@ -181,6 +267,13 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
 		},
 		and,
 	)
@@ -194,6 +287,12 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_INT_COMP,
 			StaticInstFlag_IMM,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
+		},
 		andi,
 	)
 
@@ -206,6 +305,8 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_UNCOND,
 			StaticInstFlag_DIRECT_JMP,
 		},
+		[]StaticInstDependency{},
+		[]StaticInstDependency{},
 		b,
 	)
 
@@ -217,6 +318,10 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_UNCOND,
 			StaticInstFlag_DIRECT_JMP,
+		},
+		[]StaticInstDependency{},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_RA,
 		},
 		bal,
 	)
@@ -230,6 +335,11 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_COND,
 			StaticInstFlag_DIRECT_JMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{},
 		beq,
 	)
 
@@ -242,6 +352,10 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_COND,
 			StaticInstFlag_DIRECT_JMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{},
 		bgez,
 	)
 
@@ -255,6 +369,12 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_DIRECT_JMP,
 			StaticInstFlag_FUNC_CALL,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_RA,
+		},
 		bgezal,
 	)
 
@@ -267,6 +387,10 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_COND,
 			StaticInstFlag_DIRECT_JMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{},
 		bgtz,
 	)
 
@@ -279,6 +403,10 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_COND,
 			StaticInstFlag_DIRECT_JMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{},
 		blez,
 	)
 
@@ -291,6 +419,10 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_COND,
 			StaticInstFlag_DIRECT_JMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{},
 		bltz,
 	)
 
@@ -303,6 +435,11 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_COND,
 			StaticInstFlag_DIRECT_JMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{},
 		bne,
 	)
 
@@ -314,6 +451,8 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_TRAP,
 		},
+		[]StaticInstDependency{},
+		[]StaticInstDependency{},
 		_break,
 	)
 
@@ -324,6 +463,14 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+			StaticInstDependency_FT,
+			StaticInstDependency_REGISTER_FCSR,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_FCSR,
 		},
 		c_cond_d,
 	)
@@ -336,6 +483,14 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+			StaticInstDependency_FT,
+			StaticInstDependency_REGISTER_FCSR,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_FCSR,
+		},
 		c_cond_s,
 	)
 
@@ -346,6 +501,12 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
 		},
 		cvt_d_s,
 	)
@@ -358,6 +519,12 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
+		},
 		cvt_d_w,
 	)
 
@@ -368,6 +535,12 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
 		},
 		cvt_d_l,
 	)
@@ -380,6 +553,12 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
+		},
 		cvt_s_d,
 	)
 
@@ -390,6 +569,12 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
 		},
 		cvt_s_w,
 	)
@@ -402,6 +587,12 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
+		},
 		cvt_s_l,
 	)
 
@@ -412,6 +603,12 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
 		},
 		cvt_w_s,
 	)
@@ -424,6 +621,12 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
+		},
 		cvt_w_d,
 	)
 
@@ -434,6 +637,14 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_HI,
+			StaticInstDependency_REGISTER_LO,
 		},
 		div,
 	)
@@ -446,6 +657,13 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+			StaticInstDependency_FT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
+		},
 		div_s,
 	)
 
@@ -457,6 +675,13 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+			StaticInstDependency_FT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
+		},
 		div_d,
 	)
 
@@ -467,6 +692,14 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_HI,
+			StaticInstDependency_REGISTER_LO,
 		},
 		divu,
 	)
@@ -480,6 +713,8 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_UNCOND,
 			StaticInstFlag_DIRECT_JMP,
 		},
+		[]StaticInstDependency{},
+		[]StaticInstDependency{},
 		j,
 	)
 
@@ -492,6 +727,10 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_UNCOND,
 			StaticInstFlag_DIRECT_JMP,
 			StaticInstFlag_FUNC_CALL,
+		},
+		[]StaticInstDependency{},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_RA,
 		},
 		jal,
 	)
@@ -506,6 +745,12 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_INDIRECT_JMP,
 			StaticInstFlag_FUNC_CALL,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
+		},
 		jalr,
 	)
 
@@ -519,6 +764,10 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_INDIRECT_JMP,
 			StaticInstFlag_FUNC_RET,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{},
 		jr,
 	)
 
@@ -530,6 +779,13 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
 		},
 		lb,
 	)
@@ -543,6 +799,13 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
+		},
 		lbu,
 	)
 
@@ -554,6 +817,12 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FT,
 		},
 		ldc1,
 	)
@@ -567,6 +836,13 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
+		},
 		lh,
 	)
 
@@ -578,6 +854,12 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
 		},
 		lhu,
 	)
@@ -591,6 +873,12 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
+		},
 		ll,
 	)
 
@@ -601,6 +889,10 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
 		},
 		lui,
 	)
@@ -614,6 +906,12 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
+		},
 		lw,
 	)
 
@@ -625,6 +923,12 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FT,
 		},
 		lwc1,
 	)
@@ -638,6 +942,13 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
+		},
 		lwl,
 	)
 
@@ -650,6 +961,13 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_LD,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
+		},
 		lwr,
 	)
 
@@ -660,6 +978,16 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+			StaticInstDependency_REGISTER_HI,
+			StaticInstDependency_REGISTER_LO,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_HI,
+			StaticInstDependency_REGISTER_LO,
 		},
 		madd,
 	)
@@ -672,6 +1000,12 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_HI,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
+		},
 		mfhi,
 	)
 
@@ -682,6 +1016,12 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_LO,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
 		},
 		mflo,
 	)
@@ -694,6 +1034,12 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
+		},
 		mov_s,
 	)
 
@@ -704,6 +1050,12 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
 		},
 		mov_d,
 	)
@@ -716,6 +1068,16 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+			StaticInstDependency_REGISTER_HI,
+			StaticInstDependency_REGISTER_LO,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_HI,
+			StaticInstDependency_REGISTER_LO,
+		},
 		msub,
 	)
 
@@ -726,6 +1088,12 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_LO,
 		},
 		mtlo,
 	)
@@ -738,6 +1106,13 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+			StaticInstDependency_FT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
+		},
 		mul_s,
 	)
 
@@ -748,6 +1123,13 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+			StaticInstDependency_FT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
 		},
 		mul_d,
 	)
@@ -760,6 +1142,14 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_HI,
+			StaticInstDependency_REGISTER_LO,
+		},
 		mult,
 	)
 
@@ -770,6 +1160,14 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_HI,
+			StaticInstDependency_REGISTER_LO,
 		},
 		multu,
 	)
@@ -782,6 +1180,12 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
+		},
 		neg_s,
 	)
 
@@ -792,6 +1196,12 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
 		},
 		neg_d,
 	)
@@ -804,6 +1214,13 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
+		},
 		nor,
 	)
 
@@ -814,6 +1231,13 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
 		},
 		or,
 	)
@@ -827,6 +1251,12 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_INT_COMP,
 			StaticInstFlag_IMM,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
+		},
 		ori,
 	)
 
@@ -839,6 +1269,11 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_ST,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{},
 		sb,
 	)
 
@@ -850,6 +1285,13 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_ST,
 			StaticInstFlag_DISPLACED_ADDRESSING,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
 		},
 		sc,
 	)
@@ -863,6 +1305,11 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_ST,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_FT,
+		},
+		[]StaticInstDependency{},
 		sdc1,
 	)
 
@@ -875,6 +1322,11 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_ST,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{},
 		sh,
 	)
 
@@ -885,6 +1337,12 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
 		},
 		sll,
 	)
@@ -897,6 +1355,13 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
+		},
 		sllv,
 	)
 
@@ -907,6 +1372,13 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
 		},
 		slt,
 	)
@@ -920,6 +1392,12 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_INT_COMP,
 			StaticInstFlag_IMM,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
+		},
 		slti,
 	)
 
@@ -932,6 +1410,12 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_INT_COMP,
 			StaticInstFlag_IMM,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
+		},
 		sltiu,
 	)
 
@@ -942,6 +1426,13 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
 		},
 		sltu,
 	)
@@ -954,6 +1445,12 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
+		},
 		sqrt_s,
 	)
 
@@ -964,6 +1461,12 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_FP_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
 		},
 		sqrt_d,
 	)
@@ -976,6 +1479,12 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
+		},
 		sra,
 	)
 
@@ -986,6 +1495,13 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
 		},
 		srav,
 	)
@@ -998,6 +1514,12 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
+		},
 		srl,
 	)
 
@@ -1008,6 +1530,13 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
 		},
 		srlv,
 	)
@@ -1020,6 +1549,13 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+			StaticInstDependency_FT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
+		},
 		sub_s,
 	)
 
@@ -1031,6 +1567,13 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_FP_COMP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_FS,
+			StaticInstDependency_FT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_FD,
+		},
 		sub_d,
 	)
 
@@ -1041,6 +1584,13 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
 		},
 		subu,
 	)
@@ -1054,6 +1604,11 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_ST,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{},
 		sw,
 	)
 
@@ -1066,6 +1621,11 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_ST,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_FT,
+		},
+		[]StaticInstDependency{},
 		swc1,
 	)
 
@@ -1078,6 +1638,11 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_ST,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{},
 		swl,
 	)
 
@@ -1090,6 +1655,11 @@ func (processor *Processor) addMnemonics() {
 			StaticInstFlag_ST,
 			StaticInstFlag_DISPLACED_ADDRESSING,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{},
 		swr,
 	)
 
@@ -1101,6 +1671,10 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_TRAP,
 		},
+		[]StaticInstDependency{
+			StaticInstDependency_REGISTER_V0,
+		},
+		[]StaticInstDependency{},
 		_syscall,
 	)
 
@@ -1111,6 +1685,13 @@ func (processor *Processor) addMnemonics() {
 		StaticInstType_INT_COMP,
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+			StaticInstDependency_RT,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RD,
 		},
 		xor,
 	)
@@ -1123,6 +1704,12 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstFlag{
 			StaticInstFlag_INT_COMP,
 			StaticInstFlag_IMM,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RS,
+		},
+		[]StaticInstDependency{
+			StaticInstDependency_RT,
 		},
 		xori,
 	)

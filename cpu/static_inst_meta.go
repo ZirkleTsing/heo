@@ -36,6 +36,18 @@ const (
 	StaticInstType_NOP = StaticInstType("NOP")
 )
 
+func (staticInstType StaticInstType) IsControl() bool {
+	return staticInstType == StaticInstType_COND ||
+		staticInstType == StaticInstType_UNCOND ||
+		staticInstType == StaticInstType_FUNC_CALL ||
+		staticInstType == StaticInstType_FUNC_RET
+}
+
+func (staticInstType StaticInstType) IsLoadOrStore() bool {
+	return staticInstType == StaticInstType_LD ||
+		staticInstType == StaticInstType_ST
+}
+
 type RegisterDependencyType string
 
 const (
@@ -84,12 +96,12 @@ func (registerDependency *RegisterDependency) ToInt() uint32 {
 type StaticInstDependency string
 
 const (
-	StaticInstDependency_BIT_FIELD_RS = StaticInstDependency("BIT_FIELD_RS")
-	StaticInstDependency_BIT_FIELD_RT = StaticInstDependency("BIT_FIELD_RT")
-	StaticInstDependency_BIT_FIELD_RD = StaticInstDependency("BIT_FIELD_RD")
-	StaticInstDependency_BIT_FIELD_FS = StaticInstDependency("BIT_FIELD_FS")
-	StaticInstDependency_BIT_FIELD_FT = StaticInstDependency("BIT_FIELD_FT")
-	StaticInstDependency_BIT_FIELD_FD = StaticInstDependency("BIT_FIELD_FD")
+	StaticInstDependency_RS = StaticInstDependency("RS")
+	StaticInstDependency_RT = StaticInstDependency("RT")
+	StaticInstDependency_RD = StaticInstDependency("RD")
+	StaticInstDependency_FS = StaticInstDependency("FS")
+	StaticInstDependency_FT = StaticInstDependency("FT")
+	StaticInstDependency_FD = StaticInstDependency("FD")
 	StaticInstDependency_REGISTER_RA = StaticInstDependency("REGISTER_RA")
 	StaticInstDependency_REGISTER_V0 = StaticInstDependency("REGISTER_V0")
 	StaticInstDependency_REGISTER_HI = StaticInstDependency("REGISTER_HI")
@@ -99,17 +111,17 @@ const (
 
 func (staticInstDependency StaticInstDependency) ToRegisterDependency(machInst MachInst) *RegisterDependency {
 	switch staticInstDependency {
-	case StaticInstDependency_BIT_FIELD_RS:
+	case StaticInstDependency_RS:
 		return NewRegisterDependency(RegisterDependencyType_INT, machInst.Rs())
-	case StaticInstDependency_BIT_FIELD_RT:
+	case StaticInstDependency_RT:
 		return NewRegisterDependency(RegisterDependencyType_INT, machInst.Rt())
-	case StaticInstDependency_BIT_FIELD_RD:
+	case StaticInstDependency_RD:
 		return NewRegisterDependency(RegisterDependencyType_INT, machInst.Rd())
-	case StaticInstDependency_BIT_FIELD_FS:
+	case StaticInstDependency_FS:
 		return NewRegisterDependency(RegisterDependencyType_FP, machInst.Fs())
-	case StaticInstDependency_BIT_FIELD_FT:
+	case StaticInstDependency_FT:
 		return NewRegisterDependency(RegisterDependencyType_FP, machInst.Ft())
-	case StaticInstDependency_BIT_FIELD_FD:
+	case StaticInstDependency_FD:
 		return NewRegisterDependency(RegisterDependencyType_FP, machInst.Fd())
 	case StaticInstDependency_REGISTER_RA:
 		return NewRegisterDependency(RegisterDependencyType_INT, regs.REGISTER_RA)

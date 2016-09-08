@@ -13,11 +13,13 @@ type GeneralReorderBufferEntry interface {
 	BranchPredictorUpdate() *BranchPredictorUpdate
 	Speculative() bool
 
-	OldPhysicalRegisters() map[uint32]*PhysicalRegister
-	TargetPhysicalRegisters() map[uint32]*PhysicalRegister
-	SetTargetPhysicalRegisters(targetPhysicalRegisters map[uint32]*PhysicalRegister)
-	SourcePhysicalRegisters() map[uint32]*PhysicalRegister
-	SetSourcePhysicalRegisters(sourcePhysicalRegisters map[uint32]*PhysicalRegister)
+	OldPhysicalRegisters() map[*RegisterDependency]*PhysicalRegister
+
+	TargetPhysicalRegisters() map[*RegisterDependency]*PhysicalRegister
+	SetTargetPhysicalRegisters(targetPhysicalRegisters map[*RegisterDependency]*PhysicalRegister)
+
+	SourcePhysicalRegisters() map[*RegisterDependency]*PhysicalRegister
+	SetSourcePhysicalRegisters(sourcePhysicalRegisters map[*RegisterDependency]*PhysicalRegister)
 
 	Dispatched() bool
 	SetDispatched(dispatched bool)
@@ -47,9 +49,9 @@ type BaseReorderBufferEntry struct {
 	branchPredictorUpdate          *BranchPredictorUpdate
 	speculative                    bool
 
-	oldPhysicalRegisters           map[uint32]*PhysicalRegister
-	targetPhysicalRegisters        map[uint32]*PhysicalRegister
-	sourcePhysicalRegisters        map[uint32]*PhysicalRegister
+	oldPhysicalRegisters           map[*RegisterDependency]*PhysicalRegister
+	targetPhysicalRegisters        map[*RegisterDependency]*PhysicalRegister
+	sourcePhysicalRegisters        map[*RegisterDependency]*PhysicalRegister
 
 	dispatched                     bool
 	issued                         bool
@@ -72,6 +74,10 @@ func NewBaseReorderBufferEntry(thread Thread, dynamicInst *DynamicInst, npc uint
 		returnAddressStackRecoverIndex:returnAddressStackRecoverIndex,
 		branchPredictorUpdate:branchPredictorUpdate,
 		speculative:speculative,
+
+		oldPhysicalRegisters:make(map[*RegisterDependency]*PhysicalRegister),
+		targetPhysicalRegisters:make(map[*RegisterDependency]*PhysicalRegister),
+		sourcePhysicalRegisters:make(map[*RegisterDependency]*PhysicalRegister),
 	}
 
 	thread.Core().Processor().Experiment.OoO.CurrentReorderBufferEntryId++
@@ -115,23 +121,23 @@ func (reorderBufferEntry *BaseReorderBufferEntry) Speculative() bool {
 	return reorderBufferEntry.speculative
 }
 
-func (reorderBufferEntry *BaseReorderBufferEntry) OldPhysicalRegisters() map[uint32]*PhysicalRegister {
+func (reorderBufferEntry *BaseReorderBufferEntry) OldPhysicalRegisters() map[*RegisterDependency]*PhysicalRegister {
 	return reorderBufferEntry.oldPhysicalRegisters
 }
 
-func (reorderBufferEntry *BaseReorderBufferEntry) TargetPhysicalRegisters() map[uint32]*PhysicalRegister {
+func (reorderBufferEntry *BaseReorderBufferEntry) TargetPhysicalRegisters() map[*RegisterDependency]*PhysicalRegister {
 	return reorderBufferEntry.targetPhysicalRegisters
 }
 
-func (reorderBufferEntry *BaseReorderBufferEntry) SetTargetPhysicalRegisters(targetPhysicalRegisters map[uint32]*PhysicalRegister) {
+func (reorderBufferEntry *BaseReorderBufferEntry) SetTargetPhysicalRegisters(targetPhysicalRegisters map[*RegisterDependency]*PhysicalRegister) {
 	reorderBufferEntry.targetPhysicalRegisters = targetPhysicalRegisters
 }
 
-func (reorderBufferEntry *BaseReorderBufferEntry) SourcePhysicalRegisters() map[uint32]*PhysicalRegister {
+func (reorderBufferEntry *BaseReorderBufferEntry) SourcePhysicalRegisters() map[*RegisterDependency]*PhysicalRegister {
 	return reorderBufferEntry.sourcePhysicalRegisters
 }
 
-func (reorderBufferEntry *BaseReorderBufferEntry) SetSourcePhysicalRegisters(sourcePhysicalRegisters map[uint32]*PhysicalRegister) {
+func (reorderBufferEntry *BaseReorderBufferEntry) SetSourcePhysicalRegisters(sourcePhysicalRegisters map[*RegisterDependency]*PhysicalRegister) {
 	reorderBufferEntry.sourcePhysicalRegisters = sourcePhysicalRegisters
 }
 
@@ -177,7 +183,7 @@ func (reorderBufferEntry *BaseReorderBufferEntry) SetNumNotReadyOperands(numNotR
 
 func (reorderBufferEntry *BaseReorderBufferEntry) doWriteback() {
 	for dependency, targetPhysicalRegister := range reorderBufferEntry.targetPhysicalRegisters {
-		if dependency != 0 {
+		if dependency != nil {
 			targetPhysicalRegister.Writeback()
 		}
 	}
@@ -187,7 +193,7 @@ type ReorderBufferEntry struct {
 	*BaseReorderBufferEntry
 
 	EffectiveAddressComputation             bool
-	LoadStoreBufferEntry                    *LoadStoreBufferEntry
+	LoadStoreBufferEntry                    *LoadStoreQueueEntry
 	EffectiveAddressComputationOperandReady bool
 }
 
@@ -222,15 +228,15 @@ func (reorderBufferEntry *ReorderBufferEntry) AllOperandReady() bool {
 	return reorderBufferEntry.numNotReadyOperands == 0
 }
 
-type LoadStoreBufferEntry struct {
+type LoadStoreQueueEntry struct {
 	*BaseReorderBufferEntry
 
-	EffectiveAddress  uint32
+	EffectiveAddress  int32
 	StoreAddressReady bool
 }
 
-func NewLoadStoreBufferEntry(thread Thread, dynamicInst *DynamicInst, npc uint32, nnpc uint32, predictedNnpc uint32, returnAddressStackRecoverIndex uint32, branchPredictorUpdate *BranchPredictorUpdate, speculative bool) *LoadStoreBufferEntry {
-	var loadStoreBufferEntry = &LoadStoreBufferEntry{
+func NewLoadStoreQueueEntry(thread Thread, dynamicInst *DynamicInst, npc uint32, nnpc uint32, predictedNnpc uint32, returnAddressStackRecoverIndex uint32, branchPredictorUpdate *BranchPredictorUpdate, speculative bool) *LoadStoreQueueEntry {
+	var loadStoreQueueEntry = &LoadStoreQueueEntry{
 		BaseReorderBufferEntry:NewBaseReorderBufferEntry(
 			thread,
 			dynamicInst,
@@ -241,25 +247,27 @@ func NewLoadStoreBufferEntry(thread Thread, dynamicInst *DynamicInst, npc uint32
 			branchPredictorUpdate,
 			speculative,
 		),
+
+		EffectiveAddress:-1,
 	}
 
-	return loadStoreBufferEntry
+	return loadStoreQueueEntry
 }
 
-func (loadStoreBufferEntry *LoadStoreBufferEntry) Writeback() {
-	loadStoreBufferEntry.doWriteback()
+func (loadStoreQueueEntry *LoadStoreQueueEntry) Writeback() {
+	loadStoreQueueEntry.doWriteback()
 }
 
-func (loadStoreBufferEntry *LoadStoreBufferEntry) AllOperandReady() bool {
-	return loadStoreBufferEntry.numNotReadyOperands == 0
+func (loadStoreQueueEntry *LoadStoreQueueEntry) AllOperandReady() bool {
+	return loadStoreQueueEntry.numNotReadyOperands == 0
 }
 
-func SignalCompleted(generalReorderBufferEntry GeneralReorderBufferEntry) {
-	if !generalReorderBufferEntry.Squashed() {
-		generalReorderBufferEntry.Thread().Core().SetOoOEventQueue(
+func SignalCompleted(loadStoreQueueEntry GeneralReorderBufferEntry) {
+	if !loadStoreQueueEntry.Squashed() {
+		loadStoreQueueEntry.Thread().Core().SetOoOEventQueue(
 			append(
-				generalReorderBufferEntry.Thread().Core().OoOEventQueue(),
-				generalReorderBufferEntry,
+				loadStoreQueueEntry.Thread().Core().OoOEventQueue(),
+				loadStoreQueueEntry,
 			),
 		)
 	}

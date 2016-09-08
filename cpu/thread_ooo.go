@@ -11,7 +11,7 @@ type OoOThread struct {
 	FpPhysicalRegs                  *PhysicalRegisterFile
 	MiscPhysicalRegs                *PhysicalRegisterFile
 
-	RenameTable                     map[uint32]*PhysicalRegister
+	RenameTable                     map[*RegisterDependency]*PhysicalRegister
 
 	DecodeBuffer                    *PipelineBuffer
 	ReorderBuffer                   *PipelineBuffer
@@ -39,7 +39,7 @@ func NewOoOThread(core Core, num int32) *OoOThread {
 		FpPhysicalRegs:NewPhysicalRegisterFile(core.Processor().Experiment.CPUConfig.PhysicalRegisterFileSize),
 		MiscPhysicalRegs:NewPhysicalRegisterFile(core.Processor().Experiment.CPUConfig.PhysicalRegisterFileSize),
 
-		RenameTable:make(map[uint32]*PhysicalRegister),
+		RenameTable:make(map[*RegisterDependency]*PhysicalRegister),
 
 		DecodeBuffer:NewPipelineBuffer(core.Processor().Experiment.CPUConfig.DecodeBufferSize),
 		ReorderBuffer:NewPipelineBuffer(core.Processor().Experiment.CPUConfig.ReorderBufferSize),
@@ -47,24 +47,24 @@ func NewOoOThread(core Core, num int32) *OoOThread {
 	}
 
 	for i := uint32(0); i < regs.NUM_INT_REGISTERS; i++ {
-		var dep = NewRegisterDependency(RegisterDependencyType_INT, i).ToInt()
+		var dependency = NewRegisterDependency(RegisterDependencyType_INT, i)
 		var physicalReg = thread.IntPhysicalRegs.PhysicalRegisters[i]
-		physicalReg.Reserve(dep)
-		thread.RenameTable[dep] = physicalReg
+		physicalReg.Reserve(dependency)
+		thread.RenameTable[dependency] = physicalReg
 	}
 
 	for i := uint32(0); i < regs.NUM_FP_REGISTERS; i++ {
-		var dep = NewRegisterDependency(RegisterDependencyType_FP, i).ToInt()
+		var dependency = NewRegisterDependency(RegisterDependencyType_FP, i)
 		var physicalReg = thread.FpPhysicalRegs.PhysicalRegisters[i]
-		physicalReg.Reserve(dep)
-		thread.RenameTable[dep] = physicalReg
+		physicalReg.Reserve(dependency)
+		thread.RenameTable[dependency] = physicalReg
 	}
 
 	for i := uint32(0); i < regs.NUM_MISC_REGISTERS; i++ {
-		var dep = NewRegisterDependency(RegisterDependencyType_MISC, i).ToInt()
+		var dependency = NewRegisterDependency(RegisterDependencyType_MISC, i)
 		var physicalReg = thread.MiscPhysicalRegs.PhysicalRegisters[i]
-		physicalReg.Reserve(dep)
-		thread.RenameTable[dep] = physicalReg
+		physicalReg.Reserve(dependency)
+		thread.RenameTable[dependency] = physicalReg
 	}
 
 	return thread
@@ -107,7 +107,7 @@ func (thread *OoOThread) Fetch() {
 	var hasDone = false
 
 	for !hasDone {
-		if thread.context.State != ContextState_RUNNING {
+		if thread.Context().State != ContextState_RUNNING {
 			break
 		}
 
@@ -115,8 +115,297 @@ func (thread *OoOThread) Fetch() {
 			break
 		}
 
-		if thread.context.Regs().Npc != thread.FetchNpc {
-
+		if thread.Context().Regs().Npc != thread.FetchNpc {
+			if thread.Context().Speculative {
+				thread.Context().Regs().Npc = thread.FetchNpc
+			} else {
+				thread.Context().EnterSpeculativeState()
+			}
 		}
+
+		var dynamicInst *DynamicInst
+
+		for {
+			var staticInst = thread.Context().DecodeNextStaticInst()
+
+			dynamicInst = NewDynamicInst(thread, thread.Context().Regs().Pc, staticInst)
+			staticInst.Execute(thread.Context())
+
+			if dynamicInst.StaticInst.Mnemonic.StaticInstType == StaticInstType_NOP {
+				thread.UpdateFetchNpcAndNnpcFromRegs()
+			}
+
+			if dynamicInst.StaticInst.Mnemonic.StaticInstType != StaticInstType_NOP {
+				break
+			}
+		}
+
+		thread.FetchNpc = thread.FetchNnpc
+
+		if !thread.Context().Speculative && thread.Context().State != ContextState_RUNNING {
+			thread.LastDecodedDynamicInst = dynamicInst
+			thread.LastDecodedDynamicInstCommitted = false
+		}
+
+		if thread.FetchNpc + 4 % thread.Core().L1IController().Cache.LineSize() == 0 {
+			hasDone = true
+		}
+
+		var branchPredictorUpdate = NewBranchPredictorUpdate()
+
+		var dest, returnAddressStackRecoverTop uint32
+
+		if dynamicInst.StaticInst.Mnemonic.StaticInstType.IsControl() {
+			dest, returnAddressStackRecoverTop = thread.BranchPredictor.Predict(thread.FetchNpc, dynamicInst.StaticInst.Mnemonic, branchPredictorUpdate)
+		} else {
+			dest, returnAddressStackRecoverTop = thread.FetchNpc + 4, 0
+		}
+
+		thread.FetchNnpc = dest
+
+		if thread.FetchNnpc != thread.FetchNpc + 4 {
+			hasDone = true
+		}
+
+		thread.DecodeBuffer.Entries = append(
+			thread.DecodeBuffer.Entries,
+			NewDecodeBufferEntry(
+				dynamicInst,
+				thread.Context().Regs().Npc,
+				thread.Context().Regs().Nnpc,
+				thread.FetchNnpc,
+				returnAddressStackRecoverTop,
+				branchPredictorUpdate,
+				thread.Context().Speculative,
+			),
+		)
+	}
+}
+
+func (thread *OoOThread) RegisterRenameOne() bool {
+	var decodeBufferEntry = thread.DecodeBuffer.Entries[0].(*DecodeBufferEntry)
+
+	var dynamicInst = decodeBufferEntry.DynamicInst
+
+	for outputDependencyType, numPhysicalRegistersToAllocate := range dynamicInst.StaticInst.NumPhysicalRegistersToAllocate {
+		if thread.GetPhysicalRegisterFile(outputDependencyType).NumFreePhysicalRegisters < numPhysicalRegistersToAllocate {
+			return false
+		}
+	}
+
+	if dynamicInst.StaticInst.Mnemonic.StaticInstType.IsLoadOrStore() && thread.LoadStoreQueue.Full() {
+		return false
+	}
+
+	var reorderBufferEntry = NewReorderBufferEntry(
+		thread,
+		dynamicInst,
+		decodeBufferEntry.Npc,
+		decodeBufferEntry.Nnpc,
+		decodeBufferEntry.PredictedNnpc,
+		decodeBufferEntry.ReturnAddressStackRecoverTop,
+		decodeBufferEntry.BranchPredictorUpdate,
+		decodeBufferEntry.Speculative,
+	)
+
+	reorderBufferEntry.EffectiveAddressComputation = dynamicInst.StaticInst.Mnemonic.StaticInstType.IsLoadOrStore()
+
+	for _, inputDependency := range dynamicInst.StaticInst.InputDependencies {
+		reorderBufferEntry.SourcePhysicalRegisters()[inputDependency] = thread.RenameTable[inputDependency]
+	}
+
+	for _, outputDependency := range dynamicInst.StaticInst.OutputDependencies {
+		reorderBufferEntry.OldPhysicalRegisters()[outputDependency] = thread.RenameTable[outputDependency]
+		var physReg = thread.GetPhysicalRegisterFile(outputDependency.DependencyType).Allocate(outputDependency)
+		thread.RenameTable[outputDependency] = physReg
+		reorderBufferEntry.TargetPhysicalRegisters()[outputDependency] = physReg
+	}
+
+	for _, sourcePhysReg := range reorderBufferEntry.SourcePhysicalRegisters() {
+		if !sourcePhysReg.Ready() {
+			reorderBufferEntry.SetNumNotReadyOperands(reorderBufferEntry.NumNotReadyOperands() + 1)
+			sourcePhysReg.Dependents = append(sourcePhysReg.Dependents, reorderBufferEntry)
+		}
+	}
+
+	if reorderBufferEntry.EffectiveAddressComputation {
+		var physReg = reorderBufferEntry.SourcePhysicalRegisters()[dynamicInst.StaticInst.InputDependencies[0]]
+
+		if !physReg.Ready() {
+			physReg.EffectiveAddressComputationOperandDependents = append(
+				physReg.EffectiveAddressComputationOperandDependents,
+				reorderBufferEntry,
+			)
+		} else {
+			reorderBufferEntry.EffectiveAddressComputationOperandReady = true
+		}
+	}
+
+	if dynamicInst.StaticInst.Mnemonic.StaticInstType.IsLoadOrStore() {
+		var loadStoreQueueEntry = NewLoadStoreQueueEntry(
+			thread,
+			dynamicInst,
+			decodeBufferEntry.Npc,
+			decodeBufferEntry.Nnpc,
+			decodeBufferEntry.PredictedNnpc,
+			0,
+			nil,
+			false,
+		)
+
+		loadStoreQueueEntry.EffectiveAddress = dynamicInst.EffectiveAddress
+
+		loadStoreQueueEntry.SetSourcePhysicalRegisters(reorderBufferEntry.SourcePhysicalRegisters())
+		loadStoreQueueEntry.SetTargetPhysicalRegisters(reorderBufferEntry.TargetPhysicalRegisters())
+
+		for _, sourcePhysReg := range loadStoreQueueEntry.SourcePhysicalRegisters() {
+			if !sourcePhysReg.Ready() {
+				sourcePhysReg.Dependents = append(sourcePhysReg.Dependents, loadStoreQueueEntry)
+			}
+		}
+
+		loadStoreQueueEntry.SetNumNotReadyOperands(reorderBufferEntry.NumNotReadyOperands())
+
+		var storeAddressPhysReg = loadStoreQueueEntry.SourcePhysicalRegisters()[dynamicInst.StaticInst.InputDependencies[0]]
+		if !storeAddressPhysReg.Ready() {
+			storeAddressPhysReg.StoreAddressDependents = append(
+				storeAddressPhysReg.StoreAddressDependents,
+				loadStoreQueueEntry,
+			)
+		} else {
+			loadStoreQueueEntry.StoreAddressReady = true
+		}
+
+		thread.LoadStoreQueue.Entries = append(thread.LoadStoreQueue.Entries, loadStoreQueueEntry)
+
+		reorderBufferEntry.LoadStoreBufferEntry = loadStoreQueueEntry
+	}
+
+	thread.ReorderBuffer.Entries = append(thread.ReorderBuffer.Entries, reorderBufferEntry)
+
+	thread.DecodeBuffer.Entries = thread.DecodeBuffer.Entries[:len(thread.DecodeBuffer.Entries) - 1]
+
+	return true
+}
+
+func (thread *OoOThread) DispatchOne() bool {
+	for _, entry := range thread.ReorderBuffer.Entries {
+		var reorderBufferEntry = entry.(*ReorderBufferEntry)
+
+		if !reorderBufferEntry.Dispatched() {
+			if reorderBufferEntry.AllOperandReady() {
+				thread.Core().SetReadyInstructionQueue(
+					append(
+						thread.Core().ReadyInstructionQueue(),
+						reorderBufferEntry,
+					),
+				)
+			} else {
+				thread.Core().SetWaitingInstructionQueue(
+					append(
+						thread.Core().WaitingInstructionQueue(),
+						reorderBufferEntry,
+					),
+				)
+			}
+
+			reorderBufferEntry.SetDispatched(true)
+
+			if reorderBufferEntry.LoadStoreBufferEntry != nil {
+				var loadStoreQueueEntry = reorderBufferEntry.LoadStoreBufferEntry
+
+				if loadStoreQueueEntry.DynamicInst().StaticInst.Mnemonic.StaticInstType == StaticInstType_ST {
+					if loadStoreQueueEntry.AllOperandReady() {
+						thread.Core().SetReadyStoreQueue(
+							append(
+								thread.Core().ReadyStoreQueue(),
+								loadStoreQueueEntry,
+							),
+						)
+					} else {
+						thread.Core().SetWaitingStoreQueue(
+							append(
+								thread.Core().WaitingStoreQueue(),
+								loadStoreQueueEntry,
+							),
+						)
+					}
+				}
+
+				loadStoreQueueEntry.SetDispatched(true)
+			}
+
+			return true
+		}
+	}
+
+	return false
+}
+
+func (thread *OoOThread) RefreshLoadStoreQueue() {
+	var stdUnknowns []int32
+
+	for _, entry := range thread.LoadStoreQueue.Entries {
+		var loadStoreQueueEntry = entry.(*LoadStoreQueueEntry)
+
+		if loadStoreQueueEntry.DynamicInst().StaticInst.Mnemonic.StaticInstType == StaticInstType_ST {
+			if loadStoreQueueEntry.StoreAddressReady {
+				break
+			} else if !loadStoreQueueEntry.AllOperandReady() {
+				stdUnknowns = append(stdUnknowns, loadStoreQueueEntry.EffectiveAddress)
+			} else {
+				for i, stdUnknown := range stdUnknowns {
+					if stdUnknown == loadStoreQueueEntry.EffectiveAddress {
+						stdUnknowns[i] = -1
+					}
+				}
+			}
+		}
+
+		if loadStoreQueueEntry.DynamicInst().StaticInst.Mnemonic.StaticInstType == StaticInstType_LD &&
+			loadStoreQueueEntry.Dispatched() &&
+			!loadStoreQueueEntry.Issued() &&
+			!loadStoreQueueEntry.Completed() &&
+			loadStoreQueueEntry.AllOperandReady() {
+			var foundInReadyLoadQueue bool
+
+			for _, readyLoad := range thread.Core().ReadyLoadQueue() {
+				if readyLoad == loadStoreQueueEntry {
+					foundInReadyLoadQueue = true
+					break
+				}
+			}
+
+			var foundInStdUnknowns bool
+
+			for _, stdUnknown := range stdUnknowns {
+				if stdUnknown == loadStoreQueueEntry.EffectiveAddress {
+					foundInStdUnknowns = true
+					break
+				}
+			}
+
+			if !foundInReadyLoadQueue && !foundInStdUnknowns {
+				thread.Core().SetReadyLoadQueue(
+					append(
+						thread.Core().ReadyLoadQueue(),
+						loadStoreQueueEntry,
+					),
+				)
+			}
+		}
+	}
+}
+
+func (thread *OoOThread) GetPhysicalRegisterFile(dependencyType RegisterDependencyType) *PhysicalRegisterFile {
+	switch dependencyType {
+	case RegisterDependencyType_INT:
+		return thread.IntPhysicalRegs
+	case RegisterDependencyType_FP:
+		return thread.FpPhysicalRegs
+	case RegisterDependencyType_MISC:
+		return thread.MiscPhysicalRegs
+	default:
+		panic("Impossible")
 	}
 }

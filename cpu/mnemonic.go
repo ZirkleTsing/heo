@@ -133,26 +133,41 @@ func NewDecodeCondition(bitField *BitField, value uint32) *DecodeCondition {
 
 type Mnemonic struct {
 	Name               MnemonicName
+
 	DecodeMethod       *DecodeMethod
 	DecodeCondition    *DecodeCondition
+
 	Bits               uint32
 	Mask               uint32
+
 	ExtraBitField      *BitField
 	ExtraBitFieldValue uint32
+
 	StaticInstType     StaticInstType
 	StaticInstFlags    []StaticInstFlag
+
+	InputDependencies  []StaticInstDependency
+	OutputDependencies []StaticInstDependency
+
 	Execute            func(context *Context, machInst MachInst)
 }
 
-func NewMnemonic(name MnemonicName, decodeMethod *DecodeMethod, decodeCondition *DecodeCondition, staticInstType StaticInstType, staticInstFlags []StaticInstFlag, execute func(context *Context, machInst MachInst)) *Mnemonic {
+func NewMnemonic(name MnemonicName, decodeMethod *DecodeMethod, decodeCondition *DecodeCondition, staticInstType StaticInstType, staticInstFlags []StaticInstFlag, inputDependencies []StaticInstDependency, outputDependencies []StaticInstDependency, execute func(context *Context, machInst MachInst)) *Mnemonic {
 	var mnemonic = &Mnemonic{
 		Name:name,
+
 		DecodeMethod:decodeMethod,
 		DecodeCondition:decodeCondition,
+
 		Bits:decodeMethod.Bits,
 		Mask:decodeMethod.Mask,
+
 		StaticInstType:staticInstType,
 		StaticInstFlags:staticInstFlags,
+
+		InputDependencies:inputDependencies,
+		OutputDependencies:outputDependencies,
+
 		Execute:execute,
 	}
 
@@ -162,6 +177,26 @@ func NewMnemonic(name MnemonicName, decodeMethod *DecodeMethod, decodeCondition 
 	}
 
 	return mnemonic
+}
+
+func (mnemonic *Mnemonic) GetInputDependencies(machInst MachInst) []*RegisterDependency {
+	var inputDependencies []*RegisterDependency
+
+	for _, staticInstDependency := range mnemonic.InputDependencies {
+		inputDependencies = append(inputDependencies, staticInstDependency.ToRegisterDependency(machInst))
+	}
+
+	return inputDependencies
+}
+
+func (mnemonic *Mnemonic) GetOutputDependencies(machInst MachInst) []*RegisterDependency {
+	var outputDependencies []*RegisterDependency
+
+	for _, staticInstDependency := range mnemonic.OutputDependencies {
+		outputDependencies = append(outputDependencies, staticInstDependency.ToRegisterDependency(machInst))
+	}
+
+	return outputDependencies
 }
 
 const (
