@@ -10,6 +10,9 @@ type OoOCore struct {
 	waitingStoreQueue       []GeneralReorderBufferEntry
 	readyStoreQueue         []GeneralReorderBufferEntry
 	oooEventQueue           []GeneralReorderBufferEntry
+
+	RegisterRenameScheduler *RoundRobinScheduler
+	DispatchScheduler       *RoundRobinScheduler
 }
 
 func NewOoOCore(processor *Processor, num int32) *OoOCore {
@@ -18,6 +21,50 @@ func NewOoOCore(processor *Processor, num int32) *OoOCore {
 	}
 
 	core.fuPool = NewFUPool(core)
+
+	var resources []interface{}
+
+	for _, thread := range core.Threads() {
+		resources = append(resources, thread)
+	}
+
+	core.RegisterRenameScheduler = NewRoundRobinScheduler(
+		resources,
+		func(resource interface{}) bool {
+			var thread = resource.(*OoOThread)
+
+			if thread.Context() == nil {
+				return false
+			} else if thread.DecodeBuffer.Empty() {
+				return false
+			} else if thread.ReorderBuffer.Full() {
+				return false
+			} else {
+				return true
+			}
+		},
+		func(resource interface{}) bool {
+			var thread = resource.(*OoOThread)
+
+			return thread.RegisterRenameOne()
+		},
+		core.Processor().Experiment.CPUConfig.DecodeWidth,
+	)
+
+	core.DispatchScheduler = NewRoundRobinScheduler(
+		resources,
+		func(resource interface{}) bool {
+			var thread = resource.(*OoOThread)
+
+			return thread.Context() != nil
+		},
+		func(resource interface{}) bool {
+			var thread = resource.(*OoOThread)
+
+			return thread.DispatchOne()
+		},
+		core.Processor().Experiment.CPUConfig.DecodeWidth,
+	)
 
 	return core
 }
@@ -74,40 +121,253 @@ func (core *OoOCore) SetOoOEventQueue(oooEventQueue []GeneralReorderBufferEntry)
 	core.oooEventQueue = oooEventQueue
 }
 
-func (core *OoOCore) DoMeasurementOneCycle() {
-
+func (core *OoOCore) MeasurementOneCycle() {
+	core.Commit()
+	core.Writeback()
+	core.RefreshLoadStoreQueue()
+	core.Wakeup()
+	core.Issue()
+	core.Dispatch()
+	core.RegisterRename()
+	core.Fetch()
 }
 
 func (core *OoOCore) Fetch() {
-	//TODO
+	for _, thread := range core.Threads() {
+		if thread.Context() != nil && thread.Context().State == ContextState_RUNNING {
+			thread.(*OoOThread).Fetch()
+		}
+	}
 }
 
 func (core *OoOCore) RegisterRename() {
-	//TODO
+	core.RegisterRenameScheduler.ConsumeNext()
 }
 
 func (core *OoOCore) Dispatch() {
-	//TODO
+	core.DispatchScheduler.ConsumeNext()
 }
 
 func (core *OoOCore) Wakeup() {
-	//TODO
+	var waitingInstructionQueueToReserve []GeneralReorderBufferEntry
+
+	for _, entry := range core.WaitingInstructionQueue() {
+		if entry.AllOperandReady() {
+			core.SetReadyInstructionQueue(
+				append(
+					core.ReadyInstructionQueue(),
+					entry,
+				),
+			)
+		} else {
+			waitingInstructionQueueToReserve = append(
+				waitingInstructionQueueToReserve,
+				entry,
+			)
+		}
+	}
+
+	core.SetWaitingInstructionQueue(waitingInstructionQueueToReserve)
+
+	var waitingStoreQueueToReserve []GeneralReorderBufferEntry
+
+	for _, entry := range core.WaitingStoreQueue() {
+		if entry.AllOperandReady() {
+			core.SetReadyStoreQueue(
+				append(
+					core.ReadyStoreQueue(),
+					entry,
+				),
+			)
+		} else {
+			waitingStoreQueueToReserve = append(
+				waitingStoreQueueToReserve,
+				entry,
+			)
+		}
+	}
+
+	core.SetWaitingStoreQueue(waitingStoreQueueToReserve)
 }
 
 func (core *OoOCore) Issue() {
-	//TODO
+	var quant = core.Processor().Experiment.CPUConfig.IssueWidth
+
+	var readyInstructionQueueToRemove []GeneralReorderBufferEntry
+
+	for _, entry := range core.ReadyInstructionQueue() {
+		if quant <= 0 {
+			break
+		}
+
+		var reorderBufferEntry = entry.(*ReorderBufferEntry)
+
+		if reorderBufferEntry.DynamicInst().StaticInst.Mnemonic.FUOperationType != FUOperationType_NONE {
+			if core.FUPool().Acquire(reorderBufferEntry, func() {
+				SignalCompleted(reorderBufferEntry)
+			}) {
+				reorderBufferEntry.SetIssued(true)
+			} else {
+				continue
+			}
+		} else {
+			reorderBufferEntry.SetIssued(true)
+			reorderBufferEntry.SetCompleted(true)
+			reorderBufferEntry.Writeback()
+		}
+
+		readyInstructionQueueToRemove = append(readyInstructionQueueToRemove, reorderBufferEntry)
+
+		quant--
+	}
+
+	for _, entryToRemove := range readyInstructionQueueToRemove {
+		core.removeFromReadyInstructionQueue(entryToRemove)
+	}
+
+	var readyLoadQueueToRemove []GeneralReorderBufferEntry
+
+	for _, entry := range core.ReadyLoadQueue() {
+		if quant <= 0 {
+			break
+		}
+
+		var loadStoreQueueEntry = entry.(*LoadStoreQueueEntry)
+
+		var hitInLoadStoreQueue = false
+
+		for _, entryFound := range loadStoreQueueEntry.Thread().(*OoOThread).LoadStoreQueue.Entries {
+			var loadStoreQueueEntryFound = entryFound.(*LoadStoreQueueEntry)
+
+			if loadStoreQueueEntryFound.DynamicInst().StaticInst.Mnemonic.StaticInstType == StaticInstType_ST &&
+				loadStoreQueueEntryFound.EffectiveAddress == loadStoreQueueEntry.EffectiveAddress {
+				hitInLoadStoreQueue = true
+				break
+			}
+		}
+
+		if hitInLoadStoreQueue {
+			loadStoreQueueEntry.SetIssued(true)
+			SignalCompleted(loadStoreQueueEntry)
+		} else {
+			if !core.CanLoad(loadStoreQueueEntry.Thread(), uint32(loadStoreQueueEntry.EffectiveAddress)) {
+				break
+			}
+
+			core.Load(
+				loadStoreQueueEntry.Thread(),
+				uint32(loadStoreQueueEntry.EffectiveAddress),
+				loadStoreQueueEntry.DynamicInst().Pc,
+				func() {
+					SignalCompleted(loadStoreQueueEntry)
+				},
+			)
+
+			loadStoreQueueEntry.SetIssued(true)
+		}
+
+		readyLoadQueueToRemove = append(readyLoadQueueToRemove, loadStoreQueueEntry)
+
+		quant--
+	}
+
+	for _, entryToRemove := range readyLoadQueueToRemove {
+		core.removeFromReadyLoadQueue(entryToRemove)
+	}
+
+	var readyStoreQueueToRemove []GeneralReorderBufferEntry
+
+	for _, entry := range core.ReadyStoreQueue() {
+		if quant <= 0 {
+			break
+		}
+
+		var loadStoreQueueEntry = entry.(*LoadStoreQueueEntry)
+
+		if !core.CanStore(loadStoreQueueEntry.Thread(), uint32(loadStoreQueueEntry.EffectiveAddress)) {
+			break
+		}
+
+		core.Store(
+			loadStoreQueueEntry.Thread(),
+			uint32(loadStoreQueueEntry.EffectiveAddress),
+			loadStoreQueueEntry.DynamicInst().Pc,
+			func() {
+			},
+		)
+
+		loadStoreQueueEntry.SetIssued(true)
+		SignalCompleted(loadStoreQueueEntry)
+
+		readyStoreQueueToRemove = append(readyStoreQueueToRemove, loadStoreQueueEntry)
+
+		quant--
+	}
+
+	for _, entryToRemove := range readyStoreQueueToRemove {
+		core.removeFromReadyStoreQueue(entryToRemove)
+	}
+}
+
+func (core *OoOCore) removeFromReadyInstructionQueue(entryToRemove GeneralReorderBufferEntry) {
+	var readyInstructionQueueToReserve []GeneralReorderBufferEntry
+
+	for _, entry := range core.ReadyInstructionQueue() {
+		if entry != entryToRemove {
+			readyInstructionQueueToReserve = append(readyInstructionQueueToReserve, entry)
+		}
+	}
+
+	core.SetReadyInstructionQueue(readyInstructionQueueToReserve)
+}
+
+func (core *OoOCore) removeFromReadyLoadQueue(entryToRemove GeneralReorderBufferEntry) {
+	var readyLoadQueueToReserve []GeneralReorderBufferEntry
+
+	for _, entry := range core.ReadyLoadQueue() {
+		if entry != entryToRemove {
+			readyLoadQueueToReserve = append(readyLoadQueueToReserve, entry)
+		}
+	}
+
+	core.SetReadyLoadQueue(readyLoadQueueToReserve)
+}
+
+func (core *OoOCore) removeFromReadyStoreQueue(entryToRemove GeneralReorderBufferEntry) {
+	var readyStoreQueueToReserve []GeneralReorderBufferEntry
+
+	for _, entry := range core.ReadyStoreQueue() {
+		if entry != entryToRemove {
+			readyStoreQueueToReserve = append(readyStoreQueueToReserve, entry)
+		}
+	}
+
+	core.SetReadyStoreQueue(readyStoreQueueToReserve)
 }
 
 func (core *OoOCore) Writeback() {
-	//TODO
+	for _, entry := range core.OoOEventQueue() {
+		entry.SetCompleted(true)
+		entry.Writeback()
+	}
+
+	core.SetOoOEventQueue([]GeneralReorderBufferEntry{})
 }
 
 func (core *OoOCore) RefreshLoadStoreQueue() {
-	//TODO
+	for _, thread := range core.Threads() {
+		if thread.Context() != nil {
+			thread.(*OoOThread).RefreshLoadStoreQueue()
+		}
+	}
 }
 
 func (core *OoOCore) Commit() {
-	//TODO
+	for _, thread := range core.Threads() {
+		if thread.Context() != nil {
+			thread.(*OoOThread).Commit()
+		}
+	}
 }
 
 func (core *OoOCore) RemoveFromQueues(entryToRemove GeneralReorderBufferEntry) {

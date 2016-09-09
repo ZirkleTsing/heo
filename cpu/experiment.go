@@ -68,7 +68,8 @@ func (experiment *CPUExperiment) Run(skipIfStatsFileExists bool) {
 
 	//TODO: to be called based on config
 	//experiment.DoFastForward()
-	experiment.DoWarmup()
+	//experiment.DoWarmup()
+	experiment.DoMeasurement()
 
 	experiment.EndTime = time.Now()
 
@@ -106,9 +107,15 @@ func (experiment *CPUExperiment) DoWarmup() {
 		}
 
 		experiment.advanceOneCycle()
+	}
+}
 
-		//if experiment.cycleAccurateEventQueue.CurrentCycle == 100000 {
-		//	experiment.MemoryHierarchy.DumpPendingFlowTree()
-		//}
+func (experiment *CPUExperiment) DoMeasurement() {
+	for len(experiment.Kernel.Contexts) > 0 && experiment.canAdvanceOneCycle() {
+		for _, core := range experiment.Processor.Cores {
+			core.(*OoOCore).MeasurementOneCycle()
+		}
+
+		experiment.advanceOneCycle()
 	}
 }

@@ -34,6 +34,19 @@ type GeneralReorderBufferEntry interface {
 	SetNumNotReadyOperands(numNotReadyOperands uint32)
 
 	Writeback()
+
+	AllOperandReady() bool
+}
+
+func SignalCompleted(reorderBufferEntry GeneralReorderBufferEntry) {
+	if !reorderBufferEntry.Squashed() {
+		reorderBufferEntry.Thread().Core().SetOoOEventQueue(
+			append(
+				reorderBufferEntry.Thread().Core().OoOEventQueue(),
+				reorderBufferEntry,
+			),
+		)
+	}
 }
 
 type BaseReorderBufferEntry struct {
@@ -260,15 +273,4 @@ func (loadStoreQueueEntry *LoadStoreQueueEntry) Writeback() {
 
 func (loadStoreQueueEntry *LoadStoreQueueEntry) AllOperandReady() bool {
 	return loadStoreQueueEntry.numNotReadyOperands == 0
-}
-
-func SignalCompleted(loadStoreQueueEntry GeneralReorderBufferEntry) {
-	if !loadStoreQueueEntry.Squashed() {
-		loadStoreQueueEntry.Thread().Core().SetOoOEventQueue(
-			append(
-				loadStoreQueueEntry.Thread().Core().OoOEventQueue(),
-				loadStoreQueueEntry,
-			),
-		)
-	}
 }
