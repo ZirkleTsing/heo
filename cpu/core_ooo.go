@@ -24,14 +24,14 @@ func NewOoOCore(processor *Processor, num int32) *OoOCore {
 
 	var resources []interface{}
 
-	for _, thread := range core.Threads() {
-		resources = append(resources, thread)
+	for i := int32(0); i < core.Processor().Experiment.CPUConfig.NumThreadsPerCore; i++ {
+		resources = append(resources, i)
 	}
 
 	core.RegisterRenameScheduler = NewRoundRobinScheduler(
 		resources,
 		func(resource interface{}) bool {
-			var thread = resource.(*OoOThread)
+			var thread = core.Threads()[resource.(int32)].(*OoOThread)
 
 			if thread.Context() == nil {
 				return false
@@ -44,7 +44,7 @@ func NewOoOCore(processor *Processor, num int32) *OoOCore {
 			}
 		},
 		func(resource interface{}) bool {
-			var thread = resource.(*OoOThread)
+			var thread = core.Threads()[resource.(int32)].(*OoOThread)
 
 			return thread.RegisterRenameOne()
 		},
@@ -54,12 +54,12 @@ func NewOoOCore(processor *Processor, num int32) *OoOCore {
 	core.DispatchScheduler = NewRoundRobinScheduler(
 		resources,
 		func(resource interface{}) bool {
-			var thread = resource.(*OoOThread)
+			var thread = core.Threads()[resource.(int32)].(*OoOThread)
 
 			return thread.Context() != nil
 		},
 		func(resource interface{}) bool {
-			var thread = resource.(*OoOThread)
+			var thread = core.Threads()[resource.(int32)].(*OoOThread)
 
 			return thread.DispatchOne()
 		},

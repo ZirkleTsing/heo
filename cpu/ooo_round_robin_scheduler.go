@@ -45,7 +45,7 @@ func (scheduler *RoundRobinScheduler) consumeNext(resourceId int32) int32 {
 	resourceId = (resourceId + 1) % int32(len(scheduler.Resources))
 
 	for numConsumed := uint32(0); numConsumed < scheduler.Quant; numConsumed++ {
-		if stall, ok := scheduler.Stalled[resourceId]; ok && stall && scheduler.Predicate(scheduler.Resources[resourceId]) {
+		if stall, ok := scheduler.Stalled[resourceId]; (ok && stall) || !scheduler.Predicate(scheduler.Resources[resourceId]) {
 			resourceId = scheduler.findNext()
 		}
 
