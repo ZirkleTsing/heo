@@ -22,6 +22,10 @@ func NewRoundRobinScheduler(resources []interface{}, predicate func(resource int
 		Stalled:make(map[int32]bool),
 	}
 
+	for i := int32(0); i < int32(len(resources)); i++ {
+		scheduler.Stalled[i] = false
+	}
+
 	return scheduler
 }
 
@@ -40,12 +44,14 @@ func (scheduler *RoundRobinScheduler) findNext() int32 {
 }
 
 func (scheduler *RoundRobinScheduler) consumeNext(resourceId int32) int32 {
-	scheduler.Stalled = make(map[int32]bool)
+	for i := int32(0); i < int32(len(scheduler.Resources)); i++ {
+		scheduler.Stalled[i] = false
+	}
 
 	resourceId = (resourceId + 1) % int32(len(scheduler.Resources))
 
 	for numConsumed := uint32(0); numConsumed < scheduler.Quant; numConsumed++ {
-		if stall, ok := scheduler.Stalled[resourceId]; (ok && stall) || !scheduler.Predicate(scheduler.Resources[resourceId]) {
+		if scheduler.Stalled[resourceId] || !scheduler.Predicate(scheduler.Resources[resourceId]) {
 			resourceId = scheduler.findNext()
 		}
 

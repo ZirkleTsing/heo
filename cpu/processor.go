@@ -45,6 +45,10 @@ func (processor *Processor) UpdateContextToThreadAssignments() {
 
 			candidateThread.SetContext(context)
 
+			if oooThread := candidateThread.(*OoOThread); oooThread != nil {
+				oooThread.UpdateFetchNpcAndNnpcFromRegs()
+			}
+
 			contextsToReserve = append(contextsToReserve, context)
 		} else if context.State == ContextState_FINISHED {
 			var thread = processor.ContextToThreadMappings[context].(*OoOThread)
