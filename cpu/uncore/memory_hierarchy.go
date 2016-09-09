@@ -256,8 +256,6 @@ func (memoryHierarchy *BaseMemoryHierarchy) DumpPendingFlowTree() {
 		)
 		fmt.Println()
 	}
-
-	fmt.Println()
 }
 
 type P2PReorderBuffer struct {

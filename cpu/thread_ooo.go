@@ -409,6 +409,7 @@ func (thread *OoOThread) Commit() {
 	if thread.Core().Processor().Experiment.CycleAccurateEventQueue().CurrentCycle - thread.LastCommitCycle > commitTimeout {
 		if thread.NoDynamicInstCommittedCounterThreshold > 5 {
 			thread.Core().Processor().Experiment.MemoryHierarchy.DumpPendingFlowTree()
+			panic("No dynamic insts committed for a long time")
 		} else {
 			thread.LastCommitCycle = thread.Core().Processor().Experiment.CycleAccurateEventQueue().CurrentCycle
 			thread.NoDynamicInstCommittedCounterThreshold++
