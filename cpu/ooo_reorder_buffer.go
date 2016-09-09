@@ -13,13 +13,13 @@ type GeneralReorderBufferEntry interface {
 	BranchPredictorUpdate() *BranchPredictorUpdate
 	Speculative() bool
 
-	OldPhysicalRegisters() map[*RegisterDependency]*PhysicalRegister
+	OldPhysicalRegisters() map[uint32]*PhysicalRegister
 
-	TargetPhysicalRegisters() map[*RegisterDependency]*PhysicalRegister
-	SetTargetPhysicalRegisters(targetPhysicalRegisters map[*RegisterDependency]*PhysicalRegister)
+	TargetPhysicalRegisters() map[uint32]*PhysicalRegister
+	SetTargetPhysicalRegisters(targetPhysicalRegisters map[uint32]*PhysicalRegister)
 
-	SourcePhysicalRegisters() map[*RegisterDependency]*PhysicalRegister
-	SetSourcePhysicalRegisters(sourcePhysicalRegisters map[*RegisterDependency]*PhysicalRegister)
+	SourcePhysicalRegisters() map[uint32]*PhysicalRegister
+	SetSourcePhysicalRegisters(sourcePhysicalRegisters map[uint32]*PhysicalRegister)
 
 	Dispatched() bool
 	SetDispatched(dispatched bool)
@@ -62,9 +62,9 @@ type BaseReorderBufferEntry struct {
 	branchPredictorUpdate        *BranchPredictorUpdate
 	speculative                  bool
 
-	oldPhysicalRegisters         map[*RegisterDependency]*PhysicalRegister
-	targetPhysicalRegisters      map[*RegisterDependency]*PhysicalRegister
-	sourcePhysicalRegisters      map[*RegisterDependency]*PhysicalRegister
+	oldPhysicalRegisters         map[uint32]*PhysicalRegister
+	targetPhysicalRegisters      map[uint32]*PhysicalRegister
+	sourcePhysicalRegisters      map[uint32]*PhysicalRegister
 
 	dispatched                   bool
 	issued                       bool
@@ -88,9 +88,9 @@ func NewBaseReorderBufferEntry(thread Thread, dynamicInst *DynamicInst, npc uint
 		branchPredictorUpdate:branchPredictorUpdate,
 		speculative:speculative,
 
-		oldPhysicalRegisters:make(map[*RegisterDependency]*PhysicalRegister),
-		targetPhysicalRegisters:make(map[*RegisterDependency]*PhysicalRegister),
-		sourcePhysicalRegisters:make(map[*RegisterDependency]*PhysicalRegister),
+		oldPhysicalRegisters:make(map[uint32]*PhysicalRegister),
+		targetPhysicalRegisters:make(map[uint32]*PhysicalRegister),
+		sourcePhysicalRegisters:make(map[uint32]*PhysicalRegister),
 	}
 
 	thread.Core().Processor().Experiment.OoO.CurrentReorderBufferEntryId++
@@ -134,23 +134,23 @@ func (reorderBufferEntry *BaseReorderBufferEntry) Speculative() bool {
 	return reorderBufferEntry.speculative
 }
 
-func (reorderBufferEntry *BaseReorderBufferEntry) OldPhysicalRegisters() map[*RegisterDependency]*PhysicalRegister {
+func (reorderBufferEntry *BaseReorderBufferEntry) OldPhysicalRegisters() map[uint32]*PhysicalRegister {
 	return reorderBufferEntry.oldPhysicalRegisters
 }
 
-func (reorderBufferEntry *BaseReorderBufferEntry) TargetPhysicalRegisters() map[*RegisterDependency]*PhysicalRegister {
+func (reorderBufferEntry *BaseReorderBufferEntry) TargetPhysicalRegisters() map[uint32]*PhysicalRegister {
 	return reorderBufferEntry.targetPhysicalRegisters
 }
 
-func (reorderBufferEntry *BaseReorderBufferEntry) SetTargetPhysicalRegisters(targetPhysicalRegisters map[*RegisterDependency]*PhysicalRegister) {
+func (reorderBufferEntry *BaseReorderBufferEntry) SetTargetPhysicalRegisters(targetPhysicalRegisters map[uint32]*PhysicalRegister) {
 	reorderBufferEntry.targetPhysicalRegisters = targetPhysicalRegisters
 }
 
-func (reorderBufferEntry *BaseReorderBufferEntry) SourcePhysicalRegisters() map[*RegisterDependency]*PhysicalRegister {
+func (reorderBufferEntry *BaseReorderBufferEntry) SourcePhysicalRegisters() map[uint32]*PhysicalRegister {
 	return reorderBufferEntry.sourcePhysicalRegisters
 }
 
-func (reorderBufferEntry *BaseReorderBufferEntry) SetSourcePhysicalRegisters(sourcePhysicalRegisters map[*RegisterDependency]*PhysicalRegister) {
+func (reorderBufferEntry *BaseReorderBufferEntry) SetSourcePhysicalRegisters(sourcePhysicalRegisters map[uint32]*PhysicalRegister) {
 	reorderBufferEntry.sourcePhysicalRegisters = sourcePhysicalRegisters
 }
 
@@ -196,7 +196,7 @@ func (reorderBufferEntry *BaseReorderBufferEntry) SetNumNotReadyOperands(numNotR
 
 func (reorderBufferEntry *BaseReorderBufferEntry) doWriteback() {
 	for dependency, targetPhysicalRegister := range reorderBufferEntry.targetPhysicalRegisters {
-		if dependency != nil {
+		if dependency != 0 {
 			targetPhysicalRegister.Writeback()
 		}
 	}

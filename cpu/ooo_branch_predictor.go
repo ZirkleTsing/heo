@@ -221,7 +221,8 @@ func (branchPredictor *BranchPredictor) HitRatio() float32 {
 }
 
 func (branchPredictor *BranchPredictor) GetSaturatingCounter(branchAddress uint32) *simutil.SaturatingCounter {
-	var index = (branchAddress >> 19) ^ (branchAddress >> BRANCH_SHIFT) & (branchPredictor.Size - 1)
+	var index =(branchAddress >> BRANCH_SHIFT) & (branchPredictor.Size - 1)
+
 	return branchPredictor.SaturatingCounters[index]
 }
 

@@ -12,7 +12,7 @@ const (
 type PhysicalRegister struct {
 	PhysicalRegisterFile                         *PhysicalRegisterFile
 	State                                        PhysicalRegisterState
-	Dependency                                   *RegisterDependency
+	Dependency                                   int32
 	EffectiveAddressComputationOperandDependents []*ReorderBufferEntry
 	StoreAddressDependents                       []*LoadStoreQueueEntry
 	Dependents                                   []GeneralReorderBufferEntry
@@ -27,24 +27,24 @@ func NewPhysicalRegister(physicalRegisterFile *PhysicalRegisterFile) *PhysicalRe
 	return physicalRegister
 }
 
-func (physicalRegister *PhysicalRegister) Reserve(dependency *RegisterDependency) {
+func (physicalRegister *PhysicalRegister) Reserve(dependency uint32) {
 	if physicalRegister.State != PhysicalRegisterState_AVAILABLE {
 		panic("Impossible")
 	}
 
-	physicalRegister.Dependency = dependency
+	physicalRegister.Dependency = int32(dependency)
 
 	physicalRegister.State = PhysicalRegisterState_ARCHITECTURAL_REGISTER
 
 	physicalRegister.PhysicalRegisterFile.NumFreePhysicalRegisters--
 }
 
-func (physicalRegister *PhysicalRegister) Allocate(dependency *RegisterDependency) {
+func (physicalRegister *PhysicalRegister) Allocate(dependency uint32) {
 	if physicalRegister.State != PhysicalRegisterState_AVAILABLE {
 		panic("Impossible")
 	}
 
-	physicalRegister.Dependency = dependency
+	physicalRegister.Dependency = int32(dependency)
 
 	physicalRegister.State = PhysicalRegisterState_RENAME_BUFFER_INVALID
 
@@ -89,7 +89,7 @@ func (physicalRegister *PhysicalRegister) Recover() {
 		panic("Impossible")
 	}
 
-	physicalRegister.Dependency = nil
+	physicalRegister.Dependency = -1
 
 	physicalRegister.State = PhysicalRegisterState_AVAILABLE
 
@@ -101,7 +101,7 @@ func (physicalRegister *PhysicalRegister) Reclaim() {
 		panic("Impossible")
 	}
 
-	physicalRegister.Dependency = nil
+	physicalRegister.Dependency = -1
 
 	physicalRegister.State = PhysicalRegisterState_AVAILABLE
 
@@ -133,7 +133,7 @@ func NewPhysicalRegisterFile(size uint32) *PhysicalRegisterFile {
 	return physicalRegisterFile
 }
 
-func (physicalRegisterFile *PhysicalRegisterFile) Allocate(dependency *RegisterDependency) *PhysicalRegister {
+func (physicalRegisterFile *PhysicalRegisterFile) Allocate(dependency uint32) *PhysicalRegister {
 	for _, physicalRegister := range physicalRegisterFile.PhysicalRegisters {
 		if physicalRegister.State == PhysicalRegisterState_AVAILABLE {
 			physicalRegister.Allocate(dependency)

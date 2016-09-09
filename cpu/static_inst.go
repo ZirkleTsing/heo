@@ -4,8 +4,8 @@ type StaticInst struct {
 	Mnemonic                       *Mnemonic
 	MachInst                       MachInst
 
-	InputDependencies              []*RegisterDependency
-	OutputDependencies             []*RegisterDependency
+	InputDependencies              []uint32
+	OutputDependencies             []uint32
 
 	NumPhysicalRegistersToAllocate map[RegisterDependencyType]uint32
 }
@@ -22,8 +22,8 @@ func NewStaticInst(mnemonic *Mnemonic, machInst MachInst) *StaticInst {
 	}
 
 	for _, outputDependency := range staticInst.OutputDependencies {
-		if outputDependency.ToInt() != 0 {
-			var outputDependencyType = outputDependency.DependencyType
+		if outputDependency != 0 {
+			var outputDependencyType, _ = RegisterDependencyFromInt(outputDependency)
 
 			if _, ok := staticInst.NumPhysicalRegistersToAllocate[outputDependencyType]; !ok {
 				staticInst.NumPhysicalRegistersToAllocate[outputDependencyType] = 0

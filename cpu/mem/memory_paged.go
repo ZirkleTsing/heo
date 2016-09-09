@@ -25,6 +25,7 @@ func (page *MemoryPage) Clone() *MemoryPage {
 	var newPage = &MemoryPage{
 		Id:page.Id,
 		PhysicalAddress:page.PhysicalAddress,
+		Buffer:make([]byte, len(page.Buffer)),
 	}
 
 	copy(newPage.Buffer, page.Buffer)

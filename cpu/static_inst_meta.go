@@ -56,38 +56,24 @@ const (
 	RegisterDependencyType_MISC = RegisterDependencyType("MISC")
 )
 
-type RegisterDependency struct {
-	DependencyType RegisterDependencyType
-	Num            uint32
-}
-
-func NewRegisterDependency(dependencyType RegisterDependencyType, num uint32) *RegisterDependency {
-	var registerDependency = &RegisterDependency{
-		DependencyType:dependencyType,
-		Num:num,
-	}
-
-	return registerDependency
-}
-
-func NewRegisterDependencyFromInt(i uint32) *RegisterDependency {
+func RegisterDependencyFromInt(i uint32) (RegisterDependencyType, uint32) {
 	if i < regs.NUM_INT_REGISTERS {
-		return NewRegisterDependency(RegisterDependencyType_INT, i)
+		return RegisterDependencyType_INT, i
 	} else if i < regs.NUM_INT_REGISTERS + regs.NUM_FP_REGISTERS {
-		return NewRegisterDependency(RegisterDependencyType_FP, i - regs.NUM_INT_REGISTERS)
+		return RegisterDependencyType_FP, i - regs.NUM_INT_REGISTERS
 	} else {
-		return NewRegisterDependency(RegisterDependencyType_MISC, i - regs.NUM_INT_REGISTERS - regs.NUM_FP_REGISTERS)
+		return RegisterDependencyType_MISC, i - regs.NUM_INT_REGISTERS - regs.NUM_FP_REGISTERS
 	}
 }
 
-func (registerDependency *RegisterDependency) ToInt() uint32 {
-	switch registerDependency.DependencyType {
+func RegisterDependencyToInt(dependencyType RegisterDependencyType, num uint32) uint32 {
+	switch dependencyType {
 	case RegisterDependencyType_INT:
-		return registerDependency.Num
+		return num
 	case RegisterDependencyType_FP:
-		return regs.NUM_INT_REGISTERS + registerDependency.Num
+		return regs.NUM_INT_REGISTERS + num
 	case RegisterDependencyType_MISC:
-		return regs.NUM_INT_REGISTERS + regs.NUM_FP_REGISTERS + registerDependency.Num
+		return regs.NUM_INT_REGISTERS + regs.NUM_FP_REGISTERS + num
 	default:
 		panic("Impossible")
 	}
@@ -109,30 +95,30 @@ const (
 	StaticInstDependency_REGISTER_FCSR = StaticInstDependency("REGISTER_FCSR")
 )
 
-func (staticInstDependency StaticInstDependency) ToRegisterDependency(machInst MachInst) *RegisterDependency {
+func (staticInstDependency StaticInstDependency) ToRegisterDependency(machInst MachInst) (RegisterDependencyType, uint32) {
 	switch staticInstDependency {
 	case StaticInstDependency_RS:
-		return NewRegisterDependency(RegisterDependencyType_INT, machInst.Rs())
+		return RegisterDependencyType_INT, machInst.Rs()
 	case StaticInstDependency_RT:
-		return NewRegisterDependency(RegisterDependencyType_INT, machInst.Rt())
+		return RegisterDependencyType_INT, machInst.Rt()
 	case StaticInstDependency_RD:
-		return NewRegisterDependency(RegisterDependencyType_INT, machInst.Rd())
+		return RegisterDependencyType_INT, machInst.Rd()
 	case StaticInstDependency_FS:
-		return NewRegisterDependency(RegisterDependencyType_FP, machInst.Fs())
+		return RegisterDependencyType_FP, machInst.Fs()
 	case StaticInstDependency_FT:
-		return NewRegisterDependency(RegisterDependencyType_FP, machInst.Ft())
+		return RegisterDependencyType_FP, machInst.Ft()
 	case StaticInstDependency_FD:
-		return NewRegisterDependency(RegisterDependencyType_FP, machInst.Fd())
+		return RegisterDependencyType_FP, machInst.Fd()
 	case StaticInstDependency_REGISTER_RA:
-		return NewRegisterDependency(RegisterDependencyType_INT, regs.REGISTER_RA)
+		return RegisterDependencyType_INT, regs.REGISTER_RA
 	case StaticInstDependency_REGISTER_V0:
-		return NewRegisterDependency(RegisterDependencyType_INT, regs.REGISTER_V0)
+		return RegisterDependencyType_INT, regs.REGISTER_V0
 	case StaticInstDependency_REGISTER_HI:
-		return NewRegisterDependency(RegisterDependencyType_MISC, regs.REGISTER_HI)
+		return RegisterDependencyType_MISC, regs.REGISTER_HI
 	case StaticInstDependency_REGISTER_LO:
-		return NewRegisterDependency(RegisterDependencyType_MISC, regs.REGISTER_LO)
+		return RegisterDependencyType_MISC, regs.REGISTER_LO
 	case StaticInstDependency_REGISTER_FCSR:
-		return NewRegisterDependency(RegisterDependencyType_FP, regs.REGISTER_FCSR)
+		return RegisterDependencyType_FP, regs.REGISTER_FCSR
 	default:
 		panic("Impossible")
 	}

@@ -11,7 +11,7 @@ type OoOThread struct {
 	FpPhysicalRegs                         *PhysicalRegisterFile
 	MiscPhysicalRegs                       *PhysicalRegisterFile
 
-	RenameTable                            map[*RegisterDependency]*PhysicalRegister
+	RenameTable                            map[uint32]*PhysicalRegister
 
 	DecodeBuffer                           *PipelineBuffer
 	ReorderBuffer                          *PipelineBuffer
@@ -42,7 +42,7 @@ func NewOoOThread(core Core, num int32) *OoOThread {
 		FpPhysicalRegs:NewPhysicalRegisterFile(core.Processor().Experiment.CPUConfig.PhysicalRegisterFileSize),
 		MiscPhysicalRegs:NewPhysicalRegisterFile(core.Processor().Experiment.CPUConfig.PhysicalRegisterFileSize),
 
-		RenameTable:make(map[*RegisterDependency]*PhysicalRegister),
+		RenameTable:make(map[uint32]*PhysicalRegister),
 
 		DecodeBuffer:NewPipelineBuffer(core.Processor().Experiment.CPUConfig.DecodeBufferSize),
 		ReorderBuffer:NewPipelineBuffer(core.Processor().Experiment.CPUConfig.ReorderBufferSize),
@@ -50,21 +50,21 @@ func NewOoOThread(core Core, num int32) *OoOThread {
 	}
 
 	for i := uint32(0); i < regs.NUM_INT_REGISTERS; i++ {
-		var dependency = NewRegisterDependency(RegisterDependencyType_INT, i)
+		var dependency = RegisterDependencyToInt(RegisterDependencyType_INT, i)
 		var physicalReg = thread.IntPhysicalRegs.PhysicalRegisters[i]
 		physicalReg.Reserve(dependency)
 		thread.RenameTable[dependency] = physicalReg
 	}
 
 	for i := uint32(0); i < regs.NUM_FP_REGISTERS; i++ {
-		var dependency = NewRegisterDependency(RegisterDependencyType_FP, i)
+		var dependency = RegisterDependencyToInt(RegisterDependencyType_FP, i)
 		var physicalReg = thread.FpPhysicalRegs.PhysicalRegisters[i]
 		physicalReg.Reserve(dependency)
 		thread.RenameTable[dependency] = physicalReg
 	}
 
 	for i := uint32(0); i < regs.NUM_MISC_REGISTERS; i++ {
-		var dependency = NewRegisterDependency(RegisterDependencyType_MISC, i)
+		var dependency = RegisterDependencyToInt(RegisterDependencyType_MISC, i)
 		var physicalReg = thread.MiscPhysicalRegs.PhysicalRegisters[i]
 		physicalReg.Reserve(dependency)
 		thread.RenameTable[dependency] = physicalReg
@@ -219,8 +219,10 @@ func (thread *OoOThread) RegisterRenameOne() bool {
 	}
 
 	for _, outputDependency := range dynamicInst.StaticInst.OutputDependencies {
+		var outputDependencyType, _ = RegisterDependencyFromInt(outputDependency)
+
 		reorderBufferEntry.OldPhysicalRegisters()[outputDependency] = thread.RenameTable[outputDependency]
-		var physReg = thread.GetPhysicalRegisterFile(outputDependency.DependencyType).Allocate(outputDependency)
+		var physReg = thread.GetPhysicalRegisterFile(outputDependencyType).Allocate(outputDependency)
 		thread.RenameTable[outputDependency] = physReg
 		reorderBufferEntry.TargetPhysicalRegisters()[outputDependency] = physReg
 	}
@@ -447,7 +449,7 @@ func (thread *OoOThread) Commit() {
 		}
 
 		for _, outputDependency := range reorderBufferEntry.DynamicInst().StaticInst.OutputDependencies {
-			if outputDependency.ToInt() != 0 {
+			if outputDependency != 0 {
 				reorderBufferEntry.OldPhysicalRegisters()[outputDependency].Reclaim()
 				reorderBufferEntry.TargetPhysicalRegisters()[outputDependency].Commit()
 			}
@@ -507,13 +509,13 @@ func (thread *OoOThread) Squash() {
 		thread.Core().RemoveFromQueues(reorderBufferEntry)
 
 		for _, outputDependency := range reorderBufferEntry.DynamicInst().StaticInst.OutputDependencies {
-			if outputDependency.ToInt() != 0 {
+			if outputDependency != 0 {
 				reorderBufferEntry.TargetPhysicalRegisters()[outputDependency].Recover()
 				thread.RenameTable[outputDependency] = reorderBufferEntry.OldPhysicalRegisters()[outputDependency]
 			}
 		}
 
-		reorderBufferEntry.SetTargetPhysicalRegisters(make(map[*RegisterDependency]*PhysicalRegister))
+		reorderBufferEntry.SetTargetPhysicalRegisters(make(map[uint32]*PhysicalRegister))
 
 		thread.ReorderBuffer.Entries = thread.ReorderBuffer.Entries[:len(thread.ReorderBuffer.Entries) - 1]
 	}

@@ -183,21 +183,21 @@ func NewMnemonic(name MnemonicName, decodeMethod *DecodeMethod, decodeCondition 
 	return mnemonic
 }
 
-func (mnemonic *Mnemonic) GetInputDependencies(machInst MachInst) []*RegisterDependency {
-	var inputDependencies []*RegisterDependency
+func (mnemonic *Mnemonic) GetInputDependencies(machInst MachInst) []uint32 {
+	var inputDependencies []uint32
 
 	for _, staticInstDependency := range mnemonic.InputDependencies {
-		inputDependencies = append(inputDependencies, staticInstDependency.ToRegisterDependency(machInst))
+		inputDependencies = append(inputDependencies, RegisterDependencyToInt(staticInstDependency.ToRegisterDependency(machInst)))
 	}
 
 	return inputDependencies
 }
 
-func (mnemonic *Mnemonic) GetOutputDependencies(machInst MachInst) []*RegisterDependency {
-	var outputDependencies []*RegisterDependency
+func (mnemonic *Mnemonic) GetOutputDependencies(machInst MachInst) []uint32 {
+	var outputDependencies []uint32
 
 	for _, staticInstDependency := range mnemonic.OutputDependencies {
-		outputDependencies = append(outputDependencies, staticInstDependency.ToRegisterDependency(machInst))
+		outputDependencies = append(outputDependencies, RegisterDependencyToInt(staticInstDependency.ToRegisterDependency(machInst)))
 	}
 
 	return outputDependencies
