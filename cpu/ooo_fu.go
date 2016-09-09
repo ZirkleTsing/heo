@@ -110,16 +110,13 @@ func (fuDescriptor *FUDescriptor) Full() bool {
 
 type FUPool struct {
 	Core                 Core
-
 	Descriptors          map[FUType]*FUDescriptor
-
 	FUOperationToFUTypes map[FUOperationType]FUType
 }
 
 func NewFUPool(core Core) *FUPool {
 	var fuPool = &FUPool{
 		Core:core,
-
 		Descriptors:make(map[FUType]*FUDescriptor),
 		FUOperationToFUTypes: make(map[FUOperationType]FUType),
 	}

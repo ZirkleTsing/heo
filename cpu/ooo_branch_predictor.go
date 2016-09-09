@@ -95,10 +95,24 @@ func (branchTargetBuffer *BranchTargetBuffer) Update(branchAddress uint32, branc
 
 	entryFound.Target = branchTarget
 
+	branchTargetBuffer.removeFromEntries(set, entryFound)
+
 	branchTargetBuffer.Entries[set] = append(
 		[]*BranchTargetBufferEntry{entryFound},
-		branchTargetBuffer.Entries[set][:branchTargetBuffer.Assoc - 1]...,
+		branchTargetBuffer.Entries[set]...,
 	)
+}
+
+func (branchTargetBuffer *BranchTargetBuffer) removeFromEntries(set uint32, entryToRemove *BranchTargetBufferEntry) {
+	var entriesToReserve []*BranchTargetBufferEntry
+
+	for _, entry := range branchTargetBuffer.Entries[set] {
+		if entry != entryToRemove {
+			entriesToReserve = append(entriesToReserve, entry)
+		}
+	}
+
+	branchTargetBuffer.Entries[set] = entriesToReserve
 }
 
 type ReturnAddressStack struct {

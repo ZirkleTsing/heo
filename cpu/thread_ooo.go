@@ -134,6 +134,7 @@ func (thread *OoOThread) Fetch() {
 			var staticInst = thread.Context().DecodeNextStaticInst()
 
 			dynamicInst = NewDynamicInst(thread, thread.Context().Regs().Pc, staticInst)
+
 			staticInst.Execute(thread.Context())
 
 			if dynamicInst.StaticInst.Mnemonic.StaticInstType == StaticInstType_NOP {
@@ -152,21 +153,19 @@ func (thread *OoOThread) Fetch() {
 			thread.lastDecodedDynamicInstCommitted = false
 		}
 
-		if thread.FetchNpc + 4 % thread.Core().L1IController().Cache.LineSize() == 0 {
+		if (thread.FetchNpc + 4) % thread.Core().L1IController().Cache.LineSize() == 0 {
 			hasDone = true
 		}
 
 		var branchPredictorUpdate = NewBranchPredictorUpdate()
 
-		var dest, returnAddressStackRecoverTop uint32
+		var returnAddressStackRecoverTop uint32
 
 		if dynamicInst.StaticInst.Mnemonic.StaticInstType.IsControl() {
-			dest, returnAddressStackRecoverTop = thread.BranchPredictor.Predict(thread.FetchNpc, dynamicInst.StaticInst.Mnemonic, branchPredictorUpdate)
+			thread.FetchNnpc, returnAddressStackRecoverTop = thread.BranchPredictor.Predict(thread.FetchNpc, dynamicInst.StaticInst.Mnemonic, branchPredictorUpdate)
 		} else {
-			dest, returnAddressStackRecoverTop = thread.FetchNpc + 4, 0
+			thread.FetchNnpc, returnAddressStackRecoverTop = thread.FetchNpc + 4, 0
 		}
-
-		thread.FetchNnpc = dest
 
 		if thread.FetchNnpc != thread.FetchNpc + 4 {
 			hasDone = true
