@@ -458,6 +458,78 @@ func (thread *OoOThread) DumpQueues() {
 	for fuType, fuDescriptor := range thread.Core().FUPool().Descriptors {
 		fmt.Printf("thread.core.fuPool.descriptors[%s]={numFree=%d, quantity=%d}\n", fuType, fuDescriptor.NumFree, fuDescriptor.Quantity)
 	}
+
+	for i, entry := range thread.Core().WaitingInstructionQueue() {
+		fmt.Printf(
+			"thread.core.waitingInstructionQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t}\n",
+			i,
+			entry.Id(),
+			entry.Dispatched(),
+			entry.Issued(),
+			entry.Completed(),
+			entry.Squashed(),
+		)
+	}
+
+	for i, entry := range thread.Core().ReadyInstructionQueue() {
+		fmt.Printf(
+			"thread.core.readyInstructionQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t}\n",
+			i,
+			entry.Id(),
+			entry.Dispatched(),
+			entry.Issued(),
+			entry.Completed(),
+			entry.Squashed(),
+		)
+	}
+
+	for i, entry := range thread.Core().ReadyLoadQueue() {
+		fmt.Printf(
+			"thread.core.readyLoadQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t}\n",
+			i,
+			entry.Id(),
+			entry.Dispatched(),
+			entry.Issued(),
+			entry.Completed(),
+			entry.Squashed(),
+		)
+	}
+
+	for i, entry := range thread.Core().WaitingStoreQueue() {
+		fmt.Printf(
+			"thread.core.waitingStoreQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t}\n",
+			i,
+			entry.Id(),
+			entry.Dispatched(),
+			entry.Issued(),
+			entry.Completed(),
+			entry.Squashed(),
+		)
+	}
+
+	for i, entry := range thread.Core().ReadyStoreQueue() {
+		fmt.Printf(
+			"thread.core.readyStoreQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t}\n",
+			i,
+			entry.Id(),
+			entry.Dispatched(),
+			entry.Issued(),
+			entry.Completed(),
+			entry.Squashed(),
+		)
+	}
+
+	for i, entry := range thread.Core().OoOEventQueue() {
+		fmt.Printf(
+			"thread.core.oooEventQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t}\n",
+			i,
+			entry.Id(),
+			entry.Dispatched(),
+			entry.Issued(),
+			entry.Completed(),
+			entry.Squashed(),
+		)
+	}
 }
 
 func (thread *OoOThread) Commit() {
