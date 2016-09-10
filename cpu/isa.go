@@ -1020,7 +1020,6 @@ func (processor *Processor) addMnemonics() {
 		},
 		[]StaticInstDependency{
 			StaticInstDependency_RS,
-			StaticInstDependency_RT,
 		},
 		[]StaticInstDependency{
 			StaticInstDependency_RT,
@@ -1044,7 +1043,6 @@ func (processor *Processor) addMnemonics() {
 		},
 		[]StaticInstDependency{
 			StaticInstDependency_RS,
-			StaticInstDependency_RT,
 		},
 		[]StaticInstDependency{
 			StaticInstDependency_RT,
@@ -1091,7 +1089,6 @@ func (processor *Processor) addMnemonics() {
 		},
 		[]StaticInstDependency{
 			StaticInstDependency_RS,
-			StaticInstDependency_RT,
 		},
 		[]StaticInstDependency{
 			StaticInstDependency_RT,
@@ -1231,19 +1228,23 @@ func (processor *Processor) addMnemonics() {
 			StaticInstDependency_RT,
 		},
 		func(context *Context, machInst MachInst) {
-			var dst = make([]byte, 4)
-
 			var addr = GetEffectiveAddress(context, machInst)
 
 			var size = 4 - (addr & 3)
 
 			var src = context.Process.Memory().ReadBlockAt(addr, size)
 
+			var dst = make([]byte, 4)
+
+			context.Process.Memory().ByteOrder.PutUint32(dst, context.Regs().Gpr[machInst.Rt()])
+
 			for i := uint32(0); i < size; i++ {
 				dst[3 - i] = src[i]
 			}
 
-			context.Process.Memory().ByteOrder.PutUint32(dst, context.Regs().Gpr[machInst.Rt()])
+			var rt = context.Process.Memory().ByteOrder.Uint32(dst)
+
+			context.Regs().Gpr[machInst.Rt()] = rt
 		},
 	)
 
@@ -1265,19 +1266,23 @@ func (processor *Processor) addMnemonics() {
 			StaticInstDependency_RT,
 		},
 		func(context *Context, machInst MachInst) {
-			var dst = make([]byte, 4)
-
 			var addr = GetEffectiveAddress(context, machInst)
 
 			var size = 1 + (addr & 3)
 
 			var src = context.Process.Memory().ReadBlockAt(addr - size + 1, size)
 
+			var dst = make([]byte, 4)
+
+			context.Process.Memory().ByteOrder.PutUint32(dst, context.Regs().Gpr[machInst.Rt()])
+
 			for i := uint32(0); i < size; i++ {
 				dst[size - i - 1] = src[i]
 			}
 
-			context.Process.Memory().ByteOrder.PutUint32(dst, context.Regs().Gpr[machInst.Rt()])
+			var rt = context.Process.Memory().ByteOrder.Uint32(dst)
+
+			context.Regs().Gpr[machInst.Rt()] = rt
 		},
 	)
 
@@ -1437,7 +1442,7 @@ func (processor *Processor) addMnemonics() {
 			StaticInstDependency_REGISTER_LO,
 		},
 		func(context *Context, machInst MachInst) {
-			context.Regs().Lo = context.Regs().Gpr[machInst.Rs()]
+			context.Regs().Lo = context.Regs().Gpr[machInst.Rd()]
 		},
 	)
 
@@ -2135,14 +2140,15 @@ func (processor *Processor) addMnemonics() {
 		},
 		[]StaticInstDependency{},
 		func(context *Context, machInst MachInst) {
-			var dst = make([]byte, 4)
-
 			var addr = GetEffectiveAddress(context, machInst)
 
 			var size = 4 - (addr & 3)
 
 			var src = make([]byte, 4)
+
 			context.Process.Memory().ByteOrder.PutUint32(src, context.Regs().Gpr[machInst.Rt()])
+
+			var dst = make([]byte, 4)
 
 			for i := uint32(0); i < size; i++ {
 				dst[i] = src[3 - i]
@@ -2168,14 +2174,15 @@ func (processor *Processor) addMnemonics() {
 		},
 		[]StaticInstDependency{},
 		func(context *Context, machInst MachInst) {
-			var dst = make([]byte, 4)
-
 			var addr = GetEffectiveAddress(context, machInst)
 
 			var size = 1 + (addr & 3)
 
 			var src = make([]byte, 4)
+
 			context.Process.Memory().ByteOrder.PutUint32(src, context.Regs().Gpr[machInst.Rt()])
+
+			var dst = make([]byte, 4)
 
 			for i := uint32(0); i < size; i++ {
 				dst[i] = src[size - i - 1]
