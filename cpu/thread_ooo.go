@@ -430,7 +430,7 @@ func (thread *OoOThread) DumpQueues() {
 		}
 
 		fmt.Printf(
-			"thread.reorderBuffer[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, loadStoreQueueEntry.id=%d}\n",
+			"thread.reorderBuffer[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, loadStoreQueueEntry.id=%d, numNotReadyOperands=%d, allOperandReady=%t}\n",
 			i,
 			reorderBufferEntry.Id(),
 			reorderBufferEntry.Dispatched(),
@@ -438,6 +438,8 @@ func (thread *OoOThread) DumpQueues() {
 			reorderBufferEntry.Completed(),
 			reorderBufferEntry.Squashed(),
 			loadStoreQueueEntryId,
+			reorderBufferEntry.NumNotReadyOperands(),
+			reorderBufferEntry.AllOperandReady(),
 		)
 	}
 
@@ -445,13 +447,15 @@ func (thread *OoOThread) DumpQueues() {
 		var loadStoreQueueEntry = entry.(*LoadStoreQueueEntry)
 
 		fmt.Printf(
-			"thread.loadStoreQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t}\n",
+			"thread.loadStoreQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, numNotReadyOperands=%d, allOperandReady=%t}\n",
 			i,
 			loadStoreQueueEntry.Id(),
 			loadStoreQueueEntry.Dispatched(),
 			loadStoreQueueEntry.Issued(),
 			loadStoreQueueEntry.Completed(),
 			loadStoreQueueEntry.Squashed(),
+			loadStoreQueueEntry.NumNotReadyOperands(),
+			loadStoreQueueEntry.AllOperandReady(),
 		)
 	}
 
@@ -461,73 +465,85 @@ func (thread *OoOThread) DumpQueues() {
 
 	for i, entry := range thread.Core().WaitingInstructionQueue() {
 		fmt.Printf(
-			"thread.core.waitingInstructionQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t}\n",
+			"thread.core.waitingInstructionQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, numNotReadyOperands=%d, allOperandReady=%t}\n",
 			i,
 			entry.Id(),
 			entry.Dispatched(),
 			entry.Issued(),
 			entry.Completed(),
 			entry.Squashed(),
+			entry.NumNotReadyOperands(),
+			entry.AllOperandReady(),
 		)
 	}
 
 	for i, entry := range thread.Core().ReadyInstructionQueue() {
 		fmt.Printf(
-			"thread.core.readyInstructionQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t}\n",
+			"thread.core.readyInstructionQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, numNotReadyOperands=%d, allOperandReady=%t}\n",
 			i,
 			entry.Id(),
 			entry.Dispatched(),
 			entry.Issued(),
 			entry.Completed(),
 			entry.Squashed(),
+			entry.NumNotReadyOperands(),
+			entry.AllOperandReady(),
 		)
 	}
 
 	for i, entry := range thread.Core().ReadyLoadQueue() {
 		fmt.Printf(
-			"thread.core.readyLoadQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t}\n",
+			"thread.core.readyLoadQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, numNotReadyOperands=%d, allOperandReady=%t}\n",
 			i,
 			entry.Id(),
 			entry.Dispatched(),
 			entry.Issued(),
 			entry.Completed(),
 			entry.Squashed(),
+			entry.NumNotReadyOperands(),
+			entry.AllOperandReady(),
 		)
 	}
 
 	for i, entry := range thread.Core().WaitingStoreQueue() {
 		fmt.Printf(
-			"thread.core.waitingStoreQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t}\n",
+			"thread.core.waitingStoreQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, numNotReadyOperands=%d, allOperandReady=%t}\n",
 			i,
 			entry.Id(),
 			entry.Dispatched(),
 			entry.Issued(),
 			entry.Completed(),
 			entry.Squashed(),
+			entry.NumNotReadyOperands(),
+			entry.AllOperandReady(),
 		)
 	}
 
 	for i, entry := range thread.Core().ReadyStoreQueue() {
 		fmt.Printf(
-			"thread.core.readyStoreQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t}\n",
+			"thread.core.readyStoreQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, numNotReadyOperands=%d, allOperandReady=%t}\n",
 			i,
 			entry.Id(),
 			entry.Dispatched(),
 			entry.Issued(),
 			entry.Completed(),
 			entry.Squashed(),
+			entry.NumNotReadyOperands(),
+			entry.AllOperandReady(),
 		)
 	}
 
 	for i, entry := range thread.Core().OoOEventQueue() {
 		fmt.Printf(
-			"thread.core.oooEventQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t}\n",
+			"thread.core.oooEventQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, numNotReadyOperands=%d, allOperandReady=%t}\n",
 			i,
 			entry.Id(),
 			entry.Dispatched(),
 			entry.Issued(),
 			entry.Completed(),
 			entry.Squashed(),
+			entry.NumNotReadyOperands(),
+			entry.AllOperandReady(),
 		)
 	}
 }

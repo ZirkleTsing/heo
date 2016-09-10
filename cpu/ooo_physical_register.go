@@ -67,7 +67,7 @@ func (physicalRegister *PhysicalRegister) Writeback() {
 	}
 
 	for _, dependent := range physicalRegister.Dependents {
-		dependent.SetNumNotReadyOperands(dependent.NumNotReadyOperands() + 1)
+		dependent.SetNumNotReadyOperands(dependent.NumNotReadyOperands() - 1)
 	}
 
 	physicalRegister.EffectiveAddressComputationOperandDependents = []*ReorderBufferEntry{}
