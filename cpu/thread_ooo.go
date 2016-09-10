@@ -413,10 +413,58 @@ func (thread *OoOThread) RefreshLoadStoreQueue() {
 	}
 }
 
+func (thread *OoOThread) DumpQueues() {
+	for i, entry := range thread.DecodeBuffer.Entries {
+		var decodeBufferEntry = entry.(*DecodeBufferEntry)
+
+		fmt.Printf("thread.decodeBuffer[%d]={id=%d, speculative=%t}\n", i, decodeBufferEntry.Id, decodeBufferEntry.Speculative)
+	}
+
+	for i, entry := range thread.ReorderBuffer.Entries {
+		var reorderBufferEntry = entry.(*ReorderBufferEntry)
+
+		var loadStoreQueueEntryId = int32(-1)
+
+		if reorderBufferEntry.LoadStoreBufferEntry != nil {
+			loadStoreQueueEntryId = reorderBufferEntry.LoadStoreBufferEntry.Id()
+		}
+
+		fmt.Printf(
+			"thread.reorderBuffer[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, loadStoreQueueEntry.id=%d}\n",
+			i,
+			reorderBufferEntry.Id(),
+			reorderBufferEntry.Dispatched(),
+			reorderBufferEntry.Issued(),
+			reorderBufferEntry.Completed(),
+			reorderBufferEntry.Squashed(),
+			loadStoreQueueEntryId,
+		)
+	}
+
+	for i, entry := range thread.LoadStoreQueue.Entries {
+		var loadStoreQueueEntry = entry.(*LoadStoreQueueEntry)
+
+		fmt.Printf(
+			"thread.loadStoreQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t}\n",
+			i,
+			loadStoreQueueEntry.Id(),
+			loadStoreQueueEntry.Dispatched(),
+			loadStoreQueueEntry.Issued(),
+			loadStoreQueueEntry.Completed(),
+			loadStoreQueueEntry.Squashed(),
+		)
+	}
+
+	for fuType, fuDescriptor := range thread.Core().FUPool().Descriptors {
+		fmt.Printf("thread.core.fuPool.descriptors[%s]={numFree=%d, quantity=%d}\n", fuType, fuDescriptor.NumFree, fuDescriptor.Quantity)
+	}
+}
+
 func (thread *OoOThread) Commit() {
 	var commitTimeout = int64(1000000)
 
 	if thread.Core().Processor().Experiment.CycleAccurateEventQueue().CurrentCycle - thread.LastCommitCycle > commitTimeout {
+		thread.DumpQueues()
 		thread.Core().Processor().Experiment.MemoryHierarchy.DumpPendingFlowTree()
 		panic(fmt.Sprintf(
 			"[%d] No dynamic insts committed for a long time (thread.NumDynamicInsts=%d)",

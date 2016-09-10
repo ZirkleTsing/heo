@@ -148,7 +148,7 @@ func (core *OoOCore) Dispatch() {
 	core.DispatchScheduler.ConsumeNext()
 }
 
-func (core *OoOCore) Wakeup() {
+func (core *OoOCore) WakeupInstructionQueue() {
 	var waitingInstructionQueueToReserve []GeneralReorderBufferEntry
 
 	for _, entry := range core.WaitingInstructionQueue() {
@@ -168,7 +168,9 @@ func (core *OoOCore) Wakeup() {
 	}
 
 	core.SetWaitingInstructionQueue(waitingInstructionQueueToReserve)
+}
 
+func (core *OoOCore) WakeupStoreQueue() {
 	var waitingStoreQueueToReserve []GeneralReorderBufferEntry
 
 	for _, entry := range core.WaitingStoreQueue() {
@@ -190,9 +192,12 @@ func (core *OoOCore) Wakeup() {
 	core.SetWaitingStoreQueue(waitingStoreQueueToReserve)
 }
 
-func (core *OoOCore) Issue() {
-	var quant = core.Processor().Experiment.CPUConfig.IssueWidth
+func (core *OoOCore) Wakeup() {
+	core.WakeupInstructionQueue()
+	core.WakeupStoreQueue()
+}
 
+func (core *OoOCore) IssueInstructionQueue(quant uint32) uint32 {
 	var readyInstructionQueueToRemove []GeneralReorderBufferEntry
 
 	for _, entry := range core.ReadyInstructionQueue() {
@@ -225,6 +230,10 @@ func (core *OoOCore) Issue() {
 		core.removeFromReadyInstructionQueue(entryToRemove)
 	}
 
+	return quant
+}
+
+func (core *OoOCore) IssueLoadQueue(quant uint32) uint32 {
 	var readyLoadQueueToRemove []GeneralReorderBufferEntry
 
 	for _, entry := range core.ReadyLoadQueue() {
@@ -275,6 +284,10 @@ func (core *OoOCore) Issue() {
 		core.removeFromReadyLoadQueue(entryToRemove)
 	}
 
+	return quant
+}
+
+func (core *OoOCore) IssueStoreQueue(quant uint32) uint32 {
 	var readyStoreQueueToRemove []GeneralReorderBufferEntry
 
 	for _, entry := range core.ReadyStoreQueue() {
@@ -307,6 +320,16 @@ func (core *OoOCore) Issue() {
 	for _, entryToRemove := range readyStoreQueueToRemove {
 		core.removeFromReadyStoreQueue(entryToRemove)
 	}
+
+	return quant
+}
+
+func (core *OoOCore) Issue() {
+	var quant = core.Processor().Experiment.CPUConfig.IssueWidth
+
+	quant = core.IssueInstructionQueue(quant)
+	quant = core.IssueLoadQueue(quant)
+	quant = core.IssueStoreQueue(quant)
 }
 
 func (core *OoOCore) removeFromReadyInstructionQueue(entryToRemove GeneralReorderBufferEntry) {
