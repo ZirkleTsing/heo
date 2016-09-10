@@ -5,7 +5,7 @@ import "github.com/mcai/acogo/cpu/regs"
 type OoOThread struct {
 	*MemoryHierarchyThread
 
-	BranchPredictor                        *BranchPredictor
+	BranchPredictor                        BranchPredictor
 
 	IntPhysicalRegs                        *PhysicalRegisterFile
 	FpPhysicalRegs                         *PhysicalRegisterFile
@@ -31,13 +31,6 @@ func NewOoOThread(core Core, num int32) *OoOThread {
 	var thread = &OoOThread{
 		MemoryHierarchyThread:NewMemoryHierarchyThread(core, num),
 
-		BranchPredictor:NewBranchPredictor(
-			core.Processor().Experiment.CPUConfig.BranchPredictorSize,
-			core.Processor().Experiment.CPUConfig.BranchTargetBufferNumSets,
-			core.Processor().Experiment.CPUConfig.BranchTargetBufferAssoc,
-			core.Processor().Experiment.CPUConfig.ReturnAddressStackSize,
-		),
-
 		IntPhysicalRegs:NewPhysicalRegisterFile(core.Processor().Experiment.CPUConfig.PhysicalRegisterFileSize),
 		FpPhysicalRegs:NewPhysicalRegisterFile(core.Processor().Experiment.CPUConfig.PhysicalRegisterFileSize),
 		MiscPhysicalRegs:NewPhysicalRegisterFile(core.Processor().Experiment.CPUConfig.PhysicalRegisterFileSize),
@@ -47,6 +40,21 @@ func NewOoOThread(core Core, num int32) *OoOThread {
 		DecodeBuffer:NewPipelineBuffer(core.Processor().Experiment.CPUConfig.DecodeBufferSize),
 		ReorderBuffer:NewPipelineBuffer(core.Processor().Experiment.CPUConfig.ReorderBufferSize),
 		LoadStoreQueue:NewPipelineBuffer(core.Processor().Experiment.CPUConfig.LoadStoreQueueSize),
+	}
+
+	switch core.Processor().Experiment.CPUConfig.BranchPredictorType {
+	case BranchPredictorType_PERFECT:
+		thread.BranchPredictor = NewPerfectBranchPredictor(thread)
+	case BranchPredictorType_TWO_BIT:
+		thread.BranchPredictor = NewTwoBitBranchPredictor(
+			thread,
+			core.Processor().Experiment.CPUConfig.TwoBitBranchPredictorSize,
+			core.Processor().Experiment.CPUConfig.BranchTargetBufferNumSets,
+			core.Processor().Experiment.CPUConfig.BranchTargetBufferAssoc,
+			core.Processor().Experiment.CPUConfig.ReturnAddressStackSize,
+		)
+	default:
+		panic("Impossible")
 	}
 
 	for i := uint32(0); i < regs.NUM_INT_REGISTERS; i++ {
@@ -157,14 +165,14 @@ func (thread *OoOThread) Fetch() {
 			hasDone = true
 		}
 
-		var branchPredictorUpdate = NewBranchPredictorUpdate()
-
 		var returnAddressStackRecoverTop uint32
 
+		var branchPredictorUpdate interface{}
+
 		if dynamicInst.StaticInst.Mnemonic.StaticInstType.IsControl() {
-			thread.FetchNnpc, returnAddressStackRecoverTop = thread.BranchPredictor.Predict(thread.FetchNpc, dynamicInst.StaticInst.Mnemonic, branchPredictorUpdate)
+			thread.FetchNnpc, returnAddressStackRecoverTop, branchPredictorUpdate = thread.BranchPredictor.Predict(thread.FetchNpc, dynamicInst.StaticInst.Mnemonic)
 		} else {
-			thread.FetchNnpc, returnAddressStackRecoverTop = thread.FetchNpc + 4, 0
+			thread.FetchNnpc, returnAddressStackRecoverTop, branchPredictorUpdate = thread.FetchNpc + 4, 0, NewTwoBitBranchPredictorUpdate()
 		}
 
 		if thread.FetchNnpc != thread.FetchNpc + 4 {
@@ -426,7 +434,7 @@ func (thread *OoOThread) Commit() {
 		}
 
 		if reorderBufferEntry.Speculative() {
-			thread.BranchPredictor.ReturnAddressStack.Recover(reorderBufferEntry.ReturnAddressStackRecoverTop())
+			thread.BranchPredictor.Recover(reorderBufferEntry.ReturnAddressStackRecoverTop())
 
 			thread.Context().ExitSpeculativeState()
 

@@ -7,11 +7,11 @@ type DecodeBufferEntry struct {
 	Nnpc                         uint32
 	PredictedNnpc                uint32
 	ReturnAddressStackRecoverTop uint32
-	BranchPredictorUpdate        *BranchPredictorUpdate
+	BranchPredictorUpdate        interface{}
 	Speculative                  bool
 }
 
-func NewDecodeBufferEntry(dynamicInst *DynamicInst, npc uint32, nnpc uint32, predictedNnpc uint32, returnAddressStackRecoverTop uint32, branchPredictorUpdate *BranchPredictorUpdate, speculative bool) *DecodeBufferEntry {
+func NewDecodeBufferEntry(dynamicInst *DynamicInst, npc uint32, nnpc uint32, predictedNnpc uint32, returnAddressStackRecoverTop uint32, branchPredictorUpdate interface{}, speculative bool) *DecodeBufferEntry {
 	var decodeBufferEntry = &DecodeBufferEntry{
 		Id:dynamicInst.Thread.Core().Processor().Experiment.OoO.CurrentDecodeBufferEntryId,
 		DynamicInst:dynamicInst,

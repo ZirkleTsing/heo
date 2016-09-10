@@ -22,7 +22,9 @@ type CPUConfig struct {
 	ReorderBufferSize         uint32
 	LoadStoreQueueSize        uint32
 
-	BranchPredictorSize       uint32
+	BranchPredictorType       BranchPredictorType
+
+	TwoBitBranchPredictorSize uint32
 	BranchTargetBufferNumSets uint32
 	BranchTargetBufferAssoc   uint32
 	ReturnAddressStackSize    uint32
@@ -47,7 +49,9 @@ func NewCPUConfig(outputDirectory string) *CPUConfig {
 		ReorderBufferSize: 96,
 		LoadStoreQueueSize:48,
 
-		BranchPredictorSize:2048,
+		BranchPredictorType:BranchPredictorType_PERFECT,
+
+		TwoBitBranchPredictorSize:2048,
 		BranchTargetBufferNumSets:512,
 		BranchTargetBufferAssoc:4,
 		ReturnAddressStackSize:8,

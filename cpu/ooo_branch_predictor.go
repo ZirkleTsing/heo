@@ -1,15 +1,9 @@
 package cpu
 
-import "github.com/mcai/acogo/simutil"
-
 type BranchPredictorType string
 
 const (
 	BranchPredictorType_PERFECT = BranchPredictorType("PERFECT")
-
-	BranchPredictorType_TAKEN = BranchPredictorType("TAKEN")
-
-	BranchPredictorType_NOT_TAKEN = BranchPredictorType("NOT_TAKEN")
 
 	BranchPredictorType_TWO_BIT = BranchPredictorType("TWO_BIT")
 )
@@ -164,113 +158,59 @@ func (returnAddressStack *ReturnAddressStack) Pop() uint32 {
 	return target
 }
 
-type BranchPredictorUpdate struct {
-	SaturatingCounter *simutil.SaturatingCounter
-	Ras               bool
+type BranchPredictor interface {
+	Thread() Thread
+
+	Predict(branchAddress uint32, mnemonic *Mnemonic) (uint32, uint32, interface{})
+	Update(branchAddress uint32, branchTarget uint32, taken bool, correct bool, mnemonic *Mnemonic, branchPredictorUpdate interface{})
+	Recover(returnAddressStackRecoverTop uint32)
+
+	NumHits() int32
+	NumMisses() int32
 }
 
-func NewBranchPredictorUpdate() *BranchPredictorUpdate {
-	var branchPredictorUpdate = &BranchPredictorUpdate{
-	}
-
-	return branchPredictorUpdate
+type BaseBranchPredictor struct {
+	thread    Thread
+	numHits   int32
+	numMisses int32
 }
 
-type BranchPredictor struct {
-	BranchTargetBuffer *BranchTargetBuffer
-	ReturnAddressStack *ReturnAddressStack
-
-	Size               uint32
-	SaturatingCounters []*simutil.SaturatingCounter
-
-	NumHits            int32
-	NumMisses          int32
-}
-
-func NewBranchPredictor(branchTargetBufferNumSets uint32, branchTargetBufferAssoc uint32, returnAddressStackSize uint32, size uint32) *BranchPredictor {
-	var branchPredictor = &BranchPredictor{
-		BranchTargetBuffer:NewBranchTargetBuffer(branchTargetBufferNumSets, branchTargetBufferAssoc),
-		ReturnAddressStack:NewReturnAddressStack(returnAddressStackSize),
-		Size:size,
-	}
-
-	var flipFlop = uint32(1)
-
-	for i := uint32(0); i < size; i++ {
-		branchPredictor.SaturatingCounters = append(
-			branchPredictor.SaturatingCounters,
-			simutil.NewSaturatingCounter(0, 2, 3, flipFlop),
-		)
-
-		flipFlop = 3 - flipFlop
+func NewBaseBranchPredictor(thread Thread) *BaseBranchPredictor {
+	var branchPredictor = &BaseBranchPredictor{
+		thread:thread,
 	}
 
 	return branchPredictor
 }
 
-func (branchPredictor *BranchPredictor) NumAccesses() int32 {
-	return branchPredictor.NumHits + branchPredictor.NumMisses
+func (branchPredictor *BaseBranchPredictor) Thread() Thread {
+	return branchPredictor.thread
 }
 
-func (branchPredictor *BranchPredictor) HitRatio() float32 {
+func (branchPredictor *BaseBranchPredictor) NumHits() int32 {
+	return branchPredictor.numHits
+}
+
+func (branchPredictor *BaseBranchPredictor) NumMisses() int32 {
+	return branchPredictor.numMisses
+}
+
+func (branchPredictor *BaseBranchPredictor) NumAccesses() int32 {
+	return branchPredictor.numHits + branchPredictor.numMisses
+}
+
+func (branchPredictor *BaseBranchPredictor) HitRatio() float32 {
 	if branchPredictor.NumAccesses() > 0 {
-		return float32(branchPredictor.NumHits) / float32(branchPredictor.NumAccesses())
+		return float32(branchPredictor.numHits) / float32(branchPredictor.NumAccesses())
 	} else {
 		return 0
 	}
 }
 
-func (branchPredictor *BranchPredictor) GetSaturatingCounter(branchAddress uint32) *simutil.SaturatingCounter {
-	var index =(branchAddress >> BRANCH_SHIFT) & (branchPredictor.Size - 1)
-
-	return branchPredictor.SaturatingCounters[index]
-}
-
-func (branchPredictor *BranchPredictor) Predict(branchAddress uint32, mnemonic *Mnemonic, branchPredictorUpdate *BranchPredictorUpdate) (uint32, uint32) {
-	if mnemonic.StaticInstType == StaticInstType_COND {
-		branchPredictorUpdate.SaturatingCounter = branchPredictor.GetSaturatingCounter(branchAddress)
-	}
-
-	var returnAddressStackRecoverTop = branchPredictor.ReturnAddressStack.Top()
-
-	if mnemonic.StaticInstType == StaticInstType_FUNC_RET && branchPredictor.ReturnAddressStack.Size() > 0 {
-		branchPredictorUpdate.Ras = true
-		return branchPredictor.ReturnAddressStack.Pop(), returnAddressStackRecoverTop
-	}
-
-	if mnemonic.StaticInstType == StaticInstType_FUNC_CALL && branchPredictor.ReturnAddressStack.Size() > 0 {
-		branchPredictor.ReturnAddressStack.Push(branchAddress)
-	}
-
-	if mnemonic.StaticInstType != StaticInstType_COND || branchPredictorUpdate.SaturatingCounter.Taken() {
-		var branchTargetBufferEntry = branchPredictor.BranchTargetBuffer.Lookup(branchAddress)
-
-		if branchTargetBufferEntry != nil {
-			return branchTargetBufferEntry.Target, returnAddressStackRecoverTop
-		} else {
-			return 0, returnAddressStackRecoverTop
-		}
-	} else {
-		return 0, returnAddressStackRecoverTop
-	}
-}
-
-func (branchPredictor *BranchPredictor) Update(branchAddress uint32, branchTarget uint32, taken bool, correct bool, mnemonic *Mnemonic, branchPredictorUpdate *BranchPredictorUpdate) {
+func (branchPredictor *BaseBranchPredictor) Update(branchAddress uint32, branchTarget uint32, taken bool, correct bool, mnemonic *Mnemonic, branchPredictorUpdate interface{}) {
 	if correct {
-		branchPredictor.NumHits++
+		branchPredictor.numHits++
 	} else {
-		branchPredictor.NumMisses++
+		branchPredictor.numMisses++
 	}
-
-	if mnemonic.StaticInstType == StaticInstType_FUNC_RET {
-		if !branchPredictorUpdate.Ras {
-			return
-		}
-	}
-
-	if mnemonic.StaticInstType == StaticInstType_COND {
-		branchPredictorUpdate.SaturatingCounter.Update(taken)
-	}
-
-	branchPredictor.BranchTargetBuffer.Update(branchAddress, branchTarget, taken)
 }
