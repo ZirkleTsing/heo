@@ -1,30 +1,32 @@
 package cpu
 
-import "github.com/mcai/acogo/cpu/regs"
+import (
+	"github.com/mcai/acogo/cpu/regs"
+	"fmt"
+)
 
 type OoOThread struct {
 	*MemoryHierarchyThread
 
-	BranchPredictor                        BranchPredictor
+	BranchPredictor                 BranchPredictor
 
-	IntPhysicalRegs                        *PhysicalRegisterFile
-	FpPhysicalRegs                         *PhysicalRegisterFile
-	MiscPhysicalRegs                       *PhysicalRegisterFile
+	IntPhysicalRegs                 *PhysicalRegisterFile
+	FpPhysicalRegs                  *PhysicalRegisterFile
+	MiscPhysicalRegs                *PhysicalRegisterFile
 
-	RenameTable                            map[uint32]*PhysicalRegister
+	RenameTable                     map[uint32]*PhysicalRegister
 
-	DecodeBuffer                           *PipelineBuffer
-	ReorderBuffer                          *PipelineBuffer
-	LoadStoreQueue                         *PipelineBuffer
+	DecodeBuffer                    *PipelineBuffer
+	ReorderBuffer                   *PipelineBuffer
+	LoadStoreQueue                  *PipelineBuffer
 
-	FetchNpc                               uint32
-	FetchNnpc                              uint32
+	FetchNpc                        uint32
+	FetchNnpc                       uint32
 
-	lastDecodedDynamicInst                 *DynamicInst
-	lastDecodedDynamicInstCommitted        bool
+	lastDecodedDynamicInst          *DynamicInst
+	lastDecodedDynamicInstCommitted bool
 
-	LastCommitCycle                        int64
-	NoDynamicInstCommittedCounterThreshold uint32
+	LastCommitCycle                 int64
 }
 
 func NewOoOThread(core Core, num int32) *OoOThread {
@@ -415,13 +417,12 @@ func (thread *OoOThread) Commit() {
 	var commitTimeout = int64(1000000)
 
 	if thread.Core().Processor().Experiment.CycleAccurateEventQueue().CurrentCycle - thread.LastCommitCycle > commitTimeout {
-		if thread.NoDynamicInstCommittedCounterThreshold > 5 {
-			thread.Core().Processor().Experiment.MemoryHierarchy.DumpPendingFlowTree()
-			panic("No dynamic insts committed for a long time")
-		} else {
-			thread.LastCommitCycle = thread.Core().Processor().Experiment.CycleAccurateEventQueue().CurrentCycle
-			thread.NoDynamicInstCommittedCounterThreshold++
-		}
+		thread.Core().Processor().Experiment.MemoryHierarchy.DumpPendingFlowTree()
+		panic(fmt.Sprintf(
+			"[%d] No dynamic insts committed for a long time (thread.NumDynamicInsts=%d)",
+			thread.Core().Processor().Experiment.CycleAccurateEventQueue().CurrentCycle,
+			thread.NumDynamicInsts(),
+		))
 	}
 
 	var numCommitted = uint32(0)
