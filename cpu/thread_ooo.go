@@ -459,6 +459,12 @@ func (thread *OoOThread) DumpQueues() {
 		)
 	}
 
+	for dependency := uint32(0); dependency < regs.NUM_INT_REGISTERS + regs.NUM_FP_REGISTERS + regs.NUM_MISC_REGISTERS; dependency++ {
+		var physReg = thread.RenameTable[dependency]
+
+		fmt.Printf("thread.renameTable[%d]={state=%s}\n", dependency, physReg.State)
+	}
+
 	for fuType, fuDescriptor := range thread.Core().FUPool().Descriptors {
 		fmt.Printf("thread.core.fuPool.descriptors[%s]={numFree=%d, quantity=%d}\n", fuType, fuDescriptor.NumFree, fuDescriptor.Quantity)
 	}
