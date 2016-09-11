@@ -113,17 +113,17 @@ func (kernel *Kernel) Map(contextToMap *Context, predicate func(candidateThreadI
 }
 
 func (kernel *Kernel) ProcessSystemEvents() {
-	var systemEventsToPreserve []SystemEvent
+	var systemEventsToReserve []SystemEvent
 
 	for _, e := range kernel.SystemEvents {
 		if (e.Context().State == ContextState_RUNNING || e.Context().State == ContextState_BLOCKED) && !e.Context().Speculative && e.NeedProcess() {
 			e.Process()
 		} else {
-			systemEventsToPreserve = append(systemEventsToPreserve, e)
+			systemEventsToReserve = append(systemEventsToReserve, e)
 		}
 	}
 
-	kernel.SystemEvents = systemEventsToPreserve
+	kernel.SystemEvents = systemEventsToReserve
 }
 
 func (kernel *Kernel) ProcessSignals() {
