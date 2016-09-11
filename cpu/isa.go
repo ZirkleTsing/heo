@@ -593,7 +593,9 @@ func (processor *Processor) addMnemonics() {
 		[]StaticInstDependency{},
 		[]StaticInstDependency{},
 		func(context *Context, machInst MachInst) {
-			context.Finish()
+			if !context.Speculative {
+				context.Finish()
+			}
 		},
 	)
 
@@ -2206,7 +2208,9 @@ func (processor *Processor) addMnemonics() {
 		},
 		[]StaticInstDependency{},
 		func(context *Context, machInst MachInst) {
-			context.Kernel.SyscallEmulation.DoSyscall(context.Regs().Gpr[regs.REGISTER_V0], context)
+			if !context.Speculative {
+				context.Kernel.SyscallEmulation.DoSyscall(context.Regs().Gpr[regs.REGISTER_V0], context)
+			}
 		},
 	)
 

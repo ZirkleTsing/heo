@@ -116,7 +116,7 @@ func (kernel *Kernel) ProcessSystemEvents() {
 	var systemEventsToPreserve []SystemEvent
 
 	for _, e := range kernel.SystemEvents {
-		if (e.Context().State == ContextState_RUNNING || e.Context().State == ContextState_BLOCKED) && e.NeedProcess() {
+		if (e.Context().State == ContextState_RUNNING || e.Context().State == ContextState_BLOCKED) && !e.Context().Speculative && e.NeedProcess() {
 			e.Process()
 		} else {
 			systemEventsToPreserve = append(systemEventsToPreserve, e)
@@ -128,7 +128,7 @@ func (kernel *Kernel) ProcessSystemEvents() {
 
 func (kernel *Kernel) ProcessSignals() {
 	for _, context := range kernel.Contexts {
-		if context.State == ContextState_RUNNING || context.State == ContextState_BLOCKED {
+		if (context.State == ContextState_RUNNING || context.State == ContextState_BLOCKED) && !context.Speculative {
 			for signal := uint32(1); signal <= MAX_SIGNAL; signal++ {
 				if kernel.MustProcessSignal(context, signal) {
 					kernel.RunSignalHandler(context, signal)
