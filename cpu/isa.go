@@ -6,6 +6,13 @@ import (
 	"github.com/mcai/acogo/cpu/cpuutil"
 )
 
+const (
+	FMT_SINGLE = 16
+	FMT_DOUBLE = 17
+	FMT_WORD = 20
+	FMT_LONG = 21
+)
+
 func (processor *Processor) addMnemonic(name MnemonicName, decodeMethod *DecodeMethod, decodeCondition *DecodeCondition, fuOperationType FUOperationType, staticInstType StaticInstType, staticInstFlags []StaticInstFlag, inputDependencies []StaticInstDependency, outputDependencies []StaticInstDependency, execute func(context *Context, machInst MachInst)) {
 	var mnemonic = NewMnemonic(name, decodeMethod, decodeCondition, fuOperationType, staticInstType, staticInstFlags, inputDependencies, outputDependencies, execute)
 

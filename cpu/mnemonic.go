@@ -202,10 +202,3 @@ func (mnemonic *Mnemonic) GetOutputDependencies(machInst MachInst) []uint32 {
 
 	return outputDependencies
 }
-
-const (
-	FMT_SINGLE = 16
-	FMT_DOUBLE = 17
-	FMT_WORD = 20
-	FMT_LONG = 21
-)
