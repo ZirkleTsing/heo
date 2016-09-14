@@ -299,7 +299,7 @@ func (thread *OoOThread) RegisterRenameOne() bool {
 
 	thread.ReorderBuffer.Entries = append(thread.ReorderBuffer.Entries, reorderBufferEntry)
 
-	thread.DecodeBuffer.Entries = thread.DecodeBuffer.Entries[:len(thread.DecodeBuffer.Entries) - 1]
+	thread.DecodeBuffer.Entries = thread.DecodeBuffer.Entries[1:]
 
 	return true
 }
@@ -462,7 +462,7 @@ func (thread *OoOThread) DumpQueues() {
 	for dependency := uint32(0); dependency < regs.NUM_INT_REGISTERS + regs.NUM_FP_REGISTERS + regs.NUM_MISC_REGISTERS; dependency++ {
 		var physicalReg = thread.RenameTable[dependency]
 
-		fmt.Printf("thread.renameTable[%d]={state=%s}\n", dependency, physicalReg.State)
+		fmt.Printf("thread.renameTable[%d]={dependency=%d, state=%s}\n", dependency, physicalReg.Dependency, physicalReg.State)
 	}
 
 	for fuType, fuDescriptor := range thread.Core().FUPool().Descriptors {
