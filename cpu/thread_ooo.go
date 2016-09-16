@@ -232,24 +232,24 @@ func (thread *OoOThread) RegisterRenameOne() bool {
 		var outputDependencyType, _ = RegisterDependencyFromInt(outputDependency)
 
 		reorderBufferEntry.OldPhysicalRegisters()[outputDependency] = thread.RenameTable[outputDependency]
-		var physReg = thread.GetPhysicalRegisterFile(outputDependencyType).Allocate(outputDependency)
-		thread.RenameTable[outputDependency] = physReg
-		reorderBufferEntry.TargetPhysicalRegisters()[outputDependency] = physReg
+		var physicalReg = thread.GetPhysicalRegisterFile(outputDependencyType).Allocate(outputDependency)
+		thread.RenameTable[outputDependency] = physicalReg
+		reorderBufferEntry.TargetPhysicalRegisters()[outputDependency] = physicalReg
 	}
 
-	for _, sourcePhysReg := range reorderBufferEntry.SourcePhysicalRegisters() {
-		if !sourcePhysReg.Ready() {
-			reorderBufferEntry.SetNumNotReadyOperands(reorderBufferEntry.NumNotReadyOperands() + 1)
-			sourcePhysReg.Dependents = append(sourcePhysReg.Dependents, reorderBufferEntry)
+	for _, sourcePhysicalReg := range reorderBufferEntry.SourcePhysicalRegisters() {
+		if !sourcePhysicalReg.Ready() {
+			reorderBufferEntry.AddNotReadyOperand(uint32(sourcePhysicalReg.Dependency))
+			sourcePhysicalReg.Dependents = append(sourcePhysicalReg.Dependents, reorderBufferEntry)
 		}
 	}
 
 	if reorderBufferEntry.EffectiveAddressComputation {
-		var physReg = reorderBufferEntry.SourcePhysicalRegisters()[dynamicInst.StaticInst.InputDependencies[0]]
+		var physicalReg = reorderBufferEntry.SourcePhysicalRegisters()[dynamicInst.StaticInst.InputDependencies[0]]
 
-		if !physReg.Ready() {
-			physReg.EffectiveAddressComputationOperandDependents = append(
-				physReg.EffectiveAddressComputationOperandDependents,
+		if !physicalReg.Ready() {
+			physicalReg.EffectiveAddressComputationOperandDependents = append(
+				physicalReg.EffectiveAddressComputationOperandDependents,
 				reorderBufferEntry,
 			)
 		} else {
@@ -274,18 +274,18 @@ func (thread *OoOThread) RegisterRenameOne() bool {
 		loadStoreQueueEntry.SetSourcePhysicalRegisters(reorderBufferEntry.SourcePhysicalRegisters())
 		loadStoreQueueEntry.SetTargetPhysicalRegisters(reorderBufferEntry.TargetPhysicalRegisters())
 
-		for _, sourcePhysReg := range loadStoreQueueEntry.SourcePhysicalRegisters() {
-			if !sourcePhysReg.Ready() {
-				sourcePhysReg.Dependents = append(sourcePhysReg.Dependents, loadStoreQueueEntry)
+		for _, sourcePhysicalReg := range loadStoreQueueEntry.SourcePhysicalRegisters() {
+			if !sourcePhysicalReg.Ready() {
+				sourcePhysicalReg.Dependents = append(sourcePhysicalReg.Dependents, loadStoreQueueEntry)
 			}
 		}
 
-		loadStoreQueueEntry.SetNumNotReadyOperands(reorderBufferEntry.NumNotReadyOperands())
+		loadStoreQueueEntry.SetNotReadyOperands(reorderBufferEntry.NotReadyOperands())
 
-		var storeAddressPhysReg = loadStoreQueueEntry.SourcePhysicalRegisters()[dynamicInst.StaticInst.InputDependencies[0]]
-		if !storeAddressPhysReg.Ready() {
-			storeAddressPhysReg.StoreAddressDependents = append(
-				storeAddressPhysReg.StoreAddressDependents,
+		var storeAddressPhysicalReg = loadStoreQueueEntry.SourcePhysicalRegisters()[dynamicInst.StaticInst.InputDependencies[0]]
+		if !storeAddressPhysicalReg.Ready() {
+			storeAddressPhysicalReg.StoreAddressDependents = append(
+				storeAddressPhysicalReg.StoreAddressDependents,
 				loadStoreQueueEntry,
 			)
 		} else {
@@ -299,7 +299,7 @@ func (thread *OoOThread) RegisterRenameOne() bool {
 
 	thread.ReorderBuffer.Entries = append(thread.ReorderBuffer.Entries, reorderBufferEntry)
 
-	thread.DecodeBuffer.Entries = thread.DecodeBuffer.Entries[:len(thread.DecodeBuffer.Entries) - 1]
+	thread.DecodeBuffer.Entries = thread.DecodeBuffer.Entries[1:]
 
 	return true
 }
@@ -430,7 +430,7 @@ func (thread *OoOThread) DumpQueues() {
 		}
 
 		fmt.Printf(
-			"thread.reorderBuffer[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, loadStoreQueueEntry.id=%d, numNotReadyOperands=%d, allOperandReady=%t}\n",
+			"thread.reorderBuffer[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, loadStoreQueueEntry.id=%d, notReadyOperands=%+v, allOperandReady=%t}\n",
 			i,
 			reorderBufferEntry.Id(),
 			reorderBufferEntry.Dispatched(),
@@ -438,7 +438,7 @@ func (thread *OoOThread) DumpQueues() {
 			reorderBufferEntry.Completed(),
 			reorderBufferEntry.Squashed(),
 			loadStoreQueueEntryId,
-			reorderBufferEntry.NumNotReadyOperands(),
+			reorderBufferEntry.NotReadyOperands(),
 			reorderBufferEntry.AllOperandReady(),
 		)
 	}
@@ -447,22 +447,22 @@ func (thread *OoOThread) DumpQueues() {
 		var loadStoreQueueEntry = entry.(*LoadStoreQueueEntry)
 
 		fmt.Printf(
-			"thread.loadStoreQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, numNotReadyOperands=%d, allOperandReady=%t}\n",
+			"thread.loadStoreQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, notReadyOperands=%+v, allOperandReady=%t}\n",
 			i,
 			loadStoreQueueEntry.Id(),
 			loadStoreQueueEntry.Dispatched(),
 			loadStoreQueueEntry.Issued(),
 			loadStoreQueueEntry.Completed(),
 			loadStoreQueueEntry.Squashed(),
-			loadStoreQueueEntry.NumNotReadyOperands(),
+			loadStoreQueueEntry.NotReadyOperands(),
 			loadStoreQueueEntry.AllOperandReady(),
 		)
 	}
 
 	for dependency := uint32(0); dependency < regs.NUM_INT_REGISTERS + regs.NUM_FP_REGISTERS + regs.NUM_MISC_REGISTERS; dependency++ {
-		var physReg = thread.RenameTable[dependency]
+		var physicalReg = thread.RenameTable[dependency]
 
-		fmt.Printf("thread.renameTable[%d]={state=%s}\n", dependency, physReg.State)
+		fmt.Printf("thread.renameTable[%d]={dependency=%d, state=%s}\n", dependency, physicalReg.Dependency, physicalReg.State)
 	}
 
 	for fuType, fuDescriptor := range thread.Core().FUPool().Descriptors {
@@ -471,84 +471,84 @@ func (thread *OoOThread) DumpQueues() {
 
 	for i, entry := range thread.Core().WaitingInstructionQueue() {
 		fmt.Printf(
-			"thread.core.waitingInstructionQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, numNotReadyOperands=%d, allOperandReady=%t}\n",
+			"thread.core.waitingInstructionQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, notReadyOperands=%+v, allOperandReady=%t}\n",
 			i,
 			entry.Id(),
 			entry.Dispatched(),
 			entry.Issued(),
 			entry.Completed(),
 			entry.Squashed(),
-			entry.NumNotReadyOperands(),
+			entry.NotReadyOperands(),
 			entry.AllOperandReady(),
 		)
 	}
 
 	for i, entry := range thread.Core().ReadyInstructionQueue() {
 		fmt.Printf(
-			"thread.core.readyInstructionQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, numNotReadyOperands=%d, allOperandReady=%t}\n",
+			"thread.core.readyInstructionQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, notReadyOperands=%+v, allOperandReady=%t}\n",
 			i,
 			entry.Id(),
 			entry.Dispatched(),
 			entry.Issued(),
 			entry.Completed(),
 			entry.Squashed(),
-			entry.NumNotReadyOperands(),
+			entry.NotReadyOperands(),
 			entry.AllOperandReady(),
 		)
 	}
 
 	for i, entry := range thread.Core().ReadyLoadQueue() {
 		fmt.Printf(
-			"thread.core.readyLoadQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, numNotReadyOperands=%d, allOperandReady=%t}\n",
+			"thread.core.readyLoadQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, notReadyOperands=%+v, allOperandReady=%t}\n",
 			i,
 			entry.Id(),
 			entry.Dispatched(),
 			entry.Issued(),
 			entry.Completed(),
 			entry.Squashed(),
-			entry.NumNotReadyOperands(),
+			entry.NotReadyOperands(),
 			entry.AllOperandReady(),
 		)
 	}
 
 	for i, entry := range thread.Core().WaitingStoreQueue() {
 		fmt.Printf(
-			"thread.core.waitingStoreQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, numNotReadyOperands=%d, allOperandReady=%t}\n",
+			"thread.core.waitingStoreQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, notReadyOperands=%+v, allOperandReady=%t}\n",
 			i,
 			entry.Id(),
 			entry.Dispatched(),
 			entry.Issued(),
 			entry.Completed(),
 			entry.Squashed(),
-			entry.NumNotReadyOperands(),
+			entry.NotReadyOperands(),
 			entry.AllOperandReady(),
 		)
 	}
 
 	for i, entry := range thread.Core().ReadyStoreQueue() {
 		fmt.Printf(
-			"thread.core.readyStoreQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, numNotReadyOperands=%d, allOperandReady=%t}\n",
+			"thread.core.readyStoreQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, notReadyOperands=%+v, allOperandReady=%t}\n",
 			i,
 			entry.Id(),
 			entry.Dispatched(),
 			entry.Issued(),
 			entry.Completed(),
 			entry.Squashed(),
-			entry.NumNotReadyOperands(),
+			entry.NotReadyOperands(),
 			entry.AllOperandReady(),
 		)
 	}
 
 	for i, entry := range thread.Core().OoOEventQueue() {
 		fmt.Printf(
-			"thread.core.oooEventQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, numNotReadyOperands=%d, allOperandReady=%t}\n",
+			"thread.core.oooEventQueue[%d]={id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, notReadyOperands=%+v, allOperandReady=%t}\n",
 			i,
 			entry.Id(),
 			entry.Dispatched(),
 			entry.Issued(),
 			entry.Completed(),
 			entry.Squashed(),
-			entry.NumNotReadyOperands(),
+			entry.NotReadyOperands(),
 			entry.AllOperandReady(),
 		)
 	}

@@ -30,8 +30,10 @@ type GeneralReorderBufferEntry interface {
 	Squashed() bool
 	SetSquashed(squashed bool)
 
-	NumNotReadyOperands() uint32
-	SetNumNotReadyOperands(numNotReadyOperands uint32)
+	NotReadyOperands() []uint32
+	SetNotReadyOperands(notReadyOperands []uint32)
+	AddNotReadyOperand(notReadyOperand uint32)
+	RemoveNotReadyOperand(notReadyOperand uint32)
 
 	Writeback()
 
@@ -71,7 +73,7 @@ type BaseReorderBufferEntry struct {
 	completed                    bool
 	squashed                     bool
 
-	numNotReadyOperands          uint32
+	notReadyOperands             []uint32
 }
 
 func NewBaseReorderBufferEntry(thread Thread, dynamicInst *DynamicInst, npc uint32, nnpc uint32, predictedNnpc uint32, returnAddressStackRecoverTop uint32, branchPredictorUpdate interface{}, speculative bool) *BaseReorderBufferEntry {
@@ -186,12 +188,28 @@ func (reorderBufferEntry *BaseReorderBufferEntry) SetSquashed(squashed bool) {
 	reorderBufferEntry.squashed = squashed
 }
 
-func (reorderBufferEntry *BaseReorderBufferEntry) NumNotReadyOperands() uint32 {
-	return reorderBufferEntry.numNotReadyOperands
+func (reorderBufferEntry *BaseReorderBufferEntry) NotReadyOperands() []uint32 {
+	return reorderBufferEntry.notReadyOperands
 }
 
-func (reorderBufferEntry *BaseReorderBufferEntry) SetNumNotReadyOperands(numNotReadyOperands uint32) {
-	reorderBufferEntry.numNotReadyOperands = numNotReadyOperands
+func (reorderBufferEntry *BaseReorderBufferEntry) SetNotReadyOperands(notReadyOperands []uint32) {
+	reorderBufferEntry.notReadyOperands = notReadyOperands
+}
+
+func (reorderBufferEntry *BaseReorderBufferEntry) AddNotReadyOperand(notReadyOperand uint32) {
+	reorderBufferEntry.notReadyOperands = append(reorderBufferEntry.notReadyOperands, notReadyOperand)
+}
+
+func (reorderBufferEntry *BaseReorderBufferEntry) RemoveNotReadyOperand(notReadyOperand uint32) {
+	var notReadyOperandsToReserve []uint32
+
+	for _, o := range reorderBufferEntry.notReadyOperands {
+		if o != notReadyOperand {
+			notReadyOperandsToReserve = append(notReadyOperandsToReserve, o)
+		}
+	}
+
+	reorderBufferEntry.notReadyOperands = notReadyOperandsToReserve
 }
 
 func (reorderBufferEntry *BaseReorderBufferEntry) doWriteback() {
@@ -238,7 +256,7 @@ func (reorderBufferEntry *ReorderBufferEntry) AllOperandReady() bool {
 		return reorderBufferEntry.EffectiveAddressComputationOperandReady
 	}
 
-	return reorderBufferEntry.numNotReadyOperands == 0
+	return len(reorderBufferEntry.notReadyOperands) == 0
 }
 
 type LoadStoreQueueEntry struct {
@@ -272,5 +290,5 @@ func (loadStoreQueueEntry *LoadStoreQueueEntry) Writeback() {
 }
 
 func (loadStoreQueueEntry *LoadStoreQueueEntry) AllOperandReady() bool {
-	return loadStoreQueueEntry.numNotReadyOperands == 0
+	return len(loadStoreQueueEntry.notReadyOperands) == 0
 }

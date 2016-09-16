@@ -396,9 +396,12 @@ func (core *OoOCore) Commit() {
 func (core *OoOCore) RemoveFromQueues(entryToRemove GeneralReorderBufferEntry) {
 	var waitingInstructionQueueToReserve []GeneralReorderBufferEntry
 	var readyInstructionQueueToReserve   []GeneralReorderBufferEntry
+
 	var readyLoadQueueToReserve          []GeneralReorderBufferEntry
+
 	var waitingStoreQueueToReserve       []GeneralReorderBufferEntry
 	var readyStoreQueueToReserve         []GeneralReorderBufferEntry
+
 	var oooEventQueueToReserve           []GeneralReorderBufferEntry
 
 	for _, entry := range core.waitingInstructionQueue {
@@ -439,9 +442,12 @@ func (core *OoOCore) RemoveFromQueues(entryToRemove GeneralReorderBufferEntry) {
 
 	core.waitingInstructionQueue = waitingInstructionQueueToReserve
 	core.readyInstructionQueue = readyInstructionQueueToReserve
+
 	core.readyLoadQueue = readyLoadQueueToReserve
+
 	core.waitingStoreQueue = waitingStoreQueueToReserve
 	core.readyStoreQueue = readyStoreQueueToReserve
+
 	core.oooEventQueue = oooEventQueueToReserve
 
 	entryToRemove.SetSquashed(true)
