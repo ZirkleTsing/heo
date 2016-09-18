@@ -8,25 +8,26 @@ import (
 type OoOThread struct {
 	*MemoryHierarchyThread
 
-	BranchPredictor                 BranchPredictor
+	BranchPredictor                        BranchPredictor
 
-	IntPhysicalRegs                 *PhysicalRegisterFile
-	FpPhysicalRegs                  *PhysicalRegisterFile
-	MiscPhysicalRegs                *PhysicalRegisterFile
+	IntPhysicalRegs                        *PhysicalRegisterFile
+	FpPhysicalRegs                         *PhysicalRegisterFile
+	MiscPhysicalRegs                       *PhysicalRegisterFile
 
-	RenameTable                     map[uint32]*PhysicalRegister
+	RenameTable                            map[uint32]*PhysicalRegister
 
-	DecodeBuffer                    *PipelineBuffer
-	ReorderBuffer                   *PipelineBuffer
-	LoadStoreQueue                  *PipelineBuffer
+	DecodeBuffer                           *PipelineBuffer
+	ReorderBuffer                          *PipelineBuffer
+	LoadStoreQueue                         *PipelineBuffer
 
-	FetchNpc                        uint32
-	FetchNnpc                       uint32
+	FetchNpc                               uint32
+	FetchNnpc                              uint32
 
-	lastDecodedDynamicInst          *DynamicInst
-	lastDecodedDynamicInstCommitted bool
+	lastDecodedDynamicInst                 *DynamicInst
+	lastDecodedDynamicInstCommitted        bool
 
-	LastCommitCycle                 int64
+	LastCommitCycle                        int64
+	noDynamicInstCommittedCounterThreshold int64
 }
 
 func NewOoOThread(core Core, num int32) *OoOThread {
@@ -573,13 +574,18 @@ func (thread *OoOThread) Commit() {
 	var commitTimeout = int64(1000000)
 
 	if thread.Core().Processor().Experiment.CycleAccurateEventQueue().CurrentCycle - thread.LastCommitCycle > commitTimeout {
-		thread.DumpQueues()
-		thread.Core().Processor().Experiment.MemoryHierarchy.DumpPendingFlowTree()
-		panic(fmt.Sprintf(
-			"[%d] No dynamic insts committed for a long time (thread.NumDynamicInsts=%d)",
-			thread.Core().Processor().Experiment.CycleAccurateEventQueue().CurrentCycle,
-			thread.NumDynamicInsts(),
-		))
+		if thread.noDynamicInstCommittedCounterThreshold > 5 {
+			thread.DumpQueues()
+			thread.Core().Processor().Experiment.MemoryHierarchy.DumpPendingFlowTree()
+			panic(fmt.Sprintf(
+				"[%d] No dynamic insts committed for a long time (thread.NumDynamicInsts=%d)",
+				thread.Core().Processor().Experiment.CycleAccurateEventQueue().CurrentCycle,
+				thread.NumDynamicInsts(),
+			))
+		} else {
+			thread.LastCommitCycle = thread.Core().Processor().Experiment.CycleAccurateEventQueue().CurrentCycle
+			thread.noDynamicInstCommittedCounterThreshold++
+		}
 	}
 
 	var numCommitted = uint32(0)
