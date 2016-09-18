@@ -33,9 +33,9 @@ func NewOoOThread(core Core, num int32) *OoOThread {
 	var thread = &OoOThread{
 		MemoryHierarchyThread:NewMemoryHierarchyThread(core, num),
 
-		IntPhysicalRegs:NewPhysicalRegisterFile(core.Processor().Experiment.CPUConfig.PhysicalRegisterFileSize),
-		FpPhysicalRegs:NewPhysicalRegisterFile(core.Processor().Experiment.CPUConfig.PhysicalRegisterFileSize),
-		MiscPhysicalRegs:NewPhysicalRegisterFile(core.Processor().Experiment.CPUConfig.PhysicalRegisterFileSize),
+		IntPhysicalRegs:NewPhysicalRegisterFile(RegisterDependencyType_INT, core.Processor().Experiment.CPUConfig.PhysicalRegisterFileSize),
+		FpPhysicalRegs:NewPhysicalRegisterFile(RegisterDependencyType_FP, core.Processor().Experiment.CPUConfig.PhysicalRegisterFileSize),
+		MiscPhysicalRegs:NewPhysicalRegisterFile(RegisterDependencyType_MISC, core.Processor().Experiment.CPUConfig.PhysicalRegisterFileSize),
 
 		RenameTable:make(map[uint32]*PhysicalRegister),
 
@@ -229,12 +229,14 @@ func (thread *OoOThread) RegisterRenameOne() bool {
 	}
 
 	for _, outputDependency := range dynamicInst.StaticInst.OutputDependencies {
-		var outputDependencyType, _ = RegisterDependencyFromInt(outputDependency)
+		if outputDependency != 0 {
+			var outputDependencyType, _ = RegisterDependencyFromInt(outputDependency)
 
-		reorderBufferEntry.OldPhysicalRegisters()[outputDependency] = thread.RenameTable[outputDependency]
-		var physicalReg = thread.GetPhysicalRegisterFile(outputDependencyType).Allocate(outputDependency)
-		thread.RenameTable[outputDependency] = physicalReg
-		reorderBufferEntry.TargetPhysicalRegisters()[outputDependency] = physicalReg
+			reorderBufferEntry.OldPhysicalRegisters()[outputDependency] = thread.RenameTable[outputDependency]
+			var physicalReg = thread.GetPhysicalRegisterFile(outputDependencyType).Allocate(reorderBufferEntry, outputDependency)
+			thread.RenameTable[outputDependency] = physicalReg
+			reorderBufferEntry.TargetPhysicalRegisters()[outputDependency] = physicalReg
+		}
 	}
 
 	for _, sourcePhysicalReg := range reorderBufferEntry.SourcePhysicalRegisters() {
@@ -462,7 +464,8 @@ func (thread *OoOThread) DumpQueues() {
 	for dependency := uint32(0); dependency < regs.NUM_INT_REGISTERS + regs.NUM_FP_REGISTERS + regs.NUM_MISC_REGISTERS; dependency++ {
 		var physicalReg = thread.RenameTable[dependency]
 
-		fmt.Printf("thread.renameTable[%d]={dependency=%d, state=%s}\n", dependency, physicalReg.Dependency, physicalReg.State)
+		fmt.Printf("thread.renameTable[%d]=PhysicalRegister{type=%s, num=%d, dependency=%d, state=%s}\n",
+			dependency, physicalReg.PhysicalRegisterFile.RegisterDependencyType, physicalReg.Num, physicalReg.Dependency, physicalReg.State)
 	}
 
 	for fuType, fuDescriptor := range thread.Core().FUPool().Descriptors {
@@ -552,6 +555,18 @@ func (thread *OoOThread) DumpQueues() {
 			entry.AllOperandReady(),
 		)
 	}
+
+	fmt.Println("thread.intPhysicalRegs:")
+
+	thread.IntPhysicalRegs.Dump()
+
+	fmt.Println("thread.fpPhysicalRegs:")
+
+	thread.FpPhysicalRegs.Dump()
+
+	fmt.Println("thread.miscPhysicalRegs:")
+
+	thread.MiscPhysicalRegs.Dump()
 }
 
 func (thread *OoOThread) Commit() {

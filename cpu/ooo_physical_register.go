@@ -1,5 +1,7 @@
 package cpu
 
+import "fmt"
+
 type PhysicalRegisterState string
 
 const (
@@ -11,139 +13,193 @@ const (
 
 type PhysicalRegister struct {
 	PhysicalRegisterFile                         *PhysicalRegisterFile
+	Num                                          uint32
 	State                                        PhysicalRegisterState
+	Allocator                                    *ReorderBufferEntry
 	Dependency                                   int32
 	EffectiveAddressComputationOperandDependents []*ReorderBufferEntry
 	StoreAddressDependents                       []*LoadStoreQueueEntry
 	Dependents                                   []GeneralReorderBufferEntry
 }
 
-func NewPhysicalRegister(physicalRegisterFile *PhysicalRegisterFile) *PhysicalRegister {
-	var physicalRegister = &PhysicalRegister{
+func NewPhysicalRegister(physicalRegisterFile *PhysicalRegisterFile, num uint32) *PhysicalRegister {
+	var physicalReg = &PhysicalRegister{
 		PhysicalRegisterFile:physicalRegisterFile,
+		Num:num,
 		State:PhysicalRegisterState_AVAILABLE,
+		Dependency:-1,
 	}
 
-	return physicalRegister
+	return physicalReg
 }
 
-func (physicalRegister *PhysicalRegister) Reserve(dependency uint32) {
-	if physicalRegister.State != PhysicalRegisterState_AVAILABLE {
+func (physicalReg *PhysicalRegister) Reserve(dependency uint32) {
+	if physicalReg.State != PhysicalRegisterState_AVAILABLE {
 		panic("Impossible")
 	}
 
-	physicalRegister.Dependency = int32(dependency)
+	physicalReg.Dependency = int32(dependency)
 
-	physicalRegister.State = PhysicalRegisterState_ARCHITECTURAL_REGISTER
+	physicalReg.State = PhysicalRegisterState_ARCHITECTURAL_REGISTER
 
-	physicalRegister.PhysicalRegisterFile.NumFreePhysicalRegisters--
+	physicalReg.PhysicalRegisterFile.NumFreePhysicalRegisters--
 }
 
-func (physicalRegister *PhysicalRegister) Allocate(dependency uint32) {
-	if physicalRegister.State != PhysicalRegisterState_AVAILABLE {
+func (physicalReg *PhysicalRegister) Allocate(allocator *ReorderBufferEntry, dependency uint32) {
+	if physicalReg.State != PhysicalRegisterState_AVAILABLE {
 		panic("Impossible")
 	}
 
-	physicalRegister.Dependency = int32(dependency)
+	physicalReg.Allocator = allocator
 
-	physicalRegister.State = PhysicalRegisterState_RENAME_BUFFER_INVALID
+	physicalReg.Dependency = int32(dependency)
 
-	physicalRegister.PhysicalRegisterFile.NumFreePhysicalRegisters--
+	physicalReg.State = PhysicalRegisterState_RENAME_BUFFER_INVALID
+
+	physicalReg.PhysicalRegisterFile.NumFreePhysicalRegisters--
 }
 
-func (physicalRegister *PhysicalRegister) Writeback() {
-	if physicalRegister.State != PhysicalRegisterState_RENAME_BUFFER_INVALID {
+func (physicalReg *PhysicalRegister) Writeback() {
+	if physicalReg.State != PhysicalRegisterState_RENAME_BUFFER_INVALID {
 		panic("Impossible")
 	}
 
-	physicalRegister.State = PhysicalRegisterState_RENAME_BUFFER_VALID
+	physicalReg.State = PhysicalRegisterState_RENAME_BUFFER_VALID
 
-	for _, effectiveAddressComputationOperandDependent := range physicalRegister.EffectiveAddressComputationOperandDependents {
+	for _, effectiveAddressComputationOperandDependent := range physicalReg.EffectiveAddressComputationOperandDependents {
 		effectiveAddressComputationOperandDependent.EffectiveAddressComputationOperandReady = true
 	}
 
-	for _, storeAddressDependent := range physicalRegister.StoreAddressDependents {
+	for _, storeAddressDependent := range physicalReg.StoreAddressDependents {
 		storeAddressDependent.StoreAddressReady = true
 	}
 
-	for _, dependent := range physicalRegister.Dependents {
-		dependent.RemoveNotReadyOperand(uint32(physicalRegister.Dependency))
+	for _, dependent := range physicalReg.Dependents {
+		dependent.RemoveNotReadyOperand(uint32(physicalReg.Dependency))
 	}
 
-	physicalRegister.EffectiveAddressComputationOperandDependents = []*ReorderBufferEntry{}
-	physicalRegister.StoreAddressDependents = []*LoadStoreQueueEntry{}
-	physicalRegister.Dependents = []GeneralReorderBufferEntry{}
+	physicalReg.EffectiveAddressComputationOperandDependents = []*ReorderBufferEntry{}
+	physicalReg.StoreAddressDependents = []*LoadStoreQueueEntry{}
+	physicalReg.Dependents = []GeneralReorderBufferEntry{}
 }
 
-func (physicalRegister *PhysicalRegister) Commit() {
-	if physicalRegister.State != PhysicalRegisterState_RENAME_BUFFER_VALID {
+func (physicalReg *PhysicalRegister) Commit() {
+	if physicalReg.State != PhysicalRegisterState_RENAME_BUFFER_VALID {
 		panic("Impossible")
 	}
 
-	physicalRegister.State = PhysicalRegisterState_ARCHITECTURAL_REGISTER
+	physicalReg.Allocator = nil
+
+	physicalReg.State = PhysicalRegisterState_ARCHITECTURAL_REGISTER
 }
 
-func (physicalRegister *PhysicalRegister) Recover() {
-	if physicalRegister.State != PhysicalRegisterState_RENAME_BUFFER_INVALID &&
-		physicalRegister.State != PhysicalRegisterState_RENAME_BUFFER_VALID {
+func (physicalReg *PhysicalRegister) Recover() {
+	if physicalReg.State != PhysicalRegisterState_RENAME_BUFFER_INVALID &&
+		physicalReg.State != PhysicalRegisterState_RENAME_BUFFER_VALID {
 		panic("Impossible")
 	}
 
-	physicalRegister.Dependency = -1
+	physicalReg.Allocator = nil
 
-	physicalRegister.State = PhysicalRegisterState_AVAILABLE
+	physicalReg.Dependency = -1
 
-	physicalRegister.PhysicalRegisterFile.NumFreePhysicalRegisters++
+	physicalReg.State = PhysicalRegisterState_AVAILABLE
+
+	physicalReg.PhysicalRegisterFile.NumFreePhysicalRegisters++
 }
 
-func (physicalRegister *PhysicalRegister) Reclaim() {
-	if physicalRegister.State != PhysicalRegisterState_ARCHITECTURAL_REGISTER {
+func (physicalReg *PhysicalRegister) Reclaim() {
+	if physicalReg.State != PhysicalRegisterState_ARCHITECTURAL_REGISTER {
 		panic("Impossible")
 	}
 
-	physicalRegister.Dependency = -1
+	physicalReg.Allocator = nil
 
-	physicalRegister.State = PhysicalRegisterState_AVAILABLE
+	physicalReg.Dependency = -1
 
-	physicalRegister.PhysicalRegisterFile.NumFreePhysicalRegisters++
+	physicalReg.State = PhysicalRegisterState_AVAILABLE
+
+	physicalReg.PhysicalRegisterFile.NumFreePhysicalRegisters++
 }
 
-func (physicalRegister *PhysicalRegister) Ready() bool {
-	return physicalRegister.State == PhysicalRegisterState_RENAME_BUFFER_VALID ||
-		physicalRegister.State == PhysicalRegisterState_ARCHITECTURAL_REGISTER
+func (physicalReg *PhysicalRegister) Ready() bool {
+	return physicalReg.State == PhysicalRegisterState_RENAME_BUFFER_VALID ||
+		physicalReg.State == PhysicalRegisterState_ARCHITECTURAL_REGISTER
 }
 
 type PhysicalRegisterFile struct {
+	RegisterDependencyType   RegisterDependencyType
 	PhysicalRegisters        []*PhysicalRegister
 	NumFreePhysicalRegisters uint32
 }
 
-func NewPhysicalRegisterFile(size uint32) *PhysicalRegisterFile {
-	var physicalRegisterFile = &PhysicalRegisterFile{
+func NewPhysicalRegisterFile(registerDependencyType RegisterDependencyType, size uint32) *PhysicalRegisterFile {
+	var physicalRegs = &PhysicalRegisterFile{
+		RegisterDependencyType:registerDependencyType,
 		NumFreePhysicalRegisters:size,
 	}
 
 	for i := uint32(0); i < size; i++ {
-		physicalRegisterFile.PhysicalRegisters = append(
-			physicalRegisterFile.PhysicalRegisters,
-			NewPhysicalRegister(physicalRegisterFile),
+		physicalRegs.PhysicalRegisters = append(
+			physicalRegs.PhysicalRegisters,
+			NewPhysicalRegister(physicalRegs, i),
 		)
 	}
 
-	return physicalRegisterFile
+	return physicalRegs
 }
 
-func (physicalRegisterFile *PhysicalRegisterFile) Allocate(dependency uint32) *PhysicalRegister {
-	for _, physicalRegister := range physicalRegisterFile.PhysicalRegisters {
-		if physicalRegister.State == PhysicalRegisterState_AVAILABLE {
-			physicalRegister.Allocate(dependency)
-			return physicalRegister
+func (physicalRegs *PhysicalRegisterFile) Allocate(allocator *ReorderBufferEntry, dependency uint32) *PhysicalRegister {
+	for _, physicalReg := range physicalRegs.PhysicalRegisters {
+		if physicalReg.State == PhysicalRegisterState_AVAILABLE {
+			physicalReg.Allocate(allocator, dependency)
+			return physicalReg
 		}
 	}
 
 	panic("Impossible")
 }
 
-func (physicalRegisterFile *PhysicalRegisterFile) Full() bool {
-	return physicalRegisterFile.NumFreePhysicalRegisters == 0
+func (physicalRegs *PhysicalRegisterFile) Full() bool {
+	return physicalRegs.NumFreePhysicalRegisters == 0
+}
+
+func (physicalRegs *PhysicalRegisterFile) Dump() {
+	for i, physicalReg := range physicalRegs.PhysicalRegisters {
+		fmt.Printf("physicalRegister[%d]={type=%s, num=%d, dependency=%d, state=%s, ready=%t}\n",
+			i, physicalReg.PhysicalRegisterFile.RegisterDependencyType, physicalReg.Num, physicalReg.Dependency, physicalReg.State, physicalReg.Ready())
+
+		if physicalReg.Allocator != nil {
+			var reorderBufferEntry = physicalReg.Allocator
+
+			var loadStoreQueueEntryId = int32(-1)
+
+			if reorderBufferEntry.LoadStoreBufferEntry != nil {
+				loadStoreQueueEntryId = reorderBufferEntry.LoadStoreBufferEntry.Id()
+			}
+
+			fmt.Printf(
+				"physicalRegister[%d].allocator=ReorderBufferEntry{id=%d, dispatched=%t, issued=%t, completed=%t, squashed=%t, loadStoreQueueEntry.id=%d, notReadyOperands=%+v, allOperandReady=%t}\n",
+				i,
+				reorderBufferEntry.Id(),
+				reorderBufferEntry.Dispatched(),
+				reorderBufferEntry.Issued(),
+				reorderBufferEntry.Completed(),
+				reorderBufferEntry.Squashed(),
+				loadStoreQueueEntryId,
+				reorderBufferEntry.NotReadyOperands(),
+				reorderBufferEntry.AllOperandReady(),
+			)
+		}
+
+		for j, dependent := range physicalReg.Dependents {
+			fmt.Printf("physicalRegister[%d].dependent[%d]={id=%d}\n", i, j, dependent.Id())
+		}
+		for j, storeAddressDependent := range physicalReg.StoreAddressDependents {
+			fmt.Printf("physicalRegister[%d].storeAddressDependent[%d]={id=%d}\n", i, j, storeAddressDependent.Id())
+		}
+		for j, EffectiveAddressComputationOperandDependent := range physicalReg.EffectiveAddressComputationOperandDependents {
+			fmt.Printf("physicalRegister[%d].EffectiveAddressComputationOperandDependent[%d]={id=%d}\n", i, j, EffectiveAddressComputationOperandDependent.Id())
+		}
+	}
 }
