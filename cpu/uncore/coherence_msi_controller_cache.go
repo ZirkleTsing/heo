@@ -3,7 +3,7 @@ package uncore
 import "github.com/mcai/acogo/cpu/mem"
 
 type CacheController struct {
-	*BaseController
+	*BaseCacheController
 	Cache                     *EvictableCache
 	NumReadPorts              uint32
 	NumWritePorts             uint32
@@ -30,7 +30,7 @@ func NewCacheController(memoryHierarchy MemoryHierarchy, name string, deviceType
 		replacementPolicyType,
 	)
 
-	cacheController.BaseController = NewBaseController(
+	cacheController.BaseCacheController = NewBaseCacheController(
 		memoryHierarchy,
 		name,
 		deviceType,

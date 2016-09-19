@@ -12,8 +12,6 @@ const (
 )
 
 type UncoreConfig struct {
-	OutputDirectory          string
-
 	NumCores                 int32
 	NumThreadsPerCore        int32
 
@@ -43,8 +41,6 @@ type UncoreConfig struct {
 	L2Assoc                  uint32
 	L2LineSize               uint32
 	L2HitLatency             uint32
-	L2NumReadPorts           uint32
-	L2NumWritePorts          uint32
 	L2ReplacementPolicy      CacheReplacementPolicyType
 
 	MemoryControllerLineSize uint32

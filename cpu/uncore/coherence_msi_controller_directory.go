@@ -3,7 +3,7 @@ package uncore
 import "github.com/mcai/acogo/cpu/mem"
 
 type DirectoryController struct {
-	*BaseController
+	*BaseCacheController
 	Cache                    *EvictableCache
 	CacheControllers         []*CacheController
 	NumPendingMemoryAccesses uint32
@@ -26,7 +26,7 @@ func NewDirectoryController(memoryHierarchy MemoryHierarchy, name string) *Direc
 		memoryHierarchy.Config().L2ReplacementPolicy,
 	)
 
-	directoryController.BaseController = NewBaseController(
+	directoryController.BaseCacheController = NewBaseCacheController(
 		memoryHierarchy,
 		name,
 		MemoryDeviceType_L2_CONTROLLER,

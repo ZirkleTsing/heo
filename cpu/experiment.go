@@ -75,6 +75,8 @@ func (experiment *CPUExperiment) Run(skipIfStatsFileExists bool) {
 
 	experiment.CPUConfig.Dump(experiment.CPUConfig.OutputDirectory)
 
+	experiment.MemoryHierarchy.Config().Dump(experiment.CPUConfig.OutputDirectory)
+
 	experiment.DumpStats()
 }
 
