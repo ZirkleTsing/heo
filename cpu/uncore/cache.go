@@ -191,6 +191,6 @@ func (cache *Cache) FindLine(address uint32) *CacheLine {
 	}
 }
 
-func (cache *Cache) OccupancyRatio() float32 {
-	return float32(cache.NumTagsInUse) / float32(cache.Geometry.NumLines)
+func (cache *Cache) OccupancyRatio() float64 {
+	return float64(cache.NumTagsInUse) / float64(cache.Geometry.NumLines)
 }

@@ -15,7 +15,6 @@ type Kernel struct {
 	Processes           []*Process
 	SyscallEmulation    *SyscallEmulation
 
-	CurrentCycle        int32
 	CurrentPid          int32
 	CurrentProcessId    int32
 	CurrentMemoryId     int32
@@ -28,7 +27,6 @@ func NewKernel(experiment *CPUExperiment) *Kernel {
 	var kernel = &Kernel{
 		Experiment:experiment,
 		SyscallEmulation:NewSyscallEmulation(),
-		CurrentCycle:0,
 		CurrentPid:1000,
 		CurrentMemoryId:0,
 		CurrentContextId:0,
@@ -199,10 +197,8 @@ func (kernel *Kernel) MustProcessSignal(context *Context, signal uint32) bool {
 }
 
 func (kernel *Kernel) AdvanceOneCycle() {
-	if kernel.CurrentCycle % 1000 == 0 {
+	if kernel.Experiment.CycleAccurateEventQueue().CurrentCycle % 1000 == 0 {
 		kernel.ProcessSystemEvents()
 		kernel.ProcessSignals()
 	}
-
-	kernel.CurrentCycle++
 }

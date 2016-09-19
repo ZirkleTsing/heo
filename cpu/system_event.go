@@ -12,7 +12,7 @@ type SystemEventCriterion interface {
 }
 
 type TimeCriterion struct {
-	When int32
+	When int64
 }
 
 func NewTimeCriterion() *TimeCriterion {
@@ -23,7 +23,7 @@ func NewTimeCriterion() *TimeCriterion {
 }
 
 func (criterion *TimeCriterion) NeedProcess(context *Context) bool {
-	return criterion.When <= native.Clock(context.Kernel.CurrentCycle)
+	return criterion.When <= native.Clock(context.Kernel.Experiment.CycleAccurateEventQueue().CurrentCycle)
 }
 
 type SignalCriterion struct {

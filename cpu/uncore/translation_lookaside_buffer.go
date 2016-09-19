@@ -6,9 +6,9 @@ type TranslationLookasideBuffer struct {
 	MemoryHierarchy MemoryHierarchy
 	Name            string
 	Cache           *EvictableCache
-	NumHits         int32
-	NumMisses       int32
-	NumEvictions    int32
+	NumHits         int64
+	NumMisses       int64
+	NumEvictions    int64
 }
 
 func NewTranslationLookasideBuffer(memoryHierarchy MemoryHierarchy, name string) *TranslationLookasideBuffer {
@@ -31,19 +31,19 @@ func NewTranslationLookasideBuffer(memoryHierarchy MemoryHierarchy, name string)
 	return tlb
 }
 
-func (tlb *TranslationLookasideBuffer) NumAccesses() int32 {
+func (tlb *TranslationLookasideBuffer) NumAccesses() int64 {
 	return tlb.NumHits + tlb.NumMisses
 }
 
-func (tlb *TranslationLookasideBuffer) HitRatio() float32 {
+func (tlb *TranslationLookasideBuffer) HitRatio() float64 {
 	if tlb.NumAccesses() == 0 {
 		return 0
 	} else {
-		return float32(tlb.NumHits) / float32(tlb.NumAccesses())
+		return float64(tlb.NumHits) / float64(tlb.NumAccesses())
 	}
 }
 
-func (tlb *TranslationLookasideBuffer) OccupancyRatio() float32 {
+func (tlb *TranslationLookasideBuffer) OccupancyRatio() float64 {
 	return tlb.Cache.OccupancyRatio()
 }
 

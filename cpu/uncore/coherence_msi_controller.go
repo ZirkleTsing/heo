@@ -11,7 +11,7 @@ type Controller interface {
 
 type BaseController struct {
 	*BaseMemoryDevice
-	next                   MemoryDevice
+	next MemoryDevice
 }
 
 func NewBaseController(memoryHierarchy MemoryHierarchy, name string, deviceType MemoryDeviceType) *BaseController {
@@ -45,11 +45,11 @@ func (controller *BaseController) SetNext(next MemoryDevice) {
 type BaseCacheController struct {
 	*BaseController
 
-	NumDownwardReadHits    int32
-	NumDownwardReadMisses  int32
-	NumDownwardWriteHits   int32
-	NumDownwardWriteMisses int32
-	NumEvictions           int32
+	NumDownwardReadHits    int64
+	NumDownwardReadMisses  int64
+	NumDownwardWriteHits   int64
+	NumDownwardWriteMisses int64
+	NumEvictions           int64
 }
 
 func NewBaseCacheController(memoryHierarchy MemoryHierarchy, name string, deviceType MemoryDeviceType) *BaseCacheController {
@@ -76,23 +76,23 @@ func (controller *BaseCacheController) UpdateStats(write bool, hitInCache bool) 
 	}
 }
 
-func (controller *BaseCacheController) NumDownwardHits() int32 {
+func (controller *BaseCacheController) NumDownwardHits() int64 {
 	return controller.NumDownwardReadHits + controller.NumDownwardWriteHits
 }
 
-func (controller *BaseCacheController) NumDownwardMisses() int32 {
+func (controller *BaseCacheController) NumDownwardMisses() int64 {
 	return controller.NumDownwardReadMisses + controller.NumDownwardWriteMisses
 }
 
-func (controller *BaseCacheController) NumDownwardAccesses() int32 {
+func (controller *BaseCacheController) NumDownwardAccesses() int64 {
 	return controller.NumDownwardHits() + controller.NumDownwardMisses()
 }
 
-func (controller *BaseCacheController) HitRatio() float32 {
+func (controller *BaseCacheController) HitRatio() float64 {
 	if controller.NumDownwardAccesses() == 0 {
 		return 0
 	} else {
-		return float32(controller.NumDownwardHits()) / float32(controller.NumDownwardAccesses())
+		return float64(controller.NumDownwardHits()) / float64(controller.NumDownwardAccesses())
 	}
 }
 

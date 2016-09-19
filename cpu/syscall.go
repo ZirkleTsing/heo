@@ -647,10 +647,10 @@ func (syscallEmulation *SyscallEmulation) nanosleep_impl(context *Context) {
 	var sec = context.Process.Memory().ReadWordAt(preq)
 	var nsec = context.Process.Memory().ReadWordAt(preq + 4)
 
-	var total = int32(sec * native.CLOCKS_PER_SEC + nsec / 1e9 * native.CLOCKS_PER_SEC)
+	var total = int64(sec * native.CLOCKS_PER_SEC + nsec / 1e9 * native.CLOCKS_PER_SEC)
 
 	var e = NewResumeEvent(context)
-	e.TimeCriterion.When = native.Clock(context.Kernel.CurrentCycle + total)
+	e.TimeCriterion.When = native.Clock(context.Kernel.Experiment.CycleAccurateEventQueue().CurrentCycle + total)
 	context.Kernel.SystemEvents = append(context.Kernel.SystemEvents, e)
 	context.Suspend()
 }
@@ -685,7 +685,7 @@ func (syscallEmulation *SyscallEmulation) poll_impl(context *Context) {
 		}
 
 		var e = NewPollEvent(context)
-		e.TimeCriterion.When = native.Clock(context.Kernel.CurrentCycle) + timeout * native.CLOCKS_PER_SEC / 1000
+		e.TimeCriterion.When = native.Clock(context.Kernel.Experiment.CycleAccurateEventQueue().CurrentCycle) + int64(timeout * native.CLOCKS_PER_SEC / 1000)
 		e.WaitForFileDescriptorCriterion.Buffer = context.Kernel.GetReadBuffer(fd)
 
 		if e.WaitForFileDescriptorCriterion.Buffer == nil {
