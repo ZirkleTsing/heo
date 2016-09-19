@@ -19,7 +19,7 @@ func NewCacheAccess(cache *EvictableCache, access *MemoryHierarchyAccess, set ui
 		Line:cache.Sets[set].Lines[way],
 	}
 
-	cacheAccess.HitInCache = cacheAccess.Line.Tag() == int32(tag)
+	cacheAccess.HitInCache = cacheAccess.Line.Tag == int32(tag)
 	cacheAccess.Replacement = cacheAccess.Line.Valid()
 
 	return cacheAccess

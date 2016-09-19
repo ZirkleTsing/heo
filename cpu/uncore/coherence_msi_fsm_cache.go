@@ -31,6 +31,10 @@ func NewCacheControllerFiniteStateMachine(set uint32, way uint32, cacheControlle
 	return fsm
 }
 
+func (fsm *CacheControllerFiniteStateMachine) Valid() bool {
+	return fsm.State() != CacheControllerState_I
+}
+
 func (fsm *CacheControllerFiniteStateMachine) Line() *CacheLine {
 	return fsm.CacheController.Cache.Sets[fsm.Set].Lines[fsm.Way]
 }
@@ -353,7 +357,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 			cacheControllerFsm.SendGetSToDir(event, event.Tag())
 			cacheControllerFsm.FireServiceNonblockingRequestEvent(event.Access(), event.Tag(), false)
 			cacheControllerFsm.Line().Access = event.Access()
-			cacheControllerFsm.Line().SetTag(int32(event.Tag()))
+			cacheControllerFsm.Line().Tag = int32(event.Tag())
 			cacheControllerFsm.OnCompletedCallback = func() {
 				cacheControllerFsm.CacheController.Cache.ReplacementPolicy.HandleInsertionOnMiss(
 					event.Access(),
@@ -373,7 +377,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 			cacheControllerFsm.SendGetMToDir(event, event.Tag())
 			cacheControllerFsm.FireServiceNonblockingRequestEvent(event.Access(), event.Tag(), false)
 			cacheControllerFsm.Line().Access = event.Access()
-			cacheControllerFsm.Line().SetTag(int32(event.Tag()))
+			cacheControllerFsm.Line().Tag = int32(event.Tag())
 			cacheControllerFsm.OnCompletedCallback = func() {
 				cacheControllerFsm.CacheController.Cache.ReplacementPolicy.HandleInsertionOnMiss(
 					event.Access(),
@@ -602,7 +606,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 			var cacheControllerFsm = fsm.(*CacheControllerFiniteStateMachine)
 			var event = params.(*ReplacementEvent)
 
-			cacheControllerFsm.SendPutSToDir(event, uint32(cacheControllerFsm.Line().Tag()))
+			cacheControllerFsm.SendPutSToDir(event, uint32(cacheControllerFsm.Line().Tag))
 			cacheControllerFsm.OnCompletedCallback = event.OnCompletedCallback
 			cacheControllerFsm.FireReplacementEvent(event.Access(), event.Tag())
 			cacheControllerFsm.CacheController.NumEvictions++
@@ -616,7 +620,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 
 			cacheControllerFsm.SendInvAckToRequester(event, event.Tag(), event.Requester)
 			cacheControllerFsm.Line().Access = nil
-			cacheControllerFsm.Line().SetTag(INVALID_TAG)
+			cacheControllerFsm.Line().Tag = INVALID_TAG
 		},
 		CacheControllerState_I,
 	).OnCondition(
@@ -627,7 +631,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 
 			cacheControllerFsm.SendRecallAckToDir(event, event.Tag(), 8)
 			cacheControllerFsm.Line().Access = nil
-			cacheControllerFsm.Line().SetTag(INVALID_TAG)
+			cacheControllerFsm.Line().Tag = INVALID_TAG
 		},
 		CacheControllerState_I,
 	)
@@ -827,7 +831,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 			var cacheControllerFsm = fsm.(*CacheControllerFiniteStateMachine)
 			var event = params.(*ReplacementEvent)
 
-			cacheControllerFsm.SendPutMAndDataToDir(event, uint32(cacheControllerFsm.Line().Tag()))
+			cacheControllerFsm.SendPutMAndDataToDir(event, uint32(cacheControllerFsm.Line().Tag))
 			cacheControllerFsm.OnCompletedCallback = event.OnCompletedCallback
 			cacheControllerFsm.FireReplacementEvent(event.Access(), event.Tag())
 			cacheControllerFsm.CacheController.NumEvictions++
@@ -850,7 +854,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 
 			cacheControllerFsm.SendDataToRequester(event, event.Tag(), event.Requester)
 			cacheControllerFsm.Line().Access = nil
-			cacheControllerFsm.Line().SetTag(INVALID_TAG)
+			cacheControllerFsm.Line().Tag = INVALID_TAG
 		},
 		CacheControllerState_I,
 	).OnCondition(
@@ -865,7 +869,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 				cacheControllerFsm.CacheController.Cache.LineSize() + 8,
 			)
 			cacheControllerFsm.Line().Access = nil
-			cacheControllerFsm.Line().SetTag(INVALID_TAG)
+			cacheControllerFsm.Line().Tag = INVALID_TAG
 		},
 		CacheControllerState_I,
 	)
@@ -929,7 +933,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 			var cacheControllerFsm = fsm.(*CacheControllerFiniteStateMachine)
 
 			cacheControllerFsm.Line().Access = nil
-			cacheControllerFsm.Line().SetTag(INVALID_TAG)
+			cacheControllerFsm.Line().Tag = INVALID_TAG
 		},
 		CacheControllerState_I,
 	)
@@ -984,7 +988,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 			var cacheControllerFsm = fsm.(*CacheControllerFiniteStateMachine)
 
 			cacheControllerFsm.Line().Access = nil
-			cacheControllerFsm.Line().SetTag(INVALID_TAG)
+			cacheControllerFsm.Line().Tag = INVALID_TAG
 		},
 		CacheControllerState_I,
 	)
@@ -1021,7 +1025,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 			var cacheControllerFsm = fsm.(*CacheControllerFiniteStateMachine)
 
 			cacheControllerFsm.Line().Access = nil
-			cacheControllerFsm.Line().SetTag(INVALID_TAG)
+			cacheControllerFsm.Line().Tag = INVALID_TAG
 		},
 		CacheControllerState_I,
 	)

@@ -13,26 +13,22 @@ const (
 )
 
 type CacheLineStateProvider interface {
-	InitialState() interface{}
 	State() interface{}
+	Valid() bool
 }
 
 type BaseCacheLineStateProvider struct {
-	initialState interface{}
-	state        interface{}
+	state interface{}
+	valid func(state interface{}) bool
 }
 
-func NewBaseCacheLineStateProvider(initialState interface{}) *BaseCacheLineStateProvider {
+func NewBaseCacheLineStateProvider(state interface{}, valid func(state interface{}) bool) *BaseCacheLineStateProvider {
 	var stateProvider = &BaseCacheLineStateProvider{
-		initialState:initialState,
-		state:initialState,
+		state:state,
+		valid:valid,
 	}
 
 	return stateProvider
-}
-
-func (stateProvider *BaseCacheLineStateProvider) InitialState() interface{} {
-	return stateProvider.initialState
 }
 
 func (stateProvider *BaseCacheLineStateProvider) State() interface{} {
@@ -43,13 +39,17 @@ func (stateProvider *BaseCacheLineStateProvider) SetState(state interface{}) {
 	stateProvider.state = state
 }
 
+func (stateProvider *BaseCacheLineStateProvider) Valid() bool {
+	return stateProvider.valid(stateProvider.state)
+}
+
 type CacheLine struct {
 	Cache         *Cache
 
 	Set           uint32
 	Way           uint32
 
-	tag           int32
+	Tag           int32
 
 	Access        *MemoryHierarchyAccess
 
@@ -61,44 +61,19 @@ func newCacheLine(cache *Cache, set uint32, way uint32, stateProvider CacheLineS
 		Cache:cache,
 		Set:set,
 		Way:way,
+		Tag:INVALID_TAG,
 		StateProvider:stateProvider,
 	}
 
 	return cacheLine
 }
 
-func (cacheLine *CacheLine) Valid() bool {
-	return cacheLine.State() != cacheLine.InitialState()
-}
-
-func (cacheLine *CacheLine) Tag() int32 {
-	return cacheLine.tag
-}
-
-func (cacheLine *CacheLine) SetTag(tag int32) {
-	if tag != INVALID_TAG {
-		for _, line := range cacheLine.Cache.Sets[cacheLine.Set].Lines {
-			if line.Tag() == tag {
-				panic("Impossible")
-			}
-		}
-	}
-
-	if cacheLine.Tag() == INVALID_TAG && tag != INVALID_TAG {
-		cacheLine.Cache.NumTagsInUse++
-	} else if cacheLine.tag != INVALID_TAG && tag == INVALID_TAG {
-		cacheLine.Cache.NumTagsInUse--
-	}
-
-	cacheLine.tag = tag
-}
-
-func (cacheLine *CacheLine) InitialState() interface{} {
-	return cacheLine.StateProvider.InitialState()
-}
-
 func (cacheLine *CacheLine) State() interface{} {
 	return cacheLine.StateProvider.State()
+}
+
+func (cacheLine *CacheLine) Valid() bool {
+	return cacheLine.StateProvider.Valid()
 }
 
 type CacheSet struct {
@@ -130,7 +105,6 @@ func newCacheSet(cache *Cache, assoc uint32, num uint32) *CacheSet {
 type Cache struct {
 	Geometry                 *mem.Geometry
 	Sets                     []*CacheSet
-	NumTagsInUse             int32
 	LineStateProviderFactory func(set uint32, way uint32) CacheLineStateProvider
 }
 
@@ -172,7 +146,7 @@ func (cache *Cache) FindWay(address uint32) int32 {
 	var set = cache.GetSet(address)
 
 	for _, line := range cache.Sets[set].Lines {
-		if line.Valid() && line.Tag() == int32(tag) {
+		if line.Valid() && line.Tag == int32(tag) {
 			return int32(line.Way)
 		}
 	}
@@ -192,5 +166,15 @@ func (cache *Cache) FindLine(address uint32) *CacheLine {
 }
 
 func (cache *Cache) OccupancyRatio() float64 {
-	return float64(cache.NumTagsInUse) / float64(cache.Geometry.NumLines)
+	var numValidLines = 0
+
+	for set := uint32(0); set < cache.Geometry.NumSets; set++ {
+		for _, line := range cache.Sets[set].Lines {
+			if line.Valid() {
+				numValidLines++
+			}
+		}
+	}
+
+	return float64(numValidLines) / float64(cache.Geometry.NumLines)
 }

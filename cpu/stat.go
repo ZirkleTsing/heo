@@ -106,6 +106,10 @@ func (experiment *CPUExperiment) DumpStats() {
 			Key:fmt.Sprintf("itlb_%d.NumEvictions", i),
 			Value:itlb.NumEvictions,
 		})
+		experiment.Stats = append(experiment.Stats, simutil.Stat{
+			Key:fmt.Sprintf("itlb_%d.OccupancyRatio", i),
+			Value:itlb.OccupancyRatio(),
+		})
 	}
 
 	for i, dtlb := range experiment.MemoryHierarchy.DTlbs() {
@@ -128,6 +132,10 @@ func (experiment *CPUExperiment) DumpStats() {
 		experiment.Stats = append(experiment.Stats, simutil.Stat{
 			Key:fmt.Sprintf("dtlb_%d.NumEvictions", i),
 			Value:dtlb.NumEvictions,
+		})
+		experiment.Stats = append(experiment.Stats, simutil.Stat{
+			Key:fmt.Sprintf("dtlb_%d.OccupancyRatio", i),
+			Value:dtlb.OccupancyRatio(),
 		})
 	}
 
@@ -170,6 +178,11 @@ func (experiment *CPUExperiment) DumpStats() {
 			Key:fmt.Sprintf("icache_%d.NumEvictions", i),
 			Value:cacheController.NumEvictions,
 		})
+
+		experiment.Stats = append(experiment.Stats, simutil.Stat{
+			Key:fmt.Sprintf("icache_%d.OccupancyRatio", i),
+			Value:cacheController.Cache.OccupancyRatio(),
+		})
 	}
 
 	for i, cacheController := range experiment.MemoryHierarchy.L1DControllers() {
@@ -211,6 +224,11 @@ func (experiment *CPUExperiment) DumpStats() {
 			Key:fmt.Sprintf("dcache_%d.NumEvictions", i),
 			Value:cacheController.NumEvictions,
 		})
+
+		experiment.Stats = append(experiment.Stats, simutil.Stat{
+			Key:fmt.Sprintf("dcache_%d.OccupancyRatio", i),
+			Value:cacheController.Cache.OccupancyRatio(),
+		})
 	}
 
 	experiment.Stats = append(experiment.Stats, simutil.Stat{
@@ -250,6 +268,11 @@ func (experiment *CPUExperiment) DumpStats() {
 	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key:"l2cache.NumEvictions",
 		Value:experiment.MemoryHierarchy.L2Controller().NumEvictions,
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key:"l2cache.OccupancyRatio",
+		Value:experiment.MemoryHierarchy.L2Controller().Cache.OccupancyRatio(),
 	})
 
 	experiment.Stats = append(experiment.Stats, simutil.Stat{

@@ -8,12 +8,17 @@ import (
 type CacheBasedPredictorLineValueProvider struct {
 	*BaseCacheLineStateProvider
 	PredictedValue interface{}
-	Confidence *simutil.SaturatingCounter
+	Confidence     *simutil.SaturatingCounter
 }
 
 func NewCacheBasedPredictorLineValueProvider(counterThreshold uint32, counterMaxValue uint32) *CacheBasedPredictorLineValueProvider {
 	var valueProvider = &CacheBasedPredictorLineValueProvider{
-		BaseCacheLineStateProvider:NewBaseCacheLineStateProvider(false),
+		BaseCacheLineStateProvider:NewBaseCacheLineStateProvider(
+			false,
+			func(state interface{}) bool {
+				return state != false
+			},
+		),
 		Confidence:simutil.NewSaturatingCounter(0, counterThreshold, counterMaxValue, 0),
 	}
 
@@ -89,7 +94,7 @@ func (predictor *CacheBasedPredictor) Update(address uint32, observedValue inter
 		predictor.Cache.ReplacementPolicy.HandlePromotionOnHit(nil, set, cacheAccess.Way)
 	} else {
 		stateProvider.SetState(true)
-		line.SetTag(int32(tag))
+		line.Tag = int32(tag)
 
 		stateProvider.PredictedValue = observedValue
 		stateProvider.Confidence.Reset()

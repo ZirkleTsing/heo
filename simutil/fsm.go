@@ -46,7 +46,6 @@ type FiniteStateMachine interface {
 }
 
 type BaseFiniteStateMachine struct {
-	initialState            interface{}
 	state                   interface{}
 	BlockingEventDispatcher *BlockingEventDispatcher
 	settingStates           bool
@@ -54,16 +53,11 @@ type BaseFiniteStateMachine struct {
 
 func NewBaseFiniteStateMachine(state interface{}) *BaseFiniteStateMachine {
 	var finiteStateMachine = &BaseFiniteStateMachine{
-		initialState:state,
 		state:state,
 		BlockingEventDispatcher:NewBlockingEventDispatcher(),
 	}
 
 	return finiteStateMachine
-}
-
-func (finiteStateMachine *BaseFiniteStateMachine) InitialState() interface{} {
-	return finiteStateMachine.initialState
 }
 
 func (finiteStateMachine *BaseFiniteStateMachine) State() interface{} {

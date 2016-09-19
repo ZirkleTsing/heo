@@ -11,7 +11,12 @@ func NewLRUPolicy(cache *EvictableCache) *LRUPolicy {
 		lruStack:NewCache(
 			cache.Geometry,
 			func(set uint32, way uint32) CacheLineStateProvider {
-				return NewBaseCacheLineStateProvider(way)
+				return NewBaseCacheLineStateProvider(
+					way,
+					func(state interface{}) bool {
+						return true
+					},
+				)
 			},
 		),
 	}

@@ -52,6 +52,10 @@ func NewDirectoryControllerFiniteStateMachine(set uint32, way uint32, directoryC
 	return fsm
 }
 
+func (fsm *DirectoryControllerFiniteStateMachine) Valid() bool {
+	return fsm.State() != DirectoryControllerState_I
+}
+
 func (fsm *DirectoryControllerFiniteStateMachine) Line() *CacheLine {
 	return fsm.DirectoryController.Cache.Sets[fsm.Set].Lines[fsm.Way]
 }
@@ -455,7 +459,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 
 			directoryControllerFsm.FireServiceNonblockingRequestEvent(event.Access(), event.Tag(), false)
 			directoryControllerFsm.Line().Access = event.Access()
-			directoryControllerFsm.Line().SetTag(int32(event.Tag()))
+			directoryControllerFsm.Line().Tag = int32(event.Tag())
 		},
 		DirectoryControllerState_IS_D,
 	).OnCondition(
@@ -497,7 +501,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 
 			directoryControllerFsm.FireServiceNonblockingRequestEvent(event.Access(), event.Tag(), false)
 			directoryControllerFsm.Line().Access = event.Access()
-			directoryControllerFsm.Line().SetTag(int32(event.Tag()))
+			directoryControllerFsm.Line().Tag = int32(event.Tag())
 		},
 		DirectoryControllerState_IM_D,
 	)
@@ -700,12 +704,12 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 			var event = params.(*DirReplacementEvent)
 
 			directoryControllerFsm.NumRecallAcks = int32(len(directoryControllerFsm.DirectoryEntry.Sharers))
-			directoryControllerFsm.SendRecallToSharers(event, uint32(directoryControllerFsm.Line().Tag()))
+			directoryControllerFsm.SendRecallToSharers(event, uint32(directoryControllerFsm.Line().Tag))
 			directoryControllerFsm.ClearSharers()
 			directoryControllerFsm.OnCompletedCallback = event.OnCompletedCallback
 			directoryControllerFsm.FireReplacementEvent(event.Access(), event.Tag())
 			directoryControllerFsm.EvicterTag = int32(event.Tag())
-			directoryControllerFsm.VictimTag = directoryControllerFsm.Line().Tag()
+			directoryControllerFsm.VictimTag = directoryControllerFsm.Line().Tag
 			directoryControllerFsm.DirectoryController.NumEvictions++
 		},
 		DirectoryControllerState_SI_A,
@@ -729,7 +733,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 			directoryControllerFsm.SendPutAckToRequester(event, event.Tag(), event.Requester)
 			directoryControllerFsm.FirePutSOrPutMAndDataFromOwnerEvent(event.Access(), event.Tag())
 			directoryControllerFsm.Line().Access = nil
-			directoryControllerFsm.Line().SetTag(INVALID_TAG)
+			directoryControllerFsm.Line().Tag = INVALID_TAG
 		},
 		DirectoryControllerState_I,
 	).OnCondition(
@@ -774,12 +778,12 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 			var event = params.(*DirReplacementEvent)
 
 			directoryControllerFsm.NumRecallAcks = 1
-			directoryControllerFsm.SendRecallToOwner(event, uint32(directoryControllerFsm.Line().Tag()))
+			directoryControllerFsm.SendRecallToOwner(event, uint32(directoryControllerFsm.Line().Tag))
 			directoryControllerFsm.ClearOwner()
 			directoryControllerFsm.OnCompletedCallback = event.OnCompletedCallback
 			directoryControllerFsm.FireReplacementEvent(event.Access(), event.Tag())
 			directoryControllerFsm.EvicterTag = int32(event.Tag())
-			directoryControllerFsm.VictimTag = directoryControllerFsm.Line().Tag()
+			directoryControllerFsm.VictimTag = directoryControllerFsm.Line().Tag
 			directoryControllerFsm.DirectoryController.NumEvictions++
 		},
 		DirectoryControllerState_MI_A,
@@ -812,7 +816,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 			directoryControllerFsm.SendPutAckToRequester(event, event.Tag(), event.Requester)
 			directoryControllerFsm.FirePutSOrPutMAndDataFromOwnerEvent(event.Access(), event.Tag())
 			directoryControllerFsm.Line().Access = nil
-			directoryControllerFsm.Line().SetTag(INVALID_TAG)
+			directoryControllerFsm.Line().Tag = INVALID_TAG
 		},
 		DirectoryControllerState_I,
 	).OnCondition(
@@ -937,7 +941,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 
 			directoryControllerFsm.CopyDataToMem(event.Tag())
 			directoryControllerFsm.Line().Access = nil
-			directoryControllerFsm.Line().SetTag(INVALID_TAG)
+			directoryControllerFsm.Line().Tag = INVALID_TAG
 		},
 		DirectoryControllerState_I,
 	).OnCondition(
@@ -1010,7 +1014,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 			var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
 
 			directoryControllerFsm.Line().Access = nil
-			directoryControllerFsm.Line().SetTag(INVALID_TAG)
+			directoryControllerFsm.Line().Tag = INVALID_TAG
 		},
 		DirectoryControllerState_I,
 	).OnCondition(
