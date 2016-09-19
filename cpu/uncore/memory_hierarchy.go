@@ -34,6 +34,8 @@ type MemoryHierarchy interface {
 	ITlbs() []*TranslationLookasideBuffer
 	DTlbs() []*TranslationLookasideBuffer
 
+	Network() *noc.Network
+
 	Transfer(from MemoryDevice, to MemoryDevice, size uint32, onCompletedCallback func())
 	TransferMessage(from Controller, to Controller, size uint32, message CoherenceMessage)
 
@@ -59,7 +61,7 @@ type BaseMemoryHierarchy struct {
 
 	p2pReorderBuffers              map[Controller](map[Controller]*P2PReorderBuffer)
 
-	Network                        *noc.Network
+	network                        *noc.Network
 	DevicesToNodeIds               map[interface{}]uint32
 }
 
@@ -134,7 +136,7 @@ func NewBaseMemoryHierarchy(driver UncoreDriver, config *UncoreConfig, nocConfig
 	nocConfig.NumNodes = int(numNodes)
 	nocConfig.MaxInputBufferSize = int(memoryHierarchy.l2Controller.Cache.LineSize() + 8)
 
-	memoryHierarchy.Network = noc.NewNetwork(driver.(noc.NetworkDriver), nocConfig)
+	memoryHierarchy.network = noc.NewNetwork(driver.(noc.NetworkDriver), nocConfig)
 
 	return memoryHierarchy
 }
@@ -195,15 +197,19 @@ func (memoryHierarchy *BaseMemoryHierarchy) DTlbs() []*TranslationLookasideBuffe
 	return memoryHierarchy.dTlbs
 }
 
+func (memoryHierarchy *BaseMemoryHierarchy) Network() *noc.Network {
+	return memoryHierarchy.network
+}
+
 func (memoryHierarchy *BaseMemoryHierarchy) Transfer(from MemoryDevice, to MemoryDevice, size uint32, onCompletedCallback func()) {
 	var src = memoryHierarchy.DevicesToNodeIds[from]
 	var dest = memoryHierarchy.DevicesToNodeIds[to]
 
 	if src != dest {
-		var packet = noc.NewDataPacket(memoryHierarchy.Network, int(src), int(dest), int(size), true, onCompletedCallback)
+		var packet = noc.NewDataPacket(memoryHierarchy.network, int(src), int(dest), int(size), true, onCompletedCallback)
 
 		memoryHierarchy.Driver().CycleAccurateEventQueue().Schedule(func() {
-			memoryHierarchy.Network.Receive(packet)
+			memoryHierarchy.network.Receive(packet)
 		}, 1)
 	} else {
 		onCompletedCallback()

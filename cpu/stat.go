@@ -3,6 +3,7 @@ package cpu
 import (
 	"fmt"
 	"github.com/mcai/acogo/simutil"
+	"github.com/mcai/acogo/noc"
 )
 
 func (experiment *CPUExperiment) DumpStats() {
@@ -260,6 +261,95 @@ func (experiment *CPUExperiment) DumpStats() {
 		Key:"mem.NumWrites",
 		Value:experiment.MemoryHierarchy.MemoryController().NumWrites,
 	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "noc.PacketsPerSecond",
+		Value: float64(experiment.MemoryHierarchy.Network().NumPacketsTransmitted) / experiment.EndTime.Sub(experiment.BeginTime).Seconds(),
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "noc.NumPacketsReceived",
+		Value: experiment.MemoryHierarchy.Network().NumPacketsReceived,
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "noc.NumPacketsTransmitted",
+		Value: experiment.MemoryHierarchy.Network().NumPacketsTransmitted,
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "noc.Throughput",
+		Value: experiment.MemoryHierarchy.Network().Throughput(),
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "noc.AveragePacketDelay",
+		Value: experiment.MemoryHierarchy.Network().AveragePacketDelay(),
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "noc.AveragePacketHops",
+		Value: experiment.MemoryHierarchy.Network().AveragePacketHops(),
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "noc.MaxPacketDelay",
+		Value: experiment.MemoryHierarchy.Network().MaxPacketDelay,
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "noc.MaxPacketHops",
+		Value: experiment.MemoryHierarchy.Network().MaxPacketHops,
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "noc.NumPayloadPacketsReceived",
+		Value: experiment.MemoryHierarchy.Network().NumPayloadPacketsReceived,
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "noc.NumPayloadPacketsTransmitted",
+		Value: experiment.MemoryHierarchy.Network().NumPayloadPacketsTransmitted,
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "noc.PayloadThroughput",
+		Value: experiment.MemoryHierarchy.Network().PayloadThroughput(),
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "noc.AveragePayloadPacketDelay",
+		Value: experiment.MemoryHierarchy.Network().AveragePayloadPacketDelay(),
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "noc.AveragePayloadPacketHops",
+		Value: experiment.MemoryHierarchy.Network().AveragePayloadPacketHops(),
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "noc.MaxPayloadPacketDelay",
+		Value: experiment.MemoryHierarchy.Network().MaxPayloadPacketDelay,
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "noc.MaxPayloadPacketHops",
+		Value: experiment.MemoryHierarchy.Network().MaxPayloadPacketHops,
+	})
+
+	for _, state := range noc.VALID_FLIT_STATES {
+		experiment.Stats = append(experiment.Stats, simutil.Stat{
+			Key: fmt.Sprintf("noc.AverageFlitPerStateDelay[%s]", state),
+			Value: experiment.MemoryHierarchy.Network().AverageFlitPerStateDelay(state),
+		})
+	}
+
+	for _, state := range noc.VALID_FLIT_STATES {
+		experiment.Stats = append(experiment.Stats, simutil.Stat{
+			Key: fmt.Sprintf("noc.MaxFlitPerStateDelay[%s]", state),
+			Value: experiment.MemoryHierarchy.Network().MaxFlitPerStateDelay[state],
+		})
+	}
 
 	simutil.WriteJsonFile(experiment.Stats, experiment.CPUConfig.OutputDirectory, simutil.STATS_JSON_FILE_NAME)
 }
