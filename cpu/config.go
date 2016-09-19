@@ -7,7 +7,7 @@ type CPUConfig struct {
 
 	ContextMappings           []*ContextMapping
 
-	MaxDynamicInsts           int32
+	MaxDynamicInsts           int64
 
 	NumCores                  int32
 	NumThreadsPerCore         int32

@@ -11,12 +11,15 @@ type Thread interface {
 	Id() int32
 	Context() *Context
 	SetContext(context *Context)
-	NumDynamicInsts() int32
 	FastForwardOneCycle()
 
 	Itlb() *uncore.TranslationLookasideBuffer
 	Dtlb() *uncore.TranslationLookasideBuffer
 	WarmupOneCycle()
+
+	NumDynamicInsts() int64
+	InstructionsPerCycle() float64
+	CyclesPerInstructions() float64
 }
 
 type BaseThread struct {
@@ -24,7 +27,7 @@ type BaseThread struct {
 	num                   int32
 	id                    int32
 	context               *Context
-	numDynamicInsts       int32
+	numDynamicInsts       int64
 
 	ExecutedMnemonicNames map[MnemonicName]int32
 	ExecutedSyscallNames  map[string]int32
@@ -90,7 +93,7 @@ func (thread *BaseThread) SetContext(context *Context) {
 	thread.context = context
 }
 
-func (thread *BaseThread) NumDynamicInsts() int32 {
+func (thread *BaseThread) NumDynamicInsts() int64 {
 	return thread.numDynamicInsts
 }
 
@@ -113,4 +116,16 @@ func (thread *BaseThread) FastForwardOneCycle() {
 			}
 		}
 	}
+}
+
+func (thread *BaseThread) InstructionsPerCycle() float64 {
+	return float64(thread.numDynamicInsts) / float64(thread.Core().Processor().Experiment.CycleAccurateEventQueue().CurrentCycle)
+}
+
+func (thread *BaseThread) CyclesPerInstructions() float64 {
+	if thread.numDynamicInsts == 0 {
+		return float64(0)
+	}
+
+	return float64(thread.Core().Processor().Experiment.CycleAccurateEventQueue().CurrentCycle) / float64(thread.numDynamicInsts)
 }

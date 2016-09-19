@@ -7,19 +7,58 @@ import (
 
 func (experiment *CPUExperiment) DumpStats() {
 	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "SimulationTime",
+		Value: fmt.Sprintf("%v", experiment.SimulationTime()),
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "TotalCycles",
 		Value: experiment.CycleAccurateEventQueue().CurrentCycle,
 	})
 
 	experiment.Stats = append(experiment.Stats, simutil.Stat{
-		Key: "SimulationTime",
-		Value: fmt.Sprintf("%v", experiment.EndTime.Sub(experiment.BeginTime)),
+		Key:"NumDynamicInsts",
+		Value:experiment.Processor.NumDynamicInsts(),
 	})
 
 	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "CyclesPerSecond",
-		Value: float64(experiment.CycleAccurateEventQueue().CurrentCycle) / experiment.EndTime.Sub(experiment.BeginTime).Seconds(),
+		Value: experiment.CyclesPerSecond(),
 	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "InstructionsPerSecond",
+		Value: experiment.InstructionsPerSecond(),
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key:"InstructionsPerCycle",
+		Value:experiment.Processor.InstructionsPerCycle(),
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key:"CyclesPerInstructions",
+		Value:experiment.Processor.CyclesPerInstructions(),
+	})
+
+	for i, core := range experiment.Processor.Cores {
+		for j, thread := range core.Threads() {
+			experiment.Stats = append(experiment.Stats, simutil.Stat{
+				Key:fmt.Sprintf("thread_%d-%d.NumDynamicInsts", i, j),
+				Value:thread.NumDynamicInsts(),
+			})
+
+			experiment.Stats = append(experiment.Stats, simutil.Stat{
+				Key:fmt.Sprintf("thread_%d-%d.InstructionsPerCycle", i, j),
+				Value:thread.InstructionsPerCycle(),
+			})
+
+			experiment.Stats = append(experiment.Stats, simutil.Stat{
+				Key:fmt.Sprintf("thread_%d-%d.CyclesPerInstructions", i, j),
+				Value:thread.CyclesPerInstructions(),
+			})
+		}
+	}
 
 	simutil.WriteJsonFile(experiment.Stats, experiment.CPUConfig.OutputDirectory, simutil.STATS_JSON_FILE_NAME)
 }

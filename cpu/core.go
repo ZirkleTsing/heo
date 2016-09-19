@@ -44,6 +44,8 @@ type Core interface {
 	WarmupOneCycle()
 
 	RemoveFromQueues(entryToRemove GeneralReorderBufferEntry)
+
+	NumDynamicInsts() int64
 }
 
 type BaseCore struct {
@@ -81,4 +83,14 @@ func (core *BaseCore) FastForwardOneCycle() {
 	for _, thread := range core.Threads() {
 		thread.FastForwardOneCycle()
 	}
+}
+
+func (core *BaseCore) NumDynamicInsts() int64 {
+	var numDynamicInsts = int64(0)
+
+	for _, thread := range core.Threads() {
+		numDynamicInsts += thread.NumDynamicInsts()
+	}
+
+	return numDynamicInsts
 }

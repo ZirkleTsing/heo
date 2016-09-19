@@ -85,3 +85,25 @@ func (processor *Processor) kill(context *Context) {
 
 	processor.Experiment.BlockingEventDispatcher().Dispatch(NewContextKilledEvent(context))
 }
+
+func (processor *Processor) NumDynamicInsts() int64 {
+	var numDynamicInsts = int64(0)
+
+	for _, core := range processor.Cores {
+		numDynamicInsts += core.NumDynamicInsts()
+	}
+
+	return numDynamicInsts
+}
+
+func (processor *Processor) InstructionsPerCycle() float64 {
+	return float64(processor.NumDynamicInsts()) / float64(processor.Experiment.CycleAccurateEventQueue().CurrentCycle)
+}
+
+func (processor *Processor) CyclesPerInstructions() float64 {
+	if processor.NumDynamicInsts() == 0 {
+		return float64(0)
+	}
+
+	return float64(processor.Experiment.CycleAccurateEventQueue().CurrentCycle) / float64(processor.NumDynamicInsts())
+}

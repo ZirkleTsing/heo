@@ -119,3 +119,15 @@ func (experiment *CPUExperiment) DoMeasurement() {
 		experiment.advanceOneCycle()
 	}
 }
+
+func (experiment *CPUExperiment) SimulationTime() time.Duration {
+	return experiment.EndTime.Sub(experiment.BeginTime)
+}
+
+func (experiment *CPUExperiment) CyclesPerSecond() float64 {
+	return float64(experiment.CycleAccurateEventQueue().CurrentCycle) / experiment.EndTime.Sub(experiment.BeginTime).Seconds()
+}
+
+func (experiment *CPUExperiment) InstructionsPerSecond() float64 {
+	return float64(experiment.Processor.NumDynamicInsts()) / experiment.EndTime.Sub(experiment.BeginTime).Seconds()
+}
