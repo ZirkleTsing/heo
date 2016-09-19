@@ -196,19 +196,18 @@ func (memoryHierarchy *BaseMemoryHierarchy) DTlbs() []*TranslationLookasideBuffe
 }
 
 func (memoryHierarchy *BaseMemoryHierarchy) Transfer(from MemoryDevice, to MemoryDevice, size uint32, onCompletedCallback func()) {
-	//var src = memoryHierarchy.DevicesToNodeIds[from]
-	//var dest = memoryHierarchy.DevicesToNodeIds[to]
-	//
-	//var packet = noc.NewDataPacket(memoryHierarchy.Network, int(src), int(dest), int(size), true, onCompletedCallback)
-	//
-	//memoryHierarchy.Driver().CycleAccurateEventQueue().Schedule(
-	//	func() {
-	//		memoryHierarchy.Network.Receive(packet)
-	//	},
-	//	1,
-	//)
+	var src = memoryHierarchy.DevicesToNodeIds[from]
+	var dest = memoryHierarchy.DevicesToNodeIds[to]
 
-	onCompletedCallback() //TODO
+	if src != dest {
+		var packet = noc.NewDataPacket(memoryHierarchy.Network, int(src), int(dest), int(size), true, onCompletedCallback)
+
+		memoryHierarchy.Driver().CycleAccurateEventQueue().Schedule(func() {
+			memoryHierarchy.Network.Receive(packet)
+		}, 1)
+	} else {
+		onCompletedCallback()
+	}
 }
 
 func (memoryHierarchy *BaseMemoryHierarchy) TransferMessage(from Controller, to Controller, size uint32, message CoherenceMessage) {
@@ -233,7 +232,7 @@ func (memoryHierarchy *BaseMemoryHierarchy) DumpPendingFlowTree() {
 	for _, pendingFlow := range memoryHierarchy.pendingFlows {
 		simutil.PrintNode(
 			pendingFlow,
-			func(node interface{}) interface{}{
+			func(node interface{}) interface{} {
 				var cacheCoherenceFlow = node.(CacheCoherenceFlow)
 
 				if cacheCoherenceFlow.Completed() {
@@ -242,7 +241,7 @@ func (memoryHierarchy *BaseMemoryHierarchy) DumpPendingFlowTree() {
 					return fmt.Sprintf("%s -> created at %d", reflect.TypeOf(cacheCoherenceFlow), cacheCoherenceFlow.BeginCycle())
 				}
 			},
-			func(node interface{}) []interface{}{
+			func(node interface{}) []interface{} {
 				var cacheCoherenceFlow = node.(CacheCoherenceFlow)
 
 				var children []interface{}
