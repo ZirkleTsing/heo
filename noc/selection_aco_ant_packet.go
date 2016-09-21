@@ -7,7 +7,7 @@ type AntPacket struct {
 
 func NewAntPacket(network *Network, src int, dest int, size int, onCompletedCallback func(), forward bool) *AntPacket {
 	var packet = &AntPacket{
-		DataPacket:NewDataPacket(network, src, dest, size, forward, onCompletedCallback),
+		DataPacket:NewDataPacket(network, src, dest, size, false, onCompletedCallback),
 		Forward:forward,
 	}
 
@@ -24,7 +24,7 @@ func (packet *AntPacket) HandleDestArrived(inputVirtualChannel *InputVirtualChan
 		selectionAlgorithm.UpdatePheromoneTable(packet, inputVirtualChannel)
 	}
 
-	packet.EndCycle = inputVirtualChannel.InputPort.Router.Node.Network.Driver.CycleAccurateEventQueue().CurrentCycle
+	packet.endCycle = inputVirtualChannel.InputPort.Router.Node.Network.Driver.CycleAccurateEventQueue().CurrentCycle
 
 	inputVirtualChannel.InputPort.Router.Node.Network.LogPacketTransmitted(packet)
 
@@ -39,7 +39,7 @@ func (packet *AntPacket) DoRouteComputation(inputVirtualChannel *InputVirtualCha
 	if packet.Forward {
 		return packet.DataPacket.DoRouteComputation(inputVirtualChannel)
 	} else {
-		if inputVirtualChannel.InputPort.Router.Node.Id != packet.Src {
+		if inputVirtualChannel.InputPort.Router.Node.Id != packet.src {
 			selectionAlgorithm.UpdatePheromoneTable(packet, inputVirtualChannel)
 		}
 

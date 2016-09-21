@@ -15,8 +15,8 @@ func NewXYRoutingAlgorithm(node *Node) *XYRoutingAlgorithm {
 func (routingAlgorithm *XYRoutingAlgorithm) NextHop(packet Packet, parent int) []Direction {
 	var directions []Direction
 
-	var destX = routingAlgorithm.Node.Network.GetX(packet.GetDest())
-	var destY = routingAlgorithm.Node.Network.GetY(packet.GetDest())
+	var destX = routingAlgorithm.Node.Network.GetX(packet.Dest())
+	var destY = routingAlgorithm.Node.Network.GetY(packet.Dest())
 
 	var x = routingAlgorithm.Node.X
 	var y = routingAlgorithm.Node.Y

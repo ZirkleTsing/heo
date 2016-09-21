@@ -112,7 +112,7 @@ func (network *Network) AddTrafficGenerator(trafficGenerator TrafficGenerator) {
 }
 
 func (network *Network) Receive(packet Packet) bool {
-	if !network.Nodes[packet.GetSrc()].Router.InjectPacket(packet) {
+	if !network.Nodes[packet.Src()].Router.InjectPacket(packet) {
 		network.Driver.CycleAccurateEventQueue().Schedule(func() {
 			network.Receive(packet)
 		}, 1)
@@ -127,7 +127,7 @@ func (network *Network) Receive(packet Packet) bool {
 func (network *Network) LogPacketReceived(packet Packet) {
 	network.NumPacketsReceived++
 
-	if packet.GetHasPayload() {
+	if packet.HasPayload() {
 		network.NumPayloadPacketsReceived++
 	}
 }
@@ -135,14 +135,14 @@ func (network *Network) LogPacketReceived(packet Packet) {
 func (network *Network) LogPacketTransmitted(packet Packet) {
 	network.NumPacketsTransmitted++
 
-	if packet.GetHasPayload() {
+	if packet.HasPayload() {
 		network.NumPayloadPacketsTransmitted++
 	}
 
 	network.totalPacketDelays += int64(Delay(packet))
 	network.totalPacketHops += int64(Hops(packet))
 
-	if packet.GetHasPayload() {
+	if packet.HasPayload() {
 		network.totalPayloadPacketDelays += int64(Delay(packet))
 		network.totalPayloadPacketHops += int64(Hops(packet))
 	}
@@ -150,7 +150,7 @@ func (network *Network) LogPacketTransmitted(packet Packet) {
 	network.MaxPacketDelay = int(math.Max(float64(network.MaxPacketDelay), float64(Delay(packet))))
 	network.MaxPacketHops = int(math.Max(float64(network.MaxPacketHops), float64(Hops(packet))))
 
-	if packet.GetHasPayload() {
+	if packet.HasPayload() {
 		network.MaxPayloadPacketDelay = int(math.Max(float64(network.MaxPayloadPacketDelay), float64(Delay(packet))))
 		network.MaxPayloadPacketHops = int(math.Max(float64(network.MaxPayloadPacketHops), float64(Hops(packet))))
 	}

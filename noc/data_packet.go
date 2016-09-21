@@ -6,33 +6,33 @@ import (
 )
 
 type DataPacket struct {
-	Network              *Network
-	Id                   int64
-	BeginCycle, EndCycle int64
-	Src, Dest            int
-	Size                 int
-	OnCompletedCallback  func()
-	Memory               []*PacketMemoryEntry
-	Flits                []*Flit
-	HasPayload           bool
+	network              *Network
+	id                   int64
+	beginCycle, endCycle int64
+	src, dest            int
+	size                 int
+	onCompletedCallback  func()
+	memory               []*PacketMemoryEntry
+	flits                []*Flit
+	hasPayload           bool
 }
 
 func NewDataPacket(network *Network, src int, dest int, size int, hasPayload bool, onCompletedCallback func()) *DataPacket {
 	var packet = &DataPacket{
-		Network:network,
-		Id:network.CurrentPacketId,
-		BeginCycle:network.Driver.CycleAccurateEventQueue().CurrentCycle,
-		EndCycle:-1,
-		Src:src,
-		Dest:dest,
-		Size:size,
-		OnCompletedCallback:onCompletedCallback,
-		HasPayload:hasPayload,
+		network:network,
+		id:network.CurrentPacketId,
+		beginCycle:network.Driver.CycleAccurateEventQueue().CurrentCycle,
+		endCycle:-1,
+		src:src,
+		dest:dest,
+		size:size,
+		onCompletedCallback:onCompletedCallback,
+		hasPayload:hasPayload,
 	}
 
 	network.CurrentPacketId++
 
-	var numFlits = int(math.Ceil(float64(packet.Size) / float64(network.Config.LinkWidth)))
+	var numFlits = int(math.Ceil(float64(packet.size) / float64(network.Config.LinkWidth)))
 	if numFlits > network.Config.MaxInputBufferSize {
 		panic(fmt.Sprintf("Number of flits (%d) in a packet cannot be greater than max input buffer size (%d)", numFlits, network.Config.MaxInputBufferSize))
 	}
@@ -40,75 +40,75 @@ func NewDataPacket(network *Network, src int, dest int, size int, hasPayload boo
 	return packet
 }
 
-func (packet *DataPacket) GetNetwork() *Network {
-	return packet.Network
+func (packet *DataPacket) Network() *Network {
+	return packet.network
 }
 
-func (packet *DataPacket) GetId() int64 {
-	return packet.Id
+func (packet *DataPacket) Id() int64 {
+	return packet.id
 }
 
-func (packet *DataPacket) GetBeginCycle() int64 {
-	return packet.BeginCycle
+func (packet *DataPacket) BeginCycle() int64 {
+	return packet.beginCycle
 }
 
-func (packet *DataPacket) GetEndCycle() int64 {
-	return packet.EndCycle
+func (packet *DataPacket) EndCycle() int64 {
+	return packet.endCycle
 }
 
 func (packet *DataPacket) SetEndCycle(endCycle int64) {
-	packet.EndCycle = endCycle
+	packet.endCycle = endCycle
 }
 
-func (packet *DataPacket) GetSrc() int {
-	return packet.Src
+func (packet *DataPacket) Src() int {
+	return packet.src
 }
 
-func (packet *DataPacket) GetDest() int {
-	return packet.Dest
+func (packet *DataPacket) Dest() int {
+	return packet.dest
 }
 
-func (packet *DataPacket) GetSize() int {
-	return packet.Size
+func (packet *DataPacket) Size() int {
+	return packet.size
 }
 
-func (packet *DataPacket) GetOnCompletedCallback() func() {
-	return packet.OnCompletedCallback
+func (packet *DataPacket) OnCompletedCallback() func() {
+	return packet.onCompletedCallback
 }
 
-func (packet *DataPacket) GetMemory() []*PacketMemoryEntry {
-	return packet.Memory
+func (packet *DataPacket) Memory() []*PacketMemoryEntry {
+	return packet.memory
 }
 
-func (packet *DataPacket) GetFlits() []*Flit {
-	return packet.Flits
+func (packet *DataPacket) Flits() []*Flit {
+	return packet.flits
 }
 
 func (packet *DataPacket) SetFlits(flits []*Flit) {
-	packet.Flits = flits
+	packet.flits = flits
 }
 
-func (packet *DataPacket) GetHasPayload() bool {
-	return packet.HasPayload
+func (packet *DataPacket) HasPayload() bool {
+	return packet.hasPayload
 }
 
 func (packet *DataPacket) HandleDestArrived(inputVirtualChannel *InputVirtualChannel) {
 	packet.Memorize(inputVirtualChannel.InputPort.Router.Node)
 
-	packet.EndCycle = inputVirtualChannel.InputPort.Router.Node.Network.Driver.CycleAccurateEventQueue().CurrentCycle
+	packet.endCycle = inputVirtualChannel.InputPort.Router.Node.Network.Driver.CycleAccurateEventQueue().CurrentCycle
 
 	inputVirtualChannel.InputPort.Router.Node.Network.LogPacketTransmitted(packet)
 
-	if packet.OnCompletedCallback != nil {
-		packet.OnCompletedCallback()
+	if packet.onCompletedCallback != nil {
+		packet.onCompletedCallback()
 	}
 }
 
 func (packet *DataPacket) DoRouteComputation(inputVirtualChannel *InputVirtualChannel) Direction {
 	var parent = -1
 
-	if len(packet.Memory) > 0 {
-		parent = packet.Memory[len(packet.Memory) - 1].NodeId
+	if len(packet.memory) > 0 {
+		parent = packet.memory[len(packet.memory) - 1].NodeId
 	}
 
 	packet.Memorize(inputVirtualChannel.InputPort.Router.Node)
@@ -119,21 +119,21 @@ func (packet *DataPacket) DoRouteComputation(inputVirtualChannel *InputVirtualCh
 }
 
 func (packet *DataPacket) Memorize(node *Node) {
-	for _, entry := range packet.Memory {
+	for _, entry := range packet.memory {
 		if entry.NodeId == node.Id {
-			panic(fmt.Sprintf("packet#%d(src=%d, dest=%d): %d", packet.Id, packet.Src, packet.Dest, node.Id))
+			panic(fmt.Sprintf("packet#%d(src=%d, dest=%d): %d", packet.id, packet.src, packet.dest, node.Id))
 		}
 	}
 
-	packet.Memory = append(packet.Memory, &PacketMemoryEntry{
+	packet.memory = append(packet.memory, &PacketMemoryEntry{
 		NodeId:node.Id,
-		Timestamp:packet.Network.Driver.CycleAccurateEventQueue().CurrentCycle,
+		Timestamp:packet.network.Driver.CycleAccurateEventQueue().CurrentCycle,
 	})
 }
 
 func (packet *DataPacket) DumpMemory() {
-	for i, entry := range packet.Memory {
-		fmt.Printf("packet#%d.memory[%d]=%d\n", packet.Id, i, entry.NodeId)
+	for i, entry := range packet.memory {
+		fmt.Printf("packet#%d.memory[%d]=%d\n", packet.id, i, entry.NodeId)
 	}
 
 	fmt.Println()

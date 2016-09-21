@@ -18,10 +18,10 @@ func (routingAlgorithm *OddEvenRoutingAlgorithm) NextHop(packet Packet, parent i
 	var c0 = routingAlgorithm.Node.X
 	var c1 = routingAlgorithm.Node.Y
 
-	var s0 = routingAlgorithm.Node.Network.GetX(packet.GetSrc())
+	var s0 = routingAlgorithm.Node.Network.GetX(packet.Src())
 
-	var d0 = routingAlgorithm.Node.Network.GetX(packet.GetDest())
-	var d1 = routingAlgorithm.Node.Network.GetY(packet.GetDest())
+	var d0 = routingAlgorithm.Node.Network.GetX(packet.Dest())
+	var d1 = routingAlgorithm.Node.Network.GetY(packet.Dest())
 
 	var e0 = d0 - c0
 	var e1 = -(d1 - c1)

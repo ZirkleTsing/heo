@@ -26,9 +26,9 @@ func NewACOSelectionAlgorithm(node *Node) *ACOSelectionAlgorithm {
 }
 
 func (selectionAlgorithm *ACOSelectionAlgorithm) CreateAndSendBackwardAntPacket(packet *AntPacket) {
-	var newPacket = NewAntPacket(packet.Network, packet.Dest, packet.Src, selectionAlgorithm.Node.Network.Config.AntPacketSize, func() {}, false)
+	var newPacket = NewAntPacket(packet.Network(), packet.Dest(), packet.Src(), selectionAlgorithm.Node.Network.Config.AntPacketSize, func() {}, false)
 
-	newPacket.Memory = packet.Memory
+	newPacket.memory = packet.memory
 
 	selectionAlgorithm.Node.Network.Driver.CycleAccurateEventQueue().Schedule(func() {
 		selectionAlgorithm.Node.Network.Receive(newPacket)
@@ -38,14 +38,14 @@ func (selectionAlgorithm *ACOSelectionAlgorithm) CreateAndSendBackwardAntPacket(
 func (selectionAlgorithm *ACOSelectionAlgorithm) BackwardAntPacket(packet *AntPacket) Direction {
 	var i int
 
-	for i = len(packet.Memory) - 1; i > 0; i-- {
-		var entry = packet.Memory[i]
+	for i = len(packet.memory) - 1; i > 0; i-- {
+		var entry = packet.memory[i]
 		if entry.NodeId == selectionAlgorithm.Node.Id {
 			break
 		}
 	}
 
-	var prev = packet.Memory[i - 1].NodeId
+	var prev = packet.memory[i - 1].NodeId
 
 	for direction, neighbor := range selectionAlgorithm.Node.Neighbors {
 		if neighbor == prev {
@@ -58,15 +58,15 @@ func (selectionAlgorithm *ACOSelectionAlgorithm) BackwardAntPacket(packet *AntPa
 
 func (selectionAlgorithm *ACOSelectionAlgorithm) UpdatePheromoneTable(packet *AntPacket, inputVirtualChannel *InputVirtualChannel) {
 	var i int
-	for i = 0; i < len(packet.Memory); i++ {
-		var entry = packet.Memory[i]
+	for i = 0; i < len(packet.memory); i++ {
+		var entry = packet.memory[i]
 		if entry.NodeId == selectionAlgorithm.Node.Id {
 			break
 		}
 	}
 
-	for j := i + 1; j < len(packet.Memory); j++ {
-		var entry = packet.Memory[j]
+	for j := i + 1; j < len(packet.memory); j++ {
+		var entry = packet.memory[j]
 		var dest = entry.NodeId
 		selectionAlgorithm.PheromoneTable.Update(dest, inputVirtualChannel.InputPort.Direction)
 	}
@@ -79,7 +79,7 @@ func (selectionAlgorithm *ACOSelectionAlgorithm) Select(packet Packet, ivc int, 
 	for _, direction := range directions {
 		var neighbor = selectionAlgorithm.Node.Neighbors[direction]
 		var neighborRouter = selectionAlgorithm.Node.Network.Nodes[neighbor].Router
-		var pheromone = selectionAlgorithm.PheromoneTable.Pheromones[packet.GetDest()][direction]
+		var pheromone = selectionAlgorithm.PheromoneTable.Pheromones[packet.Dest()][direction]
 		var freeSlots = neighborRouter.FreeSlots(direction.GetReflexDirection(), ivc)
 
 		var acoSelectionAlpha = selectionAlgorithm.Node.Network.Config.AcoSelectionAlpha

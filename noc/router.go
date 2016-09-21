@@ -184,7 +184,7 @@ func (router *Router) stageRouteComputation() {
 			var flit = inputVirtualChannel.InputBuffer.Peek()
 
 			if flit != nil && flit.Head && flit.GetState() == FLIT_STATE_INPUT_BUFFER {
-				if flit.Packet.GetDest() == router.Node.Id {
+				if flit.Packet.Dest() == router.Node.Id {
 					inputVirtualChannel.Route = DIRECTION_LOCAL
 				} else {
 					inputVirtualChannel.Route = flit.Packet.DoRouteComputation(inputVirtualChannel)
@@ -207,7 +207,7 @@ func (router *Router) localPacketInjection() {
 
 			var packet = router.InjectionBuffer.Peek()
 
-			var numFlits = int(math.Ceil(float64(packet.GetSize()) / float64(router.Node.Network.Config.LinkWidth)))
+			var numFlits = int(math.Ceil(float64(packet.Size()) / float64(router.Node.Network.Config.LinkWidth)))
 
 			var inputBuffer = router.InputPorts[DIRECTION_LOCAL].VirtualChannels[ivc].InputBuffer
 
