@@ -10,6 +10,9 @@ import (
 
 type CPUExperiment struct {
 	CPUConfig               *CPUConfig
+	UncoreConfig            *uncore.UncoreConfig
+	NocConfig               *noc.NoCConfig
+
 	Stats                   simutil.Stats
 	statMap                 map[string]interface{}
 
@@ -31,20 +34,16 @@ func NewCPUExperiment(config *CPUConfig) *CPUExperiment {
 		blockingEventDispatcher:simutil.NewBlockingEventDispatcher(),
 	}
 
+	experiment.UncoreConfig = uncore.NewUncoreConfig(config.NumCores, config.NumThreadsPerCore)
+	experiment.NocConfig = noc.NewNoCConfig(config.OutputDirectory, -1, -1, -1, false)
+
 	experiment.Processor = NewProcessor(experiment)
 	experiment.Kernel = NewKernel(experiment)
 
-	var uncoreConfig = uncore.NewUncoreConfig()
-	uncoreConfig.NumCores = config.NumCores
-	uncoreConfig.NumThreadsPerCore = config.NumThreadsPerCore
-
-	var nocConfig = noc.NewNoCConfig(config.OutputDirectory, -1, -1, -1, false)
-
-	experiment.MemoryHierarchy = uncore.NewBaseMemoryHierarchy(experiment, uncoreConfig, nocConfig)
-
-	experiment.OoO = NewOoO(experiment)
-
 	experiment.Processor.UpdateContextToThreadAssignments()
+
+	experiment.MemoryHierarchy = uncore.NewBaseMemoryHierarchy(experiment, experiment.UncoreConfig, experiment.NocConfig)
+	experiment.OoO = NewOoO(experiment)
 
 	return experiment
 }
@@ -66,9 +65,26 @@ func (experiment *CPUExperiment) Run(skipIfStatsFileExists bool) {
 
 	experiment.BeginTime = time.Now()
 
-	//TODO: to be called based on config
-	//experiment.DoFastForward()
-	//experiment.DoWarmup()
+	experiment.DoFastForward()
+
+	experiment.cycleAccurateEventQueue.CurrentCycle = 0
+
+	for _, core := range experiment.Processor.Cores {
+		for _, thread := range core.Threads() {
+			thread.ResetNumDynamicInsts()
+		}
+	}
+
+	experiment.DoWarmup()
+
+	experiment.cycleAccurateEventQueue.CurrentCycle = 0
+
+	for _, core := range experiment.Processor.Cores {
+		for _, thread := range core.Threads() {
+			thread.ResetNumDynamicInsts()
+		}
+	}
+
 	experiment.DoMeasurement()
 
 	experiment.EndTime = time.Now()
@@ -82,7 +98,15 @@ func (experiment *CPUExperiment) Run(skipIfStatsFileExists bool) {
 	experiment.DumpStats()
 }
 
-func (experiment *CPUExperiment) canAdvanceOneCycle() bool {
+func (experiment *CPUExperiment) canDoFastForwardOneCycle() bool {
+	return experiment.Processor.Cores[0].Threads()[0].NumDynamicInsts() < experiment.CPUConfig.FastForwardDynamicInsts
+}
+
+func (experiment *CPUExperiment) canDoWarmupOneCycle() bool {
+	return experiment.Processor.Cores[0].Threads()[0].NumDynamicInsts() < experiment.CPUConfig.WarmupDynamicInsts
+}
+
+func (experiment *CPUExperiment) canDoMeasurementOneCycle() bool {
 	return experiment.CPUConfig.MaxDynamicInsts == -1 ||
 		experiment.Processor.Cores[0].Threads()[0].NumDynamicInsts() < experiment.CPUConfig.MaxDynamicInsts
 }
@@ -95,7 +119,7 @@ func (experiment *CPUExperiment) advanceOneCycle() {
 }
 
 func (experiment *CPUExperiment) DoFastForward() {
-	for len(experiment.Kernel.Contexts) > 0 && experiment.canAdvanceOneCycle() {
+	for len(experiment.Kernel.Contexts) > 0 && experiment.canDoFastForwardOneCycle() {
 		for _, core := range experiment.Processor.Cores {
 			core.FastForwardOneCycle()
 		}
@@ -105,7 +129,7 @@ func (experiment *CPUExperiment) DoFastForward() {
 }
 
 func (experiment *CPUExperiment) DoWarmup() {
-	for len(experiment.Kernel.Contexts) > 0 && experiment.canAdvanceOneCycle() {
+	for len(experiment.Kernel.Contexts) > 0 && experiment.canDoWarmupOneCycle() {
 		for _, core := range experiment.Processor.Cores {
 			core.WarmupOneCycle()
 		}
@@ -115,7 +139,7 @@ func (experiment *CPUExperiment) DoWarmup() {
 }
 
 func (experiment *CPUExperiment) DoMeasurement() {
-	for len(experiment.Kernel.Contexts) > 0 && experiment.canAdvanceOneCycle() {
+	for len(experiment.Kernel.Contexts) > 0 && experiment.canDoMeasurementOneCycle() {
 		for _, core := range experiment.Processor.Cores {
 			core.(*OoOCore).MeasurementOneCycle()
 		}

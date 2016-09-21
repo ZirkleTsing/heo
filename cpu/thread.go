@@ -18,6 +18,8 @@ type Thread interface {
 	WarmupOneCycle()
 
 	NumDynamicInsts() int64
+	ResetNumDynamicInsts()
+
 	InstructionsPerCycle() float64
 	CyclesPerInstructions() float64
 }
@@ -97,6 +99,10 @@ func (thread *BaseThread) NumDynamicInsts() int64 {
 	return thread.numDynamicInsts
 }
 
+func (thread *BaseThread) ResetNumDynamicInsts() {
+	thread.numDynamicInsts = 0
+}
+
 func (thread *BaseThread) FastForwardOneCycle() {
 	if thread.Context() != nil && thread.Context().State == ContextState_RUNNING {
 		var staticInst *StaticInst
@@ -119,6 +125,9 @@ func (thread *BaseThread) FastForwardOneCycle() {
 }
 
 func (thread *BaseThread) InstructionsPerCycle() float64 {
+	if thread.Core().Processor().Experiment.CycleAccurateEventQueue().CurrentCycle == 0 {
+		return float64(0)
+	}
 	return float64(thread.numDynamicInsts) / float64(thread.Core().Processor().Experiment.CycleAccurateEventQueue().CurrentCycle)
 }
 

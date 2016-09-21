@@ -47,10 +47,10 @@ type UncoreConfig struct {
 	MemoryControllerLatency  uint32
 }
 
-func NewUncoreConfig() *UncoreConfig {
+func NewUncoreConfig(numCores int32, numThreadsPerCore int32) *UncoreConfig {
 	var uncoreConfig = &UncoreConfig{
-		NumCores:2,
-		NumThreadsPerCore:2,
+		NumCores:numCores,
+		NumThreadsPerCore:numThreadsPerCore,
 
 		TlbSize:32768,
 		TlbAssoc:4,

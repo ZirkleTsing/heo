@@ -97,6 +97,10 @@ func (processor *Processor) NumDynamicInsts() int64 {
 }
 
 func (processor *Processor) InstructionsPerCycle() float64 {
+	if processor.Experiment.CycleAccurateEventQueue().CurrentCycle == 0 {
+		return float64(0)
+	}
+
 	return float64(processor.NumDynamicInsts()) / float64(processor.Experiment.CycleAccurateEventQueue().CurrentCycle)
 }
 

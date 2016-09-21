@@ -8,6 +8,8 @@
     }
   ],
   "MaxDynamicInsts": -1,
+  "FastForwardDynamicInsts": 500000,
+  "WarmupDynamicInsts": 0,
   "NumCores": 2,
   "NumThreadsPerCore": 2,
   "PhysicalRegisterFileSize": 128,

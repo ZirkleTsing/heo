@@ -374,6 +374,10 @@ func (experiment *CPUExperiment) DumpStats() {
 		})
 	}
 
+	for _, stat := range experiment.Stats {
+		fmt.Printf("%+v: %+v\n", stat.Key, stat.Value)
+	}
+
 	simutil.WriteJsonFile(experiment.Stats, experiment.CPUConfig.OutputDirectory, simutil.STATS_JSON_FILE_NAME)
 }
 

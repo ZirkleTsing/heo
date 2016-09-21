@@ -177,6 +177,10 @@ func (network *Network) LogFlitPerStateDelay(state FlitState, delay int) {
 }
 
 func (network *Network) Throughput() float64 {
+	if network.Driver.CycleAccurateEventQueue().CurrentCycle == 0 {
+		return float64(0)
+	}
+
 	return float64(network.NumPacketsTransmitted) / float64(network.Driver.CycleAccurateEventQueue().CurrentCycle) / float64(network.NumNodes)
 }
 
@@ -197,6 +201,10 @@ func (network *Network) AveragePacketHops() float64 {
 }
 
 func (network *Network) PayloadThroughput() float64 {
+	if network.Driver.CycleAccurateEventQueue().CurrentCycle == 0 {
+		return float64(0)
+	}
+
 	return float64(network.NumPayloadPacketsTransmitted) / float64(network.Driver.CycleAccurateEventQueue().CurrentCycle) / float64(network.NumNodes)
 }
 
