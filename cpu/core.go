@@ -41,8 +41,6 @@ type Core interface {
 	Load(thread Thread, virtualAddress uint32, virtualPc uint32, onCompletedCallback func())
 	Store(thread Thread, virtualAddress uint32, virtualPc uint32, onCompletedCallback func())
 
-	WarmupOneCycle()
-
 	RemoveFromQueues(entryToRemove GeneralReorderBufferEntry)
 
 	NumDynamicInsts() int64

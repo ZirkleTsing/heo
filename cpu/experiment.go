@@ -79,13 +79,6 @@ func (experiment *CPUExperiment) Run(skipIfStatsFileExists bool) {
 
 	experiment.SwapProcessor()
 
-	experiment.DoWarmup()
-
-	experiment.blockingEventDispatcher = simutil.NewBlockingEventDispatcher()
-	experiment.cycleAccurateEventQueue = simutil.NewCycleAccurateEventQueue()
-
-	experiment.SwapProcessor()
-
 	experiment.DoMeasurement()
 
 	experiment.EndTime = time.Now()
@@ -99,10 +92,6 @@ func (experiment *CPUExperiment) Run(skipIfStatsFileExists bool) {
 
 func (experiment *CPUExperiment) canDoFastForwardOneCycle() bool {
 	return experiment.Processor.Cores[0].Threads()[0].NumDynamicInsts() < experiment.CPUConfig.FastForwardDynamicInsts
-}
-
-func (experiment *CPUExperiment) canDoWarmupOneCycle() bool {
-	return experiment.Processor.Cores[0].Threads()[0].NumDynamicInsts() < experiment.CPUConfig.WarmupDynamicInsts
 }
 
 func (experiment *CPUExperiment) canDoMeasurementOneCycle() bool {
@@ -121,16 +110,6 @@ func (experiment *CPUExperiment) DoFastForward() {
 	for len(experiment.Kernel.Contexts) > 0 && experiment.canDoFastForwardOneCycle() {
 		for _, core := range experiment.Processor.Cores {
 			core.FastForwardOneCycle()
-		}
-
-		experiment.advanceOneCycle()
-	}
-}
-
-func (experiment *CPUExperiment) DoWarmup() {
-	for len(experiment.Kernel.Contexts) > 0 && experiment.canDoWarmupOneCycle() {
-		for _, core := range experiment.Processor.Cores {
-			core.WarmupOneCycle()
 		}
 
 		experiment.advanceOneCycle()

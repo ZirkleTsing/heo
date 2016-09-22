@@ -195,9 +195,3 @@ func (core *MemoryHierarchyCore) Store(thread Thread, virtualAddress uint32, vir
 
 	//TODO
 }
-
-func (core *MemoryHierarchyCore) WarmupOneCycle() {
-	for _, thread := range core.Threads() {
-		thread.WarmupOneCycle()
-	}
-}

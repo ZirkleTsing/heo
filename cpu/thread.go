@@ -15,7 +15,6 @@ type Thread interface {
 
 	Itlb() *uncore.TranslationLookasideBuffer
 	Dtlb() *uncore.TranslationLookasideBuffer
-	WarmupOneCycle()
 
 	NumDynamicInsts() int64
 	ResetNumDynamicInsts()

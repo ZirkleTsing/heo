@@ -14,7 +14,6 @@ func main() {
 	config.NumThreadsPerCore = 2
 	config.MaxDynamicInsts = -1
 	config.FastForwardDynamicInsts = 1000
-	config.WarmupDynamicInsts = 1000
 
 	var experiment = cpu.NewCPUExperiment(config)
 

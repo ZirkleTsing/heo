@@ -10,7 +10,6 @@ type CPUConfig struct {
 	MaxDynamicInsts           int64
 
 	FastForwardDynamicInsts   int64
-	WarmupDynamicInsts        int64
 
 	NumCores                  int32
 	NumThreadsPerCore         int32
@@ -40,7 +39,6 @@ func NewCPUConfig(outputDirectory string) *CPUConfig {
 		MaxDynamicInsts:-1,
 
 		FastForwardDynamicInsts:0,
-		WarmupDynamicInsts:0,
 
 		NumCores:2,
 		NumThreadsPerCore:2,
