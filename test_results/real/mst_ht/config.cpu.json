@@ -4,10 +4,10 @@
     {
       "ThreadId": 0,
       "Executable": "/home/itecgo/Projects/Archimulator/benchmarks/Olden_Custom1/mst/ht/mst.mips",
-      "Arguments": "400"
+      "Arguments": "800"
     }
   ],
-  "MaxDynamicInsts": 1,
+  "MaxDynamicInsts": 10000000,
   "FastForwardDynamicInsts": 100000000,
   "NumCores": 2,
   "NumThreadsPerCore": 2,
