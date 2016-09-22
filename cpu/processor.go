@@ -4,7 +4,6 @@ type Processor struct {
 	Experiment              *CPUExperiment
 	Cores                   []Core
 	ContextToThreadMappings map[*Context]Thread
-	Mnemonics               []*Mnemonic
 }
 
 func NewProcessor(experiment *CPUExperiment) *Processor {
@@ -12,8 +11,6 @@ func NewProcessor(experiment *CPUExperiment) *Processor {
 		Experiment:experiment,
 		ContextToThreadMappings:make(map[*Context]Thread),
 	}
-
-	processor.addMnemonics()
 
 	for i := int32(0); i < experiment.CPUConfig.NumCores; i++ {
 		var core = NewOoOCore(processor, i)

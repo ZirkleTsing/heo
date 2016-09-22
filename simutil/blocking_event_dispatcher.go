@@ -9,27 +9,27 @@ type BlockingEventDispatcher struct {
 }
 
 func NewBlockingEventDispatcher() *BlockingEventDispatcher {
-	var blockingEventDispatcher = &BlockingEventDispatcher{
+	var dispatcher = &BlockingEventDispatcher{
 		Listeners:make(map[reflect.Type]([](func(event interface{})))),
 	}
 
-	return blockingEventDispatcher
+	return dispatcher
 }
 
-func (blockingEventDispatcher *BlockingEventDispatcher) Dispatch(event interface{}) {
+func (dispatcher *BlockingEventDispatcher) Dispatch(event interface{}) {
 	var t = reflect.TypeOf(event)
 
-	if listeners, ok := blockingEventDispatcher.Listeners[t]; ok {
+	if listeners, ok := dispatcher.Listeners[t]; ok {
 		for _, listener := range listeners {
 			listener(event)
 		}
 	}
 }
 
-func (blockingEventDispatcher *BlockingEventDispatcher) AddListener(t reflect.Type, listener func(event interface{})) {
-	if _, ok := blockingEventDispatcher.Listeners[t]; !ok {
-		blockingEventDispatcher.Listeners[t] = make([](func(event interface{})), 0)
+func (dispatcher *BlockingEventDispatcher) AddListener(t reflect.Type, listener func(event interface{})) {
+	if _, ok := dispatcher.Listeners[t]; !ok {
+		dispatcher.Listeners[t] = make([](func(event interface{})), 0)
 	}
 
-	blockingEventDispatcher.Listeners[t] = append(blockingEventDispatcher.Listeners[t], listener)
+	dispatcher.Listeners[t] = append(dispatcher.Listeners[t], listener)
 }

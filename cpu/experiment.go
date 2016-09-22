@@ -20,6 +20,8 @@ type CPUExperiment struct {
 	cycleAccurateEventQueue *simutil.CycleAccurateEventQueue
 	blockingEventDispatcher *simutil.BlockingEventDispatcher
 
+	ISA                     *ISA
+
 	Kernel                  *Kernel
 	Processor               *Processor
 
@@ -30,22 +32,27 @@ type CPUExperiment struct {
 func NewCPUExperiment(config *CPUConfig) *CPUExperiment {
 	var experiment = &CPUExperiment{
 		CPUConfig:config,
+		UncoreConfig:uncore.NewUncoreConfig(config.NumCores, config.NumThreadsPerCore),
+		NocConfig:noc.NewNoCConfig(config.OutputDirectory, -1, -1, -1, false),
 		cycleAccurateEventQueue:simutil.NewCycleAccurateEventQueue(),
 		blockingEventDispatcher:simutil.NewBlockingEventDispatcher(),
 	}
 
-	experiment.UncoreConfig = uncore.NewUncoreConfig(config.NumCores, config.NumThreadsPerCore)
-	experiment.NocConfig = noc.NewNoCConfig(config.OutputDirectory, -1, -1, -1, false)
+	experiment.ISA = NewISA()
 
-	experiment.Processor = NewProcessor(experiment)
 	experiment.Kernel = NewKernel(experiment)
 
+	experiment.SwapProcessor()
+
+	return experiment
+}
+
+func (experiment *CPUExperiment) SwapProcessor() {
+	experiment.Processor = NewProcessor(experiment)
 	experiment.Processor.UpdateContextToThreadAssignments()
 
 	experiment.MemoryHierarchy = uncore.NewBaseMemoryHierarchy(experiment, experiment.UncoreConfig, experiment.NocConfig)
 	experiment.OoO = NewOoO(experiment)
-
-	return experiment
 }
 
 func (experiment *CPUExperiment) CycleAccurateEventQueue() *simutil.CycleAccurateEventQueue {
@@ -67,32 +74,24 @@ func (experiment *CPUExperiment) Run(skipIfStatsFileExists bool) {
 
 	experiment.DoFastForward()
 
-	experiment.cycleAccurateEventQueue.CurrentCycle = 0
+	experiment.blockingEventDispatcher = simutil.NewBlockingEventDispatcher()
+	experiment.cycleAccurateEventQueue = simutil.NewCycleAccurateEventQueue()
 
-	for _, core := range experiment.Processor.Cores {
-		for _, thread := range core.Threads() {
-			thread.ResetNumDynamicInsts()
-		}
-	}
+	experiment.SwapProcessor()
 
 	experiment.DoWarmup()
 
-	experiment.cycleAccurateEventQueue.CurrentCycle = 0
+	experiment.blockingEventDispatcher = simutil.NewBlockingEventDispatcher()
+	experiment.cycleAccurateEventQueue = simutil.NewCycleAccurateEventQueue()
 
-	for _, core := range experiment.Processor.Cores {
-		for _, thread := range core.Threads() {
-			thread.ResetNumDynamicInsts()
-		}
-	}
+	experiment.SwapProcessor()
 
 	experiment.DoMeasurement()
 
 	experiment.EndTime = time.Now()
 
 	experiment.CPUConfig.Dump(experiment.CPUConfig.OutputDirectory)
-
 	experiment.MemoryHierarchy.Config().Dump(experiment.CPUConfig.OutputDirectory)
-
 	experiment.MemoryHierarchy.Network().Config.Dump(experiment.CPUConfig.OutputDirectory)
 
 	experiment.DumpStats()

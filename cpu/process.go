@@ -194,7 +194,7 @@ func (process *Process) CloseProgram() {
 }
 
 func (process *Process) decode(machInst MachInst) *StaticInst {
-	for _, mnemonic := range process.Kernel.Experiment.Processor.Mnemonics {
+	for _, mnemonic := range process.Kernel.Experiment.ISA.Mnemonics {
 		if (uint32(machInst) & mnemonic.Mask) == mnemonic.Bits && (mnemonic.ExtraBitField == nil || machInst.ValueOf(mnemonic.ExtraBitField) == mnemonic.ExtraBitFieldValue) {
 			return NewStaticInst(mnemonic, machInst)
 		}
