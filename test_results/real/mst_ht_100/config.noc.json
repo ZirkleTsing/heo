@@ -5,7 +5,7 @@
   "MaxPackets": -1,
   "DrainPackets": false,
   "Routing": "OddEven",
-  "Selection": "ACO",
+  "Selection": "BufferLevel",
   "MaxInjectionBufferSize": 32,
   "MaxInputBufferSize": 72,
   "NumVirtualChannels": 4,

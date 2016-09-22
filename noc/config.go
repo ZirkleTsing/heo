@@ -98,7 +98,7 @@ func NewNoCConfig(outputDirectory string, numNodes int, maxCycles int64, maxPack
 
 		Routing:ROUTING_ODD_EVEN,
 
-		Selection:SELECTION_ACO,
+		Selection:SELECTION_BUFFER_LEVEL,
 
 		MaxInjectionBufferSize:32,
 

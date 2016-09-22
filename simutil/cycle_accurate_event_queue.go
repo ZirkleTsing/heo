@@ -88,9 +88,5 @@ func (q *CycleAccurateEventQueue) AdvanceOneCycle() {
 		e()
 	}
 
-	if q.CurrentCycle - q.lastEventDispatchedCycle > 1000000 {
-		panic("No events dispatched for 1000000 cycles")
-	}
-
 	q.CurrentCycle++
 }
