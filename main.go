@@ -12,8 +12,8 @@ func main() {
 
 	config.NumCores = 2
 	config.NumThreadsPerCore = 2
-	config.MaxDynamicInsts = -1
-	config.FastForwardDynamicInsts = 1000
+	config.MaxDynamicInsts = 1
+	config.FastForwardDynamicInsts = 100000000
 
 	var experiment = cpu.NewCPUExperiment(config)
 

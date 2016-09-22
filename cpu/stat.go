@@ -6,7 +6,7 @@ import (
 	"github.com/mcai/acogo/noc"
 )
 
-func (experiment *CPUExperiment) DumpStats() {
+func (experiment *CPUExperiment) dumpStats(prefix string) {
 	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "SimulationTime",
 		Value: fmt.Sprintf("%v", experiment.SimulationTime()),
@@ -374,11 +374,12 @@ func (experiment *CPUExperiment) DumpStats() {
 		})
 	}
 
-	for _, stat := range experiment.Stats {
-		fmt.Printf("%+v: %+v\n", stat.Key, stat.Value)
-	}
+	simutil.WriteJsonFile(experiment.Stats, experiment.CPUConfig.OutputDirectory, prefix + "_" + simutil.STATS_JSON_FILE_NAME)
+}
 
-	simutil.WriteJsonFile(experiment.Stats, experiment.CPUConfig.OutputDirectory, simutil.STATS_JSON_FILE_NAME)
+func (experiment *CPUExperiment) clearStats() {
+	experiment.Stats = []simutil.Stat{}
+	experiment.statMap = nil
 }
 
 func (experiment *CPUExperiment) LoadStats() {

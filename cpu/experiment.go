@@ -34,20 +34,23 @@ func NewCPUExperiment(config *CPUConfig) *CPUExperiment {
 		CPUConfig:config,
 		UncoreConfig:uncore.NewUncoreConfig(config.NumCores, config.NumThreadsPerCore),
 		NocConfig:noc.NewNoCConfig(config.OutputDirectory, -1, -1, -1, false),
-		cycleAccurateEventQueue:simutil.NewCycleAccurateEventQueue(),
-		blockingEventDispatcher:simutil.NewBlockingEventDispatcher(),
 	}
 
 	experiment.ISA = NewISA()
 
 	experiment.Kernel = NewKernel(experiment)
 
-	experiment.SwapProcessor()
+	experiment.swapProcessor()
+
+	experiment.Kernel.LoadContexts()
 
 	return experiment
 }
 
-func (experiment *CPUExperiment) SwapProcessor() {
+func (experiment *CPUExperiment) swapProcessor() {
+	experiment.blockingEventDispatcher = simutil.NewBlockingEventDispatcher()
+	experiment.cycleAccurateEventQueue = simutil.NewCycleAccurateEventQueue()
+
 	experiment.Processor = NewProcessor(experiment)
 	experiment.Processor.UpdateContextToThreadAssignments()
 
@@ -70,24 +73,33 @@ func (experiment *CPUExperiment) Run(skipIfStatsFileExists bool) {
 		}
 	}
 
+	experiment.dumpConfigs()
+
 	experiment.BeginTime = time.Now()
 
-	experiment.DoFastForward()
-
-	experiment.blockingEventDispatcher = simutil.NewBlockingEventDispatcher()
-	experiment.cycleAccurateEventQueue = simutil.NewCycleAccurateEventQueue()
-
-	experiment.SwapProcessor()
-
-	experiment.DoMeasurement()
+	experiment.doFastForward()
 
 	experiment.EndTime = time.Now()
 
+	experiment.dumpStats("fastforward")
+
+	experiment.clearStats()
+
+	experiment.swapProcessor()
+
+	experiment.BeginTime = time.Now()
+
+	experiment.doMeasurement()
+
+	experiment.EndTime = time.Now()
+
+	experiment.dumpStats("measurement")
+}
+
+func (experiment *CPUExperiment) dumpConfigs() {
 	experiment.CPUConfig.Dump(experiment.CPUConfig.OutputDirectory)
 	experiment.MemoryHierarchy.Config().Dump(experiment.CPUConfig.OutputDirectory)
 	experiment.MemoryHierarchy.Network().Config.Dump(experiment.CPUConfig.OutputDirectory)
-
-	experiment.DumpStats()
 }
 
 func (experiment *CPUExperiment) canDoFastForwardOneCycle() bool {
@@ -106,7 +118,7 @@ func (experiment *CPUExperiment) advanceOneCycle() {
 	experiment.cycleAccurateEventQueue.AdvanceOneCycle()
 }
 
-func (experiment *CPUExperiment) DoFastForward() {
+func (experiment *CPUExperiment) doFastForward() {
 	for len(experiment.Kernel.Contexts) > 0 && experiment.canDoFastForwardOneCycle() {
 		for _, core := range experiment.Processor.Cores {
 			core.FastForwardOneCycle()
@@ -116,7 +128,7 @@ func (experiment *CPUExperiment) DoFastForward() {
 	}
 }
 
-func (experiment *CPUExperiment) DoMeasurement() {
+func (experiment *CPUExperiment) doMeasurement() {
 	for len(experiment.Kernel.Contexts) > 0 && experiment.canDoMeasurementOneCycle() {
 		for _, core := range experiment.Processor.Cores {
 			core.(*OoOCore).MeasurementOneCycle()

@@ -37,7 +37,11 @@ func NewKernel(experiment *CPUExperiment) *Kernel {
 		kernel.SignalActions = append(kernel.SignalActions, NewSignalAction())
 	}
 
-	for _, contextMapping := range experiment.CPUConfig.ContextMappings {
+	return kernel
+}
+
+func (kernel *Kernel) LoadContexts() {
+	for _, contextMapping := range kernel.Experiment.CPUConfig.ContextMappings {
 		var context = LoadContext(kernel, contextMapping)
 
 		if !kernel.Map(context, func(candidateThreadId int32) bool {
@@ -48,8 +52,6 @@ func NewKernel(experiment *CPUExperiment) *Kernel {
 
 		kernel.Contexts = append(kernel.Contexts, context)
 	}
-
-	return kernel
 }
 
 func (kernel *Kernel) GetProcessFromId(processId int32) *Process {
