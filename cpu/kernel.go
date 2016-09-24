@@ -204,3 +204,6 @@ func (kernel *Kernel) AdvanceOneCycle() {
 		kernel.ProcessSignals()
 	}
 }
+
+func (kernel *Kernel) ResetStats() {
+}

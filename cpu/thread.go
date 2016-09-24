@@ -1,7 +1,6 @@
 package cpu
 
 import (
-	"reflect"
 	"github.com/mcai/acogo/cpu/uncore"
 )
 
@@ -17,10 +16,11 @@ type Thread interface {
 	Dtlb() *uncore.TranslationLookasideBuffer
 
 	NumDynamicInsts() int64
-	ResetNumDynamicInsts()
 
 	InstructionsPerCycle() float64
 	CyclesPerInstructions() float64
+
+	ResetStats()
 }
 
 type BaseThread struct {
@@ -29,9 +29,6 @@ type BaseThread struct {
 	id                    int32
 	context               *Context
 	numDynamicInsts       int64
-
-	ExecutedMnemonicNames map[MnemonicName]int32
-	ExecutedSyscallNames  map[string]int32
 }
 
 func NewBaseThread(core Core, num int32) *BaseThread {
@@ -39,37 +36,7 @@ func NewBaseThread(core Core, num int32) *BaseThread {
 		core:core,
 		num:num,
 		id:core.Num() * core.Processor().Experiment.CPUConfig.NumThreadsPerCore + num,
-		ExecutedMnemonicNames:make(map[MnemonicName]int32),
-		ExecutedSyscallNames:make(map[string]int32),
 	}
-
-	core.Processor().Experiment.BlockingEventDispatcher().AddListener(reflect.TypeOf((*StaticInstExecutedEvent)(nil)), func(event interface{}) {
-		var staticInstExecutedEvent = event.(*StaticInstExecutedEvent)
-
-		if staticInstExecutedEvent.Context == thread.Context() {
-			var mnemonicName = staticInstExecutedEvent.StaticInst.Mnemonic.Name
-
-			if _, ok := thread.ExecutedMnemonicNames[mnemonicName]; !ok {
-				thread.ExecutedMnemonicNames[mnemonicName] = 0
-			}
-
-			thread.ExecutedMnemonicNames[mnemonicName]++
-		}
-	})
-
-	core.Processor().Experiment.BlockingEventDispatcher().AddListener(reflect.TypeOf((*SyscallExecutedEvent)(nil)), func(event interface{}) {
-		var syscallExecutedEvent = event.(*SyscallExecutedEvent)
-
-		if syscallExecutedEvent.Context == thread.Context() {
-			var syscallName = syscallExecutedEvent.SyscallName
-
-			if _, ok := thread.ExecutedSyscallNames[syscallName]; !ok {
-				thread.ExecutedSyscallNames[syscallName] = 0
-			}
-
-			thread.ExecutedSyscallNames[syscallName]++
-		}
-	})
 
 	return thread
 }
@@ -98,7 +65,7 @@ func (thread *BaseThread) NumDynamicInsts() int64 {
 	return thread.numDynamicInsts
 }
 
-func (thread *BaseThread) ResetNumDynamicInsts() {
+func (thread *BaseThread) ResetStats() {
 	thread.numDynamicInsts = 0
 }
 

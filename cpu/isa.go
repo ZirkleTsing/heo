@@ -26,6 +26,9 @@ func NewISA() *ISA {
 	return isa
 }
 
+func (isa *ISA) ResetStats() {
+}
+
 func (isa *ISA) addMnemonic(name MnemonicName, decodeMethod *DecodeMethod, decodeCondition *DecodeCondition, fuOperationType FUOperationType, staticInstType StaticInstType, staticInstFlags []StaticInstFlag, inputDependencies []StaticInstDependency, outputDependencies []StaticInstDependency, execute func(context *Context, machInst MachInst)) {
 	var mnemonic = NewMnemonic(name, decodeMethod, decodeCondition, fuOperationType, staticInstType, staticInstFlags, inputDependencies, outputDependencies, execute)
 

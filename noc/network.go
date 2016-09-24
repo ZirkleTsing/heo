@@ -8,7 +8,6 @@ import (
 
 type NetworkDriver interface {
 	CycleAccurateEventQueue() *simutil.CycleAccurateEventQueue
-	BlockingEventDispatcher() *simutil.BlockingEventDispatcher
 }
 
 type Network struct {

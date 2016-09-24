@@ -1,83 +1,44 @@
 package simutil
 
-type FiniteStateMachineEvent struct {
-	Fsm       *BaseFiniteStateMachine
-	Condition interface{}
-	Params    interface{}
-}
-
-func NewBaseFiniteStateMachineEvent(fsm *BaseFiniteStateMachine, condition interface{}, params interface{}) *FiniteStateMachineEvent {
-	var baseFiniteStateMachineEvent = &FiniteStateMachineEvent{
-		Fsm:fsm,
-		Condition:condition,
-		Params:params,
-	}
-
-	return baseFiniteStateMachineEvent
-}
-
-type EnterStateEvent struct {
-	*FiniteStateMachineEvent
-}
-
-func NewEnterStateEvent(fsm *BaseFiniteStateMachine, condition interface{}, params interface{}) *EnterStateEvent {
-	var enterStateEvent = &EnterStateEvent{
-		FiniteStateMachineEvent:NewBaseFiniteStateMachineEvent(fsm, condition, params),
-	}
-
-	return enterStateEvent
-}
-
-type ExitStateEvent struct {
-	*FiniteStateMachineEvent
-}
-
-func NewExitStateEvent(fsm *BaseFiniteStateMachine, condition interface{}, params interface{}) *ExitStateEvent {
-	var exitStateEvent = &ExitStateEvent{
-		FiniteStateMachineEvent:NewBaseFiniteStateMachineEvent(fsm, condition, params),
-	}
-
-	return exitStateEvent
-}
-
 type FiniteStateMachine interface {
 	State() interface{}
+	PreviousState() interface{}
 	SetState(condition interface{}, params interface{}, state interface{})
 }
 
 type BaseFiniteStateMachine struct {
-	state                   interface{}
-	BlockingEventDispatcher *BlockingEventDispatcher
+	state, previousState    interface{}
 	settingStates           bool
 }
 
 func NewBaseFiniteStateMachine(state interface{}) *BaseFiniteStateMachine {
-	var finiteStateMachine = &BaseFiniteStateMachine{
+	var fsm = &BaseFiniteStateMachine{
 		state:state,
-		BlockingEventDispatcher:NewBlockingEventDispatcher(),
 	}
 
-	return finiteStateMachine
+	return fsm
 }
 
-func (finiteStateMachine *BaseFiniteStateMachine) State() interface{} {
-	return finiteStateMachine.state
+func (fsm *BaseFiniteStateMachine) State() interface{} {
+	return fsm.state
 }
 
-func (finiteStateMachine *BaseFiniteStateMachine) SetState(condition interface{}, params interface{}, state interface{}) {
-	if finiteStateMachine.settingStates {
+func (fsm *BaseFiniteStateMachine) PreviousState() interface{} {
+	return fsm.previousState
+}
+
+func (fsm *BaseFiniteStateMachine) SetState(condition interface{}, params interface{}, state interface{}) {
+	if fsm.settingStates {
 		panic("Impossible")
 	}
 
-	finiteStateMachine.settingStates = true
+	fsm.settingStates = true
 
-	finiteStateMachine.BlockingEventDispatcher.Dispatch(NewExitStateEvent(finiteStateMachine, condition, params))
+	fsm.previousState = fsm.state
 
-	finiteStateMachine.state = state
+	fsm.state = state
 
-	finiteStateMachine.BlockingEventDispatcher.Dispatch(NewEnterStateEvent(finiteStateMachine, condition, params))
-
-	finiteStateMachine.settingStates = false
+	fsm.settingStates = false
 }
 
 type StateTransition struct {

@@ -16,3 +16,6 @@ func NewOoO(driver OoODriver) *OoO {
 
 	return ooo
 }
+
+func (ooo *OoO) ResetStats() {
+}

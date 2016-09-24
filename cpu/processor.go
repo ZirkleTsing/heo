@@ -31,7 +31,9 @@ func (processor *Processor) UpdateContextToThreadAssignments() {
 
 	for _, context := range processor.Experiment.Kernel.Contexts {
 		if context.ThreadId != -1 && processor.ContextToThreadMappings[context] == nil {
-			context.State = ContextState_RUNNING
+			if context.State == ContextState_IDLE {
+				context.State = ContextState_RUNNING
+			}
 
 			var coreNum = context.ThreadId / processor.Experiment.CPUConfig.NumThreadsPerCore
 			var threadNum = context.ThreadId % processor.Experiment.CPUConfig.NumThreadsPerCore
@@ -61,6 +63,18 @@ func (processor *Processor) UpdateContextToThreadAssignments() {
 	processor.Experiment.Kernel.Contexts = contextsToReserve
 }
 
+func (processor *Processor) NumZombies() int32 {
+	var numZombies = int32(0)
+
+	for _, context := range processor.Experiment.Kernel.Contexts {
+		if context.State == ContextState_FINISHED {
+			numZombies++
+		}
+	}
+
+	return numZombies
+}
+
 func (processor *Processor) kill(context *Context) {
 	if context.State != ContextState_FINISHED {
 		panic("Impossible")
@@ -79,8 +93,6 @@ func (processor *Processor) kill(context *Context) {
 	processor.ContextToThreadMappings[context].SetContext(nil)
 
 	context.ThreadId = -1
-
-	processor.Experiment.BlockingEventDispatcher().Dispatch(NewContextKilledEvent(context))
 }
 
 func (processor *Processor) NumDynamicInsts() int64 {
@@ -107,4 +119,10 @@ func (processor *Processor) CyclesPerInstructions() float64 {
 	}
 
 	return float64(processor.Experiment.CycleAccurateEventQueue().CurrentCycle) / float64(processor.NumDynamicInsts())
+}
+
+func (processor *Processor) ResetStats() {
+	for _, core := range processor.Cores {
+		core.ResetStats()
+	}
 }

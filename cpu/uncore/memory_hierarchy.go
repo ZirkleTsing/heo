@@ -10,7 +10,6 @@ import (
 
 type UncoreDriver interface {
 	CycleAccurateEventQueue() *simutil.CycleAccurateEventQueue
-	BlockingEventDispatcher() *simutil.BlockingEventDispatcher
 }
 
 type MemoryHierarchy interface {
@@ -40,6 +39,8 @@ type MemoryHierarchy interface {
 	TransferMessage(from Controller, to Controller, size uint32, message CoherenceMessage)
 
 	DumpPendingFlowTree()
+
+	ResetStats()
 }
 
 type BaseMemoryHierarchy struct {
@@ -261,6 +262,9 @@ func (memoryHierarchy *BaseMemoryHierarchy) DumpPendingFlowTree() {
 		)
 		fmt.Println()
 	}
+}
+
+func (memoryHierarchy *BaseMemoryHierarchy) ResetStats() {
 }
 
 type P2PReorderBuffer struct {

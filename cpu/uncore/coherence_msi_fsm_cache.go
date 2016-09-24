@@ -2,13 +2,11 @@ package uncore
 
 import (
 	"github.com/mcai/acogo/simutil"
-	"reflect"
 )
 
 type CacheControllerFiniteStateMachine struct {
 	*simutil.BaseFiniteStateMachine
 	CacheController     *CacheController
-	PreviousState       CacheControllerState
 	Set                 uint32
 	Way                 uint32
 	NumInvAcks          int32
@@ -23,10 +21,6 @@ func NewCacheControllerFiniteStateMachine(set uint32, way uint32, cacheControlle
 		Way:way,
 		CacheController:cacheController,
 	}
-
-	fsm.BlockingEventDispatcher.AddListener(reflect.TypeOf((*simutil.ExitStateEvent)(nil)), func(event interface{}) {
-		fsm.PreviousState = fsm.State().(CacheControllerState)
-	})
 
 	return fsm
 }
@@ -325,7 +319,7 @@ func NewCacheControllerFiniteStateMachineFactory() *CacheControllerFiniteStateMa
 	var actionWhenStateChanged = func(fsm simutil.FiniteStateMachine) {
 		var cacheControllerFsm = fsm.(*CacheControllerFiniteStateMachine)
 
-		if cacheControllerFsm.PreviousState != cacheControllerFsm.State() {
+		if cacheControllerFsm.PreviousState() != cacheControllerFsm.State() {
 			if cacheControllerFsm.State().(CacheControllerState).Stable() {
 				var onCompletedCallback = cacheControllerFsm.OnCompletedCallback
 				if onCompletedCallback != nil {

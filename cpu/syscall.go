@@ -261,8 +261,6 @@ func (syscallEmulation *SyscallEmulation) findAndRunSyscallHandler(syscallIndex 
 	if handler, ok := syscallEmulation.Handlers[syscallIndex]; ok {
 		handler.Run(context)
 
-		context.Kernel.Experiment.BlockingEventDispatcher().Dispatch(NewSyscallExecutedEvent(context, handler.Name))
-
 		context.Kernel.ProcessSystemEvents()
 		context.Kernel.ProcessSignals()
 
@@ -811,18 +809,4 @@ func (syscallEmulation *SyscallEmulation) fstat64_impl(context *Context) {
 
 func (syscallEmulation *SyscallEmulation) exit_group_impl(context *Context) {
 	context.Finish()
-}
-
-type SyscallExecutedEvent struct {
-	Context     *Context
-	SyscallName string
-}
-
-func NewSyscallExecutedEvent(context *Context, syscallName string) *SyscallExecutedEvent {
-	var syscallExecutedEvent = &SyscallExecutedEvent{
-		Context:context,
-		SyscallName:syscallName,
-	}
-
-	return syscallExecutedEvent
 }

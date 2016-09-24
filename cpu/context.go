@@ -3,16 +3,17 @@ package cpu
 import (
 	"github.com/mcai/acogo/cpu/regs"
 	"github.com/mcai/acogo/cpu/native"
+	"fmt"
 )
 
 const (
-	ContextState_IDLE = 0
-	ContextState_BLOCKED = 1
-	ContextState_RUNNING = 2
-	ContextState_FINISHED = 3
+	ContextState_IDLE = ContextState("IDLE")
+	ContextState_BLOCKED = ContextState("BLOCKED")
+	ContextState_RUNNING = ContextState("RUNNING")
+	ContextState_FINISHED = ContextState("FINISHED")
 )
 
-type ContextState uint32
+type ContextState string
 
 type Context struct {
 	Id               int32
@@ -61,8 +62,6 @@ func NewContext(kernel *Kernel, process *Process, parent *Context, regs *regs.Ar
 
 	kernel.CurrentContextId++
 	kernel.CurrentPid++
-
-	kernel.Experiment.BlockingEventDispatcher().Dispatch(NewContextCreatedEvent(context))
 
 	return context
 }
@@ -125,7 +124,7 @@ func (context *Context) Decode(mappedPc uint32) *StaticInst {
 
 func (context *Context) Suspend() {
 	if context.State == ContextState_BLOCKED {
-		panic("Impossible")
+		panic(fmt.Sprintf("Cannot suspend context while in state %s", context.State))
 	}
 
 	context.State = ContextState_BLOCKED
@@ -133,7 +132,7 @@ func (context *Context) Suspend() {
 
 func (context *Context) Resume() {
 	if context.State != ContextState_BLOCKED {
-		panic("Impossible")
+		panic(fmt.Sprintf("Cannot resume context while in state %s", context.State))
 	}
 
 	context.State = ContextState_RUNNING
@@ -141,7 +140,7 @@ func (context *Context) Resume() {
 
 func (context *Context) Finish() {
 	if context.State == ContextState_FINISHED {
-		panic("Impossible")
+		panic(fmt.Sprintf("Cannot finish context while in state %s", context.State))
 	}
 
 	context.State = ContextState_FINISHED
@@ -179,28 +178,4 @@ func NewContextMapping(threadId int32, executable string, arguments string) *Con
 	}
 
 	return contextMapping
-}
-
-type ContextCreatedEvent struct {
-	Context *Context
-}
-
-func NewContextCreatedEvent(context *Context) *ContextCreatedEvent {
-	var contextCreatedEvent = &ContextCreatedEvent{
-		Context:context,
-	}
-
-	return contextCreatedEvent
-}
-
-type ContextKilledEvent struct {
-	Context *Context
-}
-
-func NewContextKilledEvent(context *Context) *ContextKilledEvent {
-	var contextKilledEvent = &ContextKilledEvent{
-		Context:context,
-	}
-
-	return contextKilledEvent
 }

@@ -3,7 +3,6 @@ package cpu
 import (
 	"github.com/mcai/acogo/cpu/mem"
 	"github.com/mcai/acogo/cpu/native"
-	"reflect"
 	"github.com/mcai/acogo/cpu/regs"
 )
 
@@ -48,24 +47,28 @@ func (criterion *SignalCriterion) NeedProcess(context *Context) bool {
 
 type WaitForProcessIdCriterion struct {
 	ProcessId        int32
-	HasProcessKilled bool
 }
 
-func NewWaitForProcessIdCriterion(context *Context, processId int32) *WaitForProcessIdCriterion {
+func NewWaitForProcessIdCriterion(processId int32) *WaitForProcessIdCriterion {
 	var criterion = &WaitForProcessIdCriterion{
 		ProcessId:processId,
 	}
-
-	context.Kernel.Experiment.BlockingEventDispatcher().AddListener(reflect.TypeOf((*ContextKilledEvent)(nil)), func(event interface{}) {
-		criterion.HasProcessKilled = true
-	})
 
 	return criterion
 }
 
 func (criterion *WaitForProcessIdCriterion) NeedProcess(context *Context) bool {
-	return (criterion.ProcessId == -1 && criterion.HasProcessKilled) ||
-		(criterion.ProcessId > 0 && context.Kernel.GetContextFromProcessId(criterion.ProcessId) == nil)
+	if criterion.ProcessId == -1 {
+		return context.Kernel.Experiment.Processor.NumZombies() > 0
+	}
+
+	var contextToWait = context.Kernel.GetContextFromProcessId(criterion.ProcessId)
+
+	if contextToWait == nil || contextToWait.State == ContextState_FINISHED {
+		return true
+	}
+
+	return false
 }
 
 type WaitForFileDescriptorCriterion struct {
@@ -246,7 +249,7 @@ type WaitEvent struct {
 func NewWaitEvent(context *Context, processId int32) *WaitEvent {
 	var event = &WaitEvent{
 		BaseSystemEvent: NewBaseSystemEvent(context, SystemEventType_WAIT),
-		WaitForProcessIdCriterion: NewWaitForProcessIdCriterion(context, processId),
+		WaitForProcessIdCriterion: NewWaitForProcessIdCriterion(processId),
 		SignalCriterion: NewSignalCriterion(),
 	}
 

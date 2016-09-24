@@ -2,7 +2,6 @@ package uncore
 
 import (
 	"github.com/mcai/acogo/simutil"
-	"reflect"
 )
 
 type DirectoryEntry struct {
@@ -21,7 +20,6 @@ type DirectoryControllerFiniteStateMachine struct {
 	*simutil.BaseFiniteStateMachine
 	DirectoryController *DirectoryController
 	DirectoryEntry      *DirectoryEntry
-	PreviousState       DirectoryControllerState
 	Set                 uint32
 	Way                 uint32
 	NumRecallAcks       int32
@@ -41,13 +39,6 @@ func NewDirectoryControllerFiniteStateMachine(set uint32, way uint32, directoryC
 		EvicterTag:INVALID_TAG,
 		VictimTag:INVALID_TAG,
 	}
-
-	fsm.BlockingEventDispatcher.AddListener(
-		reflect.TypeOf((*simutil.ExitStateEvent)(nil)),
-		func(event interface{}) {
-			fsm.PreviousState = fsm.State().(DirectoryControllerState)
-		},
-	)
 
 	return fsm
 }
@@ -397,7 +388,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 	var actionWhenStateChanged = func(fsm simutil.FiniteStateMachine) {
 		var directoryControllerFsm = fsm.(*DirectoryControllerFiniteStateMachine)
 
-		if directoryControllerFsm.PreviousState != directoryControllerFsm.State() {
+		if directoryControllerFsm.PreviousState() != directoryControllerFsm.State() {
 			if directoryControllerFsm.State().(DirectoryControllerState).Stable() {
 				var onCompletedCallback = directoryControllerFsm.OnCompletedCallback
 				if onCompletedCallback != nil {

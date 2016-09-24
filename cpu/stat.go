@@ -377,9 +377,15 @@ func (experiment *CPUExperiment) dumpStats(prefix string) {
 	simutil.WriteJsonFile(experiment.Stats, experiment.CPUConfig.OutputDirectory, prefix + "_" + simutil.STATS_JSON_FILE_NAME)
 }
 
-func (experiment *CPUExperiment) clearStats() {
+func (experiment *CPUExperiment) ResetStats() {
 	experiment.Stats = []simutil.Stat{}
 	experiment.statMap = nil
+
+	experiment.ISA.ResetStats()
+	experiment.Kernel.ResetStats()
+	experiment.Processor.ResetStats()
+	experiment.MemoryHierarchy.ResetStats()
+	experiment.OoO.ResetStats()
 }
 
 func (experiment *CPUExperiment) LoadStats() {

@@ -4,11 +4,11 @@
     {
       "ThreadId": 0,
       "Executable": "/home/itecgo/Projects/Archimulator/benchmarks/Olden_Custom1/mst/baseline/mst.mips",
-      "Arguments": "800"
+      "Arguments": "1000"
     }
   ],
-  "MaxDynamicInsts": 10000000,
-  "FastForwardDynamicInsts": 100000000,
+  "MaxFastForwardDynamicInsts": 100000000,
+  "MaxMeasurementDynamicInsts": 100000000,
   "NumCores": 2,
   "NumThreadsPerCore": 2,
   "PhysicalRegisterFileSize": 128,

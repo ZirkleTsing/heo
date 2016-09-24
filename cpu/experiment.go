@@ -13,12 +13,7 @@ type CPUExperiment struct {
 	UncoreConfig            *uncore.UncoreConfig
 	NocConfig               *noc.NoCConfig
 
-	Stats                   simutil.Stats
-	statMap                 map[string]interface{}
-
-	BeginTime, EndTime      time.Time
 	cycleAccurateEventQueue *simutil.CycleAccurateEventQueue
-	blockingEventDispatcher *simutil.BlockingEventDispatcher
 
 	ISA                     *ISA
 
@@ -27,6 +22,11 @@ type CPUExperiment struct {
 
 	MemoryHierarchy         uncore.MemoryHierarchy
 	OoO                     *OoO
+
+	BeginTime, EndTime      time.Time
+
+	Stats                   simutil.Stats
+	statMap                 map[string]interface{}
 }
 
 func NewCPUExperiment(config *CPUConfig) *CPUExperiment {
@@ -40,30 +40,22 @@ func NewCPUExperiment(config *CPUConfig) *CPUExperiment {
 
 	experiment.Kernel = NewKernel(experiment)
 
-	experiment.swapProcessor()
+	experiment.cycleAccurateEventQueue = simutil.NewCycleAccurateEventQueue()
+
+	experiment.Processor = NewProcessor(experiment)
+
+	experiment.MemoryHierarchy = uncore.NewBaseMemoryHierarchy(experiment, experiment.UncoreConfig, experiment.NocConfig)
+	experiment.OoO = NewOoO(experiment)
 
 	experiment.Kernel.LoadContexts()
+
+	experiment.Processor.UpdateContextToThreadAssignments()
 
 	return experiment
 }
 
-func (experiment *CPUExperiment) swapProcessor() {
-	experiment.blockingEventDispatcher = simutil.NewBlockingEventDispatcher()
-	experiment.cycleAccurateEventQueue = simutil.NewCycleAccurateEventQueue()
-
-	experiment.Processor = NewProcessor(experiment)
-	experiment.Processor.UpdateContextToThreadAssignments()
-
-	experiment.MemoryHierarchy = uncore.NewBaseMemoryHierarchy(experiment, experiment.UncoreConfig, experiment.NocConfig)
-	experiment.OoO = NewOoO(experiment)
-}
-
 func (experiment *CPUExperiment) CycleAccurateEventQueue() *simutil.CycleAccurateEventQueue {
 	return experiment.cycleAccurateEventQueue
-}
-
-func (experiment *CPUExperiment) BlockingEventDispatcher() *simutil.BlockingEventDispatcher {
-	return experiment.blockingEventDispatcher
 }
 
 func (experiment *CPUExperiment) Run(skipIfStatsFileExists bool) {
@@ -83,9 +75,7 @@ func (experiment *CPUExperiment) Run(skipIfStatsFileExists bool) {
 
 	experiment.dumpStats("fastforward")
 
-	experiment.clearStats()
-
-	experiment.swapProcessor()
+	experiment.ResetStats()
 
 	experiment.BeginTime = time.Now()
 
@@ -103,12 +93,13 @@ func (experiment *CPUExperiment) dumpConfigs() {
 }
 
 func (experiment *CPUExperiment) canDoFastForwardOneCycle() bool {
-	return experiment.Processor.Cores[0].Threads()[0].NumDynamicInsts() < experiment.CPUConfig.FastForwardDynamicInsts
+	return experiment.CPUConfig.MaxFastForwardDynamicInsts == -1 ||
+		experiment.Processor.Cores[0].Threads()[0].NumDynamicInsts() < experiment.CPUConfig.MaxFastForwardDynamicInsts
 }
 
 func (experiment *CPUExperiment) canDoMeasurementOneCycle() bool {
-	return experiment.CPUConfig.MaxDynamicInsts == -1 ||
-		experiment.Processor.Cores[0].Threads()[0].NumDynamicInsts() < experiment.CPUConfig.MaxDynamicInsts
+	return experiment.CPUConfig.MaxMeasurementDynamicInsts == -1 ||
+		experiment.Processor.Cores[0].Threads()[0].NumDynamicInsts() < experiment.CPUConfig.MaxMeasurementDynamicInsts
 }
 
 func (experiment *CPUExperiment) advanceOneCycle() {

@@ -44,6 +44,8 @@ type Core interface {
 	RemoveFromQueues(entryToRemove GeneralReorderBufferEntry)
 
 	NumDynamicInsts() int64
+
+	ResetStats()
 }
 
 type BaseCore struct {
@@ -91,4 +93,10 @@ func (core *BaseCore) NumDynamicInsts() int64 {
 	}
 
 	return numDynamicInsts
+}
+
+func (core *BaseCore) ResetStats() {
+	for _, thread := range core.Threads() {
+		thread.ResetStats()
+	}
 }

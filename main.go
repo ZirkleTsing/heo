@@ -2,22 +2,30 @@ package main
 
 import (
 	"github.com/mcai/acogo/cpu"
+	"github.com/mcai/acogo/simutil"
 )
 
 var (
 	numCores = int32(2)
 	numThreadsPerCore = int32(2)
 
-	maxDynamicInsts = int64(10000000)
-	fastForwardDynamicInsts = int64(200000000)
+	maxFastForwardDynamicInsts = int64(100000000)
+	maxMeasurementDynamicInsts = int64(100000000)
+
+	//maxFastForwardDynamicInsts = int64(-1)
+	//maxMeasurementDynamicInsts = int64(0)
 )
 
 func main() {
-	mstBaseline()
-	mstHelperThreaded()
+	var experiments = []simutil.Experiment{
+		mstBaseline(),
+		mstHelperThreaded(),
+	}
+
+	simutil.RunExperiments(experiments, false)
 }
 
-func mstBaseline() {
+func mstBaseline() simutil.Experiment {
 	var config = cpu.NewCPUConfig("test_results/real/mst_baseline")
 
 	config.ContextMappings = append(config.ContextMappings,
@@ -25,15 +33,13 @@ func mstBaseline() {
 
 	config.NumCores = numCores
 	config.NumThreadsPerCore = numThreadsPerCore
-	config.MaxDynamicInsts = maxDynamicInsts
-	config.FastForwardDynamicInsts = fastForwardDynamicInsts
+	config.MaxMeasurementDynamicInsts = maxMeasurementDynamicInsts
+	config.MaxFastForwardDynamicInsts = maxFastForwardDynamicInsts
 
-	var experiment = cpu.NewCPUExperiment(config)
-
-	experiment.Run(false)
+	return cpu.NewCPUExperiment(config)
 }
 
-func mstHelperThreaded() {
+func mstHelperThreaded() simutil.Experiment {
 	var config = cpu.NewCPUConfig("test_results/real/mst_ht")
 
 	config.ContextMappings = append(config.ContextMappings,
@@ -41,10 +47,8 @@ func mstHelperThreaded() {
 
 	config.NumCores = numCores
 	config.NumThreadsPerCore = numThreadsPerCore
-	config.MaxDynamicInsts = maxDynamicInsts
-	config.FastForwardDynamicInsts = fastForwardDynamicInsts
+	config.MaxMeasurementDynamicInsts = maxMeasurementDynamicInsts
+	config.MaxFastForwardDynamicInsts = maxFastForwardDynamicInsts
 
-	var experiment = cpu.NewCPUExperiment(config)
-
-	experiment.Run(false)
+	return cpu.NewCPUExperiment(config)
 }

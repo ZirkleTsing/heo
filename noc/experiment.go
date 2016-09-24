@@ -9,7 +9,6 @@ import (
 
 type NoCExperiment struct {
 	cycleAccurateEventQueue *simutil.CycleAccurateEventQueue
-	blockingEventDispatcher *simutil.BlockingEventDispatcher
 
 	Network                 *Network
 
@@ -22,7 +21,6 @@ type NoCExperiment struct {
 func NewNoCExperiment(config *NoCConfig) *NoCExperiment {
 	var experiment = &NoCExperiment{
 		cycleAccurateEventQueue:simutil.NewCycleAccurateEventQueue(),
-		blockingEventDispatcher:simutil.NewBlockingEventDispatcher(),
 	}
 
 	experiment.Network = NewNetwork(experiment, config)
@@ -55,10 +53,6 @@ func NewNoCExperiment(config *NoCConfig) *NoCExperiment {
 
 func (experiment *NoCExperiment) CycleAccurateEventQueue() *simutil.CycleAccurateEventQueue {
 	return experiment.cycleAccurateEventQueue
-}
-
-func (experiment *NoCExperiment) BlockingEventDispatcher() *simutil.BlockingEventDispatcher {
-	return experiment.blockingEventDispatcher
 }
 
 func (experiment *NoCExperiment) Run(skipIfStatsFileExists bool) {
