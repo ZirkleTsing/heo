@@ -9,8 +9,11 @@ var (
 	numCores = int32(2)
 	numThreadsPerCore = int32(2)
 
-	maxFastForwardDynamicInsts = int64(100000000)
-	maxMeasurementDynamicInsts = int64(100000000)
+	//maxFastForwardDynamicInsts = int64(100000000)
+	//maxMeasurementDynamicInsts = int64(100000000)
+
+	maxFastForwardDynamicInsts = int64(0)
+	maxMeasurementDynamicInsts = int64(-1)
 
 	//maxFastForwardDynamicInsts = int64(-1)
 	//maxMeasurementDynamicInsts = int64(0)
