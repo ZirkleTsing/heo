@@ -4,8 +4,8 @@ import "github.com/mcai/acogo/cpu/uncore"
 
 type MemoryHierarchyThread struct {
 	*BaseThread
-	FetchStalled            bool
-	LastFetchedCacheLine    int32
+	FetchStalled         bool
+	LastFetchedCacheLine int32
 }
 
 func NewMemoryHierarchyThread(core Core, num int32) *MemoryHierarchyThread {

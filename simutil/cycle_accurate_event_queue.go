@@ -12,10 +12,10 @@ type CycleAccurateEvent struct {
 }
 
 type CycleAccurateEventQueue struct {
-	Events         []*CycleAccurateEvent
-	PerCycleEvents []func()
-	CurrentCycle   int64
-	currentEventId int64
+	Events                   []*CycleAccurateEvent
+	PerCycleEvents           []func()
+	CurrentCycle             int64
+	currentEventId           int64
 
 	lastEventDispatchedCycle int64
 }

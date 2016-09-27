@@ -49,9 +49,9 @@ type Core interface {
 }
 
 type BaseCore struct {
-	processor               *Processor
-	threads                 []Thread
-	num                     int32
+	processor *Processor
+	threads   []Thread
+	num       int32
 }
 
 func NewBaseCore(processor *Processor, num int32) *BaseCore {

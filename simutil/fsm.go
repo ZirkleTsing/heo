@@ -7,8 +7,8 @@ type FiniteStateMachine interface {
 }
 
 type BaseFiniteStateMachine struct {
-	state, previousState    interface{}
-	settingStates           bool
+	state, previousState interface{}
+	settingStates        bool
 }
 
 func NewBaseFiniteStateMachine(state interface{}) *BaseFiniteStateMachine {

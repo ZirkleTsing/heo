@@ -46,7 +46,7 @@ func (criterion *SignalCriterion) NeedProcess(context *Context) bool {
 }
 
 type WaitForProcessIdCriterion struct {
-	ProcessId        int32
+	ProcessId int32
 }
 
 func NewWaitForProcessIdCriterion(processId int32) *WaitForProcessIdCriterion {

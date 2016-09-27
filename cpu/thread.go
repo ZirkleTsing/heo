@@ -24,11 +24,11 @@ type Thread interface {
 }
 
 type BaseThread struct {
-	core                  Core
-	num                   int32
-	id                    int32
-	context               *Context
-	numDynamicInsts       int64
+	core            Core
+	num             int32
+	id              int32
+	context         *Context
+	numDynamicInsts int64
 }
 
 func NewBaseThread(core Core, num int32) *BaseThread {

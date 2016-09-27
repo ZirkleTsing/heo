@@ -49,7 +49,7 @@ func NewTwoBitBranchPredictor(thread Thread, branchTargetBufferNumSets uint32, b
 }
 
 func (branchPredictor *TwoBitBranchPredictor) getSaturatingCounter(branchAddress uint32) *simutil.SaturatingCounter {
-	var index =(branchAddress >> BRANCH_SHIFT) & (branchPredictor.size - 1)
+	var index = (branchAddress >> BRANCH_SHIFT) & (branchPredictor.size - 1)
 
 	return branchPredictor.saturatingCounters[index]
 }
