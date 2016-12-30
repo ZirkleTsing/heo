@@ -279,11 +279,26 @@ func (fsm *CacheControllerFiniteStateMachine) SendRecallAckToDir(producerFlow Ca
 }
 
 func (fsm *CacheControllerFiniteStateMachine) FireServiceNonblockingRequestEvent(access *MemoryHierarchyAccess, tag uint32, hitInCache bool) {
-	//TODO
+	fsm.CacheController.MemoryHierarchy().Driver().BlockingEventDispatcher().Dispatch(
+		NewGeneralCacheControllerServiceNonblockingRequestEvent(
+			fsm.CacheController,
+			access,
+			tag,
+			fsm.Set,
+			fsm.Way,
+			hitInCache,
+		),
+	)
+
 	fsm.CacheController.UpdateStats(access.AccessType.IsWrite(), hitInCache)
 }
 
 func (fsm *CacheControllerFiniteStateMachine) FireReplacementEvent(access *MemoryHierarchyAccess, tag uint32) {
+	//fsm.CacheController.MemoryHierarchy().Driver().BlockingEventDispatcher().Dispatch(
+	//	NewGeneralCacheControllerLineReplacementEvent(
+	//
+	//	),
+	//)
 	//TODO
 }
 

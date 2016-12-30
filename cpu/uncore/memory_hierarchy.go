@@ -10,6 +10,7 @@ import (
 
 type UncoreDriver interface {
 	CycleAccurateEventQueue() *simutil.CycleAccurateEventQueue
+	BlockingEventDispatcher() *simutil.BlockingEventDispatcher
 }
 
 type MemoryHierarchy interface {

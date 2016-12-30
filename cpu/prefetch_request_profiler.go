@@ -1,6 +1,9 @@
 package cpu
 
-import "github.com/mcai/acogo/cpu/uncore"
+import (
+	"github.com/mcai/acogo/cpu/uncore"
+	//"reflect"
+)
 
 type L2PrefetchRequestProfiler struct {
 	L2Controller                                    *uncore.DirectoryController
@@ -40,6 +43,9 @@ func NewL2PrefetchRequestProfiler(experiment *CPUExperiment) *L2PrefetchRequestP
 			l2PrefetchRequestProfiler.L2PrefetchRequestStates[int32(set)][int32(way)] = NewL2PrefetchRequestState()
 		}
 	}
+
+	//experiment.BlockingEventDispatcher().AddListener(reflect.TypeOf((*)(nil)))
+	//TODO
 
 	return l2PrefetchRequestProfiler
 }
