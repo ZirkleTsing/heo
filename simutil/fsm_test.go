@@ -13,10 +13,7 @@ func TestFiniteStateMachineFactory(t *testing.T) {
 		func(fsm FiniteStateMachine, condition interface{}, params interface{}) {
 			fmt.Printf("params[a] = %s\n", params.(map[string]string)["a"])
 		},
-		1,
-		func(fsm FiniteStateMachine) {
-			fmt.Printf("fsm.state is changed to: %d\n", fsm.State())
-		})
+		1)
 
 	var fsm = NewBaseFiniteStateMachine(0)
 
