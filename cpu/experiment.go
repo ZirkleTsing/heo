@@ -14,6 +14,7 @@ type CPUExperiment struct {
 	NocConfig               *noc.NoCConfig
 
 	cycleAccurateEventQueue *simutil.CycleAccurateEventQueue
+	blockingEventDispatcher *simutil.BlockingEventDispatcher
 
 	ISA                     *ISA
 
@@ -41,6 +42,7 @@ func NewCPUExperiment(config *CPUConfig) *CPUExperiment {
 	experiment.Kernel = NewKernel(experiment)
 
 	experiment.cycleAccurateEventQueue = simutil.NewCycleAccurateEventQueue()
+	experiment.blockingEventDispatcher = simutil.NewBlockingEventDispatcher()
 
 	experiment.Processor = NewProcessor(experiment)
 
@@ -56,6 +58,10 @@ func NewCPUExperiment(config *CPUConfig) *CPUExperiment {
 
 func (experiment *CPUExperiment) CycleAccurateEventQueue() *simutil.CycleAccurateEventQueue {
 	return experiment.cycleAccurateEventQueue
+}
+
+func (experiment *CPUExperiment) BlockingEventDispatcher() *simutil.BlockingEventDispatcher {
+	return experiment.blockingEventDispatcher
 }
 
 func (experiment *CPUExperiment) Run(skipIfStatsFileExists bool) {
