@@ -5,6 +5,22 @@ import (
 	"reflect"
 )
 
+func MainThreadId() uint32 {
+	return 0
+}
+
+func IsMainThread(threadId uint32) bool {
+	return threadId == MainThreadId()
+}
+
+func PrefetchThreadId() uint32 {
+	return 2
+}
+
+func IsPrefetchThread(threadId uint32) bool {
+	return threadId == PrefetchThreadId()
+}
+
 type L2PrefetchRequestProfiler struct {
 	L2Controller                                    *uncore.DirectoryController
 

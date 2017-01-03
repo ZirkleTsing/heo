@@ -3,13 +3,13 @@ package uncore
 type GeneralCacheControllerServiceNonblockingRequestEvent struct {
 	CacheController *BaseCacheController
 	Access          *MemoryHierarchyAccess
-	Tag             int32
-	Set             int32
-	Way             int32
+	Tag             uint32
+	Set             uint32
+	Way             uint32
 	HitInCache      bool
 }
 
-func NewGeneralCacheControllerServiceNonblockingRequestEvent(cacheController *BaseCacheController, access *MemoryHierarchyAccess, tag int32, set int32, way int32, hitInCache bool) *GeneralCacheControllerServiceNonblockingRequestEvent {
+func NewGeneralCacheControllerServiceNonblockingRequestEvent(cacheController *BaseCacheController, access *MemoryHierarchyAccess, tag uint32, set uint32, way uint32, hitInCache bool) *GeneralCacheControllerServiceNonblockingRequestEvent {
 	var event = &GeneralCacheControllerServiceNonblockingRequestEvent{
 		CacheController:cacheController,
 		Access:access,
@@ -25,12 +25,12 @@ func NewGeneralCacheControllerServiceNonblockingRequestEvent(cacheController *Ba
 type GeneralCacheControllerNonblockingRequestHitToTransientTagEvent struct {
 	CacheController *BaseCacheController
 	Access          *MemoryHierarchyAccess
-	Tag             int32
-	Set             int32
-	Way             int32
+	Tag             uint32
+	Set             uint32
+	Way             uint32
 }
 
-func NewGeneralCacheControllerNonblockingRequestHitToTransientTagEvent(cacheController *BaseCacheController, access *MemoryHierarchyAccess, tag int32, set int32, way int32) *GeneralCacheControllerNonblockingRequestHitToTransientTagEvent {
+func NewGeneralCacheControllerNonblockingRequestHitToTransientTagEvent(cacheController *BaseCacheController, access *MemoryHierarchyAccess, tag uint32, set uint32, way uint32) *GeneralCacheControllerNonblockingRequestHitToTransientTagEvent {
 	var event = &GeneralCacheControllerNonblockingRequestHitToTransientTagEvent{
 		CacheController:cacheController,
 		Access:access,
@@ -45,12 +45,12 @@ func NewGeneralCacheControllerNonblockingRequestHitToTransientTagEvent(cacheCont
 type GeneralCacheControllerLineReplacementEvent struct {
 	CacheController *BaseCacheController
 	Access          *MemoryHierarchyAccess
-	Tag             int32
-	Set             int32
-	Way             int32
+	Tag             uint32
+	Set             uint32
+	Way             uint32
 }
 
-func NewGeneralCacheControllerLineReplacementEvent(cacheController *BaseCacheController, access *MemoryHierarchyAccess, tag int32, set int32, way int32) *GeneralCacheControllerLineReplacementEvent {
+func NewGeneralCacheControllerLineReplacementEvent(cacheController *BaseCacheController, access *MemoryHierarchyAccess, tag uint32, set uint32, way uint32) *GeneralCacheControllerLineReplacementEvent {
 	var event = &GeneralCacheControllerLineReplacementEvent{
 		CacheController:cacheController,
 		Access:access,
@@ -65,12 +65,12 @@ func NewGeneralCacheControllerLineReplacementEvent(cacheController *BaseCacheCon
 type GeneralCacheControllerLastPutSOrPutMAndDataFromOwnerEvent struct {
 	CacheController *BaseCacheController
 	Access          *MemoryHierarchyAccess
-	Tag             int32
-	Set             int32
-	Way             int32
+	Tag             uint32
+	Set             uint32
+	Way             uint32
 }
 
-func NewGeneralCacheControllerLastPutSOrPutMAndDataFromOwnerEvent(cacheController *BaseCacheController, access *MemoryHierarchyAccess, tag int32, set int32, way int32) *GeneralCacheControllerLastPutSOrPutMAndDataFromOwnerEvent {
+func NewGeneralCacheControllerLastPutSOrPutMAndDataFromOwnerEvent(cacheController *BaseCacheController, access *MemoryHierarchyAccess, tag uint32, set uint32, way uint32) *GeneralCacheControllerLastPutSOrPutMAndDataFromOwnerEvent {
 	var event = &GeneralCacheControllerLastPutSOrPutMAndDataFromOwnerEvent{
 		CacheController:cacheController,
 		Access:access,
@@ -85,13 +85,13 @@ func NewGeneralCacheControllerLastPutSOrPutMAndDataFromOwnerEvent(cacheControlle
 type LastLevelCacheControllerLineInsertEvent struct {
 	CacheController *BaseCacheController
 	Access          *MemoryHierarchyAccess
-	Tag             int32
-	Set             int32
-	Way             int32
+	Tag             uint32
+	Set             uint32
+	Way             uint32
 	VictimTag       int32
 }
 
-func NewLastLevelCacheControllerLineInsertEvent(cacheController *BaseCacheController, access *MemoryHierarchyAccess, tag int32, set int32, way int32, victimTag int32) *LastLevelCacheControllerLineInsertEvent {
+func NewLastLevelCacheControllerLineInsertEvent(cacheController *BaseCacheController, access *MemoryHierarchyAccess, tag uint32, set uint32, way uint32, victimTag int32) *LastLevelCacheControllerLineInsertEvent {
 	var event = &LastLevelCacheControllerLineInsertEvent{
 		CacheController:cacheController,
 		Access:access,

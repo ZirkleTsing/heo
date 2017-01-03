@@ -354,7 +354,7 @@ func (fsm *DirectoryControllerFiniteStateMachine) FireServiceNonblockingRequestE
 	fsm.DirectoryController.UpdateStats(access.AccessType.IsRead(), hitInCache)
 }
 
-func (fsm *DirectoryControllerFiniteStateMachine) FireCacheLineInsertEvent(access *MemoryHierarchyAccess, tag uint32, victimTag uint32) {
+func (fsm *DirectoryControllerFiniteStateMachine) FireCacheLineInsertEvent(access *MemoryHierarchyAccess, tag uint32, victimTag int32) {
 	fsm.DirectoryController.MemoryHierarchy().Driver().BlockingEventDispatcher().Dispatch(
 		NewLastLevelCacheControllerLineInsertEvent(
 			fsm.DirectoryController,
@@ -610,7 +610,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 
 			directoryControllerFsm.SendDataToRequester(event, event.Tag(), event.Requester, 0)
 			directoryControllerFsm.AddRequesterToSharers(event.Requester)
-			directoryControllerFsm.FireCacheLineInsertEvent(event.Access(), event.Tag(), uint32(directoryControllerFsm.VictimTag))
+			directoryControllerFsm.FireCacheLineInsertEvent(event.Access(), event.Tag(), directoryControllerFsm.VictimTag)
 			directoryControllerFsm.EvicterTag = INVALID_TAG
 			directoryControllerFsm.VictimTag = INVALID_TAG
 			directoryControllerFsm.DirectoryController.Cache.ReplacementPolicy.HandleInsertionOnMiss(
@@ -686,7 +686,7 @@ func NewDirectoryControllerFiniteStateMachineFactory() *DirectoryControllerFinit
 
 			directoryControllerFsm.SendDataToRequester(event, event.Tag(), event.Requester, 0)
 			directoryControllerFsm.SetOwnerToRequester(event.Requester)
-			directoryControllerFsm.FireCacheLineInsertEvent(event.Access(), event.Tag(), uint32(directoryControllerFsm.VictimTag))
+			directoryControllerFsm.FireCacheLineInsertEvent(event.Access(), event.Tag(), directoryControllerFsm.VictimTag)
 			directoryControllerFsm.EvicterTag = INVALID_TAG
 			directoryControllerFsm.VictimTag = INVALID_TAG
 			directoryControllerFsm.DirectoryController.Cache.ReplacementPolicy.HandleInsertionOnMiss(
