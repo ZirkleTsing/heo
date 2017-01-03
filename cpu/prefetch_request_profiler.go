@@ -2,7 +2,7 @@ package cpu
 
 import (
 	"github.com/mcai/acogo/cpu/uncore"
-	//"reflect"
+	"reflect"
 )
 
 type L2PrefetchRequestProfiler struct {
@@ -44,8 +44,14 @@ func NewL2PrefetchRequestProfiler(experiment *CPUExperiment) *L2PrefetchRequestP
 		}
 	}
 
-	//experiment.BlockingEventDispatcher().AddListener(reflect.TypeOf((*)(nil)))
-	//TODO
+	experiment.BlockingEventDispatcher().AddListener(reflect.TypeOf((*uncore.GeneralCacheControllerServiceNonblockingRequestEvent)(nil)), func(event interface{}) {
+		var e = event.(*uncore.GeneralCacheControllerServiceNonblockingRequestEvent)
+
+		if e.CacheController == experiment.MemoryHierarchy.L2Controller() {
+			//var requesterIsPrefetchThread =
+		}
+
+	})
 
 	return l2PrefetchRequestProfiler
 }

@@ -340,24 +340,67 @@ func (fsm *DirectoryControllerFiniteStateMachine) ClearOwner() {
 }
 
 func (fsm *DirectoryControllerFiniteStateMachine) FireServiceNonblockingRequestEvent(access *MemoryHierarchyAccess, tag uint32, hitInCache bool) {
-	//TODO
+	fsm.DirectoryController.MemoryHierarchy().Driver().BlockingEventDispatcher().Dispatch(
+		NewGeneralCacheControllerServiceNonblockingRequestEvent(
+			fsm.DirectoryController,
+			access,
+			tag,
+			fsm.Set,
+			fsm.Way,
+			hitInCache,
+		),
+	)
+
 	fsm.DirectoryController.UpdateStats(access.AccessType.IsRead(), hitInCache)
 }
 
 func (fsm *DirectoryControllerFiniteStateMachine) FireCacheLineInsertEvent(access *MemoryHierarchyAccess, tag uint32, victimTag uint32) {
-	//TODO
+	fsm.DirectoryController.MemoryHierarchy().Driver().BlockingEventDispatcher().Dispatch(
+		NewLastLevelCacheControllerLineInsertEvent(
+			fsm.DirectoryController,
+			access,
+			tag,
+			fsm.Set,
+			fsm.Way,
+			victimTag,
+		),
+	)
 }
 
 func (fsm *DirectoryControllerFiniteStateMachine) FireReplacementEvent(access *MemoryHierarchyAccess, tag uint32) {
-	//TODO
+	fsm.DirectoryController.MemoryHierarchy().Driver().BlockingEventDispatcher().Dispatch(
+		NewGeneralCacheControllerLineReplacementEvent(
+			fsm.DirectoryController,
+			access,
+			tag,
+			fsm.Set,
+			fsm.Way,
+		),
+	)
 }
 
 func (fsm *DirectoryControllerFiniteStateMachine) FirePutSOrPutMAndDataFromOwnerEvent(access *MemoryHierarchyAccess, tag uint32) {
-	//TODO
+	fsm.DirectoryController.MemoryHierarchy().Driver().BlockingEventDispatcher().Dispatch(
+		NewGeneralCacheControllerLastPutSOrPutMAndDataFromOwnerEvent(
+			fsm.DirectoryController,
+			access,
+			tag,
+			fsm.Set,
+			fsm.Way,
+		),
+	)
 }
 
 func (fsm *DirectoryControllerFiniteStateMachine) FireNonblockingRequestHitToTransientTagEvent(access *MemoryHierarchyAccess, tag uint32) {
-	//TODO
+	fsm.DirectoryController.MemoryHierarchy().Driver().BlockingEventDispatcher().Dispatch(
+		NewGeneralCacheControllerNonblockingRequestHitToTransientTagEvent(
+			fsm.DirectoryController,
+			access,
+			tag,
+			fsm.Set,
+			fsm.Way,
+		),
+	)
 }
 
 func (fsm *DirectoryControllerFiniteStateMachine) Hit(access *MemoryHierarchyAccess, tag uint32, set uint32, way uint32) {

@@ -294,16 +294,27 @@ func (fsm *CacheControllerFiniteStateMachine) FireServiceNonblockingRequestEvent
 }
 
 func (fsm *CacheControllerFiniteStateMachine) FireReplacementEvent(access *MemoryHierarchyAccess, tag uint32) {
-	//fsm.CacheController.MemoryHierarchy().Driver().BlockingEventDispatcher().Dispatch(
-	//	NewGeneralCacheControllerLineReplacementEvent(
-	//
-	//	),
-	//)
-	//TODO
+	fsm.CacheController.MemoryHierarchy().Driver().BlockingEventDispatcher().Dispatch(
+		NewGeneralCacheControllerLineReplacementEvent(
+			fsm.CacheController,
+			access,
+			tag,
+			fsm.Set,
+			fsm.Way,
+		),
+	)
 }
 
 func (fsm *CacheControllerFiniteStateMachine) FireNonblockingRequestHitToTransientTagEvent(access *MemoryHierarchyAccess, tag uint32) {
-	//TODO
+	fsm.CacheController.MemoryHierarchy().Driver().BlockingEventDispatcher().Dispatch(
+		NewGeneralCacheControllerNonblockingRequestHitToTransientTagEvent(
+			fsm.CacheController,
+			access,
+			tag,
+			fsm.Set,
+			fsm.Way,
+		),
+	)
 }
 
 func (fsm *CacheControllerFiniteStateMachine) Hit(access *MemoryHierarchyAccess, tag uint32, set uint32, way uint32) {
