@@ -311,3 +311,23 @@ func (profiler *L2PrefetchRequestProfiler) NumUglyL2PrefetchRequests() int32 {
 		profiler.NumTimelyL2PrefetchRequests - profiler.NumLateL2PrefetchRequests -
 		profiler.NumBadL2PrefetchRequests - profiler.NumEarlyL2PrefetchRequests
 }
+
+func (profiler *L2PrefetchRequestProfiler) ResetStats() {
+	profiler.NumL2DemandHits = 0
+	profiler.NumL2DemandMisses = 0
+
+	profiler.NumL2PrefetchHits = 0
+	profiler.NumL2PrefetchMisses = 0
+
+	profiler.NumRedundantHitToTransientTagL2PrefetchRequests = 0
+	profiler.NumRedundantHitToCacheL2PrefetchRequests = 0
+
+	profiler.NumGoodL2PrefetchRequests = 0
+
+	profiler.NumTimelyL2PrefetchRequests = 0
+	profiler.NumLateL2PrefetchRequests = 0
+
+	profiler.NumBadL2PrefetchRequests = 0
+
+	profiler.NumEarlyL2PrefetchRequests = 0
+}

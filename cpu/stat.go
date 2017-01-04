@@ -374,6 +374,61 @@ func (experiment *CPUExperiment) dumpStats(prefix string) {
 		})
 	}
 
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "l2PrefetchRequestProfiler.NumL2DemandHits",
+		Value: experiment.L2PrefetchRequestProfiler.NumL2DemandHits,
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "l2PrefetchRequestProfiler.NumL2DemandMisses",
+		Value: experiment.L2PrefetchRequestProfiler.NumL2DemandMisses,
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "l2PrefetchRequestProfiler.NumL2PrefetchHits",
+		Value: experiment.L2PrefetchRequestProfiler.NumL2PrefetchHits,
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "l2PrefetchRequestProfiler.NumL2PrefetchMisses",
+		Value: experiment.L2PrefetchRequestProfiler.NumL2PrefetchMisses,
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "l2PrefetchRequestProfiler.NumRedundantHitToTransientTagL2PrefetchRequests",
+		Value: experiment.L2PrefetchRequestProfiler.NumRedundantHitToTransientTagL2PrefetchRequests,
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "l2PrefetchRequestProfiler.NumRedundantHitToCacheL2PrefetchRequests",
+		Value: experiment.L2PrefetchRequestProfiler.NumRedundantHitToCacheL2PrefetchRequests,
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "l2PrefetchRequestProfiler.NumGoodL2PrefetchRequests",
+		Value: experiment.L2PrefetchRequestProfiler.NumGoodL2PrefetchRequests,
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "l2PrefetchRequestProfiler.NumTimelyL2PrefetchRequests",
+		Value: experiment.L2PrefetchRequestProfiler.NumTimelyL2PrefetchRequests,
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "l2PrefetchRequestProfiler.NumLateL2PrefetchRequests",
+		Value: experiment.L2PrefetchRequestProfiler.NumLateL2PrefetchRequests,
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "l2PrefetchRequestProfiler.NumBadL2PrefetchRequests",
+		Value: experiment.L2PrefetchRequestProfiler.NumBadL2PrefetchRequests,
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "l2PrefetchRequestProfiler.NumEarlyL2PrefetchRequests",
+		Value: experiment.L2PrefetchRequestProfiler.NumEarlyL2PrefetchRequests,
+	})
+
 	simutil.WriteJsonFile(experiment.Stats, experiment.CPUConfig.OutputDirectory, prefix + "_" + simutil.STATS_JSON_FILE_NAME)
 }
 
@@ -386,6 +441,8 @@ func (experiment *CPUExperiment) ResetStats() {
 	experiment.Processor.ResetStats()
 	experiment.MemoryHierarchy.ResetStats()
 	experiment.OoO.ResetStats()
+
+	experiment.L2PrefetchRequestProfiler.ResetStats()
 }
 
 func (experiment *CPUExperiment) LoadStats() {

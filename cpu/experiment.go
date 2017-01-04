@@ -9,25 +9,27 @@ import (
 )
 
 type CPUExperiment struct {
-	CPUConfig               *CPUConfig
-	UncoreConfig            *uncore.UncoreConfig
-	NocConfig               *noc.NoCConfig
+	CPUConfig                 *CPUConfig
+	UncoreConfig              *uncore.UncoreConfig
+	NocConfig                 *noc.NoCConfig
 
-	cycleAccurateEventQueue *simutil.CycleAccurateEventQueue
-	blockingEventDispatcher *simutil.BlockingEventDispatcher
+	cycleAccurateEventQueue   *simutil.CycleAccurateEventQueue
+	blockingEventDispatcher   *simutil.BlockingEventDispatcher
 
-	ISA                     *ISA
+	ISA                       *ISA
 
-	Kernel                  *Kernel
-	Processor               *Processor
+	Kernel                    *Kernel
+	Processor                 *Processor
 
-	MemoryHierarchy         uncore.MemoryHierarchy
-	OoO                     *OoO
+	MemoryHierarchy           uncore.MemoryHierarchy
+	OoO                       *OoO
 
-	BeginTime, EndTime      time.Time
+	BeginTime, EndTime        time.Time
 
-	Stats                   simutil.Stats
-	statMap                 map[string]interface{}
+	Stats                     simutil.Stats
+	statMap                   map[string]interface{}
+
+	L2PrefetchRequestProfiler *L2PrefetchRequestProfiler
 }
 
 func NewCPUExperiment(config *CPUConfig) *CPUExperiment {
@@ -52,6 +54,8 @@ func NewCPUExperiment(config *CPUConfig) *CPUExperiment {
 	experiment.Kernel.LoadContexts()
 
 	experiment.Processor.UpdateContextToThreadAssignments()
+
+	experiment.L2PrefetchRequestProfiler = NewL2PrefetchRequestProfiler(experiment)
 
 	return experiment
 }
