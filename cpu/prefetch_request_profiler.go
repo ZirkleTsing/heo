@@ -303,3 +303,11 @@ func (profiler *L2PrefetchRequestProfiler) markLate(set uint32, way uint32, late
 	var l2LineState = profiler.L2PrefetchRequestStates[int32(set)][int32(way)]
 	l2LineState.HitToTransientTag = true
 }
+
+func (profiler *L2PrefetchRequestProfiler) NumUglyL2PrefetchRequests() int32 {
+	return profiler.NumL2PrefetchHits + profiler.NumL2PrefetchMisses -
+		profiler.NumRedundantHitToCacheL2PrefetchRequests -
+		profiler.NumRedundantHitToTransientTagL2PrefetchRequests -
+		profiler.NumTimelyL2PrefetchRequests - profiler.NumLateL2PrefetchRequests -
+		profiler.NumBadL2PrefetchRequests - profiler.NumEarlyL2PrefetchRequests
+}
