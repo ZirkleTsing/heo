@@ -103,3 +103,7 @@ func NewLastLevelCacheControllerLineInsertEvent(cacheController *BaseCacheContro
 
 	return event
 }
+
+func (event *LastLevelCacheControllerLineInsertEvent) Eviction() bool {
+	return event.VictimTag != INVALID_TAG
+}
