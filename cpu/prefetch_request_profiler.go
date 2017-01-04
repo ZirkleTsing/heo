@@ -5,19 +5,19 @@ import (
 	"reflect"
 )
 
-func DemandThreadId() uint32 {
+func DemandThreadId() int32 {
 	return 0
 }
 
-func IsDemandThread(threadId uint32) bool {
+func IsDemandThread(threadId int32) bool {
 	return threadId == DemandThreadId()
 }
 
-func PrefetchThreadId() uint32 {
+func PrefetchThreadId() int32 {
 	return 2
 }
 
-func IsPrefetchThread(threadId uint32) bool {
+func IsPrefetchThread(threadId int32) bool {
 	return threadId == PrefetchThreadId()
 }
 
@@ -65,8 +65,8 @@ func NewL2PrefetchRequestProfiler(experiment *CPUExperiment) *L2PrefetchRequestP
 
 		if e.CacheController == experiment.MemoryHierarchy.L2Controller() {
 			var requesterIsPrefetch = IsPrefetchThread(e.Access.ThreadId)
-			var lineFoundIsPrefetch = IsPrefetchThread(l2PrefetchRequestProfiler.L2PrefetchRequestStates[e.Set][e.Way].ThreadId)
-			l2PrefetchRequestProfiler.HandleL2Request(event, requesterIsPrefetch, lineFoundIsPrefetch)
+			var lineFoundIsPrefetch = IsPrefetchThread(l2PrefetchRequestProfiler.L2PrefetchRequestStates[int32(e.Set)][int32(e.Way)].ThreadId)
+			l2PrefetchRequestProfiler.HandleL2Request(e, requesterIsPrefetch, lineFoundIsPrefetch)
 		}
 	})
 
@@ -74,8 +74,8 @@ func NewL2PrefetchRequestProfiler(experiment *CPUExperiment) *L2PrefetchRequestP
 		var e = event.(*uncore.LastLevelCacheControllerLineInsertEvent)
 
 		if e.CacheController == experiment.MemoryHierarchy.L2Controller() {
-			var lineFoundIsPrefetch = IsPrefetchThread(l2PrefetchRequestProfiler.L2PrefetchRequestStates[e.Set][e.Way].ThreadId)
-			l2PrefetchRequestProfiler.HandleL2LineInsert(event, lineFoundIsPrefetch)
+			var lineFoundIsPrefetch = IsPrefetchThread(l2PrefetchRequestProfiler.L2PrefetchRequestStates[int32(e.Set)][int32(e.Way)].ThreadId)
+			l2PrefetchRequestProfiler.HandleL2LineInsert(e, lineFoundIsPrefetch)
 		}
 	})
 
@@ -92,7 +92,7 @@ func NewL2PrefetchRequestProfiler(experiment *CPUExperiment) *L2PrefetchRequestP
 
 		if e.CacheController == experiment.MemoryHierarchy.L2Controller() {
 			var requesterIsPrefetch = IsPrefetchThread(e.Access.ThreadId)
-			var lineFoundIsPrefetch = IsPrefetchThread(l2PrefetchRequestProfiler.L2PrefetchRequestStates[e.Set][e.Way].ThreadId)
+			var lineFoundIsPrefetch = IsPrefetchThread(l2PrefetchRequestProfiler.L2PrefetchRequestStates[int32(e.Set)][int32(e.Way)].ThreadId)
 
 			if !requesterIsPrefetch && lineFoundIsPrefetch {
 				l2PrefetchRequestProfiler.MarkLate(e.Set, e.Way, true)
@@ -112,8 +112,8 @@ func (profiler *L2PrefetchRequestProfiler) HandleL2Request(event *uncore.General
 	var victimLineState *L2PrefetchRequestState = nil
 
 	if victimWay != -1 {
-		victimLine = profiler.L2Controller.Cache.Sets[event.Set].Lines[victimWay]
-		victimLineState = profiler.L2PrefetchRequestStates[event.Set][victimWay]
+		victimLine = profiler.L2Controller.Cache.Sets[int32(event.Set)].Lines[victimWay]
+		victimLineState = profiler.L2PrefetchRequestStates[int32(event.Set)][victimWay]
 	}
 
 	var victimHit = victimLine != nil
@@ -122,8 +122,8 @@ func (profiler *L2PrefetchRequestProfiler) HandleL2Request(event *uncore.General
 	var victimDemandHit = victimHit && IsDemandThread(victimLineState.VictimThreadId)
 	var victimPrefetchHit = victimHit && IsPrefetchThread(victimLineState.VictimThreadId)
 
-	var l2Line = profiler.L2Controller.Cache.Sets[event.Set].Lines[event.Way]
-	var l2LineState = profiler.L2PrefetchRequestStates[event.Set][event.Way]
+	var l2Line = profiler.L2Controller.Cache.Sets[int32(event.Set)].Lines[int32(event.Way)]
+	var l2LineState = profiler.L2PrefetchRequestStates[int32(event.Set)][int32(event.Way)]
 
 	var demandHit = event.HitInCache && !requesterIsPrefetch && !lineFoundIsPrefetch
 	var prefetchHit = event.HitInCache && !l2LineState.Used && !requesterIsPrefetch && lineFoundIsPrefetch
@@ -242,7 +242,7 @@ func (profiler *L2PrefetchRequestProfiler) Early(event *uncore.GeneralCacheContr
 }
 
 func (profiler *L2PrefetchRequestProfiler) HandleL2LineInsert(event *uncore.LastLevelCacheControllerLineInsertEvent, lineFoundIsPrefetch bool) {
-	var l2LineState = profiler.L2PrefetchRequestStates[event.Set][event.Way]
+	var l2LineState = profiler.L2PrefetchRequestStates[int32(event.Set)][int32(event.Way)]
 
 	if !lineFoundIsPrefetch && l2LineState.Used {
 		panic("Impossible")
@@ -263,10 +263,10 @@ func (profiler *L2PrefetchRequestProfiler) HandleL2LineInsert(event *uncore.Last
 }
 
 func (profiler *L2PrefetchRequestProfiler) FindWayOfL2LineByVictimTag(set uint32, victimTag uint32) int32 {
-	for way := 0; way < profiler.L2Controller.Cache.Assoc(); way++ {
-		var state = profiler.L2PrefetchRequestStates[set][way]
-		if state.VictimTag == victimTag {
-			return way
+	for way := uint32(0); way < profiler.L2Controller.Cache.Assoc(); way++ {
+		var state = profiler.L2PrefetchRequestStates[int32(set)][int32(way)]
+		if state.VictimTag == int32(victimTag) {
+			return int32(way)
 		}
 	}
 
@@ -274,7 +274,7 @@ func (profiler *L2PrefetchRequestProfiler) FindWayOfL2LineByVictimTag(set uint32
 }
 
 func (profiler *L2PrefetchRequestProfiler) MarkInvalid(set uint32, way uint32) {
-	var l2LineState = profiler.L2PrefetchRequestStates[set][way]
+	var l2LineState = profiler.L2PrefetchRequestStates[int32(set)][int32(way)]
 
 	profiler.SetL2LineBroughterThreadId(set, way, -1, -1, false)
 
@@ -287,8 +287,8 @@ func (profiler *L2PrefetchRequestProfiler) MarkInvalid(set uint32, way uint32) {
 	profiler.MarkLate(set, way, false)
 }
 
-func (profiler *L2PrefetchRequestProfiler) SetL2LineBroughterThreadId(set uint32, way uint32, l2LineBroughterThreadId uint32, pc uint32, inflight bool) {
-	var l2LineState = profiler.L2PrefetchRequestStates[set][way]
+func (profiler *L2PrefetchRequestProfiler) SetL2LineBroughterThreadId(set uint32, way uint32, l2LineBroughterThreadId int32, pc int32, inflight bool) {
+	var l2LineState = profiler.L2PrefetchRequestStates[int32(set)][int32(way)]
 
 	if inflight {
 		l2LineState.InFlightThreadId = l2LineBroughterThreadId
@@ -300,6 +300,6 @@ func (profiler *L2PrefetchRequestProfiler) SetL2LineBroughterThreadId(set uint32
 }
 
 func (profiler *L2PrefetchRequestProfiler) MarkLate(set uint32, way uint32, late bool) {
-	var l2LineState = profiler.L2PrefetchRequestStates[set][way]
+	var l2LineState = profiler.L2PrefetchRequestStates[int32(set)][int32(way)]
 	l2LineState.HitToTransientTag = true
 }
