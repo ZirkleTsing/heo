@@ -92,7 +92,7 @@ func NewL2PrefetchRequestProfiler(experiment *CPUExperiment) *L2PrefetchRequestP
 
 		if e.CacheController == experiment.MemoryHierarchy.L2Controller() {
 			var requesterIsPrefetch = IsPrefetchThread(e.Access.ThreadId)
-			var lineFoundIsPrefetch = IsPrefetchThread(l2PrefetchRequestProfiler.L2PrefetchRequestStates[int32(e.Set)][int32(e.Way)].ThreadId)
+			var lineFoundIsPrefetch = IsPrefetchThread(l2PrefetchRequestProfiler.L2PrefetchRequestStates[int32(e.Set)][int32(e.Way)].InFlightThreadId)
 
 			if !requesterIsPrefetch && lineFoundIsPrefetch {
 				l2PrefetchRequestProfiler.markLate(e.Set, e.Way, true)
@@ -301,7 +301,7 @@ func (profiler *L2PrefetchRequestProfiler) setL2LineBroughterThreadId(set uint32
 
 func (profiler *L2PrefetchRequestProfiler) markLate(set uint32, way uint32, late bool) {
 	var l2LineState = profiler.L2PrefetchRequestStates[int32(set)][int32(way)]
-	l2LineState.HitToTransientTag = true
+	l2LineState.HitToTransientTag = late
 }
 
 func (profiler *L2PrefetchRequestProfiler) NumUglyL2PrefetchRequests() int32 {
