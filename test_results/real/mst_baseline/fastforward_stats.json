@@ -1,6 +1,6 @@
 {
-  "SimulationTime": "1.333µs",
-  "SimulationTimeInSeconds": 1.333e-06,
+  "SimulationTime": "1.198µs",
+  "SimulationTimeInSeconds": 1.198e-06,
   "TotalCycles": 0,
   "NumDynamicInsts": 0,
   "CyclesPerSecond": 0,
@@ -163,5 +163,16 @@
   "noc.MaxFlitPerStateDelay[SWITCH_ALLOCATION]": 0,
   "noc.MaxFlitPerStateDelay[SWITCH_TRAVERSAL]": 0,
   "noc.MaxFlitPerStateDelay[LINK_TRAVERSAL]": 0,
-  "noc.MaxFlitPerStateDelay[DESTINATION_ARRIVED]": 0
+  "noc.MaxFlitPerStateDelay[DESTINATION_ARRIVED]": 0,
+  "l2PrefetchRequestProfiler.NumL2DemandHits": 0,
+  "l2PrefetchRequestProfiler.NumL2DemandMisses": 0,
+  "l2PrefetchRequestProfiler.NumL2PrefetchHits": 0,
+  "l2PrefetchRequestProfiler.NumL2PrefetchMisses": 0,
+  "l2PrefetchRequestProfiler.NumRedundantHitToTransientTagL2PrefetchRequests": 0,
+  "l2PrefetchRequestProfiler.NumRedundantHitToCacheL2PrefetchRequests": 0,
+  "l2PrefetchRequestProfiler.NumGoodL2PrefetchRequests": 0,
+  "l2PrefetchRequestProfiler.NumTimelyL2PrefetchRequests": 0,
+  "l2PrefetchRequestProfiler.NumLateL2PrefetchRequests": 0,
+  "l2PrefetchRequestProfiler.NumBadL2PrefetchRequests": 0,
+  "l2PrefetchRequestProfiler.NumEarlyL2PrefetchRequests": 0
 }
