@@ -7,6 +7,7 @@ import (
 	"github.com/mcai/acogo/cpu/native"
 	"github.com/mcai/acogo/cpu/mem"
 	"syscall"
+	"runtime"
 )
 
 type ErrNo uint32
@@ -797,9 +798,19 @@ func (syscallEmulation *SyscallEmulation) fstat64_impl(context *Context) {
 		memory.WriteWordAt(36, uint32(fstat.Gid))
 		memory.WriteWordAt(40, uint32(fstat.Rdev))
 		memory.WriteWordAt(56, uint32(fstat.Size))
-		memory.WriteWordAt(64, uint32(fstat.Atimespec.Nano()))
-		memory.WriteWordAt(72, uint32(fstat.Mtimespec.Nano()))
-		memory.WriteWordAt(80, uint32(fstat.Ctimespec.Nano()))
+
+		if runtime.GOOS == "linux" {
+			memory.WriteWordAt(64, uint32(fstat.Atim.Nano()))
+			memory.WriteWordAt(72, uint32(fstat.Mtim.Nano()))
+			memory.WriteWordAt(80, uint32(fstat.Ctim.Nano()))
+		} else if runtime.GOOS == "darwin" {
+			memory.WriteWordAt(64, uint32(fstat.Atimespec.Nano()))
+			memory.WriteWordAt(72, uint32(fstat.Mtimespec.Nano()))
+			memory.WriteWordAt(80, uint32(fstat.Ctimespec.Nano()))
+		} else {
+			panic("Unsupported OS version")
+		}
+
 		memory.WriteWordAt(88, uint32(fstat.Blksize))
 		memory.WriteWordAt(96, uint32(fstat.Blocks))
 
