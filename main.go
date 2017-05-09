@@ -8,7 +8,7 @@ import (
 
 var (
 	numNodes int = 8 * 8
-	maxCycles int64 = int64(100000)
+	maxCycles int64 = int64(10000000)
 	maxPackets int64 = int64(-1)
 	drainPackets = false
 )
