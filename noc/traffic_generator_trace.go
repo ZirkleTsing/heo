@@ -81,7 +81,7 @@ func NewTraceTrafficGenerator(network *Network, packetInjectionRate float64, max
 }
 
 func (generator *TraceTrafficGenerator) AdvanceOneCycle() {
-	//TODO：每隔10个时钟周期（cycle），从每个trace文件中取一行，并创建和发送对应的消息包（packet
+	//TODO：每隔10个时钟周期（cycle），从每个trace文件中取一行，并创建和发送对应的消息包（packet)
 	if(generator.Network.Driver.CycleAccurateEventQueue().CurrentCycle % 10 == 0) {
 		var packet = NewDataPacket(generator.Network, src, dest, 16, true, func() {})
 
