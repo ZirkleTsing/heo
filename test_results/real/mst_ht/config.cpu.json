@@ -3,7 +3,7 @@
   "ContextMappings": [
     {
       "ThreadId": 0,
-      "Executable": "/home/itecgo/Projects/Archimulator/benchmarks/Olden_Custom1/mst/ht/mst.mips",
+      "Executable": "benchmarks/Olden_Custom1/mst/ht/mst.mips",
       "Arguments": "1000"
     }
   ],

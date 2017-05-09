@@ -1,6 +1,6 @@
 {
-  "SimulationTime": "1.163µs",
-  "SimulationTimeInSeconds": 1.1630000000000001e-06,
+  "SimulationTime": "3.092µs",
+  "SimulationTimeInSeconds": 0.000003092,
   "TotalCycles": 0,
   "NumDynamicInsts": 0,
   "CyclesPerSecond": 0,

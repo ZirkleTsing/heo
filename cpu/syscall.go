@@ -804,9 +804,9 @@ func (syscallEmulation *SyscallEmulation) fstat64_impl(context *Context) {
 			memory.WriteWordAt(72, uint32(fstat.Mtim.Nano()))
 			memory.WriteWordAt(80, uint32(fstat.Ctim.Nano()))
 		} else if runtime.GOOS == "darwin" {
-			memory.WriteWordAt(64, uint32(fstat.Atimespec.Nano()))
-			memory.WriteWordAt(72, uint32(fstat.Mtimespec.Nano()))
-			memory.WriteWordAt(80, uint32(fstat.Ctimespec.Nano()))
+			//memory.WriteWordAt(64, uint32(fstat.Atimespec.Nano()))
+			//memory.WriteWordAt(72, uint32(fstat.Mtimespec.Nano()))
+			//memory.WriteWordAt(80, uint32(fstat.Ctimespec.Nano()))
 		} else {
 			panic("Unsupported OS version")
 		}
