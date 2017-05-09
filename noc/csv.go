@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"encoding/csv"
 	"os"
+	"github.com/mcai/acogo/simutil"
 )
 
 type CSVField struct {
@@ -150,7 +151,7 @@ func GetCSVFields() []CSVField {
 	return csvFields
 }
 
-func WriteCSVFile(outputDirectory string, outputCSVFileName string, experiments []*NoCExperiment, fields []CSVField) {
+func WriteCSVFile(outputDirectory string, outputCSVFileName string, experiments []simutil.Experiment, fields []CSVField) {
 	if err := os.MkdirAll(outputDirectory, os.ModePerm); err != nil {
 		panic(fmt.Sprintf("Cannot create output directory (%s)", err))
 	}
@@ -179,7 +180,7 @@ func WriteCSVFile(outputDirectory string, outputCSVFileName string, experiments 
 		var record []string
 
 		for _, field := range fields {
-			record = append(record, fmt.Sprintf("%+v", field.Callback(experiment)))
+			record = append(record, fmt.Sprintf("%+v", field.Callback(experiment.(*NoCExperiment))))
 		}
 
 		if err := w.Write(record); err != nil {

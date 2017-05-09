@@ -9,3 +9,9 @@ ACOGo is written in Go.
 ## TODOs
 
 1. Support cpu2006 and PARSEC.
+
+## Dependencies
+
+sudo apt-get install python-pip
+
+pip install matplotlib

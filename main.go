@@ -16,7 +16,7 @@ var (
 	drainPackets = false
 )
 
-func NewExperiment(outputDirectoryPrefix string, traffic noc.TrafficType, dataPacketInjectionRate float64, routing noc.RoutingType, selection noc.SelectionType, antPacketInjectionRate float64, acoSelectionAlpha float64, reinforcementFactor float64) *noc.NoCExperiment {
+func NewExperiment(outputDirectoryPrefix string, traffic noc.TrafficType, dataPacketInjectionRate float64, routing noc.RoutingType, selection noc.SelectionType, antPacketInjectionRate float64, acoSelectionAlpha float64, reinforcementFactor float64) simutil.Experiment {
 	var outputDirectory string
 
 	switch {
@@ -54,7 +54,7 @@ type NoCRoutingSolution struct {
 	Selection noc.SelectionType
 }
 
-func TestTrafficsAndDataPacketInjectionRates() map[noc.TrafficType]([]*noc.NoCExperiment) {
+func TestTrafficsAndDataPacketInjectionRates() map[noc.TrafficType]([]simutil.Experiment) {
 	var dataPacketInjectionRates = []float64{
 		0.015,
 		0.030,
@@ -73,7 +73,7 @@ func TestTrafficsAndDataPacketInjectionRates() map[noc.TrafficType]([]*noc.NoCEx
 
 	var outputDirectoryPrefix = "trafficsAndDataPacketInjectionRates"
 
-	var experiments = make(map[noc.TrafficType]([]*noc.NoCExperiment))
+	var experiments = make(map[noc.TrafficType]([]simutil.Experiment))
 
 	for _, traffic := range noc.TRAFFICS {
 		for _, dataPacketInjectionRate := range dataPacketInjectionRates {
@@ -107,7 +107,7 @@ func TestTrafficsAndDataPacketInjectionRates() map[noc.TrafficType]([]*noc.NoCEx
 	return experiments
 }
 
-func TestAntPacketInjectionRates() []*noc.NoCExperiment {
+func TestAntPacketInjectionRates() []simutil.Experiment {
 	var traffic = noc.TRAFFIC_TRANSPOSE1
 	var dataPacketInjectionRate = 0.060
 
@@ -130,7 +130,7 @@ func TestAntPacketInjectionRates() []*noc.NoCExperiment {
 
 	var outputDirectoryPrefix = "antPacketInjectionRates"
 
-	var experiments []*noc.NoCExperiment
+	var experiments []simutil.Experiment
 
 	for _, antPacketInjectionRate := range antPacketInjectionRates {
 		experiments = append(
@@ -149,7 +149,7 @@ func TestAntPacketInjectionRates() []*noc.NoCExperiment {
 	return experiments
 }
 
-func TestAcoSelectionAlphasAndReinforcementFactors() []*noc.NoCExperiment {
+func TestAcoSelectionAlphasAndReinforcementFactors() []simutil.Experiment {
 	var traffic = noc.TRAFFIC_TRANSPOSE1
 	var dataPacketInjectionRate = 0.060
 
@@ -179,7 +179,7 @@ func TestAcoSelectionAlphasAndReinforcementFactors() []*noc.NoCExperiment {
 
 	var outputDirectoryPrefix = "acoSelectionAlphasAndReinforcementFactors"
 
-	var experiments []*noc.NoCExperiment
+	var experiments []simutil.Experiment
 
 	for _, acoSelectionAlpha := range acoSelectionAlphas {
 		for _, reinforcementFactor := range reinforcementFactors {
@@ -207,7 +207,7 @@ var (
 )
 
 func run() {
-	var experiments []*noc.NoCExperiment
+	var experiments []simutil.Experiment
 
 	for _, traffic := range noc.TRAFFICS {
 		for _, experiment := range TrafficsAndDataPacketInjectionRates[traffic] {
