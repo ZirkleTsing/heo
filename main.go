@@ -59,8 +59,8 @@ func main() {
 
 	var traceFileNames []string
 
-	traceFileNames = append(traceFileNames, "traces/simple_pthread.trace.19349.0")
-	traceFileNames = append(traceFileNames, "traces/simple_pthread.trace.19349.1")
+	traceFileNames = append(traceFileNames, "traces/simple_pthread.trace.20327.0")
+	traceFileNames = append(traceFileNames, "traces/simple_pthread.trace.20327.1")
 
 	var experiment = NewTraceDrivenExperiment(
 		outputDirectoryPrefix,
