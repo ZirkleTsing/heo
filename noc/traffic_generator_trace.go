@@ -5,6 +5,7 @@ import (
 	"log"
 	"bufio"
 	"fmt"
+	"strings"
 )
 
 type TraceFileLine struct {
@@ -40,6 +41,14 @@ func NewTraceTrafficGenerator(network *Network, packetInjectionRate float64, max
 		scanner := bufio.NewScanner(traceFile)
 		for scanner.Scan() {
 			fmt.Println(scanner.Text())
+
+			var line = scanner.Text()
+			var parts = strings.Split(line, ",")
+
+			for _, part := range parts {
+				fmt.Println(part)
+			}
+
 		}
 
 		if err := scanner.Err(); err != nil {
