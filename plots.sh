@@ -4,4 +4,4 @@ export PYTHONPATH
 
 cd $(dirname "$0")
 
-python2.7 ./plots.py $@
+python3 ./plots.py $@

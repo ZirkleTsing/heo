@@ -12,6 +12,12 @@ ACOGo is written in Go.
 
 ## Dependencies
 
-sudo apt-get install python-pip
+1.
+sudo apt-get install python-pip3
 
-pip install matplotlib
+2.
+pip3 install matplotlib pandas seaborn
+
+or
+
+sudo apt-get install python3-matplotlib python3-pandas python3-seaborn
