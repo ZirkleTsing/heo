@@ -53,10 +53,7 @@ func NewTraceTrafficGenerator(network *Network, packetInjectionRate float64, max
 				log.Fatal(err)
 			}
 
-			read, err := strconv.ParseBool(parts[2])
-			if err != nil {
-				log.Fatal(err)
-			}
+			var read = parts[2] == "R"
 
 			ea, err := strconv.ParseInt(parts[3], 16, 64)
 			if err != nil {
