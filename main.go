@@ -13,7 +13,7 @@ var (
 	drainPackets = false
 )
 
-func NewTraceDrivenExperiment(outputDirectoryPrefix string, traffic noc.TrafficType, dataPacketInjectionRate float64, routing noc.RoutingType, selection noc.SelectionType, antPacketInjectionRate float64, acoSelectionAlpha float64, reinforcementFactor float64) simutil.Experiment {
+func NewTraceDrivenExperiment(outputDirectoryPrefix string, traffic noc.TrafficType, dataPacketInjectionRate float64, routing noc.RoutingType, selection noc.SelectionType, antPacketInjectionRate float64, acoSelectionAlpha float64, reinforcementFactor float64, traceFileNames []string) simutil.Experiment {
 	var outputDirectory string
 
 	switch {
@@ -43,6 +43,8 @@ func NewTraceDrivenExperiment(outputDirectoryPrefix string, traffic noc.TrafficT
 		config.ReinforcementFactor = reinforcementFactor
 	}
 
+	config.TraceFileNames = traceFileNames
+
 	return noc.NewNoCExperiment(config)
 }
 
@@ -55,14 +57,21 @@ func main() {
 
 	var outputDirectoryPrefix = "trafficsAndDataPacketInjectionRates"
 
+	var traceFileNames []string
+
+	traceFileNames = append(traceFileNames, "traces/simple_pthread.trace.19349.0")
+	traceFileNames = append(traceFileNames, "traces/simple_pthread.trace.19349.1")
+
 	var experiment = NewTraceDrivenExperiment(
 		outputDirectoryPrefix,
-		noc.TRAFFIC_UNIFORM,
+		noc.TRAFFIC_TRACE,
 		dataPacketInjectionRate,
 		noc.ROUTING_ODD_EVEN, noc.SELECTION_BUFFER_LEVEL,
 		antPacketInjectionRate,
 		acoSelectionAlpha,
-		reinforcementFactor)
+		reinforcementFactor,
+		traceFileNames,
+	)
 
 	var experiments []simutil.Experiment
 

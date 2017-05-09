@@ -8,12 +8,14 @@ const (
 	TRAFFIC_UNIFORM = TrafficType("Uniform")
 	TRAFFIC_TRANSPOSE1 = TrafficType("Transpose1")
 	TRAFFIC_TRANSPOSE2 = TrafficType("Transpose2")
+	TRAFFIC_TRACE = TrafficType("Trace")
 )
 
 var TRAFFICS = []TrafficType{
 	TRAFFIC_UNIFORM,
 	TRAFFIC_TRANSPOSE1,
 	TRAFFIC_TRANSPOSE2,
+	TRAFFIC_TRACE,
 }
 
 type RoutingType string
@@ -82,6 +84,8 @@ type NoCConfig struct {
 
 	AcoSelectionAlpha       float64
 	ReinforcementFactor     float64
+
+	TraceFileNames          []string
 }
 
 func NewNoCConfig(outputDirectory string, numNodes int, maxCycles int64, maxPackets int64, drainPackets bool) *NoCConfig {

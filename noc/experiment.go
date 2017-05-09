@@ -44,6 +44,10 @@ func NewNoCExperiment(config *NoCConfig) *NoCExperiment {
 				return NewDataPacket(experiment.Network, src, dest, config.DataPacketSize, true, func() {})
 			}),
 		)
+	case TRAFFIC_TRACE:
+		experiment.Network.AddTrafficGenerator(
+			NewTraceTrafficGenerator(experiment.Network, config.DataPacketInjectionRate, config.MaxPackets, config.TraceFileNames),
+		)
 	default:
 		panic(fmt.Sprintf("data packet traffic %s is not supported", dataPacketTraffic))
 	}
