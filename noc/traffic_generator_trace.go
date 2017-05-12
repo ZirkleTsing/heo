@@ -9,7 +9,7 @@ import (
 )
 
 type TraceFileLine struct {
-	ThreadId int64
+	ThreadId int32
 	Pc       int64
 	Read     bool
 	Ea       int64
@@ -19,81 +19,85 @@ type TraceTrafficGenerator struct {
 	Network              *Network
 	PacketInjectionRate  float64
 	MaxPackets           int64
-	TraceFileNames       []string
-	TraceFileLines       [][]*TraceFileLine
-	CurrentTraceFileLine []int
+	TraceFileName        string
+	TraceFileLines       []*TraceFileLine
+	CurrentTraceFileLine int
 }
 
-func NewTraceTrafficGenerator(network *Network, packetInjectionRate float64, maxPackets int64, traceFileNames []string) *TraceTrafficGenerator {
+func NewTraceTrafficGenerator(network *Network, packetInjectionRate float64, maxPackets int64, traceFileName string) *TraceTrafficGenerator {
 	var generator = &TraceTrafficGenerator{
 		Network:network,
 		PacketInjectionRate:packetInjectionRate,
 		MaxPackets:maxPackets,
-		TraceFileNames:traceFileNames,
+		TraceFileName:traceFileName,
 	}
 
-	for threadId, traceFileName := range traceFileNames {
-		generator.TraceFileLines = append(generator.TraceFileLines, []*TraceFileLine{})
+	traceFile, err := os.Open(traceFileName)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		traceFile, err := os.Open(traceFileName)
+	scanner := bufio.NewScanner(traceFile)
+	for scanner.Scan() {
+		var line = scanner.Text()
+		var parts = strings.Split(line, ",")
+
+		if parts[0] == "" {
+			continue
+		}
+
+		threadId, err := strconv.ParseInt(parts[0], 16, 64)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		scanner := bufio.NewScanner(traceFile)
-		for scanner.Scan() {
-			var line = scanner.Text()
-			var parts = strings.Split(line, ",")
-
-			pc, err := strconv.ParseInt(parts[1], 16, 64)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			var read = parts[2] == "R"
-
-			ea, err := strconv.ParseInt(parts[3], 16, 64)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			var traceFileLine = &TraceFileLine{
-				ThreadId:int64(threadId),
-				Pc:pc,
-				Read:read,
-				Ea:ea,
-			}
-
-			generator.TraceFileLines[threadId] = append(generator.TraceFileLines[threadId], traceFileLine)
-		}
-
-		if err := scanner.Err(); err != nil {
+		pc, err := strconv.ParseInt(parts[1], 16, 64)
+		if err != nil {
 			log.Fatal(err)
 		}
 
-		traceFile.Close()
+		var read = parts[2] == "R"
 
-		generator.CurrentTraceFileLine = append(generator.CurrentTraceFileLine, 0)
+		ea, err := strconv.ParseInt(parts[3], 16, 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		var traceFileLine = &TraceFileLine{
+			ThreadId:int32(threadId),
+			Pc:pc,
+			Read:read,
+			Ea:ea,
+		}
+
+		generator.TraceFileLines = append(generator.TraceFileLines, traceFileLine)
 	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	traceFile.Close()
+
+	generator.CurrentTraceFileLine = 0
 
 	return generator
 }
 
 func (generator *TraceTrafficGenerator) AdvanceOneCycle() {
 	if (generator.Network.Driver.CycleAccurateEventQueue().CurrentCycle % 100 == 0 && generator.Network.Driver.CycleAccurateEventQueue().CurrentCycle < 100000000) {
-		for threadId := 0; threadId < len(generator.TraceFileLines); threadId++ {
-			var currentTraceFileLine = generator.CurrentTraceFileLine[threadId]
+		if generator.CurrentTraceFileLine < len(generator.TraceFileLines) {
+			var traceFileLine = generator.TraceFileLines[generator.CurrentTraceFileLine]
+			generator.CurrentTraceFileLine += 1
 
-			if currentTraceFileLine < len(generator.TraceFileLines[threadId]) {
-				var src = threadId
-				var dest = len(generator.TraceFileLines) + 1
+			var src = int(traceFileLine.ThreadId)
+			var dest = generator.Network.Config.NumNodes - 1
 
-				var packet = NewDataPacket(generator.Network, src, dest, 16, true, func() {})
+			var packet = NewDataPacket(generator.Network, src, dest, 16, true, func() {})
 
-				generator.Network.Driver.CycleAccurateEventQueue().Schedule(func() {
-					generator.Network.Receive(packet)
-				}, 1)
-			}
+			generator.Network.Driver.CycleAccurateEventQueue().Schedule(func() {
+				generator.Network.Receive(packet)
+			}, 1)
 		}
 	}
 }

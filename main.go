@@ -13,7 +13,7 @@ var (
 	drainPackets = false
 )
 
-func NewTraceDrivenExperiment(outputDirectoryPrefix string, traffic noc.TrafficType, dataPacketInjectionRate float64, routing noc.RoutingType, selection noc.SelectionType, antPacketInjectionRate float64, acoSelectionAlpha float64, reinforcementFactor float64, traceFileNames []string) simutil.Experiment {
+func NewTraceDrivenExperiment(outputDirectoryPrefix string, traffic noc.TrafficType, dataPacketInjectionRate float64, routing noc.RoutingType, selection noc.SelectionType, antPacketInjectionRate float64, acoSelectionAlpha float64, reinforcementFactor float64, traceFileNames string) simutil.Experiment {
 	var outputDirectory string
 
 	switch {
@@ -43,7 +43,7 @@ func NewTraceDrivenExperiment(outputDirectoryPrefix string, traffic noc.TrafficT
 		config.ReinforcementFactor = reinforcementFactor
 	}
 
-	config.TraceFileNames = traceFileNames
+	config.TraceFileName = traceFileNames
 
 	return noc.NewNoCExperiment(config)
 }
@@ -59,8 +59,7 @@ func main() {
 
 	var traceFileNames []string
 
-	traceFileNames = append(traceFileNames, "traces/simple_pthread.trace.21454.0")
-	traceFileNames = append(traceFileNames, "traces/simple_pthread.trace.21454.1")
+	traceFileNames = append(traceFileNames, "/home/poo/Downloads/pin-3.2-81205-gcc-linux/source/tools/MemTrace/traces/blackscholes.trace.13996.txt")
 
 	var experiment = NewTraceDrivenExperiment(
 		outputDirectoryPrefix,

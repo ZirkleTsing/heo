@@ -85,7 +85,7 @@ type NoCConfig struct {
 	AcoSelectionAlpha       float64
 	ReinforcementFactor     float64
 
-	TraceFileNames          []string
+	TraceFileName           string
 }
 
 func NewNoCConfig(outputDirectory string, numNodes int, maxCycles int64, maxPackets int64, drainPackets bool) *NoCConfig {
