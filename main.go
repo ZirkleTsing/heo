@@ -57,9 +57,9 @@ func main() {
 
 	var outputDirectoryPrefix = "trafficsAndDataPacketInjectionRates"
 
-	var traceFileNames []string
+	var traceFileNames string
 
-	traceFileNames = append(traceFileNames, "/home/poo/Downloads/pin-3.2-81205-gcc-linux/source/tools/MemTrace/traces/blackscholes.trace.13996.txt")
+	traceFileNames = "/home/poo/Downloads/pin-3.2-81205-gcc-linux/source/tools/MemTrace/traces/blackscholes.trace.13996.txt"
 
 	var experiment = NewTraceDrivenExperiment(
 		outputDirectoryPrefix,
