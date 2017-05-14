@@ -2,7 +2,7 @@
 
 ## About
 
-Heo is an cycle-accurate Heterogeneous Multicore Architectural Simulator.
+Heo is a cycle-accurate CPU-GPU heterogeneous multicore architectural simulator.
 
 Heo is written in Go.
 
@@ -20,12 +20,6 @@ Heo is written in Go.
 
 ## Dependencies
 
-1.
-sudo apt-get install python-pip3
+1. `sudo apt-get install python-pip3`
 
-2.
-pip3 install matplotlib pandas seaborn
-
-or
-
-sudo apt-get install python3-matplotlib python3-pandas python3-seaborn
+2. `pip3 install matplotlib pandas seaborn` or `sudo apt-get install python3-matplotlib python3-pandas python3-seaborn`
