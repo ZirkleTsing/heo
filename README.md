@@ -18,6 +18,10 @@ Heo is written in Go.
 
 5. Support Command line options and Component Properites.
 
+6. Support multiple hardware prefetchers.
+
+7. Support application of machine learning algorithms in architectural components.
+
 ## Dependencies
 
 1. `sudo apt-get install python-pip3`
