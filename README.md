@@ -8,7 +8,15 @@ Heo is written in Go.
 
 ## TODOs
 
-1. Support cpu2006 and PARSEC.
+1. Support CPU2006, PARSEC and Rodinia.
+
+2. Support CPU-GPU heterogeneous multicore architectures.
+
+3. Support CPU frequency control (multiple clock domain).
+
+4. Support DRAM-NVM hybrid memory systems.
+
+5. Support Command line options and Component Properites.
 
 ## Dependencies
 
