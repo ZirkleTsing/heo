@@ -1,10 +1,10 @@
-from common import bench_and_trace_file_names, working_directory
+from common import bench_and_trace_file_name_range, working_directory, max_cycles_range
 from utils import parse_result, to_csv, generate_plot
 
 results = []
 
-for bench, trace_file_name in bench_and_trace_file_names:
-    for max_cycles in [10000, 100000, 1000000, 10000000, 100000000]:
+for bench, trace_file_name in bench_and_trace_file_name_range:
+    for max_cycles in max_cycles_range:
         results.append(
             parse_result(working_directory(bench, 64, 'OddEven', 'BufferLevel', max_cycles), bench=bench)
         )
