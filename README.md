@@ -83,7 +83,7 @@ For **developing and running Heo**, make sure that:
 
 ## Quick Start
 
-git clone git://github.com/mcai/heo.git
+git clone https://github.com/mcai/heo
 
 ## Customizing Heo for Your Needs
 
