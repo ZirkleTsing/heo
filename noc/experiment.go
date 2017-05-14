@@ -86,3 +86,11 @@ func (experiment *NoCExperiment) Run(skipIfStatsFileExists bool) {
 
 	experiment.DumpStats()
 }
+
+func (experiment *NoCExperiment) SimulationTime() time.Duration {
+	return experiment.EndTime.Sub(experiment.BeginTime)
+}
+
+func (experiment *NoCExperiment) CyclesPerSecond() float64 {
+	return float64(experiment.CycleAccurateEventQueue().CurrentCycle) / experiment.EndTime.Sub(experiment.BeginTime).Seconds()
+}

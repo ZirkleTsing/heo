@@ -7,18 +7,23 @@ import (
 
 func (experiment *NoCExperiment) DumpStats() {
 	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "SimulationTime",
+		Value: fmt.Sprintf("%v", experiment.SimulationTime()),
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
+		Key: "SimulationTimeInSeconds",
+		Value: experiment.SimulationTime().Seconds(),
+	})
+
+	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "TotalCycles",
 		Value: experiment.CycleAccurateEventQueue().CurrentCycle,
 	})
 
 	experiment.Stats = append(experiment.Stats, simutil.Stat{
-		Key: "SimulationTime",
-		Value: fmt.Sprintf("%v", experiment.EndTime.Sub(experiment.BeginTime)),
-	})
-
-	experiment.Stats = append(experiment.Stats, simutil.Stat{
 		Key: "CyclesPerSecond",
-		Value: float64(experiment.CycleAccurateEventQueue().CurrentCycle) / experiment.EndTime.Sub(experiment.BeginTime).Seconds(),
+		Value: experiment.CyclesPerSecond(),
 	})
 
 	experiment.Stats = append(experiment.Stats, simutil.Stat{

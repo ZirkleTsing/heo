@@ -10,6 +10,7 @@ from pyparsing import Word, Optional, ParseException, printables, nums, restOfLi
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import multiprocessing as mp
 
 
 class ExperimentResults:
@@ -57,7 +58,7 @@ def read_stats(result_dir, stats_file_name):
         return configs
 
 
-def parse_result(result_dir, config_json_file_name='config.json', stats_json_file_name='stats.txt', **props):
+def parse_result(result_dir, config_json_file_name='config.noc.json', stats_json_file_name='stats.json', **props):
     return ExperimentResults(ExperimentConfigs(read_configs(result_dir, config_json_file_name)),
                              ExperimentStats(read_stats(result_dir, stats_json_file_name)), props)
 
@@ -102,3 +103,16 @@ def generate_plot(csv_file_name, plot_file_name, x, y, hue, y_title, xticklabels
 
     plt.clf()
     plt.close('all')
+
+
+def run_experiments(experiments, run_experiment):
+    num_processes = mp.cpu_count()
+    pool = mp.Pool(num_processes)
+    pool.map(run_experiment, experiments)
+
+    pool.close()
+    pool.join()
+
+
+def add_experiment(experiments, *args):
+    experiments.append(args)

@@ -1,0 +1,5 @@
+"Bench","Max Cycles","Simulation Time (Seconds)","Throughput","Average Packet Delay"
+"simple_pthread","10000","0.29467458","0.00015625","82"
+"simple_pthread","100000","2.777471844","0.00015625","82"
+"simple_pthread","1000000","23.834975031","0.00015625","82"
+"simple_pthread","10000000","152.083620842","0.0001147640625","82"
