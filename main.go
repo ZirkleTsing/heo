@@ -59,7 +59,7 @@ func main() {
 
 	var traceFileNames string
 
-	traceFileNames = "/home/poo/Downloads/pin-3.2-81205-gcc-linux/source/tools/MemTrace/traces/blackscholes.trace.13996.txt"
+	traceFileNames = "traces/simple_pthread.trace.21454.0"
 
 	var experiment = NewTraceDrivenExperiment(
 		outputDirectoryPrefix,
