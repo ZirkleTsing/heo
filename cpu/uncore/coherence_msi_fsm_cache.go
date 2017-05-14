@@ -1,7 +1,7 @@
 package uncore
 
 import (
-	"github.com/mcai/acogo/simutil"
+	"github.com/mcai/heo/simutil"
 )
 
 type CacheControllerFiniteStateMachine struct {

@@ -1,9 +1,9 @@
 package uncore
 
 import (
-	"github.com/mcai/acogo/simutil"
+	"github.com/mcai/heo/simutil"
 	"fmt"
-	"github.com/mcai/acogo/noc"
+	"github.com/mcai/heo/noc"
 	"math"
 	"reflect"
 )

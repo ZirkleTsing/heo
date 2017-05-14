@@ -1,8 +1,8 @@
 package cpu
 
 import (
-	"github.com/mcai/acogo/cpu/uncore"
-	"github.com/mcai/acogo/simutil"
+	"github.com/mcai/heo/cpu/uncore"
+	"github.com/mcai/heo/simutil"
 )
 
 type MemoryHierarchyCore struct {

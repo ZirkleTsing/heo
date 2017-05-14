@@ -1,8 +1,8 @@
 package cpu
 
 import (
-	"github.com/mcai/acogo/cpu/regs"
-	"github.com/mcai/acogo/cpu/native"
+	"github.com/mcai/heo/cpu/regs"
+	"github.com/mcai/heo/cpu/native"
 	"fmt"
 )
 

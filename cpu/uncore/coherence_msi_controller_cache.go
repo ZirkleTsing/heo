@@ -1,6 +1,6 @@
 package uncore
 
-import "github.com/mcai/acogo/cpu/mem"
+import "github.com/mcai/heo/cpu/mem"
 
 type CacheController struct {
 	*BaseCacheController

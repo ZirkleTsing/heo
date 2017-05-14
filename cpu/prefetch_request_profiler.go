@@ -1,7 +1,7 @@
 package cpu
 
 import (
-	"github.com/mcai/acogo/cpu/uncore"
+	"github.com/mcai/heo/cpu/uncore"
 	"reflect"
 )
 

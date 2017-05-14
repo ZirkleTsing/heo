@@ -1,8 +1,8 @@
 package uncore
 
 import (
-	"github.com/mcai/acogo/cpu/mem"
-	"github.com/mcai/acogo/simutil"
+	"github.com/mcai/heo/cpu/mem"
+	"github.com/mcai/heo/simutil"
 )
 
 type CacheBasedPredictorLineValueProvider struct {

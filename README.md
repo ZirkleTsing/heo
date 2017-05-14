@@ -1,10 +1,10 @@
-# README for ACOGo
+# README for Heo
 
 ## About
 
-ACOGo is an cycle-accurate NoC Simulator for Simulating ACO based adaptive routing algorithms.
+Heo is an cycle-accurate Heterogeneous Multicore Architectural Simulator.
 
-ACOGo is written in Go.
+Heo is written in Go.
 
 ## TODOs
 

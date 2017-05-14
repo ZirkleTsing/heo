@@ -2,7 +2,7 @@ package noc
 
 import (
 	"fmt"
-	"github.com/mcai/acogo/simutil"
+	"github.com/mcai/heo/simutil"
 )
 
 func (experiment *NoCExperiment) DumpStats() {

@@ -2,7 +2,7 @@ package noc
 
 import (
 	"math"
-	"github.com/mcai/acogo/simutil"
+	"github.com/mcai/heo/simutil"
 	"fmt"
 )
 

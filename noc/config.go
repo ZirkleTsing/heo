@@ -1,6 +1,6 @@
 package noc
 
-import "github.com/mcai/acogo/simutil"
+import "github.com/mcai/heo/simutil"
 
 type TrafficType string
 

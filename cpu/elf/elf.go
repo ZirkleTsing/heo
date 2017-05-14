@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"encoding/binary"
 	"bytes"
-	"github.com/mcai/acogo/cpu/mem"
+	"github.com/mcai/heo/cpu/mem"
 )
 
 type ElfFile struct {

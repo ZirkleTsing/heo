@@ -2,8 +2,8 @@ package uncore
 
 import (
 	"testing"
-	"github.com/mcai/acogo/cpu/mem"
-	"github.com/mcai/acogo/cpu/uncore/uncoreutil"
+	"github.com/mcai/heo/cpu/mem"
+	"github.com/mcai/heo/cpu/uncore/uncoreutil"
 	"fmt"
 )
 

@@ -3,7 +3,7 @@ package noc
 import (
 	"fmt"
 	"testing"
-	"github.com/mcai/acogo/simutil"
+	"github.com/mcai/heo/simutil"
 )
 
 var (

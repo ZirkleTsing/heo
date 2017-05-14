@@ -5,8 +5,8 @@ import (
 	"os/exec"
 	"os"
 	"sync"
-	"github.com/mcai/acogo/noc"
-	"github.com/mcai/acogo/simutil"
+	"github.com/mcai/heo/noc"
+	"github.com/mcai/heo/simutil"
 )
 
 var (

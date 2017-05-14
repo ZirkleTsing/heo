@@ -1,7 +1,7 @@
 package uncore
 
 import (
-	"github.com/mcai/acogo/cpu/mem"
+	"github.com/mcai/heo/cpu/mem"
 )
 
 const (

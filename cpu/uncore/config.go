@@ -1,8 +1,8 @@
 package uncore
 
 import (
-	"github.com/mcai/acogo/cpu/uncore/uncoreutil"
-	"github.com/mcai/acogo/simutil"
+	"github.com/mcai/heo/cpu/uncore/uncoreutil"
+	"github.com/mcai/heo/simutil"
 )
 
 type CacheReplacementPolicyType string

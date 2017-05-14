@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"encoding/csv"
 	"os"
-	"github.com/mcai/acogo/simutil"
+	"github.com/mcai/heo/simutil"
 )
 
 type CSVField struct {

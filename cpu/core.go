@@ -1,6 +1,6 @@
 package cpu
 
-import "github.com/mcai/acogo/cpu/uncore"
+import "github.com/mcai/heo/cpu/uncore"
 
 type Core interface {
 	Processor() *Processor

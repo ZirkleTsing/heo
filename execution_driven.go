@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/mcai/acogo/cpu"
-	"github.com/mcai/acogo/simutil"
+	"github.com/mcai/heo/cpu"
+	"github.com/mcai/heo/simutil"
 )
 
 var (

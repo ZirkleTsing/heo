@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
-	"github.com/mcai/acogo/cpu/regs"
-	"github.com/mcai/acogo/cpu/cpuutil"
+	"github.com/mcai/heo/cpu/regs"
+	"github.com/mcai/heo/cpu/cpuutil"
 )
 
 const (

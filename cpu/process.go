@@ -2,11 +2,11 @@ package cpu
 
 import (
 	"syscall"
-	"github.com/mcai/acogo/cpu/mem"
+	"github.com/mcai/heo/cpu/mem"
 	"strings"
-	"github.com/mcai/acogo/cpu/elf"
+	"github.com/mcai/heo/cpu/elf"
 	"math"
-	"github.com/mcai/acogo/cpu/cpuutil"
+	"github.com/mcai/heo/cpu/cpuutil"
 	"fmt"
 )
 

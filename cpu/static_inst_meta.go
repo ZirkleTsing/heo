@@ -1,6 +1,6 @@
 package cpu
 
-import "github.com/mcai/acogo/cpu/regs"
+import "github.com/mcai/heo/cpu/regs"
 
 type StaticInstFlag string
 

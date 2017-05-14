@@ -3,9 +3,9 @@ package cpu
 import (
 	"fmt"
 	"math"
-	"github.com/mcai/acogo/cpu/regs"
-	"github.com/mcai/acogo/cpu/native"
-	"github.com/mcai/acogo/cpu/mem"
+	"github.com/mcai/heo/cpu/regs"
+	"github.com/mcai/heo/cpu/native"
+	"github.com/mcai/heo/cpu/mem"
 	"syscall"
 	"runtime"
 )

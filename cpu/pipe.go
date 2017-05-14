@@ -1,6 +1,6 @@
 package cpu
 
-import "github.com/mcai/acogo/cpu/mem"
+import "github.com/mcai/heo/cpu/mem"
 
 type Pipe struct {
 	FileDescriptors []int32

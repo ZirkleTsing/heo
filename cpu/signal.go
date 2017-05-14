@@ -1,8 +1,8 @@
 package cpu
 
 import (
-	"github.com/mcai/acogo/cpu/mem"
-	"github.com/mcai/acogo/cpu/cpuutil"
+	"github.com/mcai/heo/cpu/mem"
+	"github.com/mcai/heo/cpu/cpuutil"
 )
 
 const MAX_SIGNAL = 64

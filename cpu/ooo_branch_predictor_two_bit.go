@@ -1,6 +1,6 @@
 package cpu
 
-import "github.com/mcai/acogo/simutil"
+import "github.com/mcai/heo/simutil"
 
 type TwoBitBranchPredictorUpdate struct {
 	SaturatingCounter *simutil.SaturatingCounter
